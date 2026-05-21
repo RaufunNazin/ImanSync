@@ -407,7 +407,7 @@ const styles = StyleSheet.create({
   numberText: { fontFamily: Fonts.outfit, fontSize: 11 },
   
   arabicText: {
-    fontFamily: Fonts.outfit,
+    fontFamily: Fonts.arabic,
     textAlign: 'right',
     marginBottom: Spacing.four,
   },

@@ -9,6 +9,7 @@ import { Animated, StyleSheet, Text, useColorScheme, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useTranslation } from 'react-i18next';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import { formatNumber } from '@/utils/formatNumber';
 
 // Kaaba Coordinates
 const KAABA_LAT = 21.4225;
@@ -31,7 +32,7 @@ const getQiblaBearing = (lat: number, lon: number) => {
 export default function QiblaScreen() {
   const scheme = useColorScheme();
   const colors = Colors[scheme === 'unspecified' ? 'light' : scheme];
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
 
   const [heading, setHeading] = useState(0);
   const [qiblaBearing, setQiblaBearing] = useState(260); // Default approx for Dhaka
@@ -130,13 +131,13 @@ export default function QiblaScreen() {
 
           <View style={styles.infoRow}>
             <View style={styles.infoBox}>
-              <Text style={[styles.infoLabel, { color: colors.textSecondary }]}>Current Heading</Text>
-              <Text style={[styles.infoValue, { color: colors.text }]}>{Math.round(heading)}°</Text>
+              <Text style={[styles.infoLabel, { color: colors.textSecondary }]}>{t('qibla.currentHeading')}</Text>
+              <Text style={[styles.infoValue, { color: colors.text }]}>{formatNumber(Math.round(heading), i18n.language)}°</Text>
             </View>
             <View style={[styles.infoDivider, { backgroundColor: colors.border }]} />
             <View style={styles.infoBox}>
-              <Text style={[styles.infoLabel, { color: colors.textSecondary }]}>Qibla Direction</Text>
-              <Text style={[styles.infoValue, { color: colors.highlight }]}>{Math.round(qiblaBearing)}°</Text>
+              <Text style={[styles.infoLabel, { color: colors.textSecondary }]}>{t('qibla.qiblaDirection')}</Text>
+              <Text style={[styles.infoValue, { color: colors.highlight }]}>{formatNumber(Math.round(qiblaBearing), i18n.language)}°</Text>
             </View>
           </View>
 

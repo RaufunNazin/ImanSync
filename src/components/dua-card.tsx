@@ -51,7 +51,7 @@ export default function DuaCard({
           )}
 
           <View style={styles.content}>
-            <Text style={[styles.name, { color: colors.text }]} numberOfLines={2}>
+            <Text style={[styles.name, { color: colors.accent }]} numberOfLines={2}>
               {name}
             </Text>
             {description ? (
@@ -72,8 +72,8 @@ export default function DuaCard({
           </View>
 
           {count !== undefined && (
-            <View style={[styles.countBadge, { backgroundColor: colors.border + '66' }]}>
-              <Text style={[styles.countText, { color: colors.text }]}>{t('dua.duaCount', { count: formatNumber(count, i18n.language) })}</Text>
+            <View style={[styles.countBadge, { backgroundColor: 'transparent' }]}>
+              <Text style={[styles.countText, { color: colors.textSecondary }]}>{t('dua.duaCount', { count: formatNumber(count, i18n.language) })}</Text>
             </View>
           )}
         </TouchableOpacity>
@@ -86,7 +86,6 @@ const styles = StyleSheet.create({
     borderRadius: 20,
     overflow: 'hidden',
     width: '100%',
-    marginBottom: Spacing.three,
   },
   card: {
     padding: Spacing.two,
@@ -98,7 +97,7 @@ const styles = StyleSheet.create({
   pinBadge: {
     position: 'absolute',
     top: Spacing.three,
-    right: Spacing.three,
+    left: Spacing.three,
     padding: 4,
     zIndex: 2,
   },
@@ -129,8 +128,8 @@ const styles = StyleSheet.create({
   },
   countBadge: {
     position: 'absolute',
-    bottom: Spacing.three,
-    left: Spacing.three,
+    top: Spacing.three,
+    right: Spacing.three,
     paddingHorizontal: 8,
     paddingVertical: 4,
     borderRadius: 10,

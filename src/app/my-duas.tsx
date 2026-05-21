@@ -301,6 +301,7 @@ const styles = StyleSheet.create({
     paddingTop: Spacing.three,
   },
   duaArabic: {
+    fontFamily: Fonts.arabic,
     fontSize: 22,
     textAlign: 'right',
   },
@@ -331,10 +332,7 @@ const styles = StyleSheet.create({
     borderRadius: 30,
     alignItems: 'center',
     justifyContent: 'center',
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.3,
-    shadowRadius: 4,
+    boxShadow: '0px 4px 4px rgba(0, 0, 0, 0.3)',
     elevation: 5,
   },
 });

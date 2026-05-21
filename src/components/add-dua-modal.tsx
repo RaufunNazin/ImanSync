@@ -155,7 +155,7 @@ export default function AddDuaModal({ visible, onClose, onSave, colors }: AddDua
                   <View style={styles.inputGroup}>
                     <Text style={[styles.label, { color: colors.textSecondary }]}>{t('dua.duaArabic')}</Text>
                     <TextInput
-                      style={[styles.input, styles.textArea, { color: colors.text, backgroundColor: colors.card, borderColor: colors.border }]}
+                      style={[styles.input, styles.textArea, { color: colors.text, backgroundColor: colors.card, borderColor: colors.border, fontFamily: Fonts.arabic }]}
                       placeholder="بِسْمِ اللَّهِ..."
                       placeholderTextColor={colors.textSecondary + '88'}
                       value={arabic}

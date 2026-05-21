@@ -1,11 +1,10 @@
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import i18n from 'i18next';
 import { initReactI18next } from 'react-i18next';
-import * as Localization from 'expo-localization';
-import AsyncStorage from '@react-native-async-storage/async-storage';
-import en from './locales/en.json';
 import bn from './locales/bn.json';
+import en from './locales/en.json';
 
-const LANGUAGE_KEY = '@deenjourney_language';
+const LANGUAGE_KEY = '@imansync_language';
 
 const resources = {
   en: { translation: en },

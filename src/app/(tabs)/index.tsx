@@ -1,27 +1,25 @@
 import PageHeader from '@/components/page-header';
-import { Colors, BottomTabInset, Fonts, Spacing } from '@/constants/theme';
+import { BottomTabInset, Colors, Fonts, Spacing } from '@/constants/theme';
+import { getDistrictName } from '@/utils/districts';
+import { formatNumber } from '@/utils/formatNumber';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import { BlurView } from 'expo-blur';
 import * as Haptics from 'expo-haptics';
 import { useRouter } from 'expo-router';
 import { Book, BookOpen, Compass, Heart, MapPin, Moon, RotateCcw, Star, Sunset } from 'lucide-react-native';
 import React, { useEffect, useMemo, useRef, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import {
-  ActivityIndicator,
-  Platform,
   ScrollView,
   StyleSheet,
   Text,
   TouchableOpacity,
   useColorScheme,
-  View,
+  View
 } from 'react-native';
+import Animated, { useAnimatedProps, useAnimatedStyle, useSharedValue, withSpring, withTiming } from 'react-native-reanimated';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { useTranslation } from 'react-i18next';
-import { formatNumber } from '@/utils/formatNumber';
 import Svg, { Circle, G } from 'react-native-svg';
-import Animated, { useAnimatedProps, useSharedValue, withTiming, withSpring, useAnimatedStyle } from 'react-native-reanimated';
-import AsyncStorage from '@react-native-async-storage/async-storage';
-import { getDistrictName } from '@/utils/districts';
 
 // ── Types ────────────────────────────────────────────────────────────────────
 interface PrayerEntry {
@@ -48,16 +46,19 @@ interface DailyVerse {
   arabic: string;
   translation: string;
   translationBn: string;
-  reference: string;
+  surahId: number;
+  surahDefaultName: string;
+  ayahNum: number;
 }
 
 // ── Helpers ──────────────────────────────────────────────────────────────────
-const formatAMPM = (date: Date): string => {
+const formatAMPM = (date: Date, lang: string = 'en'): string => {
   let hours = date.getHours();
   let minutes = date.getMinutes();
   const ampm = hours >= 12 ? 'PM' : 'AM';
   hours = hours % 12 || 12;
-  return `${hours}:${String(minutes).padStart(2, '0')} ${ampm}`;
+  const timeStr = `${hours}:${String(minutes).padStart(2, '0')} ${ampm}`;
+  return formatNumber(timeStr, lang);
 };
 
 const parseTime = (timeStr: string, baseDate: Date): Date => {
@@ -161,13 +162,13 @@ export default function HomeScreen() {
     ])
       .then(([arJson, enJson, bnJson]) => {
         if (arJson.data && enJson.data && bnJson.data) {
-          const surahName = t('surahNames.' + enJson.data.surah.number, { defaultValue: enJson.data.surah.englishName });
-          const ayahNum = enJson.data.numberInSurah;
           setDailyVerse({
             arabic: arJson.data.text,
             translation: `"${enJson.data.text}"`,
             translationBn: `"${bnJson.data.text}"`,
-            reference: `${surahName} ${enJson.data.surah.number}:${ayahNum}`,
+            surahId: enJson.data.surah.number,
+            surahDefaultName: enJson.data.surah.englishName,
+            ayahNum: enJson.data.numberInSurah,
           });
         }
       })
@@ -193,11 +194,11 @@ export default function HomeScreen() {
     return keys.map((p) => ({
       id: p.id,
       name: t(`prayerTimes.${p.id}`),
-      time: formatAMPM(parseTime(rawTimings[p.key as keyof typeof rawTimings], today)),
+      time: formatAMPM(parseTime(rawTimings[p.key as keyof typeof rawTimings], today), i18n.language),
       date: parseTime(rawTimings[p.key as keyof typeof rawTimings], today),
       status: 'future' as const,
     }));
-  }, [rawTimings, today, t]);
+  }, [rawTimings, today, t, i18n.language]);
 
   const { currentPrayer, nextPrayer, timeToNextMs, prayersWithStatus } =
     useMemo(() => {
@@ -256,23 +257,23 @@ export default function HomeScreen() {
       {
         label: t('home.suhur'),
         sublabel: t('home.suhurDesc'),
-        time: formatAMPM(parseTime(rawTimings.Imsak, today)),
+        time: formatAMPM(parseTime(rawTimings.Imsak, today), i18n.language),
         Icon: Moon,
       },
       {
         label: t('home.iftar'),
         sublabel: t('home.iftarDesc'),
-        time: formatAMPM(parseTime(rawTimings.Maghrib, today)),
+        time: formatAMPM(parseTime(rawTimings.Maghrib, today), i18n.language),
         Icon: Sunset,
       },
       {
         label: t('home.tahajjud'),
         sublabel: t('home.tahajjudDesc'),
-        time: formatAMPM(parseTime(rawTimings.Lastthird, today)),
+        time: formatAMPM(parseTime(rawTimings.Lastthird, today), i18n.language),
         Icon: Star,
       },
     ];
-  }, [rawTimings, today]);
+  }, [rawTimings, today, t, i18n.language]);
 
   // Restricted times
   const restrictedTimes: RestrictedTime[] = useMemo(() => {
@@ -280,25 +281,25 @@ export default function HomeScreen() {
     return [
       {
         labelKey: 'restrict1',
-        time: `${formatAMPM(parseTime(rawTimings.Fajr, today))} – ${formatAMPM(parseTime(rawTimings.Sunrise, today))}`,
+        time: `${formatAMPM(parseTime(rawTimings.Fajr, today), i18n.language)} – ${formatAMPM(parseTime(rawTimings.Sunrise, today), i18n.language)}`,
       },
       {
         labelKey: 'restrict2',
-        time: `~${formatAMPM(parseTime(rawTimings.Dhuhr, today))}`,
+        time: `~${formatAMPM(parseTime(rawTimings.Dhuhr, today), i18n.language)}`,
       },
       {
         labelKey: 'restrict3',
-        time: `${formatAMPM(parseTime(rawTimings.Asr, today))} – ${formatAMPM(parseTime(rawTimings.Sunset, today))}`,
+        time: `${formatAMPM(parseTime(rawTimings.Asr, today), i18n.language)} – ${formatAMPM(parseTime(rawTimings.Sunset, today), i18n.language)}`,
       },
     ];
-  }, [rawTimings, today]);
+  }, [rawTimings, today, t, i18n.language]);
 
   return (
     <SafeAreaView style={[styles.safeArea, { backgroundColor: colors.background }]}>
       <PageHeader
-        titleEn="Noor"
+        titleEn="ImanSync"
         titleAr={t('home.titleAr')}
-        icon={require('../../../assets/images/icon.png')}
+        icon={require('../../../assets/images/android-icon-foreground.png')}
       />
       <ScrollView
         showsVerticalScrollIndicator={false}
@@ -584,14 +585,14 @@ export default function HomeScreen() {
                   </Text>
                 )}
                 <Text style={[styles.inspirationRef, { color: colors.accent }]}>
-                  — {dailyVerse.reference}
+                  — {t('surahNames.' + dailyVerse.surahId, { defaultValue: dailyVerse.surahDefaultName })} {formatNumber(dailyVerse.surahId, i18n.language)}:{formatNumber(dailyVerse.ayahNum, i18n.language)}
                 </Text>
               </View>
             </BlurView>
           </View>
         )}
 
-        <View style={{ height: Spacing.four }} />
+        <View style={{ height: BottomTabInset + Spacing.six }} />
       </ScrollView>
 
       {/* ── Floating Tasbeeh Counter ──────────────────────────────── */}
@@ -814,7 +815,7 @@ const styles = StyleSheet.create({
     marginBottom: Spacing.four,
   },
   arabicGreeting: {
-    fontFamily: Fonts.outfit,
+    fontFamily: Fonts.arabic,
     fontSize: 16,
     lineHeight: 24,
   },
@@ -884,7 +885,7 @@ const styles = StyleSheet.create({
 
   // Section
   section: {
-    marginBottom: Spacing.six,
+    // marginBottom: Spacing.four,
   },
   sectionTitle: {
     fontFamily: Fonts.outfit,
@@ -1076,7 +1077,7 @@ const styles = StyleSheet.create({
     opacity: 0.8,
   },
   inspirationArabic: {
-    fontFamily: Fonts.outfit,
+    fontFamily: Fonts.arabic,
     fontSize: 24,
     textAlign: 'center',
     lineHeight: 36,

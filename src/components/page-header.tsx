@@ -95,7 +95,7 @@ const styles = StyleSheet.create({
     lineHeight: 16,
   },
   titleAr: {
-    fontFamily: Fonts.outfit,
+    fontFamily: Fonts.arabic,
     fontSize: 17,
     lineHeight: 22,
     textAlign: 'right',

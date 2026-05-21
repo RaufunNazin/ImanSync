@@ -1,22 +1,22 @@
 {
   "expo": {
-    "name": "Noor",
-    "slug": "DeenJourney",
+    "name": "ImanSync",
+    "slug": "ImanSync",
     "version": "1.0.0",
     "orientation": "portrait",
-    "icon": "./assets/images/icon.png",
-    "scheme": "noor",
+    "icon": "./assets/expo.icon/Assets/expo.png",
+    "scheme": "imansync",
     "userInterfaceStyle": "light",
     "ios": {
-      "icon": "./assets/expo.icon",
+      "icon": "./assets/expo.icon/Assets/expo.png",
       "infoPlist": {
         "NSLocationWhenInUseUsageDescription": "We need your location to calculate accurate Qibla and prayer times."
       }
     },
     "android": {
-      "package": "com.rax13.noor",
+      "package": "com.rax13.imansync",
       "adaptiveIcon": {
-        "backgroundColor": "#E6F4FE",
+        "backgroundColor": "#0c1618",
         "foregroundImage": "./assets/images/android-icon-foreground.png",
         "backgroundImage": "./assets/images/android-icon-background.png",
         "monochromeImage": "./assets/images/android-icon-monochrome.png"
@@ -41,7 +41,7 @@
       [
         "expo-splash-screen",
         {
-          "backgroundColor": "#208AEF",
+          "backgroundColor": "#0c1618",
           "android": {
             "image": "./assets/images/splash-icon.png",
             "imageWidth": 76

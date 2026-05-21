@@ -1,15 +1,15 @@
-import { Colors, Fonts, Spacing } from '@/constants/theme';
 import PageHeader from '@/components/page-header';
+import { BottomTabInset, Colors, Fonts, Spacing } from '@/constants/theme';
+import { setLanguage } from '@/i18n';
+import { getDistrictName } from '@/utils/districts';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { BlurView } from 'expo-blur';
+import * as Location from 'expo-location';
 import { Bell, ChevronRight, Globe, MapPin, Moon, Settings as SettingsIcon, Shield } from 'lucide-react-native';
 import React, { useEffect, useState } from 'react';
-import { Appearance, Linking, Platform, ScrollView, StyleSheet, Switch, Text, TouchableOpacity, useColorScheme, View, Alert, ActivityIndicator } from 'react-native';
-import { SafeAreaView } from 'react-native-safe-area-context';
 import { useTranslation } from 'react-i18next';
-import { setLanguage } from '@/i18n';
-import * as Location from 'expo-location';
-import { getDistrictName } from '@/utils/districts';
+import { ActivityIndicator, Alert, Appearance, Image, Linking, Platform, ScrollView, StyleSheet, Switch, Text, TouchableOpacity, useColorScheme, View } from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
 
 const CALC_METHODS = [
   { id: 1, name: 'Karachi (UIS)' },
@@ -159,6 +159,15 @@ export default function SettingsScreen() {
       <PageHeader titleEn={t('settings.titleEn')} titleAr={t('settings.titleAr')} />
       <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={styles.container}>
         
+        <View style={[styles.appFooter, { borderColor: colors.accent, backgroundColor: colors.card }]}>
+          <Image source={require('../../../assets/images/android-icon-foreground.png')} style={styles.footerLogo} resizeMode="contain" />
+          <View style={styles.footerTextContainer}>
+            <Text style={styles.footerAppName}>ImanSync</Text>
+            <Text style={[styles.footerSubtitle, { color: colors.textSecondary }]}>Crafted seeking the pleasure of Allah by Srizon</Text>
+            <Text style={[styles.footerVersion, { color: colors.textSecondary }]}>v1.0.0</Text>
+          </View>
+        </View>
+
         <Text style={[styles.sectionTitle, { color: colors.textSecondary }]}>{t('settings.preferences')}</Text>
         <BlurView intensity={40} tint={colors.glassTint as any} style={styles.card}>
           <SettingRow id="notifications" icon={Bell} title={t('settings.notifications')} value={notificationsEnabled} type="toggle" />
@@ -196,7 +205,7 @@ export default function SettingsScreen() {
           />
         </BlurView>
 
-        <View style={{ height: Spacing.six }} />
+        <View style={{ height: BottomTabInset + Spacing.six }} />
       </ScrollView>
     </SafeAreaView>
   );
@@ -259,7 +268,44 @@ const styles = StyleSheet.create({
   },
   settingTitle: {
     fontFamily: Fonts.outfit,
-    fontSize: 16,
+    fontSize: 14,
+  },
+  appFooter: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    paddingVertical: Spacing.four,
+    paddingHorizontal: Spacing.four,
+    marginBottom: Spacing.four,
+    borderWidth: 1,
+    borderRadius: 24,
+  },
+  footerLogo: {
+    width: 64,
+    height: 64,
+    marginRight: Spacing.four,
+  },
+  footerTextContainer: {
+    flex: 1,
+    justifyContent: 'center',
+  },
+  footerAppName: {
+    fontFamily: Fonts.outfit,
+    fontSize: 24,
+    color: '#FFF',
+    letterSpacing: 1,
+  },
+  footerSubtitle: {
+    fontFamily: Fonts.outfit,
+    fontSize: 12,
+    marginTop: 4,
+    lineHeight: 16,
+  },
+  footerVersion: {
+    fontFamily: Fonts.outfit,
+    fontSize: 12,
+    marginTop: 4,
+    opacity: 0.7,
   },
   settingValue: {
     fontFamily: Fonts.outfit,

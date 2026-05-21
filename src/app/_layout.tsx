@@ -8,8 +8,9 @@ import { migrateDbIfNeeded } from '@/lib/db';
 import { setupNotificationChannels } from '@/lib/notifications';
 import { useFonts } from 'expo-font';
 import { Outfit_400Regular, Outfit_500Medium, Outfit_600SemiBold } from '@expo-google-fonts/outfit';
+import { NotoNaskhArabic_400Regular, NotoNaskhArabic_700Bold } from '@expo-google-fonts/noto-naskh-arabic';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import { Alert, Platform } from 'react-native';
+import { Alert, Platform, Appearance } from 'react-native';
 import { initStorage } from '@/utils/my-duas-storage';
 import { StatusBar } from 'expo-status-bar';
 
@@ -20,16 +21,34 @@ SplashScreen.preventAutoHideAsync();
 export default function RootLayout() {
   const colorScheme = useColorScheme();
   const [i18nLoaded, setI18nLoaded] = React.useState(false);
+  const [themeLoaded, setThemeLoaded] = React.useState(false);
   
   const [fontsLoaded, fontError] = useFonts({
     Outfit_400Regular,
     Outfit_500Medium,
     Outfit_600SemiBold,
+    NotoNaskhArabic_400Regular,
+    NotoNaskhArabic_700Bold,
   });
 
   useEffect(() => {
     setupNotificationChannels();
     initI18n().then(() => setI18nLoaded(true));
+
+    // Load user theme preference
+    AsyncStorage.getItem('deen_dark_mode').then((val) => {
+      try {
+        if (Platform.OS !== 'web') {
+          if (val !== null) {
+            Appearance.setColorScheme(val === 'true' ? 'dark' : 'light');
+          } else {
+            Appearance.setColorScheme('light');
+          }
+        }
+      } catch (e) {}
+    }).finally(() => {
+      setThemeLoaded(true);
+    });
 
     // First-open storage setup
     AsyncStorage.getItem('deen_my_duas_path').then(val => {
@@ -53,12 +72,12 @@ export default function RootLayout() {
   }, []);
 
   useEffect(() => {
-    if ((fontsLoaded || fontError) && i18nLoaded) {
+    if ((fontsLoaded || fontError) && i18nLoaded && themeLoaded) {
       SplashScreen.hideAsync();
     }
-  }, [fontsLoaded, fontError, i18nLoaded]);
+  }, [fontsLoaded, fontError, i18nLoaded, themeLoaded]);
 
-  if (!(fontsLoaded || fontError) || !i18nLoaded) {
+  if (!(fontsLoaded || fontError) || !i18nLoaded || !themeLoaded) {
     return null;
   }
 
@@ -75,7 +94,7 @@ export default function RootLayout() {
   return (
     <SQLiteProvider databaseName="islamic.db" onInit={migrateDbIfNeeded}>
       <ThemeProvider value={navTheme}>
-        <StatusBar style={colorScheme === 'dark' ? 'light' : 'dark'} backgroundColor="transparent" translucent={true} />
+        <StatusBar style={colorScheme === 'dark' ? 'light' : 'dark'} backgroundColor={colors.background} />
         <View style={[styles.background, { backgroundColor: colors.background }]}>
           <Stack screenOptions={{ headerShown: false, contentStyle: { backgroundColor: 'transparent' } }}>
             <Stack.Screen name="(tabs)" options={{ headerShown: false }} />

@@ -117,7 +117,7 @@ const styles = StyleSheet.create({
     fontSize: 14,
   },
   arabicText: {
-    fontFamily: Fonts.outfit,
+    fontFamily: Fonts.arabic,
     fontSize: 28,
   }
 });

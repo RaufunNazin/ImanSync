@@ -1,16 +1,16 @@
-import { Colors, Fonts, Spacing } from '@/constants/theme';
 import PageHeader from '@/components/page-header';
+import { BottomTabInset, Colors, Fonts, Spacing } from '@/constants/theme';
+import { formatNumber } from '@/utils/formatNumber';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { BlurView } from 'expo-blur';
-import { Activity, BookOpen, CheckCircle2, Circle as CircleIcon, HandCoins, Heart, Moon } from 'lucide-react-native';
-import React, { useEffect, useState, useMemo } from 'react';
-import { Platform, ScrollView, StyleSheet, Text, TouchableOpacity, useColorScheme, View } from 'react-native';
-import { SafeAreaView } from 'react-native-safe-area-context';
-import { useTranslation } from 'react-i18next';
-import { formatNumber } from '@/utils/formatNumber';
-import Svg, { Circle } from 'react-native-svg';
-import Animated, { useAnimatedProps, useSharedValue, withTiming, withSpring, useAnimatedStyle } from 'react-native-reanimated';
 import * as Haptics from 'expo-haptics';
+import { Activity, BookOpen, CheckCircle2, HandCoins, Heart, Moon } from 'lucide-react-native';
+import React, { useEffect, useMemo, useState } from 'react';
+import { useTranslation } from 'react-i18next';
+import { ScrollView, StyleSheet, Text, TouchableOpacity, useColorScheme, View } from 'react-native';
+import Animated, { useAnimatedProps, useAnimatedStyle, useSharedValue, withSpring, withTiming } from 'react-native-reanimated';
+import { SafeAreaView } from 'react-native-safe-area-context';
+import Svg, { Circle } from 'react-native-svg';
 
 const DAILY_TASKS = [
   { id: 'fajr', icon: Activity },
@@ -301,7 +301,7 @@ export default function TrackerScreen() {
             
             {activeTab === 'Daily' && (
               <View style={styles.progressCircleContainer}>
-                <Svg width={64} height={64} viewBox="0 0 64 64" style={styles.svgAbsolute}>
+                <Svg width={64} height={64} viewBox="0 0 64 64" style={[styles.svgAbsolute, { transform: [{ rotate: '-90deg' }] }]}>
                   <Circle
                     cx={32}
                     cy={32}
@@ -320,9 +320,6 @@ export default function TrackerScreen() {
                     strokeDasharray={circumference}
                     animatedProps={animatedCircleProps}
                     strokeLinecap="round"
-                    rotation="-90"
-                    originX="32"
-                    originY="32"
                   />
                 </Svg>
                 <View style={styles.progressTextContainer}>
@@ -343,7 +340,7 @@ export default function TrackerScreen() {
         {activeTab === 'Weekly' && renderRealChart(7, t('tracker.weekly'))}
         {activeTab === 'Monthly' && renderRealChart(30, t('tracker.monthly'))}
 
-        <View style={{ height: Spacing.six }} />
+        <View style={{ height: BottomTabInset + Spacing.six }} />
       </ScrollView>
     </SafeAreaView>
   );

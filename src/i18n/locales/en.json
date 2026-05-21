@@ -1,7 +1,7 @@
 {
   "home": {
-    "titleEn": "Noor",
-    "titleAr": "رحلة الدين",
+    "titleEn": "ImanSync",
+    "titleAr": "إيمان سينك",
     "greeting": "السَّلَامُ عَلَيْكُمْ",
     "quickActions": "Quick Actions",
     "qibla": "Qibla",
@@ -159,7 +159,7 @@
     "titleEn": "Settings",
     "titleAr": "الإعدادات",
     "language": "Language",
-    "theme": "Theme",
+    "theme": "Dark Mode",
     "notifications": "Notifications",
     "privacy": "Privacy Policy",
     "preferences": "Preferences",
@@ -183,7 +183,9 @@
     "titleAr": "اتجاه القبلة",
     "pointing": "Pointing to Kaaba",
     "align": "Align your phone to find Qibla",
-    "north": "N"
+    "north": "N",
+    "currentHeading": "Current Heading",
+    "qiblaDirection": "Qibla Direction"
   },
   "stories": {
     "titleEn": "Stories & Context",

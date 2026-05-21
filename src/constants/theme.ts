@@ -35,6 +35,8 @@ export type ThemeColor = keyof typeof Colors.light & keyof typeof Colors.dark;
 
 export const Fonts = {
   outfit: 'Outfit_400Regular',
+  arabic: 'NotoNaskhArabic_400Regular',
+  arabicBold: 'NotoNaskhArabic_700Bold',
 };
 
 export const Spacing = {

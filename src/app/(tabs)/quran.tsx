@@ -1,14 +1,14 @@
 import PageHeader from '@/components/page-header';
-import { Colors, Fonts, Spacing } from '@/constants/theme';
+import { BottomTabInset, Colors, Fonts, Spacing } from '@/constants/theme';
+import { formatNumber } from '@/utils/formatNumber';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { BlurView } from 'expo-blur';
 import { useFocusEffect, useRouter } from 'expo-router';
 import { Bookmark, BookOpen, ChevronRight, Search } from 'lucide-react-native';
 import React, { useCallback, useEffect, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { ActivityIndicator, ScrollView, StyleSheet, Text, TextInput, TouchableOpacity, useColorScheme, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { useTranslation } from 'react-i18next';
-import { formatNumber } from '@/utils/formatNumber';
 
 interface Surah {
   id: number;
@@ -199,13 +199,13 @@ export default function QuranScreen() {
           </View>
         )}
 
-        <View style={{ height: Spacing.six + 80 }} />
+        <View style={{ height: BottomTabInset + Spacing.six + 100 }} />
       </ScrollView>
 
       {/* Floating Last Read Pill */}
       {activeTab !== 'bookmarks' && (
         <View style={styles.floatingHintContainer}>
-          <BlurView intensity={80} tint={colors.glassTint as any} style={[styles.floatingHintCard, { borderColor: colors.accent }]}>
+          <View style={[styles.floatingHintCard, { borderColor: colors.accent, backgroundColor: colors.background }]}>
             <TouchableOpacity 
               style={styles.floatingHintTouch}
               onPress={() => {
@@ -226,7 +226,7 @@ export default function QuranScreen() {
               </View>
               <ChevronRight size={18} color={colors.textSecondary} />
             </TouchableOpacity>
-          </BlurView>
+          </View>
         </View>
       )}
     </SafeAreaView>
@@ -305,10 +305,7 @@ const styles = StyleSheet.create({
     overflow: 'hidden',
     borderWidth: 1,
     borderColor: 'rgba(255,255,255,0.15)',
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.3,
-    shadowRadius: 8,
+    boxShadow: '0px 4px 8px rgba(0, 0, 0, 0.3)',
     elevation: 5,
   },
   floatingHintTouch: {
@@ -334,7 +331,7 @@ const styles = StyleSheet.create({
   },
   tabsContainer: {
     flexDirection: 'row',
-    marginBottom: Spacing.four,
+    marginVertical: Spacing.two,
     borderBottomWidth: 1,
     borderBottomColor: 'rgba(255,255,255,0.2)',
   },
@@ -391,7 +388,7 @@ const styles = StyleSheet.create({
     fontSize: 12,
   },
   surahNameAr: {
-    fontFamily: Fonts.outfit,
+    fontFamily: Fonts.arabic,
     fontSize: 20,
     marginLeft: Spacing.two,
   },

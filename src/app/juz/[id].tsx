@@ -365,7 +365,7 @@ const styles = StyleSheet.create({
   surahTag: { fontFamily: Fonts.outfit, fontSize: 14 },
   
   arabicText: {
-    fontFamily: Fonts.outfit,
+    fontFamily: Fonts.arabic,
     textAlign: 'right',
     marginBottom: Spacing.four,
   },

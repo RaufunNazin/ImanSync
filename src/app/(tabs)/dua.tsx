@@ -1,16 +1,16 @@
-import React, { useEffect, useState } from 'react';
-import { ActivityIndicator, Dimensions, Platform, ScrollView, StyleSheet, Text, useColorScheme, View, TouchableOpacity } from 'react-native';
-import { SafeAreaView } from 'react-native-safe-area-context';
-import { Colors, Fonts, Spacing, BottomTabInset } from '@/constants/theme';
-import PageHeader from '@/components/page-header';
-import { useTranslation } from 'react-i18next';
-import { useRouter } from 'expo-router';
-import AsyncStorage from '@react-native-async-storage/async-storage';
 import DuaCard from '@/components/dua-card';
+import PageHeader from '@/components/page-header';
 import PinSheet from '@/components/pin-sheet';
-import { Search, ChevronRight } from 'lucide-react-native';
-import { TextInput } from 'react-native-gesture-handler';
+import { BottomTabInset, Colors, Fonts, Spacing } from '@/constants/theme';
 import duasBn from '@/data/duas_bn.json';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import { useRouter } from 'expo-router';
+import { ChevronRight, Search } from 'lucide-react-native';
+import React, { useEffect, useState } from 'react';
+import { useTranslation } from 'react-i18next';
+import { ActivityIndicator, Dimensions, ScrollView, StyleSheet, Text, TouchableOpacity, useColorScheme, View } from 'react-native';
+import { TextInput } from 'react-native-gesture-handler';
+import { SafeAreaView } from 'react-native-safe-area-context';
 
 interface Category {
   id: string;
@@ -330,7 +330,6 @@ const styles = StyleSheet.create({
     paddingVertical: 12,
     borderRadius: 20,
     borderWidth: 1,
-    marginBottom: Spacing.four,
   },
   searchInput: {
     flex: 1,
@@ -339,12 +338,11 @@ const styles = StyleSheet.create({
     padding: 0,
   },
   section: {
-    marginBottom: Spacing.four,
   },
   sectionTitle: {
     fontFamily: Fonts.outfit,
     fontSize: 22,
-    marginBottom: Spacing.three,
+    marginVertical: Spacing.three,
   },
   pinnedScroll: {
     gap: Spacing.three,
@@ -380,6 +378,7 @@ const styles = StyleSheet.create({
     fontSize: 16,
   },
   itemArabic: {
+    fontFamily: Fonts.arabic,
     fontSize: 18,
     textAlign: 'right',
   },

@@ -116,6 +116,7 @@ const styles = StyleSheet.create({
     fontSize: 16,
   },
   itemArabic: {
+    fontFamily: Fonts.arabic,
     fontSize: 18,
     textAlign: 'right',
   },

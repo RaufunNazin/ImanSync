@@ -12,6 +12,7 @@ export const districtMapBn: Record<string, string> = {
   "Comilla": "কুমিল্লা",
   "Cox's Bazar": "কক্সবাজার",
   "Dhaka": "ঢাকা",
+  "Dhaka (Default)": "ঢাকা (ডিফল্ট)",
   "Dinajpur": "দিনাজপুর",
   "Faridpur": "ফরিদপুর",
   "Feni": "ফেনী",
