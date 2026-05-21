@@ -74,6 +74,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: Spacing.four,
     paddingVertical: 14,
     borderBottomWidth: StyleSheet.hairlineWidth,
+    marginBottom: Spacing.four,
   },
   backBtn: {
     marginRight: 8,

@@ -734,7 +734,7 @@ function TasbeehFAB({ colors, t, i18n }: { colors: any; t: any; i18n: any }) {
   );
 }
 
-const FAB_BOTTOM = Spacing.two + 62; // matches quran page continue button clearance
+const FAB_BOTTOM = Spacing.two + 80;
 
 const fabStyles = StyleSheet.create({
   container: {
@@ -884,7 +884,7 @@ const styles = StyleSheet.create({
 
   // Section
   section: {
-    marginBottom: Spacing.four,
+    marginBottom: Spacing.six,
   },
   sectionTitle: {
     fontFamily: Fonts.outfit,

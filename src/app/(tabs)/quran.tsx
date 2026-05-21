@@ -295,7 +295,7 @@ const styles = StyleSheet.create({
   },
   floatingHintContainer: {
     position: 'absolute',
-    bottom: Spacing.two + 60,
+    bottom: Spacing.two + 80,
     left: Spacing.four,
     right: Spacing.four,
     zIndex: 999,
