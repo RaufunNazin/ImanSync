@@ -1,5 +1,5 @@
 import PageHeader from '@/components/page-header';
-import { BottomTabInset, Colors, Fonts, Spacing } from '@/constants/theme';
+import { Colors, Fonts, Spacing } from '@/constants/theme';
 import { formatNumber } from '@/utils/formatNumber';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { BlurView } from 'expo-blur';
@@ -199,7 +199,7 @@ export default function QuranScreen() {
           </View>
         )}
 
-        <View style={{ height: BottomTabInset + Spacing.six + 100 }} />
+        <View style={{ height: Spacing.six + 100 }} />
       </ScrollView>
 
       {/* Floating Last Read Pill */}

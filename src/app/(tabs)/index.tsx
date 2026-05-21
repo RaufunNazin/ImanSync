@@ -562,7 +562,7 @@ export default function HomeScreen() {
 
         {/* ── Daily Inspiration ─────────────────────────────────── */}
         {dailyVerse && (
-          <View style={styles.section}>
+          <View>
             <Text style={[styles.sectionTitle, { color: colors.text }]}>
               {t('home.dailyInspiration')}
             </Text>
@@ -592,7 +592,7 @@ export default function HomeScreen() {
           </View>
         )}
 
-        <View style={{ height: BottomTabInset + Spacing.six }} />
+        <View style={{ height: Spacing.six }} />
       </ScrollView>
 
       {/* ── Floating Tasbeeh Counter ──────────────────────────────── */}
@@ -885,7 +885,7 @@ const styles = StyleSheet.create({
 
   // Section
   section: {
-    // marginBottom: Spacing.four,
+    marginBottom: Spacing.four,
   },
   sectionTitle: {
     fontFamily: Fonts.outfit,

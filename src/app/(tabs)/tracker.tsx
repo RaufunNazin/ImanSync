@@ -1,5 +1,5 @@
 import PageHeader from '@/components/page-header';
-import { BottomTabInset, Colors, Fonts, Spacing } from '@/constants/theme';
+import { Colors, Fonts, Spacing } from '@/constants/theme';
 import { formatNumber } from '@/utils/formatNumber';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { BlurView } from 'expo-blur';
@@ -340,7 +340,7 @@ export default function TrackerScreen() {
         {activeTab === 'Weekly' && renderRealChart(7, t('tracker.weekly'))}
         {activeTab === 'Monthly' && renderRealChart(30, t('tracker.monthly'))}
 
-        <View style={{ height: BottomTabInset + Spacing.six }} />
+        <View style={{ height: Spacing.six }} />
       </ScrollView>
     </SafeAreaView>
   );
@@ -460,10 +460,9 @@ const styles = StyleSheet.create({
   taskCardLabel: {
     fontFamily: Fonts.outfit,
     fontSize: 14,
-    lineHeight: 19,
     flexShrink: 1,
     textAlign: 'center',
-    paddingBottom: 20, // leave room for the icon
+    marginBottom: 16, // leave room for the icon
   },
   taskCardCheck: {
     position: 'absolute',

@@ -1,7 +1,7 @@
 import DuaCard from '@/components/dua-card';
 import PageHeader from '@/components/page-header';
 import PinSheet from '@/components/pin-sheet';
-import { BottomTabInset, Colors, Fonts, Spacing } from '@/constants/theme';
+import { Colors, Fonts, Spacing } from '@/constants/theme';
 import duasBn from '@/data/duas_bn.json';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useRouter } from 'expo-router';
@@ -294,7 +294,7 @@ export default function DuaScreen() {
         </>
       )}
 
-        <View style={{ height: BottomTabInset + Spacing.six }} />
+        <View style={{ height: Spacing.six }} />
       </ScrollView>
 
       {/* Pin Action Sheet */}

@@ -1,5 +1,5 @@
 import PageHeader from '@/components/page-header';
-import { BottomTabInset, Colors, Fonts, Spacing } from '@/constants/theme';
+import { Colors, Fonts, Spacing } from '@/constants/theme';
 import { setLanguage } from '@/i18n';
 import { getDistrictName } from '@/utils/districts';
 import AsyncStorage from '@react-native-async-storage/async-storage';
@@ -205,7 +205,7 @@ export default function SettingsScreen() {
           />
         </BlurView>
 
-        <View style={{ height: BottomTabInset + Spacing.six }} />
+        <View style={{ height: Spacing.six }} />
       </ScrollView>
     </SafeAreaView>
   );
