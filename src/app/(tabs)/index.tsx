@@ -20,6 +20,8 @@ import { useTranslation } from 'react-i18next';
 import { formatNumber } from '@/utils/formatNumber';
 import Svg, { Circle, G } from 'react-native-svg';
 import Animated, { useAnimatedProps, useSharedValue, withTiming, withSpring, useAnimatedStyle } from 'react-native-reanimated';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import { getDistrictName } from '@/utils/districts';
 
 // ── Types ────────────────────────────────────────────────────────────────────
 interface PrayerEntry {
@@ -91,6 +93,7 @@ export default function HomeScreen() {
   const [rawTimings, setRawTimings] = useState<Record<string, string>>({});
   const [hijriDate, setHijriDate] = useState('');
   const [dailyVerse, setDailyVerse] = useState<DailyVerse | null>(null);
+  const [locationName, setLocationName] = useState('Dhaka');
 
   // Tick every second
   useEffect(() => {
@@ -100,18 +103,46 @@ export default function HomeScreen() {
 
   // Fetch prayer times
   useEffect(() => {
-    fetch(
-      'http://api.aladhan.com/v1/timingsByCity?city=Dhaka&country=Bangladesh&method=2'
-    )
-      .then((r) => r.json())
-      .then((json) => {
-        if (json.data) {
-          setRawTimings(json.data.timings);
-          const hj = json.data.date.hijri;
-          setHijriDate(`${hj.day} ${hj.month.en} ${hj.year} AH`);
+    AsyncStorage.multiGet(['deen_location', 'deen_calc_method']).then(values => {
+      let lat = 23.8103;
+      let lon = 90.4125;
+      let method = 1; // 1 = Karachi, 2 = ISNA, 3 = MWL
+      let isCityBased = true;
+      let city = 'Dhaka';
+      let country = 'Bangladesh';
+      
+      values.forEach(([key, value]) => {
+        if (value && key === 'deen_location') {
+          try {
+             let loc = JSON.parse(value);
+             lat = loc.latitude;
+             lon = loc.longitude;
+             city = loc.city;
+             isCityBased = false;
+          } catch(e){}
         }
-      })
-      .catch((e) => console.error('Prayer fetch error:', e));
+        if (value && key === 'deen_calc_method') {
+           method = parseInt(value, 10);
+        }
+      });
+
+      setLocationName(getDistrictName(city, i18n.language));
+
+      let url = isCityBased 
+        ? `https://api.aladhan.com/v1/timingsByCity?city=${city}&country=${country}&method=${method}`
+        : `https://api.aladhan.com/v1/timings?latitude=${lat}&longitude=${lon}&method=${method}`;
+
+      fetch(url)
+        .then((r) => r.json())
+        .then((json) => {
+          if (json.data) {
+            setRawTimings(json.data.timings);
+            const hj = json.data.date.hijri;
+            setHijriDate(`${hj.day} ${hj.month.en} ${hj.year} AH`);
+          }
+        })
+        .catch((e) => console.error('Prayer fetch error:', e));
+    });
   }, []);
 
   // Fetch a random Quran verse (Arabic + English)
@@ -130,7 +161,7 @@ export default function HomeScreen() {
     ])
       .then(([arJson, enJson, bnJson]) => {
         if (arJson.data && enJson.data && bnJson.data) {
-          const surahName = enJson.data.surah.englishName;
+          const surahName = t('surahNames.' + enJson.data.surah.number, { defaultValue: enJson.data.surah.englishName });
           const ayahNum = enJson.data.numberInSurah;
           setDailyVerse({
             arabic: arJson.data.text,
@@ -172,8 +203,8 @@ export default function HomeScreen() {
     useMemo(() => {
       if (fardPrayers.length === 0) {
         return {
-          currentPrayer: { name: 'Loading…', time: '' },
-          nextPrayer: { name: 'Loading…', time: '' },
+          currentPrayer: { name: t('home.loading'), time: '' },
+          nextPrayer: { name: t('home.loading'), time: '' },
           timeToNextMs: 0,
           prayersWithStatus: [],
         };
@@ -265,8 +296,9 @@ export default function HomeScreen() {
   return (
     <SafeAreaView style={[styles.safeArea, { backgroundColor: colors.background }]}>
       <PageHeader
-        titleEn={t('home.titleEn')}
+        titleEn="Noor"
         titleAr={t('home.titleAr')}
+        icon={require('../../../assets/images/icon.png')}
       />
       <ScrollView
         showsVerticalScrollIndicator={false}
@@ -286,149 +318,153 @@ export default function HomeScreen() {
 
 
         {/* ── Current Prayer Card (compact) ────────────────────── */}
-        <BlurView
-          intensity={50}
-          tint={colors.glassTint as any}
-          style={[styles.heroCard, { borderColor: colors.border }]}
-        >
-          <View style={styles.heroRow}>
-            <View style={styles.heroLeft}>
-              <Text style={[styles.heroLabel, { color: colors.textSecondary }]}>
-                {t('home.currentPrayer')}
-              </Text>
-              <Text style={[styles.heroPrayerName, { color: colors.text }]}>
-                {currentPrayer.name}
-              </Text>
-              <Text style={[styles.heroTime, { color: colors.textSecondary }]}>
-                {currentPrayer.time}
-              </Text>
-            </View>
-            <View style={styles.heroRight}>
-              <Text style={[styles.heroNextLabel, { color: colors.textSecondary }]}>
-                {t('home.next')} · {nextPrayer.name}
-              </Text>
-              <Text style={[styles.heroCountdown, { color: colors.accent }]}>
-                {displayCountdown}
-              </Text>
-              <View style={styles.locationRow}>
-                <MapPin size={12} color={colors.textSecondary} />
-                <Text style={[styles.locationText, { color: colors.textSecondary }]}>
-                  {t('home.dhakaBd')}
+        {prayersWithStatus.length > 0 && (
+          <BlurView
+            intensity={50}
+            tint={colors.glassTint as any}
+            style={[styles.heroCard, { borderColor: colors.border }]}
+          >
+            <View style={styles.heroRow}>
+              <View style={styles.heroLeft}>
+                <Text style={[styles.heroLabel, { color: colors.textSecondary }]}>
+                  {t('home.currentPrayer')}
+                </Text>
+                <Text style={[styles.heroPrayerName, { color: colors.text }]}>
+                  {currentPrayer.name}
+                </Text>
+                <Text style={[styles.heroTime, { color: colors.textSecondary }]}>
+                  {currentPrayer.time}
                 </Text>
               </View>
-            </View>
-          </View>
-        </BlurView>
-
-        {/* ── Today's Prayers — Horizontal 5-Point Timeline ──── */}
-        <View style={styles.section}>
-          <Text style={[styles.sectionTitle, { color: colors.text }]}>
-            {t('home.todaysPrayers')}
-          </Text>
-          <BlurView
-            intensity={30}
-            tint={colors.glassTint as any}
-            style={[styles.timelineCard, { borderColor: colors.border }]}
-          >
-            <View style={styles.timelineRow}>
-              {prayersWithStatus.map((prayer, index) => {
-                const isCurrent = prayer.status === 'current';
-                const isNext = prayer.status === 'next';
-                const isPast = prayer.status === 'past';
-                const isFirst = index === 0;
-                const isLast = index === prayersWithStatus.length - 1;
-                const dotColor = isCurrent
-                  ? colors.highlight
-                  : isNext
-                  ? 'transparent'
-                  : isPast
-                  ? colors.textSecondary
-                  : colors.border;
-                const lineColor = isPast
-                  ? colors.highlight + '88'
-                  : colors.border;
-
-                return (
-                  <View key={prayer.id} style={styles.timelineCol}>
-                    {/* Prayer name on top */}
-                    <Text
-                      style={[
-                        styles.timelineName,
-                        {
-                          color: isCurrent
-                            ? colors.highlight
-                            : isNext
-                            ? colors.text
-                            : colors.textSecondary,
-                          opacity: isPast ? 0.55 : 1,
-                        },
-                      ]}
-                    >
-                      {prayer.name}
-                    </Text>
-
-                    {/* Dot + horizontal connectors */}
-                    <View style={styles.timelineDotRow}>
-                      {/* Left connector */}
-                      <View
-                        style={[
-                          styles.timelineConnectorLeft,
-                          { backgroundColor: isFirst ? 'transparent' : lineColor },
-                        ]}
-                      />
-                      {/* Dot */}
-                      <View
-                        style={[
-                          styles.timelineDot,
-                          { backgroundColor: dotColor },
-                          isCurrent && { transform: [{ scale: 1.3 }] },
-                          isNext && {
-                            borderColor: colors.highlight,
-                            borderWidth: 2,
-                          },
-                        ]}
-                      />
-                      {/* Right connector */}
-                      <View
-                        style={[
-                          styles.timelineConnectorRight,
-                          { backgroundColor: isLast ? 'transparent' : lineColor },
-                        ]}
-                      />
-                    </View>
-
-                    {/* Time below */}
-                    <Text
-                      style={[
-                        styles.timelineTime,
-                        {
-                          color: isCurrent ? colors.highlight : colors.textSecondary,
-                          opacity: isPast ? 0.5 : 1,
-                        },
-                      ]}
-                    >
-                      {formatNumber(prayer.time, i18n.language)}
-                    </Text>
-
-                    {/* Next badge */}
-                    {isNext && (
-                      <View
-                        style={[
-                          styles.nextBadge,
-                          { backgroundColor: colors.highlight + '22' },
-                        ]}
-                      >
-                        <Text style={[styles.nextBadgeText, { color: colors.highlight }]}>
-                          {t('home.next')}
-                        </Text>
-                      </View>
-                    )}
-                  </View>
-                );
-              })}
+              <View style={styles.heroRight}>
+                <Text style={[styles.heroNextLabel, { color: colors.textSecondary }]}>
+                  {t('home.next')} · {nextPrayer.name}
+                </Text>
+                <Text style={[styles.heroCountdown, { color: colors.accent }]}>
+                  {displayCountdown}
+                </Text>
+                <View style={styles.locationRow}>
+                  <MapPin size={12} color={colors.textSecondary} />
+                  <Text style={[styles.locationText, { color: colors.textSecondary }]}>
+                    {locationName}
+                  </Text>
+                </View>
+              </View>
             </View>
           </BlurView>
-        </View>
+        )}
+
+        {/* ── Today's Prayers — Horizontal 5-Point Timeline ──── */}
+        {prayersWithStatus.length > 0 && (
+          <View style={styles.section}>
+            <Text style={[styles.sectionTitle, { color: colors.text }]}>
+              {t('home.todaysPrayers')}
+            </Text>
+            <BlurView
+              intensity={30}
+              tint={colors.glassTint as any}
+              style={[styles.timelineCard, { borderColor: colors.border }]}
+            >
+              <View style={styles.timelineRow}>
+                {prayersWithStatus.map((prayer, index) => {
+                  const isCurrent = prayer.status === 'current';
+                  const isNext = prayer.status === 'next';
+                  const isPast = prayer.status === 'past';
+                  const isFirst = index === 0;
+                  const isLast = index === prayersWithStatus.length - 1;
+                  const dotColor = isCurrent
+                    ? colors.highlight
+                    : isNext
+                    ? 'transparent'
+                    : isPast
+                    ? colors.textSecondary
+                    : colors.border;
+                  const lineColor = isPast
+                    ? colors.highlight + '88'
+                    : colors.border;
+
+                  return (
+                    <View key={prayer.id} style={styles.timelineCol}>
+                      {/* Prayer name on top */}
+                      <Text
+                        style={[
+                          styles.timelineName,
+                          {
+                            color: isCurrent
+                              ? colors.highlight
+                              : isNext
+                              ? colors.text
+                              : colors.textSecondary,
+                            opacity: isPast ? 0.55 : 1,
+                          },
+                        ]}
+                      >
+                        {prayer.name}
+                      </Text>
+
+                      {/* Dot + horizontal connectors */}
+                      <View style={styles.timelineDotRow}>
+                        {/* Left connector */}
+                        <View
+                          style={[
+                            styles.timelineConnectorLeft,
+                            { backgroundColor: isFirst ? 'transparent' : lineColor },
+                          ]}
+                        />
+                        {/* Dot */}
+                        <View
+                          style={[
+                            styles.timelineDot,
+                            { backgroundColor: dotColor },
+                            isCurrent && { transform: [{ scale: 1.3 }] },
+                            isNext && {
+                              borderColor: colors.highlight,
+                              borderWidth: 2,
+                            },
+                          ]}
+                        />
+                        {/* Right connector */}
+                        <View
+                          style={[
+                            styles.timelineConnectorRight,
+                            { backgroundColor: isLast ? 'transparent' : lineColor },
+                          ]}
+                        />
+                      </View>
+
+                      {/* Time below */}
+                      <Text
+                        style={[
+                          styles.timelineTime,
+                          {
+                            color: isCurrent ? colors.highlight : colors.textSecondary,
+                            opacity: isPast ? 0.5 : 1,
+                          },
+                        ]}
+                      >
+                        {formatNumber(prayer.time, i18n.language)}
+                      </Text>
+
+                      {/* Next badge */}
+                      {isNext && (
+                        <View
+                          style={[
+                            styles.nextBadge,
+                            { backgroundColor: colors.highlight + '22' },
+                          ]}
+                        >
+                          <Text style={[styles.nextBadgeText, { color: colors.highlight }]}>
+                            {t('home.next')}
+                          </Text>
+                        </View>
+                      )}
+                    </View>
+                  );
+                })}
+              </View>
+            </BlurView>
+          </View>
+        )}
 
         {/* ── Quick Actions (Unified Toolbar Layout) ────────────── */}
         <View style={styles.section}>
@@ -452,80 +488,84 @@ export default function HomeScreen() {
         </View>
 
         {/* ── Suhur · Iftar · Tahajjud ─────────────────────────── */}
-        <View style={styles.section}>
-          <Text style={[styles.sectionTitle, { color: colors.text }]}>
-            {t('home.specialTimes')}
-          </Text>
-          <View style={styles.specialGrid}>
-            {specialTimes.map((item) => (
-              <BlurView
-                key={item.label}
-                intensity={30}
-                tint={colors.glassTint as any}
-                style={[styles.specialCard, { borderColor: colors.border }]}
-              >
-                <View style={styles.specialCardInner}>
-                  {/* Top: name + sublabel */}
-                  <View>
-                    <Text style={[styles.specialLabel, { color: colors.text }]}>
-                      {item.label}
-                    </Text>
-                    <Text style={[styles.specialSublabel, { color: colors.textSecondary }]}>
-                      {item.sublabel}
-                    </Text>
+        {specialTimes.length > 0 && (
+          <View style={styles.section}>
+            <Text style={[styles.sectionTitle, { color: colors.text }]}>
+              {t('home.specialTimes')}
+            </Text>
+            <View style={styles.specialGrid}>
+              {specialTimes.map((item) => (
+                <BlurView
+                  key={item.label}
+                  intensity={30}
+                  tint={colors.glassTint as any}
+                  style={[styles.specialCard, { borderColor: colors.border }]}
+                >
+                  <View style={styles.specialCardInner}>
+                    {/* Top: name + sublabel */}
+                    <View>
+                      <Text style={[styles.specialLabel, { color: colors.text }]}>
+                        {item.label}
+                      </Text>
+                      <Text style={[styles.specialSublabel, { color: colors.textSecondary }]}>
+                        {item.sublabel}
+                      </Text>
+                    </View>
+                    {/* Bottom: time left + icon right */}
+                    <View style={styles.specialBottom}>
+                      <Text style={[styles.specialTime, { color: colors.highlight }]}>
+                        {formatNumber(item.time, i18n.language)}
+                      </Text>
+                      <item.Icon size={16} color={colors.textSecondary} />
+                    </View>
                   </View>
-                  {/* Bottom: time left + icon right */}
-                  <View style={styles.specialBottom}>
-                    <Text style={[styles.specialTime, { color: colors.highlight }]}>
-                      {formatNumber(item.time, i18n.language)}
-                    </Text>
-                    <item.Icon size={16} color={colors.textSecondary} />
-                  </View>
-                </View>
-              </BlurView>
-            ))}
+                </BlurView>
+              ))}
+            </View>
           </View>
-        </View>
+        )}
 
         {/* ── Restricted Prayer Times ──────────────────────────── */}
-        <View style={styles.section}>
-          <Text style={[styles.sectionTitle, { color: colors.text }]}>
-            {t('home.restrictedTimes')}
-          </Text>
-          <View style={styles.restrictedOuter}>
-            {restrictedTimes.map((rt) => (
-              <BlurView
-                key={rt.labelKey}
-                intensity={30}
-                tint={colors.glassTint as any}
-                style={[styles.restrictedCard, { borderColor: 'rgba(220,80,60,0.2)' }]}
-              >
-                {/* 1/3 — short name */}
-                <View style={styles.restrictedNameCol}>
-                  <Text style={[styles.restrictedLabel, { color: colors.text }]}>
-                    {t('home.' + rt.labelKey)}
-                  </Text>
-                </View>
-                {/* divider */}
-                <View style={styles.restrictedDivider} />
-                {/* 2/3 — time range */}
-                <View style={styles.restrictedTimeCol}>
-                  <Text style={[styles.restrictedTime, { color: '#dc6040' }]}>
-                    {formatNumber(rt.time, i18n.language)}
-                  </Text>
-                </View>
-              </BlurView>
-            ))}
+        {restrictedTimes.length > 0 && (
+          <View style={styles.section}>
+            <Text style={[styles.sectionTitle, { color: colors.text }]}>
+              {t('home.restrictedTimes')}
+            </Text>
+            <View style={styles.restrictedOuter}>
+              {restrictedTimes.map((rt) => (
+                <BlurView
+                  key={rt.labelKey}
+                  intensity={30}
+                  tint={colors.glassTint as any}
+                  style={[styles.restrictedCard, { borderColor: 'rgba(220,80,60,0.2)' }]}
+                >
+                  {/* 1/3 — short name */}
+                  <View style={styles.restrictedNameCol}>
+                    <Text style={[styles.restrictedLabel, { color: colors.text }]}>
+                      {t('home.' + rt.labelKey)}
+                    </Text>
+                  </View>
+                  {/* divider */}
+                  <View style={styles.restrictedDivider} />
+                  {/* 2/3 — time range */}
+                  <View style={styles.restrictedTimeCol}>
+                    <Text style={[styles.restrictedTime, { color: '#dc6040' }]}>
+                      {formatNumber(rt.time, i18n.language)}
+                    </Text>
+                  </View>
+                </BlurView>
+              ))}
+            </View>
           </View>
-        </View>
+        )}
 
         {/* ── Daily Inspiration ─────────────────────────────────── */}
-        <View style={styles.section}>
-          <Text style={[styles.sectionTitle, { color: colors.text }]}>
-            {t('home.dailyInspiration')}
-          </Text>
-          <BlurView intensity={20} tint={colors.glassTint as any} style={[styles.inspirationCard, { borderColor: colors.border }]}>
-            {dailyVerse ? (
+        {dailyVerse && (
+          <View style={styles.section}>
+            <Text style={[styles.sectionTitle, { color: colors.text }]}>
+              {t('home.dailyInspiration')}
+            </Text>
+            <BlurView intensity={20} tint={colors.glassTint as any} style={[styles.inspirationCard, { borderColor: colors.border }]}>
               <View style={{ alignItems: 'center' }}>
                 <View style={styles.quoteIconContainer}>
                   <BookOpen size={24} color={colors.accent} />
@@ -547,11 +587,9 @@ export default function HomeScreen() {
                   — {dailyVerse.reference}
                 </Text>
               </View>
-            ) : (
-              <ActivityIndicator size="small" color={colors.highlight} />
-            )}
-          </BlurView>
-        </View>
+            </BlurView>
+          </View>
+        )}
 
         <View style={{ height: Spacing.four }} />
       </ScrollView>
@@ -696,7 +734,7 @@ function TasbeehFAB({ colors, t, i18n }: { colors: any; t: any; i18n: any }) {
   );
 }
 
-const FAB_BOTTOM = Spacing.two + 60; // matches quran page continue button clearance
+const FAB_BOTTOM = Spacing.two + 62; // matches quran page continue button clearance
 
 const fabStyles = StyleSheet.create({
   container: {
@@ -762,7 +800,6 @@ const fabStyles = StyleSheet.create({
 const styles = StyleSheet.create({
   safeArea: {
     flex: 1,
-    paddingTop: Platform.OS === 'android' ? 40 : 0,
   },
   container: {
     padding: Spacing.four,

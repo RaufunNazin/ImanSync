@@ -19,14 +19,6 @@ export const initI18n = async () => {
 
     if (savedLanguage) {
       defaultLang = savedLanguage;
-    } else {
-      const systemLocales = Localization.getLocales();
-      if (systemLocales && systemLocales.length > 0) {
-        const sysLang = systemLocales[0].languageCode;
-        if (sysLang === 'en') {
-          defaultLang = 'en';
-        }
-      }
     }
 
     await i18n

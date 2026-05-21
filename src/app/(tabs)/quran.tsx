@@ -33,7 +33,7 @@ export default function QuranScreen() {
   const [bookmarks, setBookmarks] = useState([]);
 
   useEffect(() => {
-    fetch('http://api.alquran.cloud/v1/surah')
+    fetch('https://api.alquran.cloud/v1/surah')
       .then(res => res.json())
       .then(json => {
         if (json.data) {
@@ -77,7 +77,7 @@ export default function QuranScreen() {
   });
 
   return (
-    <SafeAreaView style={styles.safeArea}>
+    <SafeAreaView style={[styles.safeArea, { backgroundColor: colors.background }]}>
       
       <PageHeader titleEn={t('quran.titleEn')} titleAr={t('quran.titleAr')} />
 
@@ -262,7 +262,7 @@ const styles = StyleSheet.create({
     flex: 1,
     fontFamily: Fonts.outfit,
     fontSize: 16,
-    height: 24,
+    padding: 0,
   },
   compactLastReadCard: {
     flexDirection: 'row',

@@ -1,5 +1,5 @@
 {
-  "name": "deenjourney",
+  "name": "noor",
   "main": "expo-router/entry",
   "version": "1.0.0",
   "scripts": {
@@ -34,6 +34,7 @@
     "expo-linear-gradient": "~55.0.14",
     "expo-linking": "~55.0.15",
     "expo-localization": "^55.0.15",
+    "expo-location": "~55.1.10",
     "expo-router": "~55.0.15",
     "expo-sensors": "~55.0.15",
     "expo-splash-screen": "~55.0.21",
@@ -61,5 +62,15 @@
     "@types/react": "~19.2.2",
     "typescript": "~5.9.2"
   },
-  "private": true
+  "private": true,
+  "expo": {
+    "doctor": {
+      "reactNativeDirectoryCheck": {
+        "exclude": [
+          "@notifee/react-native",
+          "expo-av"
+        ]
+      }
+    }
+  }
 }

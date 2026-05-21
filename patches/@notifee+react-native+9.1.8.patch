@@ -1,0 +1,38 @@
+diff --git a/node_modules/@notifee/react-native/android/src/main/AndroidManifest.xml b/node_modules/@notifee/react-native/android/src/main/AndroidManifest.xml
+index 93e4281..a88e38c 100644
+--- a/node_modules/@notifee/react-native/android/src/main/AndroidManifest.xml
++++ b/node_modules/@notifee/react-native/android/src/main/AndroidManifest.xml
+@@ -1,6 +1,6 @@
+ <?xml version="1.0" encoding="utf-8"?>
+ <manifest xmlns:android="http://schemas.android.com/apk/res/android"
+-  package="io.invertase.notifee">
++  >
+ 
+   <application>
+     <provider
+diff --git a/node_modules/@notifee/react-native/android/src/main/java/io/invertase/notifee/NotifeeApiModule.java b/node_modules/@notifee/react-native/android/src/main/java/io/invertase/notifee/NotifeeApiModule.java
+index 40bea64..6f97ec5 100644
+--- a/node_modules/@notifee/react-native/android/src/main/java/io/invertase/notifee/NotifeeApiModule.java
++++ b/node_modules/@notifee/react-native/android/src/main/java/io/invertase/notifee/NotifeeApiModule.java
+@@ -39,17 +39,14 @@ public class NotifeeApiModule extends ReactContextBaseJavaModule implements Perm
+   // This method was removed upstream in react-native 0.74+, replaced with invalidate
+   // We will leave this stub here for older react-native versions compatibility
+   // ...but it will just delegate to the new invalidate method
+-  public void onCatalystInstanceDestroy() {
+-    invalidate();
+-  }
+-
+-  // This method was added in react-native 0.74 as a replacement for onCatalystInstanceDestroy
+-  // It should be marked @Override but that would cause problems in apps using older react-native
+-  // When minimum supported version is 0.74+ add @Override & remove onCatalystInstanceDestroy
++  @Override
+   public void invalidate() {
++    // We will leave this stub here for older react-native versions compatibility
+     NotifeeReactUtils.headlessTaskManager.stopAllTasks();
+   }
+ 
++
++
+   @ReactMethod
+   public void cancelAllNotifications(Promise promise) {
+     Notifee.getInstance()

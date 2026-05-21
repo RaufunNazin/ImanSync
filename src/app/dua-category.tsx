@@ -121,7 +121,6 @@ export default function DuaCategoryScreen() {
 const styles = StyleSheet.create({
   safeArea: {
     flex: 1,
-    paddingTop: Platform.OS === 'android' ? 40 : 0,
   },
   container: {
     padding: Spacing.four,

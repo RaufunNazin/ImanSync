@@ -4,7 +4,7 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import { PermissionsAndroid, Platform } from 'react-native';
 
 const STORAGE_KEY = 'deen_my_duas_path';
-const FILE_NAME = 'DeenJourney_MyDuas.json';
+const FILE_NAME = 'Noor_MyDuas.json';
 
 export interface UserDua {
   id: string;
@@ -20,14 +20,14 @@ export interface UserDua {
 export async function initStorage(uri?: string): Promise<UserDua[]> {
   if (Platform.OS === 'android') {
     // 1. Try to use hardcoded public directory first to avoid SAF picker
-    const hardcodedDir = 'file:///storage/emulated/0/Download/DeenJourney_MyDuas/';
+    const hardcodedDir = 'file:///storage/emulated/0/Download/Noor_MyDuas/';
     
     try {
       const granted = await PermissionsAndroid.request(
         PermissionsAndroid.PERMISSIONS.WRITE_EXTERNAL_STORAGE,
         {
           title: "Storage Permission",
-          message: "DeenJourney needs access to storage to save your Duas permanently.",
+          message: "Noor needs access to storage to save your Duas permanently.",
           buttonNeutral: "Ask Me Later",
           buttonNegative: "Cancel",
           buttonPositive: "OK"
@@ -82,7 +82,7 @@ export async function initStorage(uri?: string): Promise<UserDua[]> {
     }
   } else {
     // iOS Fallback
-    const dir = FileSystem.documentDirectory + 'DeenJourney_MyDuas/';
+    const dir = FileSystem.documentDirectory + 'Noor_MyDuas/';
     const dirInfo = await FileSystem.getInfoAsync(dir);
     if (!dirInfo.exists) {
       await FileSystem.makeDirectoryAsync(dir, { intermediates: true });

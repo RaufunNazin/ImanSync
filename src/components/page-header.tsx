@@ -2,7 +2,7 @@ import { Colors, Fonts, Spacing } from '@/constants/theme';
 import { useRouter } from 'expo-router';
 import { ChevronLeft } from 'lucide-react-native';
 import React from 'react';
-import { StyleSheet, Text, TouchableOpacity, useColorScheme, View } from 'react-native';
+import { StyleSheet, Text, TouchableOpacity, useColorScheme, View, Image } from 'react-native';
 
 interface PageHeaderProps {
   titleEn: string;
@@ -13,6 +13,8 @@ interface PageHeaderProps {
   subtitle?: string;
   /** Custom back action */
   onBack?: () => void;
+  /** Optional icon to show next to the title */
+  icon?: any;
 }
 
 export default function PageHeader({
@@ -21,6 +23,7 @@ export default function PageHeader({
   showBack = false,
   subtitle,
   onBack,
+  icon,
 }: PageHeaderProps) {
   const scheme = useColorScheme();
   const colors = Colors[scheme === 'unspecified' ? 'light' : scheme ?? 'light'];
@@ -41,9 +44,14 @@ export default function PageHeader({
 
       {/* English title left */}
       <View style={styles.titleEnWrapper}>
-        <Text style={[styles.titleEn, { color: colors.text }]} numberOfLines={1}>
-          {titleEn}
-        </Text>
+        <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+          {icon && (
+            <Image source={icon} style={{ width: 22, height: 22, marginRight: 8, borderRadius: 6 }} />
+          )}
+          <Text style={[styles.titleEn, { color: colors.text }]} numberOfLines={1}>
+            {titleEn}
+          </Text>
+        </View>
         {subtitle ? (
           <Text style={[styles.subtitle, { color: colors.textSecondary }]} numberOfLines={1}>
             {subtitle}
@@ -66,7 +74,6 @@ const styles = StyleSheet.create({
     paddingHorizontal: Spacing.four,
     paddingVertical: 14,
     borderBottomWidth: StyleSheet.hairlineWidth,
-    marginBottom: Spacing.three,
   },
   backBtn: {
     marginRight: 8,

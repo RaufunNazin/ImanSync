@@ -264,7 +264,7 @@ export default function TrackerScreen() {
   };
 
   return (
-    <SafeAreaView style={styles.safeArea}>
+    <SafeAreaView style={[styles.safeArea, { backgroundColor: colors.background }]}>
       <PageHeader titleEn={t('tracker.titleEn')} titleAr={t('tracker.titleAr')} />
       <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={styles.container}>
         
@@ -340,8 +340,8 @@ export default function TrackerScreen() {
         </BlurView>
 
         {activeTab === 'Daily' && renderDaily()}
-        {activeTab === 'Weekly' && renderRealChart(7, 'Weekly')}
-        {activeTab === 'Monthly' && renderRealChart(30, 'Monthly')}
+        {activeTab === 'Weekly' && renderRealChart(7, t('tracker.weekly'))}
+        {activeTab === 'Monthly' && renderRealChart(30, t('tracker.monthly'))}
 
         <View style={{ height: Spacing.six }} />
       </ScrollView>
@@ -352,7 +352,6 @@ export default function TrackerScreen() {
 const styles = StyleSheet.create({
   safeArea: { 
     flex: 1, 
-    paddingTop: Platform.OS === 'android' ? 40 : 0 
   },
   container: { 
     padding: Spacing.four,

@@ -4,6 +4,7 @@ import { BlurView } from 'expo-blur';
 import { Colors, Fonts, Spacing } from '@/constants/theme';
 import { useTranslation } from 'react-i18next';
 import { Bookmark, FolderOpen, Star } from 'lucide-react-native';
+import { formatNumber } from '@/utils/formatNumber';
 
 interface DuaCardProps {
   id: string;
@@ -28,7 +29,7 @@ export default function DuaCard({
   onLongPress,
   colors,
 }: DuaCardProps) {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
 
   return (
     <View style={styles.wrapper}>
@@ -72,7 +73,7 @@ export default function DuaCard({
 
           {count !== undefined && (
             <View style={[styles.countBadge, { backgroundColor: colors.border + '66' }]}>
-              <Text style={[styles.countText, { color: colors.text }]}>{count}</Text>
+              <Text style={[styles.countText, { color: colors.text }]}>{t('dua.duaCount', { count: formatNumber(count, i18n.language) })}</Text>
             </View>
           )}
         </TouchableOpacity>

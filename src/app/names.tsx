@@ -24,7 +24,7 @@ export default function NamesScreen() {
   const names: NameItem[] = t('namesList', { returnObjects: true }) as NameItem[];
 
   return (
-    <SafeAreaView style={styles.safeArea}>
+    <SafeAreaView style={[styles.safeArea, { backgroundColor: colors.background }]}>
       <PageHeader titleEn={t('names.titleEn')} titleAr={t('names.titleAr')} showBack />
       
       <FlatList

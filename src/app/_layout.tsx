@@ -11,6 +11,7 @@ import { Outfit_400Regular, Outfit_500Medium, Outfit_600SemiBold } from '@expo-g
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { Alert, Platform } from 'react-native';
 import { initStorage } from '@/utils/my-duas-storage';
+import { StatusBar } from 'expo-status-bar';
 
 import { initI18n } from '@/i18n';
 
@@ -74,6 +75,7 @@ export default function RootLayout() {
   return (
     <SQLiteProvider databaseName="islamic.db" onInit={migrateDbIfNeeded}>
       <ThemeProvider value={navTheme}>
+        <StatusBar style={colorScheme === 'dark' ? 'light' : 'dark'} backgroundColor="transparent" translucent={true} />
         <View style={[styles.background, { backgroundColor: colors.background }]}>
           <Stack screenOptions={{ headerShown: false, contentStyle: { backgroundColor: 'transparent' } }}>
             <Stack.Screen name="(tabs)" options={{ headerShown: false }} />

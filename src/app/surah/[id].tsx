@@ -122,7 +122,7 @@ export default function SurahScreen() {
     if (settings.showBangla) editions += ',bn.bengali';
     if (settings.showEnglishTranslit) editions += ',en.transliteration';
 
-    fetch(`http://api.alquran.cloud/v1/surah/${id}/editions/${editions}`)
+    fetch(`https://api.alquran.cloud/v1/surah/${id}/editions/${editions}`)
       .then(res => res.json())
       .then(async json => {
         if (json.data) {
@@ -291,7 +291,7 @@ export default function SurahScreen() {
   };
 
   return (
-    <SafeAreaView style={styles.safeArea}>
+    <SafeAreaView style={[styles.safeArea, { backgroundColor: colors.background }]}>
       <View style={styles.header}>
         <TouchableOpacity onPress={handleBack} style={styles.backBtn}>
           <ChevronLeft size={22} color={colors.textSecondary} />

@@ -228,7 +228,7 @@ export default function DuaDetailScreen() {
           {params.source && (
             <View style={[styles.sourceBox, { backgroundColor: colors.backgroundElement, borderColor: colors.border }]}>
               <BookOpen size={16} color={colors.accent} />
-              <Text style={[styles.sourceText, { color: colors.textSecondary }]}>{params.source}</Text>
+              <Text style={[styles.sourceText, { color: colors.textSecondary }]}>{t('dua.source')}: {params.source}</Text>
             </View>
           )}
 
@@ -245,7 +245,6 @@ export default function DuaDetailScreen() {
 const styles = StyleSheet.create({
   safeArea: {
     flex: 1,
-    paddingTop: Platform.OS === 'android' ? 40 : 0,
   },
   headerWrap: {
     flexDirection: 'row',

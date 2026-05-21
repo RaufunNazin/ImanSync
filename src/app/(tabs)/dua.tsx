@@ -116,6 +116,12 @@ export default function DuaScreen() {
     return translated === key ? cat.name : translated;
   };
 
+  const getCategoryDesc = (cat: Category) => {
+    const key = `dua.categoryDesc_${cat.id}`;
+    const translated = t(key);
+    return translated === key ? cat.description : translated;
+  };
+
   const pinnedCategories = categories.filter(c => pinnedIds.includes(c.id));
   const unpinnedCategories = categories.filter(c => !pinnedIds.includes(c.id));
 
@@ -225,7 +231,7 @@ export default function DuaScreen() {
                   <DuaCard
                     id={cat.id}
                     name={getCategoryName(cat)}
-                    description={cat.description}
+                    description={getCategoryDesc(cat)}
                     count={cat.count}
                     isPinned={true}
                     colors={colors}
@@ -259,8 +265,8 @@ export default function DuaScreen() {
             <View style={styles.gridItem}>
               <DuaCard
                 id="bookmarks"
-                name="Bookmarks"
-                description="Your saved duas"
+                name={t('dua.bookmarks')}
+                description={t('dua.bookmarksDesc')}
                 colors={colors}
                 onPress={handleBookmarksPress}
               />
@@ -274,7 +280,7 @@ export default function DuaScreen() {
                   <DuaCard
                     id={cat.id}
                     name={getCategoryName(cat)}
-                    description={cat.description}
+                    description={getCategoryDesc(cat)}
                     count={cat.count}
                     colors={colors}
                     onPress={() => handleCategoryPress(cat)}
@@ -312,7 +318,6 @@ const cardWidth = (width - Spacing.four * 2 - Spacing.three) / 2;
 const styles = StyleSheet.create({
   safeArea: {
     flex: 1,
-    paddingTop: Platform.OS === 'android' ? 40 : 0,
   },
   container: {
     padding: Spacing.four,
@@ -331,7 +336,7 @@ const styles = StyleSheet.create({
     flex: 1,
     fontFamily: Fonts.outfit,
     fontSize: 16,
-    height: 24,
+    padding: 0,
   },
   section: {
     marginBottom: Spacing.four,

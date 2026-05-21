@@ -118,10 +118,10 @@ export default function JuzScreen() {
     if (!id) return;
     setLoading(true);
 
-    const urls = [`http://api.alquran.cloud/v1/juz/${id}/quran-uthmani`];
-    if (settings.showEnglish) urls.push(`http://api.alquran.cloud/v1/juz/${id}/en.asad`);
-    if (settings.showBangla) urls.push(`http://api.alquran.cloud/v1/juz/${id}/bn.bengali`);
-    if (settings.showEnglishTranslit) urls.push(`http://api.alquran.cloud/v1/juz/${id}/en.transliteration`);
+    const urls = [`https://api.alquran.cloud/v1/juz/${id}/quran-uthmani`];
+    if (settings.showEnglish) urls.push(`https://api.alquran.cloud/v1/juz/${id}/en.asad`);
+    if (settings.showBangla) urls.push(`https://api.alquran.cloud/v1/juz/${id}/bn.bengali`);
+    if (settings.showEnglishTranslit) urls.push(`https://api.alquran.cloud/v1/juz/${id}/en.transliteration`);
 
     Promise.all(urls.map(u => fetch(u).then(res => res.json())))
       .then(responses => {
@@ -259,7 +259,7 @@ export default function JuzScreen() {
   };
 
   return (
-    <SafeAreaView style={styles.safeArea}>
+    <SafeAreaView style={[styles.safeArea, { backgroundColor: colors.background }]}>
       <View style={styles.header}>
         <TouchableOpacity onPress={handleBack} style={styles.backBtn}>
           <ChevronLeft size={22} color={colors.textSecondary} />

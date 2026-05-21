@@ -147,7 +147,7 @@ export default function MyDuasScreen() {
           <Text style={[styles.setupTitle, { color: colors.text }]}>{t('dua.setupStorage')}</Text>
           <Text style={[styles.setupDesc, { color: colors.textSecondary }]}>
             {Platform.OS === 'android' 
-              ? 'We will ask for storage permission to create a "DeenJourney_MyDuas" folder in your Downloads, so your custom duas are never lost even if you reinstall the app.\n\nIf automatic creation fails, you will be asked to select a folder manually.'
+              ? 'We will ask for storage permission to create a "Noor_MyDuas" folder in your Downloads, so your custom duas are never lost even if you reinstall the app.\n\nIf automatic creation fails, you will be asked to select a folder manually.'
               : t('dua.setupStorageDesc')}
           </Text>
           <TouchableOpacity 
@@ -240,7 +240,6 @@ export default function MyDuasScreen() {
 const styles = StyleSheet.create({
   safeArea: {
     flex: 1,
-    paddingTop: Platform.OS === 'android' ? 40 : 0,
   },
   centerContainer: {
     flex: 1,

@@ -2,12 +2,20 @@ import { Colors, Fonts, Spacing } from '@/constants/theme';
 import PageHeader from '@/components/page-header';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { BlurView } from 'expo-blur';
-import { Bell, ChevronRight, Globe, MapPin, Moon, Settings as SettingsIcon } from 'lucide-react-native';
+import { Bell, ChevronRight, Globe, MapPin, Moon, Settings as SettingsIcon, Shield } from 'lucide-react-native';
 import React, { useEffect, useState } from 'react';
-import { Appearance, Platform, ScrollView, StyleSheet, Switch, Text, TouchableOpacity, useColorScheme, View } from 'react-native';
+import { Appearance, Linking, Platform, ScrollView, StyleSheet, Switch, Text, TouchableOpacity, useColorScheme, View, Alert, ActivityIndicator } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useTranslation } from 'react-i18next';
 import { setLanguage } from '@/i18n';
+import * as Location from 'expo-location';
+import { getDistrictName } from '@/utils/districts';
+
+const CALC_METHODS = [
+  { id: 1, name: 'Karachi (UIS)' },
+  { id: 2, name: 'ISNA (North America)' },
+  { id: 3, name: 'MWL (Muslim World League)' }
+];
 
 export default function SettingsScreen() {
   const scheme = useColorScheme();
@@ -15,10 +23,13 @@ export default function SettingsScreen() {
   const { t, i18n } = useTranslation();
   
   const [notificationsEnabled, setNotificationsEnabled] = useState(true);
-  const [darkModeEnabled, setDarkModeEnabled] = useState(scheme === 'dark');
+  const [darkModeEnabled, setDarkModeEnabled] = useState(false);
+  const [calcMethodIndex, setCalcMethodIndex] = useState(0);
+  const [locationName, setLocationName] = useState('');
+  const [fetchingLoc, setFetchingLoc] = useState(false);
 
   useEffect(() => {
-    AsyncStorage.multiGet(['deen_notifications', 'deen_dark_mode']).then((values) => {
+    AsyncStorage.multiGet(['deen_notifications', 'deen_dark_mode', 'deen_calc_method', 'deen_location']).then((values) => {
       values.forEach(([key, value]) => {
         if (value !== null) {
           if (key === 'deen_notifications') setNotificationsEnabled(value === 'true');
@@ -30,6 +41,22 @@ export default function SettingsScreen() {
                 Appearance.setColorScheme(isDark ? 'dark' : 'light');
               }
             } catch (e) {}
+          }
+          if (key === 'deen_calc_method') {
+            const methodId = parseInt(value, 10);
+            const idx = CALC_METHODS.findIndex(m => m.id === methodId);
+            if (idx >= 0) setCalcMethodIndex(idx);
+          }
+          if (key === 'deen_location') {
+            try {
+              const loc = JSON.parse(value);
+              setLocationName(loc.city);
+            } catch(e){}
+          }
+        } else {
+          // Defaults
+          if (key === 'deen_location') {
+            setLocationName('Dhaka (Default)');
           }
         }
       });
@@ -58,7 +85,45 @@ export default function SettingsScreen() {
     setLanguage(nextLang);
   };
 
-  const SettingRow = ({ icon: Icon, title, value, type = 'navigate', onPress }: any) => (
+  const cycleCalcMethod = () => {
+    const nextIdx = (calcMethodIndex + 1) % CALC_METHODS.length;
+    setCalcMethodIndex(nextIdx);
+    AsyncStorage.setItem('deen_calc_method', String(CALC_METHODS[nextIdx].id));
+  };
+
+  const fetchLocation = async () => {
+    setFetchingLoc(true);
+    try {
+      let { status } = await Location.requestForegroundPermissionsAsync();
+      if (status !== 'granted') {
+        Alert.alert('Permission Denied', 'Please enable location permissions to fetch prayer times for your area.');
+        setFetchingLoc(false);
+        return;
+      }
+
+      let location = await Location.getCurrentPositionAsync({});
+      let reverse = await Location.reverseGeocodeAsync({
+        latitude: location.coords.latitude,
+        longitude: location.coords.longitude
+      });
+      
+      let city = reverse[0]?.city || reverse[0]?.subregion || reverse[0]?.region || 'Unknown Location';
+      setLocationName(city);
+      
+      await AsyncStorage.setItem('deen_location', JSON.stringify({
+        latitude: location.coords.latitude,
+        longitude: location.coords.longitude,
+        city
+      }));
+    } catch (e) {
+      console.log("Error fetching location", e);
+      Alert.alert('Error', 'Could not fetch location.');
+    } finally {
+      setFetchingLoc(false);
+    }
+  };
+
+  const SettingRow = ({ id, icon: Icon, title, value, type = 'navigate', onPress }: any) => (
     <TouchableOpacity 
       style={[styles.settingRow, { borderBottomColor: colors.border }]} 
       activeOpacity={type === 'navigate' ? 0.7 : 1}
@@ -79,30 +144,56 @@ export default function SettingsScreen() {
       ) : type === 'toggle' ? (
         <Switch
           value={value}
-          onValueChange={title === 'Notifications' ? toggleNotifications : toggleDarkMode}
+          onValueChange={id === 'notifications' ? toggleNotifications : toggleDarkMode}
           trackColor={{ false: colors.border, true: colors.highlight }}
           thumbColor="#FFFFFF"
         />
+      ) : type === 'loading' ? (
+        <ActivityIndicator size="small" color={colors.highlight} />
       ) : null}
     </TouchableOpacity>
   );
 
   return (
-    <SafeAreaView style={styles.safeArea}>
+    <SafeAreaView style={[styles.safeArea, { backgroundColor: colors.background }]}>
       <PageHeader titleEn={t('settings.titleEn')} titleAr={t('settings.titleAr')} />
       <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={styles.container}>
         
         <Text style={[styles.sectionTitle, { color: colors.textSecondary }]}>{t('settings.preferences')}</Text>
         <BlurView intensity={40} tint={colors.glassTint as any} style={styles.card}>
-          <SettingRow icon={Bell} title={t('settings.notifications')} value={notificationsEnabled} type="toggle" />
-          <SettingRow icon={Moon} title={t('settings.theme')} value={darkModeEnabled} type="toggle" />
-          <SettingRow icon={Globe} title={t('settings.language')} value={i18n.language === 'bn' ? 'বাংলা' : 'English'} onPress={cycleLanguage} />
+          <SettingRow id="notifications" icon={Bell} title={t('settings.notifications')} value={notificationsEnabled} type="toggle" />
+          <SettingRow id="theme" icon={Moon} title={t('settings.theme')} value={darkModeEnabled} type="toggle" />
+          <SettingRow id="language" icon={Globe} title={t('settings.language')} value={i18n.language === 'bn' ? 'বাংলা' : 'English'} onPress={cycleLanguage} />
         </BlurView>
 
         <Text style={[styles.sectionTitle, { color: colors.textSecondary, marginTop: Spacing.four }]}>{t('settings.locationCalc')}</Text>
         <BlurView intensity={40} tint={colors.glassTint as any} style={styles.card}>
-          <SettingRow icon={MapPin} title={t('settings.location')} value={t('settings.autoGPS')} />
-          <SettingRow icon={SettingsIcon} title={t('settings.calcMethod')} value={t('settings.karachi')} />
+          <SettingRow 
+            id="location" 
+            icon={MapPin} 
+            title={t('settings.location')} 
+            value={getDistrictName(locationName, i18n.language)} 
+            type={fetchingLoc ? 'loading' : 'navigate'} 
+            onPress={fetchLocation} 
+          />
+          <SettingRow 
+            id="method" 
+            icon={SettingsIcon} 
+            title={t('settings.calcMethod')} 
+            value={t('settings.calcMethod_' + CALC_METHODS[calcMethodIndex].id)} 
+            onPress={cycleCalcMethod}
+          />
+        </BlurView>
+
+        <Text style={[styles.sectionTitle, { color: colors.textSecondary, marginTop: Spacing.four }]}>{t('settings.system')}</Text>
+        <BlurView intensity={40} tint={colors.glassTint as any} style={styles.card}>
+          <SettingRow 
+            id="permissions"
+            icon={Shield} 
+            title={t('settings.managePermissions')} 
+            value="" 
+            onPress={() => Linking.openSettings()} 
+          />
         </BlurView>
 
         <View style={{ height: Spacing.six }} />
@@ -114,14 +205,12 @@ export default function SettingsScreen() {
 const styles = StyleSheet.create({
   safeArea: { 
     flex: 1, 
-    paddingTop: Platform.OS === 'android' ? 40 : 0 
   },
   container: { 
     padding: Spacing.four,
     paddingTop: 0,
   },
   header: {
-    // replaced by PageHeader component
   },
   title: { 
     fontFamily: Fonts.outfit,

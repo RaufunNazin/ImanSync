@@ -1,0 +1,33 @@
+diff --git a/node_modules/react-native-screens/android/src/main/java/com/swmansion/rnscreens/ScreenStackFragment.kt b/node_modules/react-native-screens/android/src/main/java/com/swmansion/rnscreens/ScreenStackFragment.kt
+index 34f19a9..eb702d7 100644
+--- a/node_modules/react-native-screens/android/src/main/java/com/swmansion/rnscreens/ScreenStackFragment.kt
++++ b/node_modules/react-native-screens/android/src/main/java/com/swmansion/rnscreens/ScreenStackFragment.kt
+@@ -219,10 +219,9 @@ class ScreenStackFragment :
+ 
+             coordinatorLayout.addView(appBarLayout)
+             if (isToolbarShadowHidden) {
+-                appBarLayout?.targetElevation = 0f
++                appBarLayout?.elevation = 0f
+             }
+             toolbar?.let { appBarLayout?.addView(it.recycle()) }
+-            setHasOptionsMenu(true)
+         } else {
+             screen.clipToOutline = true
+             // TODO(@kkafar): without this line there is no drawable / outline & nothing shows...? Determine what's going on here
+diff --git a/node_modules/react-native-screens/android/src/main/java/com/swmansion/rnscreens/ScreenStackHeaderConfig.kt b/node_modules/react-native-screens/android/src/main/java/com/swmansion/rnscreens/ScreenStackHeaderConfig.kt
+index 9a9cbf3..33ce2f4 100644
+--- a/node_modules/react-native-screens/android/src/main/java/com/swmansion/rnscreens/ScreenStackHeaderConfig.kt
++++ b/node_modules/react-native-screens/android/src/main/java/com/swmansion/rnscreens/ScreenStackHeaderConfig.kt
+@@ -438,9 +438,9 @@ class ScreenStackHeaderConfig(
+                     ?.showDevOptionsDialog()
+             } else {
+                 (context.applicationContext as ReactApplication)
+-                    .reactNativeHost
+-                    .reactInstanceManager
+-                    .showDevOptionsDialog()
++                    .reactHost
++                    ?.devSupportManager
++                    ?.showDevOptionsDialog()
+             }
+             return true
+         }

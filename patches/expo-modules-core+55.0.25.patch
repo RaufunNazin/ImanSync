@@ -1,0 +1,76 @@
+diff --git a/node_modules/expo-modules-core/android/src/main/java/expo/modules/kotlin/AppContext.kt b/node_modules/expo-modules-core/android/src/main/java/expo/modules/kotlin/AppContext.kt
+index d85eb5b..93b3ba1 100644
+--- a/node_modules/expo-modules-core/android/src/main/java/expo/modules/kotlin/AppContext.kt
++++ b/node_modules/expo-modules-core/android/src/main/java/expo/modules/kotlin/AppContext.kt
+@@ -18,7 +18,7 @@ import expo.modules.core.interfaces.ActivityProvider
+ import expo.modules.interfaces.permissions.Permissions
+ import expo.modules.kotlin.activityresult.ActivityResultsManager
+ import expo.modules.kotlin.activityresult.DefaultAppContextActivityResultCaller
+-import expo.modules.kotlin.defaultmodules.ErrorManagerModule
++
+ import expo.modules.kotlin.defaultmodules.JSLoggerModule
+ import expo.modules.kotlin.defaultmodules.NativeModulesProxyModule
+ import expo.modules.kotlin.events.EventEmitter
+@@ -53,10 +53,10 @@ class AppContext(
+   // The main context used in the app.
+   // Modules attached to this context will be available on the main js context.
+   @Deprecated("Use AppContext.runtimeContext instead", ReplaceWith("runtime"))
+-  val hostingRuntimeContext = MainRuntime(this, reactContextHolder)
++  val runtimeContext = MainRuntime(this, reactContextHolder)
+ 
+   val runtime: MainRuntime
+-    get() = hostingRuntimeContext
++    get() = runtimeContext
+ 
+   private val uiRuntimeHolder = lazy { WorkletRuntime(this, reactContextHolder) }
+   val uiRuntime
+@@ -254,7 +254,7 @@ class AppContext(
+     }
+ 
+   @Deprecated("Use AppContext.jsLogger instead")
+-  val errorManager: ErrorManagerModule? by lazy {
++  val errorManager: JSLoggerModule? by lazy {
+     registry.getModule()
+   }
+ 
+diff --git a/node_modules/expo-modules-core/android/src/main/java/expo/modules/kotlin/views/ViewDefinitionBuilder.kt b/node_modules/expo-modules-core/android/src/main/java/expo/modules/kotlin/views/ViewDefinitionBuilder.kt
+index 46d0a22..1fb9100 100644
+--- a/node_modules/expo-modules-core/android/src/main/java/expo/modules/kotlin/views/ViewDefinitionBuilder.kt
++++ b/node_modules/expo-modules-core/android/src/main/java/expo/modules/kotlin/views/ViewDefinitionBuilder.kt
+@@ -461,7 +461,7 @@ class ViewDefinitionBuilder<T : View>(
+   private fun handleFailureDuringViewCreation(context: Context, appContext: AppContext, error: Throwable): View {
+     Log.e("ExpoModulesCore", "Couldn't create view of type $viewClass", error)
+ 
+-    appContext.errorManager?.reportExceptionToLogBox(
++    appContext.jsLogger?.error(
+       error as? CodedException ?: UnexpectedException(error)
+     )
+ 
+diff --git a/node_modules/expo-modules-core/android/src/main/java/expo/modules/kotlin/views/ViewManagerDefinition.kt b/node_modules/expo-modules-core/android/src/main/java/expo/modules/kotlin/views/ViewManagerDefinition.kt
+index ca30c67..aa80c7e 100644
+--- a/node_modules/expo-modules-core/android/src/main/java/expo/modules/kotlin/views/ViewManagerDefinition.kt
++++ b/node_modules/expo-modules-core/android/src/main/java/expo/modules/kotlin/views/ViewManagerDefinition.kt
+@@ -38,6 +38,6 @@ class ViewManagerDefinition(
+     val nativeModulesProxy = reactContext.getUnimoduleProxy() ?: return
+     val appContext = nativeModulesProxy.kotlinInteropModuleRegistry.appContext
+ 
+-    appContext.errorManager?.reportExceptionToLogBox(exception)
++    appContext.jsLogger?.error(exception)
+   }
+ }
+diff --git a/node_modules/expo-modules-core/expo-module-gradle-plugin/src/main/kotlin/expo/modules/plugin/android/AndroidLibraryExtension.kt b/node_modules/expo-modules-core/expo-module-gradle-plugin/src/main/kotlin/expo/modules/plugin/android/AndroidLibraryExtension.kt
+index 9bfae8d..66fa679 100644
+--- a/node_modules/expo-modules-core/expo-module-gradle-plugin/src/main/kotlin/expo/modules/plugin/android/AndroidLibraryExtension.kt
++++ b/node_modules/expo-modules-core/expo-module-gradle-plugin/src/main/kotlin/expo/modules/plugin/android/AndroidLibraryExtension.kt
+@@ -6,8 +6,10 @@ internal fun LibraryExtension.applySDKVersions(compileSdk: Int, minSdk: Int, tar
+   this.compileSdk = compileSdk
+   defaultConfig {
+     this@defaultConfig.minSdk = minSdk
+-    this@defaultConfig.targetSdk = targetSdk
+   }
++  // Replaced targetSdk with testOptions and lint targets per Gradle 9.0 requirements
++  testOptions.targetSdk = targetSdk
++  lint.targetSdk = targetSdk
+ }
+ 
+ internal fun LibraryExtension.applyLinterOptions() {

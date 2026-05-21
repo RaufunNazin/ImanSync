@@ -9,7 +9,7 @@ export const Colors = {
     text: '#0c1618', // Deep Indigo
     textSecondary: '#475569',
     background: '#f1f7ed', // Warm Ivory
-    backgroundElement: 'rgba(255, 255, 255, 0.7)', // Glassmorphism white
+    backgroundElement: 'rgba(242, 242, 242, 0.7)', // Glassmorphism white
     backgroundSelected: 'rgba(76, 149, 108, 0.2)', // Glassmorphism light green
     primary: '#0c1618', // Deep Charcoal
     accent: '#C8AA6E', // Dusty Golden

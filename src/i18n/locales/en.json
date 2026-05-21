@@ -1,6 +1,6 @@
 {
   "home": {
-    "titleEn": "Deen Journey",
+    "titleEn": "Noor",
     "titleAr": "رحلة الدين",
     "greeting": "السَّلَامُ عَلَيْكُمْ",
     "quickActions": "Quick Actions",
@@ -25,7 +25,8 @@
     "next": "Next",
     "currentPrayer": "Current Prayer",
     "todaysPrayers": "Today's Prayers",
-    "dhakaBd": "Dhaka, BD"
+    "dhakaBd": "Dhaka, BD",
+    "loading": "Loading..."
   },
   "quran": {
     "titleEn": "Al-Quran",
@@ -133,7 +134,12 @@
     "tap": "Tap the screen to count",
     "reset": "Reset",
     "tasbeehCounter": "Tasbeeh Counter",
-    "cycleGoal": "Cycle: {{cycle}}/3 • Goal: 33"
+    "cycleGoal": "Cycle: {{cycle}}/3 • Goal: 33",
+    "bookmarks": "Bookmarks",
+    "bookmarksDesc": "Your saved duas",
+    "source": "Source",
+    "reference": "Reference",
+    "duaCount": "{{count}} duas"
   },
   "duaSettings": {
     "title": "Dua Settings",
@@ -161,7 +167,12 @@
     "location": "Location",
     "autoGPS": "Auto (GPS)",
     "calcMethod": "Calculation Method",
-    "karachi": "Karachi"
+    "karachi": "Karachi",
+    "system": "System",
+    "managePermissions": "Manage Permissions",
+    "calcMethod_1": "Karachi",
+    "calcMethod_2": "ISNA",
+    "calcMethod_3": "MWL"
   },
   "names": {
     "titleEn": "Allah's Names",
