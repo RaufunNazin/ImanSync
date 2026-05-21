@@ -1,60 +1,46 @@
 /**
- * Below are the colors that are used in the app. The colors are defined in the light and dark mode.
- * There are many other ways to style your app. For example, [Nativewind](https://www.nativewind.dev/), [Tamagui](https://tamagui.dev/), [unistyles](https://reactnativeunistyles.vercel.app), etc.
+ * Islamic App Theme System: Andalusian Twilight
  */
-
-import '@/global.css';
 
 import { Platform } from 'react-native';
 
 export const Colors = {
   light: {
-    text: '#000000',
-    background: '#ffffff',
-    backgroundElement: '#F0F0F3',
-    backgroundSelected: '#E0E1E6',
-    textSecondary: '#60646C',
+    text: '#0c1618', // Deep Indigo
+    textSecondary: '#475569',
+    background: '#f1f7ed', // Warm Ivory
+    backgroundElement: 'rgba(255, 255, 255, 0.7)', // Glassmorphism white
+    backgroundSelected: 'rgba(76, 149, 108, 0.2)', // Glassmorphism light green
+    primary: '#0c1618', // Deep Charcoal
+    accent: '#C8AA6E', // Dusty Golden
+    highlight: '#4c956c', // Sage Green
+    border: 'rgba(226, 232, 240, 0.5)',
+    glassTint: 'light',
   },
   dark: {
-    text: '#ffffff',
-    background: '#000000',
-    backgroundElement: '#212225',
-    backgroundSelected: '#2E3135',
-    textSecondary: '#B0B4BA',
+    text: '#f1f7ed', // Off-White
+    textSecondary: '#94A3B8',
+    background: '#0c1618', // Deep Charcoal
+    backgroundElement: 'rgba(41, 42, 45, 0.6)', // Glassmorphism slate
+    backgroundSelected: 'rgba(60, 64, 67, 0.8)',
+    primary: '#f1f7ed', // Off-White
+    accent: '#C8AA6E', // Dusty Golden
+    highlight: '#4c956c', // Sage Green
+    border: 'rgba(60, 64, 67, 0.5)',
+    glassTint: 'dark',
   },
 } as const;
 
 export type ThemeColor = keyof typeof Colors.light & keyof typeof Colors.dark;
 
-export const Fonts = Platform.select({
-  ios: {
-    /** iOS `UIFontDescriptorSystemDesignDefault` */
-    sans: 'system-ui',
-    /** iOS `UIFontDescriptorSystemDesignSerif` */
-    serif: 'ui-serif',
-    /** iOS `UIFontDescriptorSystemDesignRounded` */
-    rounded: 'ui-rounded',
-    /** iOS `UIFontDescriptorSystemDesignMonospaced` */
-    mono: 'ui-monospace',
-  },
-  default: {
-    sans: 'normal',
-    serif: 'serif',
-    rounded: 'normal',
-    mono: 'monospace',
-  },
-  web: {
-    sans: 'var(--font-display)',
-    serif: 'var(--font-serif)',
-    rounded: 'var(--font-rounded)',
-    mono: 'var(--font-mono)',
-  },
-});
+export const Fonts = {
+  outfit: 'Outfit_400Regular',
+};
 
 export const Spacing = {
-  half: 2,
-  one: 4,
-  two: 8,
+  half: 4,
+  one: 8,
+  two: 12,
   three: 16,
   four: 24,
   five: 32,

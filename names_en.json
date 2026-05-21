@@ -1,0 +1,596 @@
+[
+  {
+    "id": "1",
+    "arabic": "\u0627\u0644\u0631\u064e\u0651\u062d\u0652\u0645\u064e\u0646\u064f",
+    "english": "Ar Rahmaan",
+    "meaning": "The Beneficent"
+  },
+  {
+    "id": "2",
+    "arabic": "\u0627\u0644\u0631\u064e\u0651\u062d\u0650\u064a\u0645\u064f",
+    "english": "Ar Raheem",
+    "meaning": "The Merciful"
+  },
+  {
+    "id": "3",
+    "arabic": "\u0627\u0644\u0652\u0645\u064e\u0644\u0650\u0643\u064f",
+    "english": "Al Malik",
+    "meaning": "The King / Eternal Lord"
+  },
+  {
+    "id": "4",
+    "arabic": "\u0627\u0644\u0652\u0642\u064f\u062f\u064f\u0651\u0648\u0633\u064f",
+    "english": "Al Quddus",
+    "meaning": "The Purest"
+  },
+  {
+    "id": "5",
+    "arabic": "\u0627\u0644\u0633\u064e\u0651\u0644\u0627\u064e\u0645\u064f",
+    "english": "As Salaam",
+    "meaning": "The Source of Peace"
+  },
+  {
+    "id": "6",
+    "arabic": "\u0627\u0644\u0652\u0645\u064f\u0624\u0652\u0645\u0650\u0646\u064f",
+    "english": "Al Mu'min",
+    "meaning": "The inspirer of faith"
+  },
+  {
+    "id": "7",
+    "arabic": "\u0627\u0644\u0652\u0645\u064f\u0647\u064e\u064a\u0652\u0645\u0650\u0646\u064f",
+    "english": "Al Muhaymin",
+    "meaning": "The Guardian"
+  },
+  {
+    "id": "8",
+    "arabic": "\u0627\u0644\u0652\u0639\u064e\u0632\u0650\u064a\u0632\u064f",
+    "english": "Al Azeez",
+    "meaning": "The Precious / The Most Mighty"
+  },
+  {
+    "id": "9",
+    "arabic": "\u0627\u0644\u0652\u062c\u064e\u0628\u064e\u0651\u0627\u0631\u064f",
+    "english": "Al Jabbaar",
+    "meaning": "The Compeller"
+  },
+  {
+    "id": "10",
+    "arabic": "\u0627\u0644\u0652\u0645\u064f\u062a\u064e\u0643\u064e\u0628\u0650\u0651\u0631\u064f",
+    "english": "Al Mutakabbir",
+    "meaning": "The Greatest"
+  },
+  {
+    "id": "11",
+    "arabic": "\u0627\u0644\u0652\u062e\u064e\u0627\u0644\u0650\u0642\u064f",
+    "english": "Al Khaaliq",
+    "meaning": "The Creator"
+  },
+  {
+    "id": "12",
+    "arabic": "\u0627\u0644\u0652\u0628\u064e\u0627\u0631\u0650\u0626\u064f",
+    "english": "Al Baari",
+    "meaning": "The Maker of Order"
+  },
+  {
+    "id": "13",
+    "arabic": "\u0627\u0644\u0652\u0645\u064f\u0635\u064e\u0648\u0650\u0651\u0631\u064f",
+    "english": "Al Musawwir",
+    "meaning": "The Shaper of Beauty"
+  },
+  {
+    "id": "14",
+    "arabic": "\u0627\u0644\u0652\u063a\u064e\u0641\u064e\u0651\u0627\u0631\u064f",
+    "english": "Al Ghaffaar",
+    "meaning": "The Forgiving"
+  },
+  {
+    "id": "15",
+    "arabic": "\u0627\u0644\u0652\u0642\u064e\u0647\u064e\u0651\u0627\u0631\u064f",
+    "english": "Al Qahhaar",
+    "meaning": "The Subduer"
+  },
+  {
+    "id": "16",
+    "arabic": "\u0627\u0644\u0652\u0648\u064e\u0647\u064e\u0651\u0627\u0628\u064f",
+    "english": "Al Wahhaab",
+    "meaning": "The Giver of All"
+  },
+  {
+    "id": "17",
+    "arabic": "\u0627\u0644\u0631\u064e\u0651\u0632\u064e\u0651\u0627\u0642\u064f",
+    "english": "Ar Razzaaq",
+    "meaning": "The Sustainer"
+  },
+  {
+    "id": "18",
+    "arabic": "\u0627\u0644\u0652\u0641\u064e\u062a\u064e\u0651\u0627\u062d\u064f",
+    "english": "Al Fattaah",
+    "meaning": "The Opener"
+  },
+  {
+    "id": "19",
+    "arabic": "\u0627\u064e\u0644\u0652\u0639\u064e\u0644\u0650\u064a\u0652\u0645\u064f",
+    "english": "Al 'Aleem",
+    "meaning": "The Knower of all"
+  },
+  {
+    "id": "20",
+    "arabic": "\u0627\u0644\u0652\u0642\u064e\u0627\u0628\u0650\u0636\u064f",
+    "english": "Al Qaabid",
+    "meaning": "The Constrictor"
+  },
+  {
+    "id": "21",
+    "arabic": "\u0627\u0644\u0652\u0628\u064e\u0627\u0633\u0650\u0637\u064f",
+    "english": "Al Baasit",
+    "meaning": "The Reliever"
+  },
+  {
+    "id": "22",
+    "arabic": "\u0627\u0644\u0652\u062e\u064e\u0627\u0641\u0650\u0636\u064f",
+    "english": "Al Khaafid",
+    "meaning": "The Abaser"
+  },
+  {
+    "id": "23",
+    "arabic": "\u0627\u0644\u0631\u064e\u0651\u0627\u0641\u0650\u0639\u064f",
+    "english": "Ar Raafi'",
+    "meaning": "The Exalter"
+  },
+  {
+    "id": "24",
+    "arabic": "\u0627\u0644\u0652\u0645\u064f\u0639\u0650\u0632\u064f\u0651",
+    "english": "Al Mu'iz",
+    "meaning": "The Bestower of Honour"
+  },
+  {
+    "id": "25",
+    "arabic": "\u0627\u0644\u0645\u064f\u0630\u0650\u0644\u064f\u0651",
+    "english": "Al Mudhil",
+    "meaning": "The Humiliator"
+  },
+  {
+    "id": "26",
+    "arabic": "\u0627\u0644\u0633\u064e\u0651\u0645\u0650\u064a\u0639\u064f",
+    "english": "As Samee'",
+    "meaning": "The Hearer of all"
+  },
+  {
+    "id": "27",
+    "arabic": "\u0627\u0644\u0652\u0628\u064e\u0635\u0650\u064a\u0631\u064f",
+    "english": "Al Baseer",
+    "meaning": "The Seer of all"
+  },
+  {
+    "id": "28",
+    "arabic": "\u0627\u0644\u0652\u062d\u064e\u0643\u064e\u0645\u064f",
+    "english": "Al Hakam",
+    "meaning": "The Judge"
+  },
+  {
+    "id": "29",
+    "arabic": "\u0627\u0644\u0652\u0639\u064e\u062f\u0652\u0644\u064f",
+    "english": "Al 'Adl",
+    "meaning": "The Just"
+  },
+  {
+    "id": "30",
+    "arabic": "\u0627\u0644\u0644\u064e\u0651\u0637\u0650\u064a\u0641\u064f",
+    "english": "Al Lateef",
+    "meaning": "The Subtle One"
+  },
+  {
+    "id": "31",
+    "arabic": "\u0627\u0644\u0652\u062e\u064e\u0628\u0650\u064a\u0631\u064f",
+    "english": "Al Khabeer",
+    "meaning": "The All Aware"
+  },
+  {
+    "id": "32",
+    "arabic": "\u0627\u0644\u0652\u062d\u064e\u0644\u0650\u064a\u0645\u064f",
+    "english": "Al Haleem",
+    "meaning": "The Forebearing"
+  },
+  {
+    "id": "33",
+    "arabic": "\u0627\u0644\u0652\u0639\u064e\u0638\u0650\u064a\u0645\u064f",
+    "english": "Al 'Azeem",
+    "meaning": "The Maginificent"
+  },
+  {
+    "id": "34",
+    "arabic": "\u0627\u0644\u0652\u063a\u064e\u0641\u064f\u0648\u0631\u064f",
+    "english": "Al Ghafoor",
+    "meaning": "The Great Forgiver"
+  },
+  {
+    "id": "35",
+    "arabic": "\u0627\u0644\u0634\u064e\u0651\u0643\u064f\u0648\u0631\u064f",
+    "english": "Ash Shakoor",
+    "meaning": "The Rewarder of Thankfulness"
+  },
+  {
+    "id": "36",
+    "arabic": "\u0627\u0644\u0652\u0639\u064e\u0644\u0650\u064a\u064f\u0651",
+    "english": "Al 'Aliyy",
+    "meaning": "The Highest"
+  },
+  {
+    "id": "37",
+    "arabic": "\u0627\u0644\u0652\u0643\u064e\u0628\u0650\u064a\u0631\u064f",
+    "english": "Al Kabeer",
+    "meaning": "The Greatest"
+  },
+  {
+    "id": "38",
+    "arabic": "\u0627\u0644\u0652\u062d\u064e\u0641\u0650\u064a\u0638\u064f",
+    "english": "Al Hafeez",
+    "meaning": "The Preserver"
+  },
+  {
+    "id": "39",
+    "arabic": "\u0627\u0644\u0645\u064f\u0642\u064a\u0650\u062a",
+    "english": "Al Muqeet",
+    "meaning": "The Nourisher"
+  },
+  {
+    "id": "40",
+    "arabic": "\u0627\u0644\u0652\u062d\u0633\u0650\u064a\u0628\u064f",
+    "english": "Al Haseeb",
+    "meaning": "The Reckoner"
+  },
+  {
+    "id": "41",
+    "arabic": "\u0627\u0644\u0652\u062c\u064e\u0644\u0650\u064a\u0644\u064f",
+    "english": "Al Jaleel",
+    "meaning": "The Majestic"
+  },
+  {
+    "id": "42",
+    "arabic": "\u0627\u0644\u0652\u0643\u064e\u0631\u0650\u064a\u0645\u064f",
+    "english": "Al Kareem",
+    "meaning": "The Generous"
+  },
+  {
+    "id": "43",
+    "arabic": "\u0627\u0644\u0631\u064e\u0651\u0642\u0650\u064a\u0628\u064f",
+    "english": "Ar Raqeeb",
+    "meaning": "The Watchful One"
+  },
+  {
+    "id": "44",
+    "arabic": "\u0627\u0644\u0652\u0645\u064f\u062c\u0650\u064a\u0628\u064f",
+    "english": "Al Mujeeb ",
+    "meaning": "The Responder to Prayer"
+  },
+  {
+    "id": "45",
+    "arabic": "\u0627\u0644\u0652\u0648\u064e\u0627\u0633\u0650\u0639\u064f",
+    "english": "Al Waasi'",
+    "meaning": "The All Comprehending"
+  },
+  {
+    "id": "46",
+    "arabic": "\u0627\u0644\u0652\u062d\u064e\u0643\u0650\u064a\u0645\u064f",
+    "english": "Al Hakeem",
+    "meaning": "The Perfectly Wise"
+  },
+  {
+    "id": "47",
+    "arabic": "\u0627\u0644\u0652\u0648\u064e\u062f\u064f\u0648\u062f\u064f",
+    "english": "Al Wudood",
+    "meaning": "The Loving One"
+  },
+  {
+    "id": "48",
+    "arabic": "\u0627\u0644\u0652\u0645\u064e\u062c\u0650\u064a\u062f\u064f",
+    "english": "Al Majeed",
+    "meaning": "The Most Glorious One"
+  },
+  {
+    "id": "49",
+    "arabic": "\u0627\u0644\u0652\u0628\u064e\u0627\u0639\u0650\u062b\u064f",
+    "english": "Al Baa'ith",
+    "meaning": "The Resurrector"
+  },
+  {
+    "id": "50",
+    "arabic": "\u0627\u0644\u0634\u064e\u0651\u0647\u0650\u064a\u062f\u064f",
+    "english": "Ash Shaheed",
+    "meaning": "The Witness"
+  },
+  {
+    "id": "51",
+    "arabic": "\u0627\u0644\u0652\u062d\u064e\u0642\u064f\u0651",
+    "english": "Al Haqq",
+    "meaning": "The Truth"
+  },
+  {
+    "id": "52",
+    "arabic": "\u0627\u0644\u0652\u0648\u064e\u0643\u0650\u064a\u0644\u064f",
+    "english": "Al Wakeel",
+    "meaning": "The Trustee"
+  },
+  {
+    "id": "53",
+    "arabic": "\u0627\u0644\u0652\u0642\u064e\u0648\u0650\u064a\u064f\u0651",
+    "english": "Al Qawiyy",
+    "meaning": "The Possessor of all strength"
+  },
+  {
+    "id": "54",
+    "arabic": "\u0627\u0644\u0652\u0645\u064e\u062a\u0650\u064a\u0646\u064f",
+    "english": "Al Mateen",
+    "meaning": "The Forceful"
+  },
+  {
+    "id": "55",
+    "arabic": "\u0627\u0644\u0652\u0648\u064e\u0644\u0650\u064a\u064f\u0651",
+    "english": "Al Waliyy",
+    "meaning": "The Protector"
+  },
+  {
+    "id": "56",
+    "arabic": "\u0627\u0644\u0652\u062d\u064e\u0645\u0650\u064a\u062f\u064f",
+    "english": "Al Hameed",
+    "meaning": "The Praised"
+  },
+  {
+    "id": "57",
+    "arabic": "\u0627\u0644\u0652\u0645\u064f\u062d\u0652\u0635\u0650\u064a",
+    "english": "Al Muhsi",
+    "meaning": "The Appraiser"
+  },
+  {
+    "id": "58",
+    "arabic": "\u0627\u0644\u0652\u0645\u064f\u0628\u0652\u062f\u0650\u0626\u064f",
+    "english": "Al Mubdi",
+    "meaning": "The Originator"
+  },
+  {
+    "id": "59",
+    "arabic": "\u0627\u0644\u0652\u0645\u064f\u0639\u0650\u064a\u062f\u064f",
+    "english": "Al Mu'eed",
+    "meaning": "The Restorer"
+  },
+  {
+    "id": "60",
+    "arabic": "\u0627\u0644\u0652\u0645\u064f\u062d\u0652\u064a\u0650\u064a",
+    "english": "Al Muhiy",
+    "meaning": "The Giver of life"
+  },
+  {
+    "id": "61",
+    "arabic": "\u0627\u064e\u0644\u0652\u0645\u064f\u0645\u0650\u064a\u062a\u064f",
+    "english": "Al Mumeet",
+    "meaning": "The Taker of life"
+  },
+  {
+    "id": "62",
+    "arabic": "\u0627\u0644\u0652\u062d\u064e\u064a\u064f\u0651",
+    "english": "Al Haiyy",
+    "meaning": "The Ever Living"
+  },
+  {
+    "id": "63",
+    "arabic": "\u0627\u0644\u0652\u0642\u064e\u064a\u064f\u0651\u0648\u0645\u064f",
+    "english": "Al Qayyoom",
+    "meaning": "The Self Existing"
+  },
+  {
+    "id": "64",
+    "arabic": "\u0627\u0644\u0652\u0648\u064e\u0627\u062c\u0650\u062f\u064f",
+    "english": "Al Waajid",
+    "meaning": "The Finder"
+  },
+  {
+    "id": "65",
+    "arabic": "\u0627\u0644\u0652\u0645\u064e\u0627\u062c\u0650\u062f\u064f",
+    "english": "Al Maajid",
+    "meaning": "The Glorious"
+  },
+  {
+    "id": "66",
+    "arabic": "\u0627\u0644\u0652\u0648\u0627\u062d\u0650\u062f\u064f",
+    "english": "Al Waahid",
+    "meaning": "The Only One"
+  },
+  {
+    "id": "67",
+    "arabic": "\u0627\u064e\u0644\u0627\u064e\u062d\u064e\u062f\u064f",
+    "english": "Al Ahad",
+    "meaning": "The One"
+  },
+  {
+    "id": "68",
+    "arabic": "\u0627\u0644\u0635\u064e\u0651\u0645\u064e\u062f\u064f",
+    "english": "As Samad",
+    "meaning": "The Supreme Provider"
+  },
+  {
+    "id": "69",
+    "arabic": "\u0627\u0644\u0652\u0642\u064e\u0627\u062f\u0650\u0631\u064f",
+    "english": "Al Qaadir",
+    "meaning": "The Powerful"
+  },
+  {
+    "id": "70",
+    "arabic": "\u0627\u0644\u0652\u0645\u064f\u0642\u0652\u062a\u064e\u062f\u0650\u0631\u064f",
+    "english": "Al Muqtadir",
+    "meaning": "The Creator of all power"
+  },
+  {
+    "id": "71",
+    "arabic": "\u0627\u0644\u0652\u0645\u064f\u0642\u064e\u062f\u0650\u0651\u0645\u064f",
+    "english": "Al Muqaddim",
+    "meaning": "The Expediter"
+  },
+  {
+    "id": "72",
+    "arabic": "\u0627\u0644\u0652\u0645\u064f\u0624\u064e\u062e\u0650\u0651\u0631\u064f",
+    "english": "Al Mu\u2019akhir",
+    "meaning": "The Delayer"
+  },
+  {
+    "id": "73",
+    "arabic": "\u0627\u0644\u0623\u0648\u064e\u0651\u0644\u064f",
+    "english": "Al Awwal",
+    "meaning": "The First"
+  },
+  {
+    "id": "74",
+    "arabic": "\u0627\u0644\u0622\u062e\u0650\u0631\u064f",
+    "english": "Al Aakhir",
+    "meaning": "The Last"
+  },
+  {
+    "id": "75",
+    "arabic": "\u0627\u0644\u0638\u064e\u0651\u0627\u0647\u0650\u0631\u064f",
+    "english": "Az Zaahir",
+    "meaning": "The Manifest"
+  },
+  {
+    "id": "76",
+    "arabic": "\u0627\u0644\u0652\u0628\u064e\u0627\u0637\u0650\u0646\u064f",
+    "english": "Al Baatin",
+    "meaning": "The Hidden"
+  },
+  {
+    "id": "77",
+    "arabic": "\u0627\u0644\u0652\u0648\u064e\u0627\u0644\u0650\u064a",
+    "english": "Al Waali",
+    "meaning": "The Governor"
+  },
+  {
+    "id": "78",
+    "arabic": "\u0627\u0644\u0652\u0645\u064f\u062a\u064e\u0639\u064e\u0627\u0644\u0650\u064a",
+    "english": "Al Muta\u2019ali",
+    "meaning": "The Supreme One"
+  },
+  {
+    "id": "79",
+    "arabic": "\u0627\u0644\u0652\u0628\u064e\u0631\u064f\u0651",
+    "english": "Al Barr",
+    "meaning": "The Doer of Good"
+  },
+  {
+    "id": "80",
+    "arabic": "\u0627\u0644\u062a\u064e\u0651\u0648\u064e\u0627\u0628\u064f",
+    "english": "At Tawwaab",
+    "meaning": "The Guide to Repentence"
+  },
+  {
+    "id": "81",
+    "arabic": "\u0627\u0644\u0652\u0645\u064f\u0646\u0652\u062a\u064e\u0642\u0650\u0645\u064f",
+    "english": "Al Muntaqim",
+    "meaning": "The Avenger"
+  },
+  {
+    "id": "82",
+    "arabic": "\u0627\u0644\u0639\u064e\u0641\u064f\u0648\u064f\u0651",
+    "english": "Al Afuww",
+    "meaning": "The Forgiver"
+  },
+  {
+    "id": "83",
+    "arabic": "\u0627\u0644\u0631\u064e\u0651\u0624\u064f\u0648\u0641\u064f",
+    "english": "Ar Ra\u2019oof",
+    "meaning": "The Clement"
+  },
+  {
+    "id": "84",
+    "arabic": "\u0645\u064e\u0627\u0644\u0650\u0643\u064f \u0627\u0644\u0652\u0645\u064f\u0644\u0652\u0643\u0650",
+    "english": "Maalik Ul Mulk",
+    "meaning": "The Owner / Soverign of All"
+  },
+  {
+    "id": "85",
+    "arabic": "\u0630\u064f\u0648\u0627\u0644\u0652\u062c\u064e\u0644\u0627\u064e\u0644\u0650 \u0648\u064e\u0627\u0644\u0625\u0643\u0652\u0631\u064e\u0627\u0645\u0650",
+    "english": "Dhu Al Jalaali Wa Al Ikraam",
+    "meaning": "Possessor of Majesty and Bounty"
+  },
+  {
+    "id": "86",
+    "arabic": "\u0627\u0644\u0652\u0645\u064f\u0642\u0652\u0633\u0650\u0637\u064f",
+    "english": "Al Muqsit",
+    "meaning": "The Equitable One"
+  },
+  {
+    "id": "87",
+    "arabic": "\u0627\u0644\u0652\u062c\u064e\u0627\u0645\u0650\u0639\u064f",
+    "english": "Al Jaami'",
+    "meaning": "The Gatherer"
+  },
+  {
+    "id": "88",
+    "arabic": "\u0627\u0644\u0652\u063a\u064e\u0646\u0650\u064a\u064f\u0651",
+    "english": "Al Ghaniyy",
+    "meaning": "The Rich One"
+  },
+  {
+    "id": "89",
+    "arabic": "\u0627\u0644\u0652\u0645\u064f\u063a\u0652\u0646\u0650\u064a",
+    "english": "Al Mughi",
+    "meaning": "The Enricher"
+  },
+  {
+    "id": "90",
+    "arabic": "\u0627\u064e\u0644\u0652\u0645\u064e\u0627\u0646\u0650\u0639\u064f",
+    "english": "Al Maani'",
+    "meaning": "The Preventer of harm"
+  },
+  {
+    "id": "91",
+    "arabic": "\u0627\u0644\u0636\u064e\u0651\u0627\u0631\u064e\u0651",
+    "english": "Ad Daaarr",
+    "meaning": "The Creator of the harmful"
+  },
+  {
+    "id": "92",
+    "arabic": "\u0627\u0644\u0646\u064e\u0651\u0627\u0641\u0650\u0639\u064f",
+    "english": "An Naafi\u2019",
+    "meaning": "The Bestower of Benefits"
+  },
+  {
+    "id": "93",
+    "arabic": "\u0627\u0644\u0646\u064f\u0651\u0648\u0631\u064f",
+    "english": "An Noor",
+    "meaning": "The Light"
+  },
+  {
+    "id": "94",
+    "arabic": "\u0627\u0644\u0652\u0647\u064e\u0627\u062f\u0650\u064a",
+    "english": "Al Haadi",
+    "meaning": "The Guider"
+  },
+  {
+    "id": "95",
+    "arabic": "\u0627\u0644\u0652\u0628\u064e\u062f\u0650\u064a\u0639\u064f",
+    "english": "Al Badi'",
+    "meaning": "The Originator"
+  },
+  {
+    "id": "96",
+    "arabic": "\u0627\u064e\u0644\u0652\u0628\u064e\u0627\u0642\u0650\u064a",
+    "english": "Al Baaqi",
+    "meaning": "The Everlasting One"
+  },
+  {
+    "id": "97",
+    "arabic": "\u0627\u0644\u0652\u0648\u064e\u0627\u0631\u0650\u062b\u064f",
+    "english": "Al Waarith",
+    "meaning": "The Inhertior"
+  },
+  {
+    "id": "98",
+    "arabic": "\u0627\u0644\u0631\u064e\u0651\u0634\u0650\u064a\u062f\u064f",
+    "english": "Ar Rasheed",
+    "meaning": "The Most Righteous Guide"
+  },
+  {
+    "id": "99",
+    "arabic": "\u0627\u0644\u0635\u064e\u0651\u0628\u064f\u0648\u0631\u064f",
+    "english": "As Saboor",
+    "meaning": "The Patient One"
+  }
+]

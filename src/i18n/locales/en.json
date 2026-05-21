@@ -1,0 +1,926 @@
+{
+  "home": {
+    "titleEn": "Deen Journey",
+    "titleAr": "رحلة الدين",
+    "greeting": "السَّلَامُ عَلَيْكُمْ",
+    "quickActions": "Quick Actions",
+    "qibla": "Qibla",
+    "names": "99 Names",
+    "duas": "Duas",
+    "specialTimes": "Special Times",
+    "dailyInspiration": "Daily Inspiration",
+    "restrictedTimes": "Restricted Times",
+    "suhur": "Suhur",
+    "suhurDesc": "Ends at Imsak",
+    "tahajjud": "Tahajjud",
+    "tahajjudDesc": "Last Third",
+    "iftar": "Iftar",
+    "iftarDesc": "Begins at Maghrib",
+    "restrict1": "After Fajr until Sunrise",
+    "restrict1Desc": "Fajr → Sunrise",
+    "restrict2": "Around Solar Noon",
+    "restrict2Desc": "~15 min before & after Dhuhr starts",
+    "restrict3": "After Asr until Sunset",
+    "restrict3Desc": "Asr → Sunset",
+    "next": "Next",
+    "currentPrayer": "Current Prayer",
+    "todaysPrayers": "Today's Prayers",
+    "dhakaBd": "Dhaka, BD"
+  },
+  "quran": {
+    "titleEn": "Al-Quran",
+    "titleAr": "القرآن الكريم",
+    "searchPlaceholder": "Search Surah Name or Number...",
+    "tabSurah": "Surah",
+    "tabJuz": "Juz",
+    "tabBookmarks": "Bookmarks",
+    "continue": "Continue",
+    "goToAyah": "Go to Ayah",
+    "noBookmarks": "No bookmarks yet.",
+    "juz": "Juz {{id}}",
+    "Meccan": "Meccan",
+    "Medinan": "Medinan"
+  },
+  "tracker": {
+    "titleEn": "Daily Tracker",
+    "titleAr": "المتتبع اليومي",
+    "progress": "Today's Sincerity",
+    "weeklyOverview": "This Week",
+    "prayMore": "Pray more to fill the circle!",
+    "greatJob": "Great job today!",
+    "checklist": "Daily Checklist",
+    "daily": "Daily",
+    "weekly": "Weekly",
+    "monthly": "Monthly",
+    "tasksCompleted": "{{count}} of {{total}} tasks completed",
+    "trackingCons": "Tracking your consistency",
+    "msg_0": "Bismillah. Let's start the day with intention.",
+    "msg_20": "Every small step counts towards Allah.",
+    "msg_40": "A great start! Keep the momentum.",
+    "msg_60": "Halfway there! May Allah make it easy.",
+    "msg_80": "Almost there! Keep pushing forward.",
+    "msg_99": "Just a little more to complete the day!",
+    "msg_100": "Masha'Allah! A complete day.",
+    "tasks": {
+      "fajr": "Fajr Prayer",
+      "dhuhr": "Dhuhr Prayer",
+      "asr": "Asr Prayer",
+      "maghrib": "Maghrib Prayer",
+      "isha": "Isha Prayer",
+      "quran": "Quran Reading (Min. 1 page)",
+      "charity": "Sadaqah / Charity",
+      "fasting": "Fasting (Optional)",
+      "dhikr": "Morning & Evening Adhkar"
+    },
+    "consistency": "{{title}} Consistency",
+    "chartMsg_0": "No tasks tracked yet. Let's build consistency!",
+    "chartMsg_30": "A quiet period. Small steps will slowly build your average.",
+    "chartMsg_60": "You're keeping a steady pace of {{avg}}%. Let's push for more!",
+    "chartMsg_80": "A solid {{avg}}% average! You're doing great.",
+    "chartMsg_99": "An excellent {{avg}}% average! Almost perfect consistency.",
+    "chartMsg_100": "Flawless consistency! May Allah accept your efforts."
+  },
+  "dua": {
+    "titleEn": "Dua & Zikr",
+    "titleAr": "الدعاء والذكر",
+    "categories": "Categories",
+    "pinned": "Pinned Categories",
+    "myDuas": "My Duas",
+    "myDuasDesc": "Your personal collection",
+    "addDua": "Add Dua",
+    "pin": "Pin to Top",
+    "unpin": "Unpin",
+    "category_morning": "Morning Adhkar",
+    "category_evening": "Evening Adhkar",
+    "category_wudu": "Wudu & Purification",
+    "category_prayer": "During Prayer",
+    "category_after_prayer": "After Prayer",
+    "category_sleep": "Sleep",
+    "category_food": "Food & Drink",
+    "category_travel": "Travel",
+    "category_home": "Home",
+    "category_masjid": "Masjid",
+    "category_distress": "Distress & Anxiety",
+    "category_forgiveness": "Forgiveness",
+    "category_illness": "Illness & Healing",
+    "category_weather": "Weather",
+    "category_knowledge": "Knowledge",
+    "category_parents": "Parents",
+    "category_guidance": "Guidance",
+    "category_gratitude": "Gratitude",
+    "category_protection": "Protection",
+    "category_dhikr": "Dhikr",
+    "category_marriage": "Marriage & Family",
+    "category_hajj": "Hajj & Umrah",
+    "category_grief": "Grief & Loss",
+    "category_children": "Children",
+    "category_business": "Business & Provision",
+    "category_night_prayer": "Night Prayer",
+    "category_quran_recitation": "Quran Recitation",
+    "setupStorage": "Setup Storage",
+    "setupStorageDesc": "Choose a folder to save your personal duas so they aren't lost if you reinstall the app.",
+    "chooseFolder": "Choose Folder",
+    "duaTitle": "Dua Title",
+    "duaArabic": "Arabic Text (Optional)",
+    "duaTransliteration": "Transliteration (Optional)",
+    "duaTranslation": "Translation / Meaning",
+    "save": "Save Dua",
+    "cancel": "Cancel",
+    "addText": "Write Dua",
+    "addImage": "Add Image",
+    "addVideo": "Add Video",
+    "completed": "Completed!",
+    "tap": "Tap the screen to count",
+    "reset": "Reset",
+    "tasbeehCounter": "Tasbeeh Counter",
+    "cycleGoal": "Cycle: {{cycle}}/3 • Goal: 33"
+  },
+  "duaSettings": {
+    "title": "Dua Settings",
+    "textSizes": "Text Sizes",
+    "arabicFont": "Arabic Font",
+    "translationFont": "Translation Font",
+    "translitFont": "Transliteration Font",
+    "translations": "Translations",
+    "enTrans": "English Translation",
+    "bnTrans": "Bangla Translation",
+    "translit": "Transliteration",
+    "enTranslit": "English Transliteration",
+    "bnTranslit": "Bangla Transliteration",
+    "searchPlaceholder": "Search by name, translation..."
+  },
+  "settings": {
+    "titleEn": "Settings",
+    "titleAr": "الإعدادات",
+    "language": "Language",
+    "theme": "Theme",
+    "notifications": "Notifications",
+    "privacy": "Privacy Policy",
+    "preferences": "Preferences",
+    "locationCalc": "Location & Calculation",
+    "location": "Location",
+    "autoGPS": "Auto (GPS)",
+    "calcMethod": "Calculation Method",
+    "karachi": "Karachi"
+  },
+  "names": {
+    "titleEn": "Allah's Names",
+    "titleAr": "أسماء الله الحسنى"
+  },
+  "qibla": {
+    "titleEn": "Qibla Compass",
+    "titleAr": "اتجاه القبلة",
+    "pointing": "Pointing to Kaaba",
+    "align": "Align your phone to find Qibla",
+    "north": "N"
+  },
+  "stories": {
+    "titleEn": "Stories & Context",
+    "titleAr": "سياق السور",
+    "discover": "Discover the Origins",
+    "body": "We are currently translating and verifying authentic historical contexts (Asbab Al-Nuzul) for each Surah.",
+    "authentic": "Authentic Translations",
+    "authenticDesc": "Sourced from trusted historical scholars.",
+    "deeper": "Deeper Understanding",
+    "deeperDesc": "Learn why and when verses were revealed.",
+    "return": "Return to Quran"
+  },
+  "prayerTimes": {
+    "fajr": "Fajr",
+    "sunrise": "Sunrise",
+    "dhuhr": "Dhuhr",
+    "asr": "Asr",
+    "maghrib": "Maghrib",
+    "isha": "Isha"
+  },
+  "namesList": [
+    {
+      "id": "1",
+      "arabic": "الرَّحْمَنُ",
+      "english": "Ar Rahmaan",
+      "meaning": "The Beneficent"
+    },
+    {
+      "id": "2",
+      "arabic": "الرَّحِيمُ",
+      "english": "Ar Raheem",
+      "meaning": "The Merciful"
+    },
+    {
+      "id": "3",
+      "arabic": "الْمَلِكُ",
+      "english": "Al Malik",
+      "meaning": "The King / Eternal Lord"
+    },
+    {
+      "id": "4",
+      "arabic": "الْقُدُّوسُ",
+      "english": "Al Quddus",
+      "meaning": "The Purest"
+    },
+    {
+      "id": "5",
+      "arabic": "السَّلاَمُ",
+      "english": "As Salaam",
+      "meaning": "The Source of Peace"
+    },
+    {
+      "id": "6",
+      "arabic": "الْمُؤْمِنُ",
+      "english": "Al Mu'min",
+      "meaning": "The inspirer of faith"
+    },
+    {
+      "id": "7",
+      "arabic": "الْمُهَيْمِنُ",
+      "english": "Al Muhaymin",
+      "meaning": "The Guardian"
+    },
+    {
+      "id": "8",
+      "arabic": "الْعَزِيزُ",
+      "english": "Al Azeez",
+      "meaning": "The Precious / The Most Mighty"
+    },
+    {
+      "id": "9",
+      "arabic": "الْجَبَّارُ",
+      "english": "Al Jabbaar",
+      "meaning": "The Compeller"
+    },
+    {
+      "id": "10",
+      "arabic": "الْمُتَكَبِّرُ",
+      "english": "Al Mutakabbir",
+      "meaning": "The Greatest"
+    },
+    {
+      "id": "11",
+      "arabic": "الْخَالِقُ",
+      "english": "Al Khaaliq",
+      "meaning": "The Creator"
+    },
+    {
+      "id": "12",
+      "arabic": "الْبَارِئُ",
+      "english": "Al Baari",
+      "meaning": "The Maker of Order"
+    },
+    {
+      "id": "13",
+      "arabic": "الْمُصَوِّرُ",
+      "english": "Al Musawwir",
+      "meaning": "The Shaper of Beauty"
+    },
+    {
+      "id": "14",
+      "arabic": "الْغَفَّارُ",
+      "english": "Al Ghaffaar",
+      "meaning": "The Forgiving"
+    },
+    {
+      "id": "15",
+      "arabic": "الْقَهَّارُ",
+      "english": "Al Qahhaar",
+      "meaning": "The Subduer"
+    },
+    {
+      "id": "16",
+      "arabic": "الْوَهَّابُ",
+      "english": "Al Wahhaab",
+      "meaning": "The Giver of All"
+    },
+    {
+      "id": "17",
+      "arabic": "الرَّزَّاقُ",
+      "english": "Ar Razzaaq",
+      "meaning": "The Sustainer"
+    },
+    {
+      "id": "18",
+      "arabic": "الْفَتَّاحُ",
+      "english": "Al Fattaah",
+      "meaning": "The Opener"
+    },
+    {
+      "id": "19",
+      "arabic": "اَلْعَلِيْمُ",
+      "english": "Al 'Aleem",
+      "meaning": "The Knower of all"
+    },
+    {
+      "id": "20",
+      "arabic": "الْقَابِضُ",
+      "english": "Al Qaabid",
+      "meaning": "The Constrictor"
+    },
+    {
+      "id": "21",
+      "arabic": "الْبَاسِطُ",
+      "english": "Al Baasit",
+      "meaning": "The Reliever"
+    },
+    {
+      "id": "22",
+      "arabic": "الْخَافِضُ",
+      "english": "Al Khaafid",
+      "meaning": "The Abaser"
+    },
+    {
+      "id": "23",
+      "arabic": "الرَّافِعُ",
+      "english": "Ar Raafi'",
+      "meaning": "The Exalter"
+    },
+    {
+      "id": "24",
+      "arabic": "الْمُعِزُّ",
+      "english": "Al Mu'iz",
+      "meaning": "The Bestower of Honour"
+    },
+    {
+      "id": "25",
+      "arabic": "المُذِلُّ",
+      "english": "Al Mudhil",
+      "meaning": "The Humiliator"
+    },
+    {
+      "id": "26",
+      "arabic": "السَّمِيعُ",
+      "english": "As Samee'",
+      "meaning": "The Hearer of all"
+    },
+    {
+      "id": "27",
+      "arabic": "الْبَصِيرُ",
+      "english": "Al Baseer",
+      "meaning": "The Seer of all"
+    },
+    {
+      "id": "28",
+      "arabic": "الْحَكَمُ",
+      "english": "Al Hakam",
+      "meaning": "The Judge"
+    },
+    {
+      "id": "29",
+      "arabic": "الْعَدْلُ",
+      "english": "Al 'Adl",
+      "meaning": "The Just"
+    },
+    {
+      "id": "30",
+      "arabic": "اللَّطِيفُ",
+      "english": "Al Lateef",
+      "meaning": "The Subtle One"
+    },
+    {
+      "id": "31",
+      "arabic": "الْخَبِيرُ",
+      "english": "Al Khabeer",
+      "meaning": "The All Aware"
+    },
+    {
+      "id": "32",
+      "arabic": "الْحَلِيمُ",
+      "english": "Al Haleem",
+      "meaning": "The Forebearing"
+    },
+    {
+      "id": "33",
+      "arabic": "الْعَظِيمُ",
+      "english": "Al 'Azeem",
+      "meaning": "The Maginificent"
+    },
+    {
+      "id": "34",
+      "arabic": "الْغَفُورُ",
+      "english": "Al Ghafoor",
+      "meaning": "The Great Forgiver"
+    },
+    {
+      "id": "35",
+      "arabic": "الشَّكُورُ",
+      "english": "Ash Shakoor",
+      "meaning": "The Rewarder of Thankfulness"
+    },
+    {
+      "id": "36",
+      "arabic": "الْعَلِيُّ",
+      "english": "Al 'Aliyy",
+      "meaning": "The Highest"
+    },
+    {
+      "id": "37",
+      "arabic": "الْكَبِيرُ",
+      "english": "Al Kabeer",
+      "meaning": "The Greatest"
+    },
+    {
+      "id": "38",
+      "arabic": "الْحَفِيظُ",
+      "english": "Al Hafeez",
+      "meaning": "The Preserver"
+    },
+    {
+      "id": "39",
+      "arabic": "المُقيِت",
+      "english": "Al Muqeet",
+      "meaning": "The Nourisher"
+    },
+    {
+      "id": "40",
+      "arabic": "الْحسِيبُ",
+      "english": "Al Haseeb",
+      "meaning": "The Reckoner"
+    },
+    {
+      "id": "41",
+      "arabic": "الْجَلِيلُ",
+      "english": "Al Jaleel",
+      "meaning": "The Majestic"
+    },
+    {
+      "id": "42",
+      "arabic": "الْكَرِيمُ",
+      "english": "Al Kareem",
+      "meaning": "The Generous"
+    },
+    {
+      "id": "43",
+      "arabic": "الرَّقِيبُ",
+      "english": "Ar Raqeeb",
+      "meaning": "The Watchful One"
+    },
+    {
+      "id": "44",
+      "arabic": "الْمُجِيبُ",
+      "english": "Al Mujeeb ",
+      "meaning": "The Responder to Prayer"
+    },
+    {
+      "id": "45",
+      "arabic": "الْوَاسِعُ",
+      "english": "Al Waasi'",
+      "meaning": "The All Comprehending"
+    },
+    {
+      "id": "46",
+      "arabic": "الْحَكِيمُ",
+      "english": "Al Hakeem",
+      "meaning": "The Perfectly Wise"
+    },
+    {
+      "id": "47",
+      "arabic": "الْوَدُودُ",
+      "english": "Al Wudood",
+      "meaning": "The Loving One"
+    },
+    {
+      "id": "48",
+      "arabic": "الْمَجِيدُ",
+      "english": "Al Majeed",
+      "meaning": "The Most Glorious One"
+    },
+    {
+      "id": "49",
+      "arabic": "الْبَاعِثُ",
+      "english": "Al Baa'ith",
+      "meaning": "The Resurrector"
+    },
+    {
+      "id": "50",
+      "arabic": "الشَّهِيدُ",
+      "english": "Ash Shaheed",
+      "meaning": "The Witness"
+    },
+    {
+      "id": "51",
+      "arabic": "الْحَقُّ",
+      "english": "Al Haqq",
+      "meaning": "The Truth"
+    },
+    {
+      "id": "52",
+      "arabic": "الْوَكِيلُ",
+      "english": "Al Wakeel",
+      "meaning": "The Trustee"
+    },
+    {
+      "id": "53",
+      "arabic": "الْقَوِيُّ",
+      "english": "Al Qawiyy",
+      "meaning": "The Possessor of all strength"
+    },
+    {
+      "id": "54",
+      "arabic": "الْمَتِينُ",
+      "english": "Al Mateen",
+      "meaning": "The Forceful"
+    },
+    {
+      "id": "55",
+      "arabic": "الْوَلِيُّ",
+      "english": "Al Waliyy",
+      "meaning": "The Protector"
+    },
+    {
+      "id": "56",
+      "arabic": "الْحَمِيدُ",
+      "english": "Al Hameed",
+      "meaning": "The Praised"
+    },
+    {
+      "id": "57",
+      "arabic": "الْمُحْصِي",
+      "english": "Al Muhsi",
+      "meaning": "The Appraiser"
+    },
+    {
+      "id": "58",
+      "arabic": "الْمُبْدِئُ",
+      "english": "Al Mubdi",
+      "meaning": "The Originator"
+    },
+    {
+      "id": "59",
+      "arabic": "الْمُعِيدُ",
+      "english": "Al Mu'eed",
+      "meaning": "The Restorer"
+    },
+    {
+      "id": "60",
+      "arabic": "الْمُحْيِي",
+      "english": "Al Muhiy",
+      "meaning": "The Giver of life"
+    },
+    {
+      "id": "61",
+      "arabic": "اَلْمُمِيتُ",
+      "english": "Al Mumeet",
+      "meaning": "The Taker of life"
+    },
+    {
+      "id": "62",
+      "arabic": "الْحَيُّ",
+      "english": "Al Haiyy",
+      "meaning": "The Ever Living"
+    },
+    {
+      "id": "63",
+      "arabic": "الْقَيُّومُ",
+      "english": "Al Qayyoom",
+      "meaning": "The Self Existing"
+    },
+    {
+      "id": "64",
+      "arabic": "الْوَاجِدُ",
+      "english": "Al Waajid",
+      "meaning": "The Finder"
+    },
+    {
+      "id": "65",
+      "arabic": "الْمَاجِدُ",
+      "english": "Al Maajid",
+      "meaning": "The Glorious"
+    },
+    {
+      "id": "66",
+      "arabic": "الْواحِدُ",
+      "english": "Al Waahid",
+      "meaning": "The Only One"
+    },
+    {
+      "id": "67",
+      "arabic": "اَلاَحَدُ",
+      "english": "Al Ahad",
+      "meaning": "The One"
+    },
+    {
+      "id": "68",
+      "arabic": "الصَّمَدُ",
+      "english": "As Samad",
+      "meaning": "The Supreme Provider"
+    },
+    {
+      "id": "69",
+      "arabic": "الْقَادِرُ",
+      "english": "Al Qaadir",
+      "meaning": "The Powerful"
+    },
+    {
+      "id": "70",
+      "arabic": "الْمُقْتَدِرُ",
+      "english": "Al Muqtadir",
+      "meaning": "The Creator of all power"
+    },
+    {
+      "id": "71",
+      "arabic": "الْمُقَدِّمُ",
+      "english": "Al Muqaddim",
+      "meaning": "The Expediter"
+    },
+    {
+      "id": "72",
+      "arabic": "الْمُؤَخِّرُ",
+      "english": "Al Mu’akhir",
+      "meaning": "The Delayer"
+    },
+    {
+      "id": "73",
+      "arabic": "الأوَّلُ",
+      "english": "Al Awwal",
+      "meaning": "The First"
+    },
+    {
+      "id": "74",
+      "arabic": "الآخِرُ",
+      "english": "Al Aakhir",
+      "meaning": "The Last"
+    },
+    {
+      "id": "75",
+      "arabic": "الظَّاهِرُ",
+      "english": "Az Zaahir",
+      "meaning": "The Manifest"
+    },
+    {
+      "id": "76",
+      "arabic": "الْبَاطِنُ",
+      "english": "Al Baatin",
+      "meaning": "The Hidden"
+    },
+    {
+      "id": "77",
+      "arabic": "الْوَالِي",
+      "english": "Al Waali",
+      "meaning": "The Governor"
+    },
+    {
+      "id": "78",
+      "arabic": "الْمُتَعَالِي",
+      "english": "Al Muta’ali",
+      "meaning": "The Supreme One"
+    },
+    {
+      "id": "79",
+      "arabic": "الْبَرُّ",
+      "english": "Al Barr",
+      "meaning": "The Doer of Good"
+    },
+    {
+      "id": "80",
+      "arabic": "التَّوَابُ",
+      "english": "At Tawwaab",
+      "meaning": "The Guide to Repentence"
+    },
+    {
+      "id": "81",
+      "arabic": "الْمُنْتَقِمُ",
+      "english": "Al Muntaqim",
+      "meaning": "The Avenger"
+    },
+    {
+      "id": "82",
+      "arabic": "العَفُوُّ",
+      "english": "Al Afuww",
+      "meaning": "The Forgiver"
+    },
+    {
+      "id": "83",
+      "arabic": "الرَّؤُوفُ",
+      "english": "Ar Ra’oof",
+      "meaning": "The Clement"
+    },
+    {
+      "id": "84",
+      "arabic": "مَالِكُ الْمُلْكِ",
+      "english": "Maalik Ul Mulk",
+      "meaning": "The Owner / Soverign of All"
+    },
+    {
+      "id": "85",
+      "arabic": "ذُوالْجَلاَلِ وَالإكْرَامِ",
+      "english": "Dhu Al Jalaali Wa Al Ikraam",
+      "meaning": "Possessor of Majesty and Bounty"
+    },
+    {
+      "id": "86",
+      "arabic": "الْمُقْسِطُ",
+      "english": "Al Muqsit",
+      "meaning": "The Equitable One"
+    },
+    {
+      "id": "87",
+      "arabic": "الْجَامِعُ",
+      "english": "Al Jaami'",
+      "meaning": "The Gatherer"
+    },
+    {
+      "id": "88",
+      "arabic": "الْغَنِيُّ",
+      "english": "Al Ghaniyy",
+      "meaning": "The Rich One"
+    },
+    {
+      "id": "89",
+      "arabic": "الْمُغْنِي",
+      "english": "Al Mughi",
+      "meaning": "The Enricher"
+    },
+    {
+      "id": "90",
+      "arabic": "اَلْمَانِعُ",
+      "english": "Al Maani'",
+      "meaning": "The Preventer of harm"
+    },
+    {
+      "id": "91",
+      "arabic": "الضَّارَّ",
+      "english": "Ad Daaarr",
+      "meaning": "The Creator of the harmful"
+    },
+    {
+      "id": "92",
+      "arabic": "النَّافِعُ",
+      "english": "An Naafi’",
+      "meaning": "The Bestower of Benefits"
+    },
+    {
+      "id": "93",
+      "arabic": "النُّورُ",
+      "english": "An Noor",
+      "meaning": "The Light"
+    },
+    {
+      "id": "94",
+      "arabic": "الْهَادِي",
+      "english": "Al Haadi",
+      "meaning": "The Guider"
+    },
+    {
+      "id": "95",
+      "arabic": "الْبَدِيعُ",
+      "english": "Al Badi'",
+      "meaning": "The Originator"
+    },
+    {
+      "id": "96",
+      "arabic": "اَلْبَاقِي",
+      "english": "Al Baaqi",
+      "meaning": "The Everlasting One"
+    },
+    {
+      "id": "97",
+      "arabic": "الْوَارِثُ",
+      "english": "Al Waarith",
+      "meaning": "The Inhertior"
+    },
+    {
+      "id": "98",
+      "arabic": "الرَّشِيدُ",
+      "english": "Ar Rasheed",
+      "meaning": "The Most Righteous Guide"
+    },
+    {
+      "id": "99",
+      "arabic": "الصَّبُورُ",
+      "english": "As Saboor",
+      "meaning": "The Patient One"
+    }
+  ],
+  "quranSettings": {
+    "title": "Reading Settings",
+    "textSizes": "Text Sizes",
+    "arabicFont": "Arabic Font",
+    "translationFont": "Translation Font",
+    "translitFont": "Transliteration Font",
+    "displayOptions": "Display Options",
+    "showTranslation": "Show Translation",
+    "showTranslit": "Show Transliteration",
+    "translations": "Translations",
+    "enTrans": "English Translation",
+    "bnTrans": "Bangla Translation",
+    "translit": "Transliteration",
+    "enTranslit": "English Transliteration"
+  },
+  "surah": {
+    "verses": "{{count}} Verses"
+  },
+  "surahNames": {
+    "1": "",
+    "2": "",
+    "3": "",
+    "4": "",
+    "5": "",
+    "6": "",
+    "7": "",
+    "8": "",
+    "9": "",
+    "10": "",
+    "11": "",
+    "12": "",
+    "13": "",
+    "14": "",
+    "15": "",
+    "16": "",
+    "17": "",
+    "18": "",
+    "19": "",
+    "20": "",
+    "21": "",
+    "22": "",
+    "23": "",
+    "24": "",
+    "25": "",
+    "26": "",
+    "27": "",
+    "28": "",
+    "29": "",
+    "30": "",
+    "31": "",
+    "32": "",
+    "33": "",
+    "34": "",
+    "35": "",
+    "36": "",
+    "37": "",
+    "38": "",
+    "39": "",
+    "40": "",
+    "41": "",
+    "42": "",
+    "43": "",
+    "44": "",
+    "45": "",
+    "46": "",
+    "47": "",
+    "48": "",
+    "49": "",
+    "50": "",
+    "51": "",
+    "52": "",
+    "53": "",
+    "54": "",
+    "55": "",
+    "56": "",
+    "57": "",
+    "58": "",
+    "59": "",
+    "60": "",
+    "61": "",
+    "62": "",
+    "63": "",
+    "64": "",
+    "65": "",
+    "66": "",
+    "67": "",
+    "68": "",
+    "69": "",
+    "70": "",
+    "71": "",
+    "72": "",
+    "73": "",
+    "74": "",
+    "75": "",
+    "76": "",
+    "77": "",
+    "78": "",
+    "79": "",
+    "80": "",
+    "81": "",
+    "82": "",
+    "83": "",
+    "84": "",
+    "85": "",
+    "86": "",
+    "87": "",
+    "88": "",
+    "89": "",
+    "90": "",
+    "91": "",
+    "92": "",
+    "93": "",
+    "94": "",
+    "95": "",
+    "96": "",
+    "97": "",
+    "98": "",
+    "99": "",
+    "100": "",
+    "101": "",
+    "102": "",
+    "103": "",
+    "104": "",
+    "105": "",
+    "106": "",
+    "107": "",
+    "108": "",
+    "109": "",
+    "110": "",
+    "111": "",
+    "112": "",
+    "113": "",
+    "114": ""
+  }
+}

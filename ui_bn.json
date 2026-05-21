@@ -1,0 +1,70 @@
+{
+  "home": {
+    "titleEn": "Deen Journey",
+    "titleAr": "رحلة الدين",
+    "greeting": "السَّلَامُ عَلَيْكُمْ",
+    "quickActions": "কুইক অ্যাকশন",
+    "qibla": "কিবলা",
+    "names": "৯৯ নাম",
+    "duas": "দোয়া",
+    "specialTimes": "বিশেষ সময়",
+    "dailyInspiration": "দৈনিক অনুপ্রেরণা",
+    "restrictedTimes": "নিষিদ্ধ সময়"
+  },
+  "quran": {
+    "titleEn": "Al-Quran",
+    "titleAr": "القرآن الكريم",
+    "searchPlaceholder": "সূরা বা আয়াত খুঁজুন...",
+    "tabSurah": "সূরা",
+    "tabJuz": "পারা",
+    "tabBookmarks": "বুকমার্কস",
+    "continue": "চালিয়ে যান",
+    "goToAyah": "আয়াতে যান",
+    "noBookmarks": "কোনো বুকমার্ক করা আয়াত নেই।"
+  },
+  "tracker": {
+    "titleEn": "Daily Tracker",
+    "titleAr": "المتتبع اليومي",
+    "progress": "দৈনিক অগ্রগতি",
+    "weeklyOverview": "সাপ্তাহিক সারাংশ",
+    "prayMore": "বৃত্তটি পূরণ করতে আরও প্রার্থনা করুন!",
+    "greatJob": "আজকের কাজ চমৎকার হয়েছে!"
+  },
+  "dua": {
+    "titleEn": "Dua & Zikr",
+    "titleAr": "الدعاء والذكر",
+    "categories": "ক্যাটাগরি",
+    "completed": "সম্পন্ন হয়েছে"
+  },
+  "settings": {
+    "titleEn": "Settings",
+    "titleAr": "الإعدادات",
+    "language": "ভাষা",
+    "theme": "থিম",
+    "notifications": "নোটিফিকেশন",
+    "privacy": "গোপনীয়তা নীতি"
+  },
+  "names": {
+    "titleEn": "Allah's Names",
+    "titleAr": "أسماء الله الحسنى"
+  },
+  "qibla": {
+    "titleEn": "Qibla Compass",
+    "titleAr": "اتجاه القبلة",
+    "pointing": "কাবার দিকে নির্দেশ করছে",
+    "align": "কিবলা খুঁজতে ফোনটি সমান্তরাল রাখুন"
+  },
+  "stories": {
+    "titleEn": "Islamic History",
+    "titleAr": "التاريخ الإسلامي",
+    "readMore": "আরও পড়ুন"
+  },
+  "prayerTimes": {
+    "fajr": "ফজর",
+    "sunrise": "সূর্যোদয়",
+    "dhuhr": "যোহর",
+    "asr": "আসর",
+    "maghrib": "মাগরিব",
+    "isha": "ইশা"
+  }
+}
