@@ -20,7 +20,7 @@ interface Category {
   count: number;
 }
 
-const PIN_STORAGE_KEY = 'deen_dua_pins';
+const PIN_STORAGE_KEY = 'imansync_dua_pins';
 
 export default function DuaScreen() {
   const scheme = useThemeStore((s) => s.theme);

@@ -1,7 +1,7 @@
 {
   "expo": {
     "name": "ImanSync",
-    "slug": "DeenJourney",
+    "slug": "imansync",
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/expo.icon/Assets/expo.png",
@@ -11,6 +11,7 @@
       "icon": "./assets/expo.icon/Assets/expo.png",
       "infoPlist": {
         "UIBackgroundModes": [
+          "audio",
           "audio"
         ],
         "NSLocationWhenInUseUsageDescription": "We need your location to calculate accurate Qibla and prayer times."
@@ -33,7 +34,23 @@
         "android.permission.ACCESS_NETWORK_STATE",
         "android.permission.ACCESS_COARSE_LOCATION",
         "android.permission.ACCESS_FINE_LOCATION",
-        "android.permission.WAKE_LOCK"
+        "android.permission.WAKE_LOCK",
+        "android.permission.RECORD_AUDIO",
+        "android.permission.MODIFY_AUDIO_SETTINGS",
+        "android.permission.FOREGROUND_SERVICE",
+        "android.permission.FOREGROUND_SERVICE_MEDIA_PLAYBACK",
+        "android.permission.INTERNET",
+        "android.permission.READ_EXTERNAL_STORAGE",
+        "android.permission.WRITE_EXTERNAL_STORAGE",
+        "android.permission.VIBRATE",
+        "android.permission.ACCESS_NETWORK_STATE",
+        "android.permission.ACCESS_COARSE_LOCATION",
+        "android.permission.ACCESS_FINE_LOCATION",
+        "android.permission.WAKE_LOCK",
+        "android.permission.RECORD_AUDIO",
+        "android.permission.MODIFY_AUDIO_SETTINGS",
+        "android.permission.FOREGROUND_SERVICE",
+        "android.permission.FOREGROUND_SERVICE_MEDIA_PLAYBACK"
       ]
     },
     "web": {
@@ -66,6 +83,12 @@
       "eas": {
         "projectId": "25b53bfa-cbd8-4b78-aad3-a9b94d1db26c"
       }
+    },
+    "runtimeVersion": {
+      "policy": "appVersion"
+    },
+    "updates": {
+      "url": "https://u.expo.dev/25b53bfa-cbd8-4b78-aad3-a9b94d1db26c"
     }
   }
 }

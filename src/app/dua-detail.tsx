@@ -53,11 +53,11 @@ export default function DuaDetailScreen() {
   const [bookmarks, setBookmarks] = useState<any[]>([]);
 
   useEffect(() => {
-    AsyncStorage.getItem('deen_dua_settings').then(val => {
+    AsyncStorage.getItem('imansync_dua_settings').then(val => {
       if (val) setSettings(prev => ({ ...prev, ...JSON.parse(val) }));
     }).catch(e => console.error(e));
 
-    AsyncStorage.getItem('deen_dua_bookmarks').then(val => {
+    AsyncStorage.getItem('imansync_dua_bookmarks').then(val => {
       if (val) {
         const parsed = JSON.parse(val);
         setBookmarks(parsed);
@@ -72,17 +72,17 @@ export default function DuaDetailScreen() {
     if (isBookmarked) {
       updated = updated.filter(b => b.id.toString() !== params.id.toString());
     } else {
-      updated.push(params); // Save the entire params object so we can render it instantly
+      updated.push({ ...params }); // Save the entire params object so we can render it instantly
     }
     setBookmarks(updated);
     setIsBookmarked(!isBookmarked);
-    await AsyncStorage.setItem('deen_dua_bookmarks', JSON.stringify(updated));
+    await AsyncStorage.setItem('imansync_dua_bookmarks', JSON.stringify(updated));
   };
 
   const updateSetting = (key: keyof DuaSettings, val: any) => {
     setSettings(prev => {
       const next = { ...prev, [key]: val };
-      AsyncStorage.setItem('deen_dua_settings', JSON.stringify(next));
+      AsyncStorage.setItem('imansync_dua_settings', JSON.stringify(next));
       return next;
     });
   };

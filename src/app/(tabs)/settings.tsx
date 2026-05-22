@@ -2,6 +2,7 @@ import PageHeader from '@/components/page-header';
 import { Colors, Fonts, Spacing } from '@/constants/theme';
 import { setLanguage } from '@/i18n';
 import { useThemeStore } from '@/store/themeStore';
+import { usePreferencesStore } from '@/store/preferencesStore';
 import { getDistrictName } from '@/utils/districts';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { BlurView } from 'expo-blur';
@@ -9,7 +10,7 @@ import * as Location from 'expo-location';
 import { Bell, ChevronRight, Globe, MapPin, Moon, Settings as SettingsIcon, Shield } from 'lucide-react-native';
 import React, { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { ActivityIndicator, Alert, Image, Linking, ScrollView, StyleSheet, Switch, Text, TouchableOpacity, View } from 'react-native';
+import { ActivityIndicator, Alert, Image, Linking, ScrollView, StyleSheet, Switch, Text, TouchableOpacity, View, Platform } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 const CALC_METHODS = [
@@ -24,22 +25,24 @@ export default function SettingsScreen() {
   const colors = Colors[scheme === 'unspecified' ? 'light' : scheme];
   const { t, i18n } = useTranslation();
   
-  const [notificationsEnabled, setNotificationsEnabled] = useState(true);
   const [calcMethodIndex, setCalcMethodIndex] = useState(0);
   const [locationName, setLocationName] = useState('');
   const [fetchingLoc, setFetchingLoc] = useState(false);
 
+  const prefs = usePreferencesStore();
+
   useEffect(() => {
-    AsyncStorage.multiGet(['deen_notifications', 'deen_dark_mode', 'deen_calc_method', 'deen_location']).then((values) => {
+    prefs.initialize();
+    
+    AsyncStorage.multiGet(['imansync_dark_mode', 'imansync_calc_method', 'imansync_location']).then((values) => {
       values.forEach(([key, value]) => {
         if (value !== null) {
-          if (key === 'deen_notifications') setNotificationsEnabled(value === 'true');
-          if (key === 'deen_calc_method') {
+          if (key === 'imansync_calc_method') {
             const methodId = parseInt(value, 10);
             const idx = CALC_METHODS.findIndex(m => m.id === methodId);
             if (idx >= 0) setCalcMethodIndex(idx);
           }
-          if (key === 'deen_location') {
+          if (key === 'imansync_location') {
             try {
               const loc = JSON.parse(value);
               setLocationName(loc.city);
@@ -47,7 +50,7 @@ export default function SettingsScreen() {
           }
         } else {
           // Defaults
-          if (key === 'deen_location') {
+          if (key === 'imansync_location') {
             setLocationName('Dhaka (Default)');
           }
         }
@@ -55,9 +58,25 @@ export default function SettingsScreen() {
     });
   }, []);
 
-  const toggleNotifications = (enabled: boolean) => {
-    setNotificationsEnabled(enabled);
-    AsyncStorage.setItem('deen_notifications', String(enabled));
+  const toggleNotifications = async (enabled: boolean) => {
+    prefs.setPreferences({ notificationsEnabled: enabled });
+    if (enabled) {
+      // Re-schedule everything
+      import('../../services/notificationService').then(s => s.scheduleAllNotifications());
+    } else {
+      // Cancel all
+      import('@notifee/react-native').then(n => n.default.cancelAllNotifications());
+    }
+  };
+
+  const togglePrayerAlerts = (enabled: boolean) => {
+    prefs.setPreferences({ prayerAlertsEnabled: enabled });
+    import('../../services/notificationService').then(s => s.scheduleAllNotifications());
+  };
+
+  const toggleTaskReminders = (enabled: boolean) => {
+    prefs.setPreferences({ taskRemindersEnabled: enabled });
+    import('../../services/notificationService').then(s => s.scheduleAllNotifications());
   };
 
   const toggleDarkMode = (enabled: boolean) => {
@@ -67,12 +86,14 @@ export default function SettingsScreen() {
   const cycleLanguage = () => {
     const nextLang = i18n.language === 'en' ? 'bn' : 'en';
     setLanguage(nextLang);
+    // Re-schedule notifications so they are generated in the new language
+    import('../../services/notificationService').then(s => s.scheduleAllNotifications());
   };
 
-  const cycleCalcMethod = () => {
+  const cycleCalcMethod = async () => {
     const nextIdx = (calcMethodIndex + 1) % CALC_METHODS.length;
     setCalcMethodIndex(nextIdx);
-    AsyncStorage.setItem('deen_calc_method', String(CALC_METHODS[nextIdx].id));
+    await AsyncStorage.setItem('imansync_calc_method', String(CALC_METHODS[nextIdx].id));
   };
 
   const fetchLocation = async () => {
@@ -94,7 +115,7 @@ export default function SettingsScreen() {
       let city = reverse[0]?.city || reverse[0]?.subregion || reverse[0]?.region || 'Unknown Location';
       setLocationName(city);
       
-      await AsyncStorage.setItem('deen_location', JSON.stringify({
+      await AsyncStorage.setItem('imansync_location', JSON.stringify({
         latitude: location.coords.latitude,
         longitude: location.coords.longitude,
         city
@@ -107,9 +128,12 @@ export default function SettingsScreen() {
     }
   };
 
-  const SettingRow = ({ id, icon: Icon, title, value, type = 'navigate', onPress }: any) => (
+  const SettingRow = ({ id, icon: Icon, title, value, type = 'navigate', onPress, isLast }: any) => (
     <TouchableOpacity 
-      style={[styles.settingRow, { borderBottomColor: colors.border }]} 
+      style={[
+        styles.settingRow, 
+        !isLast && { borderBottomWidth: StyleSheet.hairlineWidth, borderBottomColor: colors.border }
+      ]} 
       activeOpacity={type === 'navigate' ? 0.7 : 1}
       onPress={onPress}
     >
@@ -121,16 +145,21 @@ export default function SettingsScreen() {
       </View>
       
       {type === 'navigate' ? (
-        <View style={{ flexDirection: 'row', alignItems: 'center' }}>
-          <Text style={[styles.settingValue, { color: colors.textSecondary }]}>{value}</Text>
+        <View style={{ flexDirection: 'row', alignItems: 'center', flexShrink: 1 }}>
+          <Text style={[styles.settingValue, { color: colors.textSecondary }]} numberOfLines={1} ellipsizeMode="tail">{value}</Text>
           <ChevronRight size={20} color={colors.textSecondary} />
         </View>
       ) : type === 'toggle' ? (
         <Switch
           value={value}
-          onValueChange={id === 'notifications' ? toggleNotifications : toggleDarkMode}
+          onValueChange={(val) => {
+            if (id === 'notifications') toggleNotifications(val);
+            else if (id === 'prayerAlerts') togglePrayerAlerts(val);
+            else if (id === 'taskReminders') toggleTaskReminders(val);
+            else toggleDarkMode(val);
+          }}
           trackColor={{ false: colors.border, true: colors.highlight }}
-          thumbColor="#FFFFFF"
+          thumbColor="#f4f3f4"
         />
       ) : type === 'loading' ? (
         <ActivityIndicator size="small" color={colors.highlight} />
@@ -147,20 +176,53 @@ export default function SettingsScreen() {
           <Image source={require('../../../assets/images/android-icon-foreground.png')} style={styles.footerLogo} resizeMode="contain" />
           <View style={styles.footerTextContainer}>
             <Text style={[styles.footerAppName, { color: colors.text }]}>ImanSync</Text>
-            <Text style={[styles.footerSubtitle, { color: colors.textSecondary }]}>{t('settings.footerSubtitle', { defaultValue: 'Crafted by Srizon for the satisfaction of Allah' })}</Text>
+            <Text style={[styles.footerSubtitle, { color: colors.textSecondary }]}>{t('settings.footerSubtitle', { defaultValue: 'Crafted seeking the satisfaction of Allah' })}</Text>
             <Text style={[styles.footerVersion, { color: colors.textSecondary }]}>v1.0.0</Text>
           </View>
         </View>
 
         <Text style={[styles.sectionTitle, { color: colors.textSecondary }]}>{t('settings.preferences')}</Text>
-        <BlurView intensity={40} tint={colors.glassTint as any} style={styles.card}>
-          <SettingRow id="notifications" icon={Bell} title={t('settings.notifications')} value={notificationsEnabled} type="toggle" />
-          <SettingRow id="theme" icon={Moon} title={t('settings.theme')} value={scheme === 'dark'} type="toggle" />
+        <BlurView intensity={40} tint={colors.glassTint as any} style={[styles.card, { borderColor: colors.border }]}>
           <SettingRow id="language" icon={Globe} title={t('settings.language')} value={i18n.language === 'bn' ? 'বাংলা' : 'English'} onPress={cycleLanguage} />
+          <SettingRow id="theme" icon={Moon} title={t('settings.theme')} value={scheme === 'dark'} type="toggle" isLast={true} />
+        </BlurView>
+
+        <Text style={[styles.sectionTitle, { color: colors.textSecondary, marginTop: Spacing.four }]}>{t('settings.notificationsTitle', { defaultValue: 'Notifications Settings' })}</Text>
+        <BlurView intensity={40} tint={colors.glassTint as any} style={[styles.card, { borderColor: colors.border }]}>
+          <SettingRow id="notifications" icon={Bell} title={t('settings.masterToggle', { defaultValue: 'Master Toggle' })} value={prefs.notificationsEnabled} type="toggle" isLast={!prefs.notificationsEnabled} />
+          {prefs.notificationsEnabled && (
+            <>
+              <SettingRow id="prayerAlerts" icon={Bell} title={t('settings.prayerAlerts', { defaultValue: 'Prayer Alerts' })} value={prefs.prayerAlertsEnabled} type="toggle" onPress={(v: boolean) => togglePrayerAlerts(v)} />
+              <SettingRow id="taskReminders" icon={Bell} title={t('settings.dailyReminders', { defaultValue: 'Daily Reminders' })} value={prefs.taskRemindersEnabled} type="toggle" onPress={(v: boolean) => toggleTaskReminders(v)} />
+              <SettingRow 
+                id="quietHours" 
+                icon={Moon} 
+                title={t('settings.quietHours', { defaultValue: 'Quiet Hours' })} 
+                value={`${prefs.quietHours.nightStart}:00 - 0${prefs.quietHours.nightEnd}:00`} 
+                type="navigate" 
+                isLast={true}
+                onPress={() => {
+                  const currentNightStart = prefs.quietHours.nightStart;
+                  let nextPreset;
+                  
+                  if (currentNightStart === 23) {
+                    nextPreset = { nightStart: 22, nightEnd: 4, afternoonStart: 14, afternoonEnd: 15 };
+                  } else if (currentNightStart === 22) {
+                    nextPreset = { nightStart: 21, nightEnd: 6, afternoonStart: 0, afternoonEnd: 0 };
+                  } else {
+                    nextPreset = { nightStart: 23, nightEnd: 5, afternoonStart: 15, afternoonEnd: 16 };
+                  }
+                  
+                  prefs.setPreferences({ quietHours: nextPreset });
+                  import('../../services/notificationService').then(s => s.scheduleAllNotifications());
+                }} 
+              />
+            </>
+          )}
         </BlurView>
 
         <Text style={[styles.sectionTitle, { color: colors.textSecondary, marginTop: Spacing.four }]}>{t('settings.locationCalc')}</Text>
-        <BlurView intensity={40} tint={colors.glassTint as any} style={styles.card}>
+        <BlurView intensity={40} tint={colors.glassTint as any} style={[styles.card, { borderColor: colors.border }]}>
           <SettingRow 
             id="location" 
             icon={MapPin} 
@@ -175,17 +237,19 @@ export default function SettingsScreen() {
             title={t('settings.calcMethod')} 
             value={t('settings.calcMethod_' + CALC_METHODS[calcMethodIndex].id)} 
             onPress={cycleCalcMethod}
+            isLast={true}
           />
         </BlurView>
 
         <Text style={[styles.sectionTitle, { color: colors.textSecondary, marginTop: Spacing.four }]}>{t('settings.system')}</Text>
-        <BlurView intensity={40} tint={colors.glassTint as any} style={styles.card}>
+        <BlurView intensity={40} tint={colors.glassTint as any} style={[styles.card, { borderColor: colors.border }]}>
           <SettingRow 
             id="permissions"
             icon={Shield} 
             title={t('settings.managePermissions')} 
             value="" 
             onPress={() => Linking.openSettings()} 
+            isLast={true}
           />
         </BlurView>
       </ScrollView>
@@ -224,22 +288,23 @@ const styles = StyleSheet.create({
   },
   card: {
     borderRadius: 24,
-    padding: Spacing.four,
+    paddingVertical: Spacing.two,
+    paddingHorizontal: Spacing.four,
     overflow: 'hidden',
     borderWidth: 1,
-    borderColor: 'rgba(255, 255, 255, 0.1)',
   },
   settingRow: {
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
     paddingVertical: Spacing.three,
-    borderBottomWidth: StyleSheet.hairlineWidth,
   },
   settingLeft: {
     flexDirection: 'row',
     alignItems: 'center',
     gap: Spacing.three,
+    flex: 1,
+    paddingRight: 10,
   },
   iconBox: {
     width: 40,
@@ -251,6 +316,14 @@ const styles = StyleSheet.create({
   settingTitle: {
     fontFamily: Fonts.outfit,
     fontSize: 14,
+    flexShrink: 1,
+  },
+  settingValue: {
+    fontFamily: Fonts.outfit,
+    fontSize: 14,
+    flexShrink: 1,
+    textAlign: 'right',
+    marginRight: 4,
   },
   appFooter: {
     flexDirection: 'row',
@@ -287,10 +360,5 @@ const styles = StyleSheet.create({
     fontSize: 12,
     marginTop: 4,
     opacity: 0.7,
-  },
-  settingValue: {
-    fontFamily: Fonts.outfit,
-    fontSize: 14,
-    marginRight: 4,
   },
 });

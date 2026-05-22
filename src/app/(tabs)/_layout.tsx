@@ -45,45 +45,41 @@ export default function TabLayout() {
           margin: 0,
           marginTop: 4,
         },
-        tabBarIconStyle: {
-          width: 24,
-          height: 24,
-        },
       }}
     >
       <SwipeableTabs.Screen
         name="tracker"
         options={{
           title: t('tracker.titleEn'),
-          tabBarIcon: ({ color }) => <Heart size={24} color={color} />,
+          tabBarIcon: ({ color }: { color: string }) => <Heart size={24} color={color} />,
         }}
       />
       <SwipeableTabs.Screen
         name="quran"
         options={{
           title: t('quran.titleEn'),
-          tabBarIcon: ({ color }) => <BookOpen size={24} color={color} />,
+          tabBarIcon: ({ color }: { color: string }) => <BookOpen size={24} color={color} />,
         }}
       />
       <SwipeableTabs.Screen
         name="index"
         options={{
           title: t('home.titleEn'),
-          tabBarIcon: ({ color }) => <Home size={24} color={color} />,
+          tabBarIcon: ({ color }: { color: string }) => <Home size={24} color={color} />,
         }}
       />
       <SwipeableTabs.Screen
         name="dua"
         options={{
           title: t('dua.titleEn'),
-          tabBarIcon: ({ color }) => <Map size={24} color={color} />,
+          tabBarIcon: ({ color }: { color: string }) => <Map size={24} color={color} />,
         }}
       />
       <SwipeableTabs.Screen
         name="settings"
         options={{
           title: t('settings.titleEn'),
-          tabBarIcon: ({ color }) => <Settings size={24} color={color} />,
+          tabBarIcon: ({ color }: { color: string }) => <Settings size={24} color={color} />,
         }}
       />
     </SwipeableTabs>

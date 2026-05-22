@@ -32,7 +32,7 @@ export default function DuaCard({
   const { t, i18n } = useTranslation();
 
   return (
-    <View style={styles.wrapper}>
+    <View style={[styles.wrapper, { borderColor: colors.border }]}>
       <BlurView intensity={40} tint={colors.glassTint as any} style={StyleSheet.absoluteFill} />
       <TouchableOpacity
         style={[
@@ -86,6 +86,7 @@ const styles = StyleSheet.create({
     borderRadius: 20,
     overflow: 'hidden',
     width: '100%',
+    borderWidth: 1,
   },
   card: {
     padding: Spacing.two,

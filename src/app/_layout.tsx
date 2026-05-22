@@ -19,6 +19,10 @@ import { setAudioModeAsync } from 'expo-audio';
 import { initI18n } from '@/i18n';
 import AudioPlayerBar from '@/components/AudioPlayerBar';
 import { useThemeStore } from '@/store/themeStore';
+import SystemAnnouncer from '@/components/SystemAnnouncer';
+import { usePreferencesStore } from '@/store/preferencesStore';
+import { scheduleAllNotifications } from '@/services/notificationService';
+import { AppState, AppStateStatus } from 'react-native';
 
 SplashScreen.preventAutoHideAsync();
 
@@ -36,7 +40,6 @@ export default function RootLayout() {
   });
 
   useEffect(() => {
-    setupNotificationChannels();
     initI18n().then(() => setI18nLoaded(true));
     
     setAudioModeAsync({
@@ -45,13 +48,25 @@ export default function RootLayout() {
       interruptionMode: 'mixWithOthers'
     }).catch(e => console.log('Audio mode error:', e));
 
+    // Load user preferences
+    usePreferencesStore.getState().initialize().then(() => {
+      scheduleAllNotifications(); // initial schedule
+    });
+
     // Load user theme preference
     useThemeStore.getState().initialize().finally(() => {
       setThemeLoaded(true);
     });
 
+    // Listen to app state changes to aggressively re-schedule
+    const subscription = AppState.addEventListener('change', (nextAppState: AppStateStatus) => {
+      if (nextAppState === 'active') {
+        scheduleAllNotifications();
+      }
+    });
+
     // First-open storage setup
-    AsyncStorage.getItem('deen_my_duas_path').then(val => {
+    AsyncStorage.getItem('imansync_my_duas_path').then(val => {
       if (!val) {
         // If not set up, prompt user
         Alert.alert(
@@ -69,6 +84,10 @@ export default function RootLayout() {
         );
       }
     });
+
+    return () => {
+      subscription.remove();
+    };
   }, []);
 
   useEffect(() => {
@@ -101,6 +120,7 @@ export default function RootLayout() {
               <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
             </Stack>
             <AudioPlayerBar />
+            <SystemAnnouncer />
           </View>
         </ThemeProvider>
       </SQLiteProvider>

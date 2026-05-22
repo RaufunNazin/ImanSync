@@ -41,7 +41,7 @@ export default function QiblaScreen() {
 
   useEffect(() => {
     // Load coordinates to calculate exact Qibla direction
-    AsyncStorage.getItem('deen_location').then(val => {
+    AsyncStorage.getItem('imansync_location').then(val => {
       if (val) {
         try {
           const loc = JSON.parse(val);

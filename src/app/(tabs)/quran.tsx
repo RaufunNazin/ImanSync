@@ -63,11 +63,11 @@ export default function QuranScreen() {
         if (val) setLastReadJuz(JSON.parse(val));
       }).catch(e => console.error(e));
 
-      AsyncStorage.getItem('deen_quran_bookmarks').then(val => {
+      AsyncStorage.getItem('imansync_quran_bookmarks').then(val => {
         if (val) setBookmarks(JSON.parse(val));
       }).catch(e => console.error(e));
 
-      AsyncStorage.getItem('deen_hide_learn_banner').then(val => {
+      AsyncStorage.getItem('imansync_hide_learn_banner').then(val => {
         if (val === 'true') setShowLearnBanner(false);
       }).catch(e => console.error(e));
     }, [])
@@ -118,7 +118,7 @@ export default function QuranScreen() {
               style={{ position: 'absolute', top: 8, right: 8, padding: 4 }}
               onPress={() => {
                 setShowLearnBanner(false);
-                AsyncStorage.setItem('deen_hide_learn_banner', 'true');
+                AsyncStorage.setItem('imansync_hide_learn_banner', 'true');
               }}
               hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
             >

@@ -95,7 +95,8 @@ export default function HomeScreen() {
   const [rawTimings, setRawTimings] = useState<Record<string, string>>({});
   const [hijriDate, setHijriDate] = useState('');
   const [dailyVerse, setDailyVerse] = useState<DailyVerse | null>(null);
-  const [locationName, setLocationName] = useState('Dhaka');
+  const [locationCity, setLocationCity] = useState('Dhaka');
+  const locationName = getDistrictName(locationCity, i18n.language);
 
   // Tick every second
   useEffect(() => {
@@ -105,7 +106,7 @@ export default function HomeScreen() {
 
   // Fetch prayer times
   useEffect(() => {
-    AsyncStorage.multiGet(['deen_location', 'deen_calc_method']).then(values => {
+    AsyncStorage.multiGet(['imansync_location', 'imansync_calc_method']).then(values => {
       let lat = 23.8103;
       let lon = 90.4125;
       let method = 1; // 1 = Karachi, 2 = ISNA, 3 = MWL
@@ -114,7 +115,7 @@ export default function HomeScreen() {
       let country = 'Bangladesh';
       
       values.forEach(([key, value]) => {
-        if (value && key === 'deen_location') {
+        if (value && key === 'imansync_location') {
           try {
              let loc = JSON.parse(value);
              lat = loc.latitude;
@@ -123,12 +124,12 @@ export default function HomeScreen() {
              isCityBased = false;
           } catch(e){}
         }
-        if (value && key === 'deen_calc_method') {
+        if (value && key === 'imansync_calc_method') {
            method = parseInt(value, 10);
         }
       });
 
-      setLocationName(getDistrictName(city, i18n.language));
+      setLocationCity(city);
 
       let url = isCityBased 
         ? `https://api.aladhan.com/v1/timingsByCity?city=${city}&country=${country}&method=${method}`
@@ -278,19 +279,29 @@ export default function HomeScreen() {
 
   // Restricted times
   const restrictedTimes: RestrictedTime[] = useMemo(() => {
-    if (!rawTimings.Fajr) return [];
+    if (!rawTimings.Sunrise || !rawTimings.Sunset || !rawTimings.Dhuhr) return [];
+    
+    const sunriseDate = parseTime(rawTimings.Sunrise, today);
+    const sunriseEnd = new Date(sunriseDate.getTime() + 15 * 60000);
+    
+    const dhuhrDate = parseTime(rawTimings.Dhuhr, today);
+    const zawaalStart = new Date(dhuhrDate.getTime() - 10 * 60000);
+    
+    const sunsetDate = parseTime(rawTimings.Sunset, today);
+    const paleStart = new Date(sunsetDate.getTime() - 15 * 60000);
+
     return [
       {
         labelKey: 'restrict1',
-        time: `${formatAMPM(parseTime(rawTimings.Fajr, today), i18n.language)} – ${formatAMPM(parseTime(rawTimings.Sunrise, today), i18n.language)}`,
+        time: `${formatAMPM(sunriseDate, i18n.language)} – ${formatAMPM(sunriseEnd, i18n.language)}`,
       },
       {
         labelKey: 'restrict2',
-        time: `~${formatAMPM(parseTime(rawTimings.Dhuhr, today), i18n.language)}`,
+        time: `${formatAMPM(zawaalStart, i18n.language)} – ${formatAMPM(dhuhrDate, i18n.language)}`,
       },
       {
         labelKey: 'restrict3',
-        time: `${formatAMPM(parseTime(rawTimings.Asr, today), i18n.language)} – ${formatAMPM(parseTime(rawTimings.Sunset, today), i18n.language)}`,
+        time: `${formatAMPM(paleStart, i18n.language)} – ${formatAMPM(sunsetDate, i18n.language)}`,
       },
     ];
   }, [rawTimings, today, t, i18n.language]);
@@ -342,9 +353,23 @@ export default function HomeScreen() {
                 <Text style={[styles.heroNextLabel, { color: colors.textSecondary }]}>
                   {t('home.next')} · {nextPrayer.name}
                 </Text>
-                <Text style={[styles.heroCountdown, { color: colors.accent }]}>
-                  {displayCountdown}
-                </Text>
+                <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'flex-end' }}>
+                  {displayCountdown.split('').map((char, idx) => (
+                    <Text 
+                      key={idx} 
+                      style={[
+                        styles.heroCountdown, 
+                        { 
+                          color: colors.accent,
+                          width: char === ':' || char === ' ' ? 12 : 22,
+                          textAlign: 'center'
+                        }
+                      ]}
+                    >
+                      {char}
+                    </Text>
+                  ))}
+                </View>
                 <View style={styles.locationRow}>
                   <MapPin size={12} color={colors.textSecondary} />
                   <Text style={[styles.locationText, { color: colors.textSecondary }]}>
@@ -870,6 +895,7 @@ const styles = StyleSheet.create({
     fontFamily: Fonts.outfit,
     fontSize: 32,
     letterSpacing: 1,
+    fontVariant: ['tabular-nums'],
   },
   locationRow: {
     flexDirection: 'row',
@@ -995,6 +1021,7 @@ const styles = StyleSheet.create({
   specialTime: {
     fontFamily: Fonts.outfit,
     fontSize: 13,
+    fontVariant: ['tabular-nums'],
   },
   specialIcon: {
     // reserved — icon now rendered via lucide component

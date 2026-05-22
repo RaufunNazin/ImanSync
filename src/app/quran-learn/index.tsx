@@ -21,7 +21,7 @@ export default function LearnQuranHubScreen() {
 
   useEffect(() => {
     // Load progress
-    AsyncStorage.getItem('deen_learn_progress').then(val => {
+    AsyncStorage.getItem('imansync_learn_progress').then(val => {
       if (val) {
         try {
           setCompletedLessons(JSON.parse(val));
@@ -114,7 +114,7 @@ export default function LearnQuranHubScreen() {
 const styles = StyleSheet.create({
   safeArea: { flex: 1 },
   container: {
-    padding: Spacing.four,
+    paddingHorizontal: Spacing.four,
     paddingBottom: 40,
   },
   chapterSection: {
@@ -168,7 +168,7 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
-    padding: Spacing.four,
+    padding: Spacing.three,
     borderRadius: 16,
     borderWidth: 1,
   },

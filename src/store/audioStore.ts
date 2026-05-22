@@ -1,6 +1,7 @@
 import { create } from 'zustand';
 import { createAudioPlayer, AudioPlayer } from 'expo-audio';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import { Platform } from 'react-native';
 
 interface AudioState {
   sound: AudioPlayer | null;
@@ -39,7 +40,7 @@ export const useAudioStore = create<AudioState>((set, get) => ({
 
   setReciter: async (id: number) => {
     set({ currentReciterId: id });
-    await AsyncStorage.setItem('deen_quran_reciter', String(id));
+    await AsyncStorage.setItem('imansync_quran_reciter', String(id));
     // If currently playing, we should restart the current surah with the new reciter
     const { isPlaying, currentSurahId, playSurah } = get();
     if (isPlaying && currentSurahId) {
@@ -145,7 +146,7 @@ export const useAudioStore = create<AudioState>((set, get) => ({
       });
 
       if (status.didJustFinish) {
-        get().playNext();
+        setTimeout(() => get().playNext(), 10);
       }
     } else if (status.error) {
       console.error(`Playback Error: ${status.error}`);
@@ -155,8 +156,10 @@ export const useAudioStore = create<AudioState>((set, get) => ({
 }));
 
 // Initialize reciter on load
-AsyncStorage.getItem('deen_quran_reciter').then((val) => {
-  if (val) {
-    useAudioStore.setState({ currentReciterId: parseInt(val, 10) });
-  }
-});
+if (Platform.OS !== 'web') {
+  AsyncStorage.getItem('imansync_quran_reciter').then((val) => {
+    if (val) {
+      useAudioStore.setState({ currentReciterId: parseInt(val, 10) });
+    }
+  });
+}

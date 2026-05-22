@@ -18,7 +18,7 @@ export default function DuaBookmarksScreen() {
 
   useFocusEffect(
     useCallback(() => {
-      AsyncStorage.getItem('deen_dua_bookmarks').then(val => {
+      AsyncStorage.getItem('imansync_dua_bookmarks').then(val => {
         if (val) {
           setBookmarks(JSON.parse(val));
         }

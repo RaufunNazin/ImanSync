@@ -7,7 +7,7 @@ import * as Haptics from 'expo-haptics';
 import { Activity, BookOpen, CheckCircle2, HandCoins, Heart, Moon } from 'lucide-react-native';
 import React, { useEffect, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { ScrollView, StyleSheet, Text, TouchableOpacity, useColorScheme, View } from 'react-native';
+import { ScrollView, StyleSheet, Text, TouchableOpacity, useColorScheme, View, AppState } from 'react-native';
 import Animated, { useAnimatedProps, useAnimatedStyle, useSharedValue, withSpring, withTiming } from 'react-native-reanimated';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import Svg, { Circle } from 'react-native-svg';
@@ -104,19 +104,28 @@ export default function TrackerScreen() {
   const [activeTab, setActiveTab] = useState<'Daily' | 'Weekly' | 'Monthly'>('Daily');
   const [history, setHistory] = useState<Record<string, Record<string, boolean>>>({});
   
-  const todayStr = useMemo(() => getLocalYYYYMMDD(), []);
+  const [todayStr, setTodayStr] = useState(getLocalYYYYMMDD());
 
   useEffect(() => {
-    AsyncStorage.getItem('deen_tracker_history').then(val => {
+    const sub = AppState.addEventListener('change', (state) => {
+      if (state === 'active') {
+        setTodayStr(getLocalYYYYMMDD());
+      }
+    });
+    return () => sub.remove();
+  }, []);
+
+  useEffect(() => {
+    AsyncStorage.getItem('imansync_tracker_history').then(val => {
       if (val) {
         setHistory(JSON.parse(val));
       } else {
         // Migration from old logic if exists
-        AsyncStorage.getItem('deen_tracker_tasks').then(oldVal => {
+        AsyncStorage.getItem('imansync_tracker_tasks').then(oldVal => {
           if (oldVal) {
             const parsed = JSON.parse(oldVal);
             setHistory({ [todayStr]: parsed });
-            AsyncStorage.setItem('deen_tracker_history', JSON.stringify({ [todayStr]: parsed }));
+            AsyncStorage.setItem('imansync_tracker_history', JSON.stringify({ [todayStr]: parsed }));
           }
         });
       }
@@ -124,11 +133,12 @@ export default function TrackerScreen() {
   }, [todayStr]);
 
   const toggleTask = (id: string) => {
+    const currentDayStr = getLocalYYYYMMDD();
     setHistory(prev => {
-      const todayData = prev[todayStr] || {};
+      const todayData = prev[currentDayStr] || {};
       const nextToday = { ...todayData, [id]: !todayData[id] };
-      const nextHistory = { ...prev, [todayStr]: nextToday };
-      AsyncStorage.setItem('deen_tracker_history', JSON.stringify(nextHistory));
+      const nextHistory = { ...prev, [currentDayStr]: nextToday };
+      AsyncStorage.setItem('imansync_tracker_history', JSON.stringify(nextHistory));
       
       // If completed 100% just now, do a heavy haptic
       const newCompletedCount = Object.values(nextToday).filter(Boolean).length;
@@ -214,7 +224,7 @@ export default function TrackerScreen() {
         <Text style={[styles.sectionTitle, { color: colors.text, marginTop: Spacing.four }]}>
           {t('tracker.consistency', { title })}
         </Text>
-        <BlurView intensity={40} tint={colors.glassTint as any} style={styles.chartCard}>
+        <BlurView intensity={40} tint={colors.glassTint as any} style={[styles.chartCard, { borderColor: colors.border }]}>
           <View style={styles.chartContainer}>
             {bars.map((val, i) => (
               <View key={i} style={styles.chartBarWrapper}>
@@ -286,7 +296,7 @@ export default function TrackerScreen() {
         </BlurView>
 
         {/* Visual Progress Card */}
-        <BlurView intensity={50} tint={colors.glassTint as any} style={styles.progressCard}>
+        <BlurView intensity={50} tint={colors.glassTint as any} style={[styles.progressCard, { borderColor: colors.border }]}>
           <View style={styles.progressHeader}>
             <View style={{ flex: 1 }}>
               <Text style={[styles.progressTitle, { color: colors.text }]}>
@@ -377,7 +387,6 @@ const styles = StyleSheet.create({
     marginBottom: Spacing.three,
     overflow: 'hidden',
     borderWidth: 1,
-    borderColor: 'rgba(255, 255, 255, 0.1)',
   },
   progressHeader: {
     flexDirection: 'row',
@@ -474,6 +483,7 @@ const styles = StyleSheet.create({
     padding: Spacing.four,
     borderRadius: 20,
     overflow: 'hidden',
+    borderWidth: 1,
   },
   chartContainer: {
     flexDirection: 'row',

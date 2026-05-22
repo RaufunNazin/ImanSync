@@ -60,7 +60,7 @@ export default function JuzScreen() {
 
   // Load Settings and Bookmarks
   useEffect(() => {
-    AsyncStorage.getItem('deen_quran_settings').then(val => {
+    AsyncStorage.getItem('imansync_quran_settings').then(val => {
       if (val) setSettings(prev => ({ ...prev, ...JSON.parse(val) }));
     });
     loadBookmarks();
@@ -68,7 +68,7 @@ export default function JuzScreen() {
 
   const loadBookmarks = async () => {
     try {
-      const stored = await AsyncStorage.getItem('deen_quran_bookmarks');
+      const stored = await AsyncStorage.getItem('imansync_quran_bookmarks');
       if (stored) {
         const parsed = JSON.parse(stored);
         const map: Record<string, boolean> = {};
@@ -84,7 +84,7 @@ export default function JuzScreen() {
 
   const toggleBookmark = async (ayahItem: Ayah) => {
     try {
-      const stored = await AsyncStorage.getItem('deen_quran_bookmarks');
+      const stored = await AsyncStorage.getItem('imansync_quran_bookmarks');
       let bookmarks = stored ? JSON.parse(stored) : [];
       
       const existsIndex = bookmarks.findIndex((b: any) => b.surahId === ayahItem.surahId && b.numberInSurah === ayahItem.numberInSurah);
@@ -104,7 +104,7 @@ export default function JuzScreen() {
         setBookmarkedAyahs(prev => ({ ...prev, [key]: true }));
       }
       
-      await AsyncStorage.setItem('deen_quran_bookmarks', JSON.stringify(bookmarks));
+      await AsyncStorage.setItem('imansync_quran_bookmarks', JSON.stringify(bookmarks));
     } catch (e) {
       console.error(e);
     }
@@ -113,7 +113,7 @@ export default function JuzScreen() {
   const updateSetting = (key: keyof Settings, val: any) => {
     setSettings(prev => {
       const next = { ...prev, [key]: val };
-      AsyncStorage.setItem('deen_quran_settings', JSON.stringify(next));
+      AsyncStorage.setItem('imansync_quran_settings', JSON.stringify(next));
       return next;
     });
   };

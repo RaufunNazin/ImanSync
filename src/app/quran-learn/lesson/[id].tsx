@@ -63,11 +63,11 @@ export default function LessonPlayerScreen() {
 
   const markAsComplete = async () => {
     try {
-      const val = await AsyncStorage.getItem('deen_learn_progress');
+      const val = await AsyncStorage.getItem('imansync_learn_progress');
       const progress = val ? JSON.parse(val) : [];
       if (!progress.includes(id)) {
         progress.push(id);
-        await AsyncStorage.setItem('deen_learn_progress', JSON.stringify(progress));
+        await AsyncStorage.setItem('imansync_learn_progress', JSON.stringify(progress));
       }
     } catch(e) {}
   };
@@ -209,8 +209,8 @@ export default function LessonPlayerScreen() {
                 const isTarget = opt.id === activeLesson!.items![currentIndex].id;
                 const isSelected = selectedAnswer === opt.id;
                 
-                let bgColor = colors.backgroundElement;
-                let borderColor = colors.border;
+                let bgColor: string = colors.backgroundElement;
+                let borderColor: string = colors.border;
                 
                 if (isSelected) {
                   bgColor = isTarget ? '#4CAF5030' : '#F4433630';
@@ -237,7 +237,13 @@ export default function LessonPlayerScreen() {
         <View style={[styles.footer, { borderTopColor: colors.border, backgroundColor: colors.background }]}>
           <TouchableOpacity 
             style={[styles.completeBtn, { backgroundColor: colors.highlight }]}
-            onPress={() => router.back()}
+            onPress={() => {
+              if (router.canGoBack()) {
+                router.back();
+              } else {
+                router.replace('/quran-learn');
+              }
+            }}
           >
             <Check size={20} color={colors.background} />
             <Text style={[styles.completeBtnText, { color: colors.background }]}>Continue</Text>
@@ -275,14 +281,15 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     alignItems: 'center',
     justifyContent: 'center',
-    padding: Spacing.two,
   },
   arabicText: {
     fontFamily: Fonts.arabic,
-    fontSize: 48,
-    marginBottom: 8,
+    fontSize: 40,
+    marginTop: -10, // Slight nudge up to perfectly balance the diacritics
   },
   translitText: {
+    position: 'absolute',
+    bottom: 10,
     fontFamily: Fonts.outfit,
     fontSize: 14,
   },
@@ -335,7 +342,7 @@ const styles = StyleSheet.create({
     borderWidth: 2,
     alignItems: 'center',
     justifyContent: 'center',
-    marginBottom: Spacing.eight,
+    marginBottom: Spacing.six,
   },
   tapToListen: {
     fontFamily: Fonts.outfit,

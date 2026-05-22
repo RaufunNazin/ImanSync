@@ -32,7 +32,7 @@ export default function MyDuasScreen() {
 
   const checkStorage = async () => {
     try {
-      const uri = await AsyncStorage.getItem('deen_my_duas_path');
+      const uri = await AsyncStorage.getItem('imansync_my_duas_path');
       if (!uri) {
         setNeedsSetup(true);
         setLoading(false);
@@ -138,7 +138,7 @@ export default function MyDuasScreen() {
           <Text style={[styles.setupTitle, { color: colors.text }]}>{t('dua.setupStorage')}</Text>
           <Text style={[styles.setupDesc, { color: colors.textSecondary }]}>
             {Platform.OS === 'android' 
-              ? 'We will ask for storage permission to create a "Noor_MyDuas" folder in your Downloads, so your custom duas are never lost even if you reinstall the app.\n\nIf automatic creation fails, you will be asked to select a folder manually.'
+              ? 'We will ask for storage permission to create a "ImanSync_MyDuas" folder in your Downloads, so your custom duas are never lost even if you reinstall the app.\n\nIf automatic creation fails, you will be asked to select a folder manually.'
               : t('dua.setupStorageDesc')}
           </Text>
           <TouchableOpacity 

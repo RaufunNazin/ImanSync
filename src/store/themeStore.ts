@@ -17,12 +17,12 @@ export const useThemeStore = create<ThemeState>((set) => ({
       try {
         Appearance.setColorScheme(theme);
       } catch (e) {}
-      AsyncStorage.setItem('deen_dark_mode', String(theme === 'dark'));
+      AsyncStorage.setItem('imansync_dark_mode', String(theme === 'dark'));
     }, 50);
   },
   initialize: async () => {
     try {
-      const val = await AsyncStorage.getItem('deen_dark_mode');
+      const val = await AsyncStorage.getItem('imansync_dark_mode');
       if (val !== null) {
         const isDark = val === 'true';
         const theme = isDark ? 'dark' : 'light';
