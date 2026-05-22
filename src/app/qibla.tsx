@@ -10,6 +10,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { useTranslation } from 'react-i18next';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { formatNumber } from '@/utils/formatNumber';
+import { useThemeStore } from '@/store/themeStore';
 
 // Kaaba Coordinates
 const KAABA_LAT = 21.4225;
@@ -30,7 +31,7 @@ const getQiblaBearing = (lat: number, lon: number) => {
 };
 
 export default function QiblaScreen() {
-  const scheme = useColorScheme();
+  const scheme = useThemeStore((s) => s.theme);
   const colors = Colors[scheme === 'unspecified' ? 'light' : scheme];
   const { t, i18n } = useTranslation();
 

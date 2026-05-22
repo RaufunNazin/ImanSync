@@ -9,12 +9,13 @@ import { BlurView } from 'expo-blur';
 import { Plus, Trash2, Play } from 'lucide-react-native';
 import { initStorage, loadMyDuas, saveMyDuas, saveMediaFile, UserDua, getMediaUri } from '@/utils/my-duas-storage';
 import AddDuaModal from '@/components/add-dua-modal';
-import { Video, ResizeMode } from 'expo-av';
+import { useVideoPlayer, VideoView } from 'expo-video';
 import * as DocumentPicker from 'expo-document-picker';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import { useThemeStore } from '@/store/themeStore';
 
 export default function MyDuasScreen() {
-  const scheme = useColorScheme();
+  const scheme = useThemeStore((s) => s.theme);
   const colors = Colors[scheme === 'unspecified' ? 'light' : scheme];
   const { t } = useTranslation();
   const router = useRouter();
@@ -123,17 +124,7 @@ export default function MyDuasScreen() {
     }
 
     if (dua.type === 'video') {
-      return (
-        <View style={styles.mediaPreview}>
-          <Video
-            source={{ uri: localUri }}
-            style={StyleSheet.absoluteFill}
-            useNativeControls
-            resizeMode={ResizeMode.COVER}
-            isLooping={false}
-          />
-        </View>
-      );
+      return <VideoPreview uri={localUri} />;
     }
 
     return null;
@@ -234,6 +225,23 @@ export default function MyDuasScreen() {
         colors={colors}
       />
     </SafeAreaView>
+  );
+}
+
+function VideoPreview({ uri }: { uri: string }) {
+  const player = useVideoPlayer(uri, player => {
+    player.loop = false;
+  });
+
+  return (
+    <View style={styles.mediaPreview}>
+      <VideoView
+        player={player}
+        style={StyleSheet.absoluteFill}
+        nativeControls={true}
+        contentFit="cover"
+      />
+    </View>
   );
 }
 

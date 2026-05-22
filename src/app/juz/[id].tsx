@@ -2,12 +2,14 @@ import { Colors, Fonts, Spacing } from '@/constants/theme';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { BlurView } from 'expo-blur';
 import { useLocalSearchParams, useRouter } from 'expo-router';
-import { Bookmark, ChevronLeft, Minus, Plus, Settings2, X } from 'lucide-react-native';
-import React, { useEffect, useRef, useState } from 'react';
+import { Bookmark, ChevronLeft, Minus, Plus, Settings2, X, Play, Pause } from 'lucide-react-native';
+import React, { useEffect, useRef, useState, useMemo } from 'react';
 import { ActivityIndicator, FlatList, Modal, ScrollView, StyleSheet, Switch, Text, TouchableOpacity, useColorScheme, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useTranslation } from 'react-i18next';
 import { formatNumber } from '@/utils/formatNumber';
+import { useAudioStore } from '@/store/audioStore';
+import { useThemeStore } from '@/store/themeStore';
 
 interface Ayah {
   numberInSurah: number;
@@ -39,10 +41,12 @@ const DEFAULT_SETTINGS: Settings = {
 
 export default function JuzScreen() {
   const { id, ayah } = useLocalSearchParams();
-  const scheme = useColorScheme();
+  const scheme = useThemeStore((s) => s.theme);
   const colors = Colors[scheme === 'unspecified' ? 'light' : scheme];
   const router = useRouter();
   const { t, i18n } = useTranslation();
+
+  const { playJuz, pause, resume, isPlaying, isLoading: isAudioLoading, playlist, currentReciterId, setReciter } = useAudioStore();
 
   const [ayahs, setAyahs] = useState<Ayah[]>([]);
   const [loading, setLoading] = useState(true);
@@ -148,6 +152,10 @@ export default function JuzScreen() {
       .finally(() => setLoading(false));
   }, [id, settings.showEnglish, settings.showBangla, settings.showEnglishTranslit]);
 
+  const uniqueSurahsInJuz = useMemo(() => {
+    return Array.from(new Set(ayahs.map(a => a.surahId)));
+  }, [ayahs]);
+
   // Scroll to targeted Ayah if provided
   useEffect(() => {
     if (ayahs.length > 0 && ayah && !isInitialScrollDone.current) {
@@ -185,9 +193,15 @@ export default function JuzScreen() {
 
 
   const renderSettingsModal = () => (
-    <Modal visible={modalVisible} transparent animationType="slide">
+    <Modal visible={modalVisible} transparent animationType="slide" onRequestClose={() => setModalVisible(false)}>
       <View style={styles.modalOverlay}>
-        <BlurView intensity={90} tint={colors.glassTint as any} style={styles.modalContent}>
+        <TouchableOpacity style={StyleSheet.absoluteFill} activeOpacity={1} onPress={() => setModalVisible(false)} />
+        <BlurView 
+          intensity={90} 
+          tint={colors.glassTint as any} 
+          style={[styles.modalContent, { backgroundColor: colors.backgroundElement, borderColor: colors.border }]}
+        >
+          <View style={{ width: 40, height: 4, backgroundColor: colors.border, borderRadius: 2, alignSelf: 'center', marginBottom: Spacing.four }} />
           
           <View style={styles.modalHeader}>
             <Text style={[styles.modalTitle, { color: colors.text }]}>{t('quranSettings.title')}</Text>
@@ -237,13 +251,28 @@ export default function JuzScreen() {
             </View>
 
             {/* Transliterations */}
-            <Text style={[styles.sectionTitle, { color: colors.textSecondary, marginTop: Spacing.four }]}>{t('quranSettings.translit')}</Text>
+            <Text style={[styles.sectionTitle, { color: colors.textSecondary, marginTop: Spacing.four }]}>{t('quranSettings.translit', { defaultValue: 'Transliteration' })}</Text>
             <View style={styles.settingRow}>
-              <Text style={[styles.settingLabel, { color: colors.text }]}>{t('quranSettings.enTranslit')}</Text>
+              <Text style={[styles.settingLabel, { color: colors.text }]}>{t('quranSettings.enTranslit', { defaultValue: 'Show Transliteration' })}</Text>
               <Switch value={settings.showEnglishTranslit} onValueChange={(v) => updateSetting('showEnglishTranslit', v)} trackColor={{ true: colors.highlight }} />
             </View>
-            
-            <View style={{ height: Spacing.six }} />
+
+            {/* Audio Reciter */}
+            <Text style={[styles.sectionTitle, { color: colors.textSecondary, marginTop: Spacing.four }]}>{t('quranSettings.reciter', { defaultValue: 'Audio Reciter' })}</Text>
+            <View style={{ flexDirection: 'column', alignItems: 'stretch', gap: 12, paddingBottom: Spacing.four }}>
+              <TouchableOpacity 
+                style={[{ padding: 12, borderRadius: 12, borderWidth: 1, borderColor: colors.border }, currentReciterId === 7 && { borderColor: colors.highlight, backgroundColor: colors.highlight + '15' }]} 
+                onPress={() => setReciter(7)}
+              >
+                <Text style={[styles.settingLabel, { color: currentReciterId === 7 ? colors.highlight : colors.text }]}>Mishary Rashid Alafasy</Text>
+              </TouchableOpacity>
+              <TouchableOpacity 
+                style={[{ padding: 12, borderRadius: 12, borderWidth: 1, borderColor: colors.border }, currentReciterId === 1 && { borderColor: colors.highlight, backgroundColor: colors.highlight + '15' }]} 
+                onPress={() => setReciter(1)}
+              >
+                <Text style={[styles.settingLabel, { color: currentReciterId === 1 ? colors.highlight : colors.text }]}>AbdulBaset AbdulSamad</Text>
+              </TouchableOpacity>
+            </View>
           </ScrollView>
         </BlurView>
       </View>
@@ -265,9 +294,29 @@ export default function JuzScreen() {
           <ChevronLeft size={22} color={colors.textSecondary} />
         </TouchableOpacity>
         <Text style={[styles.title, { color: colors.text, flex: 1, textAlign: 'center' }]}>{t('quran.juz', { id: formatNumber(id as string, i18n.language) })}</Text>
-        <TouchableOpacity onPress={() => setModalVisible(true)} style={styles.backBtn}>
-          <Settings2 size={20} color={colors.textSecondary} />
-        </TouchableOpacity>
+        <View style={{ flexDirection: 'row', gap: Spacing.three, alignItems: 'center' }}>
+          <TouchableOpacity 
+            onPress={() => {
+              if (playlist.length > 0 || isPlaying) {
+                isPlaying ? pause() : resume();
+              } else if (uniqueSurahsInJuz.length > 0) {
+                playJuz(uniqueSurahsInJuz);
+              }
+            }} 
+            style={styles.backBtn}
+          >
+            {isAudioLoading && (playlist.length > 0 || uniqueSurahsInJuz.length > 0) ? (
+              <ActivityIndicator size="small" color={colors.highlight} />
+            ) : isPlaying ? (
+              <Pause size={20} color={colors.highlight} fill={colors.highlight} />
+            ) : (
+              <Play size={20} color={colors.highlight} fill={colors.highlight} />
+            )}
+          </TouchableOpacity>
+          <TouchableOpacity onPress={() => setModalVisible(true)} style={styles.backBtn}>
+            <Settings2 size={20} color={colors.textSecondary} />
+          </TouchableOpacity>
+        </View>
       </View>
       
       {loading ? (
@@ -385,7 +434,8 @@ const styles = StyleSheet.create({
     padding: Spacing.five,
     maxHeight: '80%',
     borderTopWidth: 1,
-    borderColor: 'rgba(255,255,255,0.1)'
+    borderColor: 'rgba(255,255,255,0.1)',
+    overflow: 'hidden',
   },
   modalHeader: {
     flexDirection: 'row',

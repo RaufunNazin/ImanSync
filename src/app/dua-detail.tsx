@@ -1,14 +1,15 @@
-import React, { useEffect, useState } from 'react';
-import { Dimensions, Modal, Platform, ScrollView, StyleSheet, Text, TouchableOpacity, TouchableWithoutFeedback, useColorScheme, View } from 'react-native';
-import { useLocalSearchParams } from 'expo-router';
-import { SafeAreaView } from 'react-native-safe-area-context';
-import { Colors, Fonts, Spacing } from '@/constants/theme';
 import PageHeader from '@/components/page-header';
-import { BlurView } from 'expo-blur';
-import { BookOpen, Settings2, Minus, Plus, X, Bookmark } from 'lucide-react-native';
+import { Colors, Fonts, Spacing } from '@/constants/theme';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import { useTranslation } from 'react-i18next';
+import { BlurView } from 'expo-blur';
 import * as Haptics from 'expo-haptics';
+import { useLocalSearchParams } from 'expo-router';
+import { Bookmark, BookOpen, Minus, Plus, Settings2, X } from 'lucide-react-native';
+import React, { useEffect, useState } from 'react';
+import { useTranslation } from 'react-i18next';
+import { Modal, ScrollView, StyleSheet, Text, TouchableOpacity, TouchableWithoutFeedback, useColorScheme, View } from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
+import { useThemeStore } from '@/store/themeStore';
 
 interface DuaSettings {
   showEnTrans: boolean;
@@ -42,7 +43,7 @@ export default function DuaDetailScreen() {
     source: string;
   }>();
   
-  const scheme = useColorScheme();
+  const scheme = useThemeStore((s) => s.theme);
   const colors = Colors[scheme === 'unspecified' ? 'light' : scheme];
   const { t, i18n } = useTranslation();
 
@@ -154,8 +155,6 @@ export default function DuaDetailScreen() {
                 <Text style={[styles.sectionTitle, { color: colors.textSecondary }]}>{t('duaSettings.translit')}</Text>
                 {renderToggle(t('duaSettings.enTranslit'), settings.showEnTranslit, v => updateSetting('showEnTranslit', v))}
                 {isBanglaMode && renderToggle(t('duaSettings.bnTranslit'), settings.showBnTranslit, v => updateSetting('showBnTranslit', v))}
-                
-                <View style={{ height: Spacing.six }} />
               </ScrollView>
             </View>
           </TouchableWithoutFeedback>
@@ -233,8 +232,6 @@ export default function DuaDetailScreen() {
           )}
 
         </BlurView>
-
-        <View style={{ height: Spacing.six }} />
       </ScrollView>
 
       {renderSettingsModal()}

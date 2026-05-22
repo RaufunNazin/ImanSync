@@ -8,6 +8,7 @@ import { useTranslation } from 'react-i18next';
 import { BlurView } from 'expo-blur';
 import { ChevronRight } from 'lucide-react-native';
 import duasBn from '@/data/duas_bn.json';
+import { useThemeStore } from '@/store/themeStore';
 
 interface DuaItem {
   id: number;
@@ -22,7 +23,7 @@ interface DuaItem {
 
 export default function DuaCategoryScreen() {
   const { id, name } = useLocalSearchParams<{ id: string; name: string }>();
-  const scheme = useColorScheme();
+  const scheme = useThemeStore((s) => s.theme);
   const colors = Colors[scheme === 'unspecified' ? 'light' : scheme];
   const { t, i18n } = useTranslation();
   const router = useRouter();
@@ -112,7 +113,6 @@ export default function DuaCategoryScreen() {
             )}
           </View>
         )}
-        <View style={{ height: Spacing.six }} />
       </ScrollView>
     </SafeAreaView>
   );

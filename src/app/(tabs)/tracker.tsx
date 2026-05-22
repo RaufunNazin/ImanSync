@@ -11,6 +11,7 @@ import { ScrollView, StyleSheet, Text, TouchableOpacity, useColorScheme, View } 
 import Animated, { useAnimatedProps, useAnimatedStyle, useSharedValue, withSpring, withTiming } from 'react-native-reanimated';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import Svg, { Circle } from 'react-native-svg';
+import { useThemeStore } from '@/store/themeStore';
 
 const DAILY_TASKS = [
   { id: 'fajr', icon: Activity },
@@ -96,7 +97,7 @@ const TaskCard = ({ task, isDone, onToggle, colors, t }: { task: typeof DAILY_TA
 };
 
 export default function TrackerScreen() {
-  const scheme = useColorScheme();
+  const scheme = useThemeStore((s) => s.theme);
   const colors = Colors[scheme === 'unspecified' ? 'light' : scheme];
   const { t, i18n } = useTranslation();
   
@@ -339,8 +340,6 @@ export default function TrackerScreen() {
         {activeTab === 'Daily' && renderDaily()}
         {activeTab === 'Weekly' && renderRealChart(7, t('tracker.weekly'))}
         {activeTab === 'Monthly' && renderRealChart(30, t('tracker.monthly'))}
-
-        <View style={{ height: Spacing.six }} />
       </ScrollView>
     </SafeAreaView>
   );

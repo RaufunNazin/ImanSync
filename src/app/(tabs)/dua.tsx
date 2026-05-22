@@ -11,6 +11,7 @@ import { useTranslation } from 'react-i18next';
 import { ActivityIndicator, Dimensions, ScrollView, StyleSheet, Text, TouchableOpacity, useColorScheme, View } from 'react-native';
 import { TextInput } from 'react-native-gesture-handler';
 import { SafeAreaView } from 'react-native-safe-area-context';
+import { useThemeStore } from '@/store/themeStore';
 
 interface Category {
   id: string;
@@ -22,7 +23,7 @@ interface Category {
 const PIN_STORAGE_KEY = 'deen_dua_pins';
 
 export default function DuaScreen() {
-  const scheme = useColorScheme();
+  const scheme = useThemeStore((s) => s.theme);
   const colors = Colors[scheme === 'unspecified' ? 'light' : scheme];
   const { t, i18n } = useTranslation();
   const router = useRouter();
@@ -293,8 +294,6 @@ export default function DuaScreen() {
         </View>
         </>
       )}
-
-        <View style={{ height: Spacing.six }} />
       </ScrollView>
 
       {/* Pin Action Sheet */}

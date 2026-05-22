@@ -3,6 +3,7 @@ import { useRouter } from 'expo-router';
 import { ChevronLeft } from 'lucide-react-native';
 import React from 'react';
 import { StyleSheet, Text, TouchableOpacity, useColorScheme, View, Image } from 'react-native';
+import { useThemeStore } from '@/store/themeStore';
 
 interface PageHeaderProps {
   titleEn: string;
@@ -25,7 +26,7 @@ export default function PageHeader({
   onBack,
   icon,
 }: PageHeaderProps) {
-  const scheme = useColorScheme();
+  const scheme = useThemeStore((s) => s.theme);
   const colors = Colors[scheme === 'unspecified' ? 'light' : scheme ?? 'light'];
   const router = useRouter();
 

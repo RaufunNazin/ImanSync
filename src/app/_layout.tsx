@@ -2,6 +2,7 @@ import { DarkTheme, DefaultTheme, ThemeProvider } from '@react-navigation/native
 import { Stack, SplashScreen } from 'expo-router';
 import React, { useEffect } from 'react';
 import { useColorScheme, StyleSheet, View } from 'react-native';
+import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import { Colors } from '@/constants/theme';
 import { SQLiteProvider } from 'expo-sqlite';
 import { migrateDbIfNeeded } from '@/lib/db';
@@ -13,13 +14,16 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import { Alert, Platform, Appearance } from 'react-native';
 import { initStorage } from '@/utils/my-duas-storage';
 import { StatusBar } from 'expo-status-bar';
+import { setAudioModeAsync } from 'expo-audio';
 
 import { initI18n } from '@/i18n';
+import AudioPlayerBar from '@/components/AudioPlayerBar';
+import { useThemeStore } from '@/store/themeStore';
 
 SplashScreen.preventAutoHideAsync();
 
 export default function RootLayout() {
-  const colorScheme = useColorScheme();
+  const colorScheme = useThemeStore((s) => s.theme);
   const [i18nLoaded, setI18nLoaded] = React.useState(false);
   const [themeLoaded, setThemeLoaded] = React.useState(false);
   
@@ -34,19 +38,15 @@ export default function RootLayout() {
   useEffect(() => {
     setupNotificationChannels();
     initI18n().then(() => setI18nLoaded(true));
+    
+    setAudioModeAsync({
+      playsInSilentMode: true,
+      shouldPlayInBackground: true,
+      interruptionMode: 'mixWithOthers'
+    }).catch(e => console.log('Audio mode error:', e));
 
     // Load user theme preference
-    AsyncStorage.getItem('deen_dark_mode').then((val) => {
-      try {
-        if (Platform.OS !== 'web') {
-          if (val !== null) {
-            Appearance.setColorScheme(val === 'true' ? 'dark' : 'light');
-          } else {
-            Appearance.setColorScheme('light');
-          }
-        }
-      } catch (e) {}
-    }).finally(() => {
+    useThemeStore.getState().initialize().finally(() => {
       setThemeLoaded(true);
     });
 
@@ -92,16 +92,19 @@ export default function RootLayout() {
   };
 
   return (
-    <SQLiteProvider databaseName="islamic.db" onInit={migrateDbIfNeeded}>
-      <ThemeProvider value={navTheme}>
-        <StatusBar style={colorScheme === 'dark' ? 'light' : 'dark'} backgroundColor={colors.background} />
-        <View style={[styles.background, { backgroundColor: colors.background }]}>
-          <Stack screenOptions={{ headerShown: false, contentStyle: { backgroundColor: 'transparent' } }}>
-            <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
-          </Stack>
-        </View>
-      </ThemeProvider>
-    </SQLiteProvider>
+    <GestureHandlerRootView style={{ flex: 1 }}>
+      <SQLiteProvider databaseName="islamic.db" onInit={migrateDbIfNeeded}>
+        <ThemeProvider value={navTheme}>
+          <StatusBar style={colorScheme === 'dark' ? 'light' : 'dark'} backgroundColor={colors.background} />
+          <View style={[styles.background, { backgroundColor: colors.background }]}>
+            <Stack screenOptions={{ headerShown: false, contentStyle: { backgroundColor: 'transparent' } }}>
+              <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
+            </Stack>
+            <AudioPlayerBar />
+          </View>
+        </ThemeProvider>
+      </SQLiteProvider>
+    </GestureHandlerRootView>
   );
 }
 

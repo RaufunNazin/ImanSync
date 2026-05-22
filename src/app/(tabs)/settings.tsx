@@ -1,6 +1,7 @@
 import PageHeader from '@/components/page-header';
 import { Colors, Fonts, Spacing } from '@/constants/theme';
 import { setLanguage } from '@/i18n';
+import { useThemeStore } from '@/store/themeStore';
 import { getDistrictName } from '@/utils/districts';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { BlurView } from 'expo-blur';
@@ -8,7 +9,7 @@ import * as Location from 'expo-location';
 import { Bell, ChevronRight, Globe, MapPin, Moon, Settings as SettingsIcon, Shield } from 'lucide-react-native';
 import React, { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { ActivityIndicator, Alert, Appearance, Image, Linking, Platform, ScrollView, StyleSheet, Switch, Text, TouchableOpacity, useColorScheme, View } from 'react-native';
+import { ActivityIndicator, Alert, Image, Linking, ScrollView, StyleSheet, Switch, Text, TouchableOpacity, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 const CALC_METHODS = [
@@ -18,12 +19,12 @@ const CALC_METHODS = [
 ];
 
 export default function SettingsScreen() {
-  const scheme = useColorScheme();
+  const scheme = useThemeStore((s) => s.theme);
+  const setTheme = useThemeStore((s) => s.setTheme);
   const colors = Colors[scheme === 'unspecified' ? 'light' : scheme];
   const { t, i18n } = useTranslation();
   
   const [notificationsEnabled, setNotificationsEnabled] = useState(true);
-  const [darkModeEnabled, setDarkModeEnabled] = useState(false);
   const [calcMethodIndex, setCalcMethodIndex] = useState(0);
   const [locationName, setLocationName] = useState('');
   const [fetchingLoc, setFetchingLoc] = useState(false);
@@ -33,15 +34,6 @@ export default function SettingsScreen() {
       values.forEach(([key, value]) => {
         if (value !== null) {
           if (key === 'deen_notifications') setNotificationsEnabled(value === 'true');
-          if (key === 'deen_dark_mode') {
-            const isDark = value === 'true';
-            setDarkModeEnabled(isDark);
-            try {
-              if (Platform.OS !== 'web') {
-                Appearance.setColorScheme(isDark ? 'dark' : 'light');
-              }
-            } catch (e) {}
-          }
           if (key === 'deen_calc_method') {
             const methodId = parseInt(value, 10);
             const idx = CALC_METHODS.findIndex(m => m.id === methodId);
@@ -69,15 +61,7 @@ export default function SettingsScreen() {
   };
 
   const toggleDarkMode = (enabled: boolean) => {
-    setDarkModeEnabled(enabled);
-    AsyncStorage.setItem('deen_dark_mode', String(enabled));
-    try {
-      if (Platform.OS !== 'web') {
-        Appearance.setColorScheme(enabled ? 'dark' : 'light');
-      }
-    } catch (e) {
-      console.log('Appearance.setColorScheme not supported on this platform');
-    }
+    setTheme(enabled ? 'dark' : 'light');
   };
 
   const cycleLanguage = () => {
@@ -159,11 +143,11 @@ export default function SettingsScreen() {
       <PageHeader titleEn={t('settings.titleEn')} titleAr={t('settings.titleAr')} />
       <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={styles.container}>
         
-        <View style={[styles.appFooter, { borderColor: colors.accent, backgroundColor: colors.card }]}>
+        <View style={[styles.appFooter, { borderColor: colors.accent, backgroundColor: colors.backgroundElement }]}>
           <Image source={require('../../../assets/images/android-icon-foreground.png')} style={styles.footerLogo} resizeMode="contain" />
           <View style={styles.footerTextContainer}>
-            <Text style={styles.footerAppName}>ImanSync</Text>
-            <Text style={[styles.footerSubtitle, { color: colors.textSecondary }]}>Crafted seeking the pleasure of Allah by Srizon</Text>
+            <Text style={[styles.footerAppName, { color: colors.text }]}>ImanSync</Text>
+            <Text style={[styles.footerSubtitle, { color: colors.textSecondary }]}>{t('settings.footerSubtitle', { defaultValue: 'Crafted by Srizon for the satisfaction of Allah' })}</Text>
             <Text style={[styles.footerVersion, { color: colors.textSecondary }]}>v1.0.0</Text>
           </View>
         </View>
@@ -171,7 +155,7 @@ export default function SettingsScreen() {
         <Text style={[styles.sectionTitle, { color: colors.textSecondary }]}>{t('settings.preferences')}</Text>
         <BlurView intensity={40} tint={colors.glassTint as any} style={styles.card}>
           <SettingRow id="notifications" icon={Bell} title={t('settings.notifications')} value={notificationsEnabled} type="toggle" />
-          <SettingRow id="theme" icon={Moon} title={t('settings.theme')} value={darkModeEnabled} type="toggle" />
+          <SettingRow id="theme" icon={Moon} title={t('settings.theme')} value={scheme === 'dark'} type="toggle" />
           <SettingRow id="language" icon={Globe} title={t('settings.language')} value={i18n.language === 'bn' ? 'বাংলা' : 'English'} onPress={cycleLanguage} />
         </BlurView>
 
@@ -204,8 +188,6 @@ export default function SettingsScreen() {
             onPress={() => Linking.openSettings()} 
           />
         </BlurView>
-
-        <View style={{ height: Spacing.six }} />
       </ScrollView>
     </SafeAreaView>
   );
@@ -292,7 +274,6 @@ const styles = StyleSheet.create({
   footerAppName: {
     fontFamily: Fonts.outfit,
     fontSize: 24,
-    color: '#FFF',
     letterSpacing: 1,
   },
   footerSubtitle: {

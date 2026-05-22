@@ -7,9 +7,10 @@ import { BlurView } from 'expo-blur';
 import { ChevronRight, Bookmark } from 'lucide-react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useFocusEffect, useRouter } from 'expo-router';
+import { useThemeStore } from '@/store/themeStore';
 
 export default function DuaBookmarksScreen() {
-  const scheme = useColorScheme();
+  const scheme = useThemeStore((s) => s.theme);
   const colors = Colors[scheme === 'unspecified' ? 'light' : scheme];
   const router = useRouter();
 

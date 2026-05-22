@@ -4,11 +4,12 @@ import { formatNumber } from '@/utils/formatNumber';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { BlurView } from 'expo-blur';
 import { useFocusEffect, useRouter } from 'expo-router';
-import { Bookmark, BookOpen, ChevronRight, Search } from 'lucide-react-native';
+import { Bookmark, BookOpen, ChevronRight, GraduationCap, Search, X } from 'lucide-react-native';
 import React, { useCallback, useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { ActivityIndicator, ScrollView, StyleSheet, Text, TextInput, TouchableOpacity, useColorScheme, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
+import { useThemeStore } from '@/store/themeStore';
 
 interface Surah {
   id: number;
@@ -19,7 +20,7 @@ interface Surah {
 }
 
 export default function QuranScreen() {
-  const scheme = useColorScheme();
+  const scheme = useThemeStore((s) => s.theme);
   const colors = Colors[scheme === 'unspecified' ? 'light' : scheme];
   const router = useRouter();
   const { t, i18n } = useTranslation();
@@ -31,6 +32,7 @@ export default function QuranScreen() {
   const [lastReadJuz, setLastReadJuz] = useState({ id: '1', ayah: 1 });
   const [searchQuery, setSearchQuery] = useState('');
   const [bookmarks, setBookmarks] = useState([]);
+  const [showLearnBanner, setShowLearnBanner] = useState(true);
 
   useEffect(() => {
     fetch('https://api.alquran.cloud/v1/surah')
@@ -64,6 +66,10 @@ export default function QuranScreen() {
       AsyncStorage.getItem('deen_quran_bookmarks').then(val => {
         if (val) setBookmarks(JSON.parse(val));
       }).catch(e => console.error(e));
+
+      AsyncStorage.getItem('deen_hide_learn_banner').then(val => {
+        if (val === 'true') setShowLearnBanner(false);
+      }).catch(e => console.error(e));
     }, [])
   );
 
@@ -94,6 +100,32 @@ export default function QuranScreen() {
             onChangeText={setSearchQuery}
           />
         </View>
+
+        {/* Word-by-Word Learn Mode CTA */}
+        {showLearnBanner && (
+          <TouchableOpacity 
+            style={{ position: 'relative', flexDirection: 'row', alignItems: 'center', backgroundColor: colors.accent + '15', padding: Spacing.four, borderRadius: 16, marginBottom: Spacing.two, borderWidth: 1, borderColor: colors.accent + '30' }}
+            onPress={() => router.push('/quran-learn' as any)}
+          >
+            <GraduationCap size={24} color={colors.accent} />
+            <View style={{ marginLeft: Spacing.three, flex: 1, paddingRight: 8 }}>
+              <Text style={{ fontFamily: Fonts.outfit, fontSize: 16, color: colors.text }}>{t('home.learnQuran')}</Text>
+              <Text style={{ fontFamily: Fonts.outfit, fontSize: 13, color: colors.textSecondary, marginTop: 2 }}>{i18n.language === 'bn' ? 'ইন্টারেক্টিভ শব্দ-ভিত্তিক অডিও ও অনুবাদ' : 'Interactive word-by-word audio & translation'}</Text>
+            </View>
+            <ChevronRight size={20} color={colors.textSecondary} style={{ marginRight: 8 }} />
+            
+            <TouchableOpacity 
+              style={{ position: 'absolute', top: 8, right: 8, padding: 4 }}
+              onPress={() => {
+                setShowLearnBanner(false);
+                AsyncStorage.setItem('deen_hide_learn_banner', 'true');
+              }}
+              hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
+            >
+              <X size={16} color={colors.textSecondary} />
+            </TouchableOpacity>
+          </TouchableOpacity>
+        )}
 
         {/* Compact Last Read Card Removed */}
         {/* Tab Selection */}
@@ -144,7 +176,7 @@ export default function QuranScreen() {
                     </View>
                   </View>
                   
-                  <Text style={[styles.surahNameAr, { color: colors.accent }]}>{surah.nameAr}</Text>
+                  <Text style={[styles.surahNameAr, { color: scheme === 'dark' ? colors.accent : colors.highlight }]}>{surah.nameAr}</Text>
                 </TouchableOpacity>
               </BlurView>
             ))}
@@ -199,7 +231,7 @@ export default function QuranScreen() {
           </View>
         )}
 
-        <View style={{ height: Spacing.six + 100 }} />
+        <View style={{ height: Spacing.six + 20 }} />
       </ScrollView>
 
       {/* Floating Last Read Pill */}
@@ -257,6 +289,7 @@ const styles = StyleSheet.create({
     borderRadius: 20,
     borderWidth: 1,
     borderColor: 'rgba(255,255,255,0.05)',
+    marginBottom: Spacing.two,
   },
   searchInput: {
     flex: 1,
@@ -295,7 +328,7 @@ const styles = StyleSheet.create({
   },
   floatingHintContainer: {
     position: 'absolute',
-    bottom: Spacing.two + 80,
+    bottom: Spacing.two + 20,
     left: Spacing.four,
     right: Spacing.four,
     zIndex: 999,
@@ -304,8 +337,8 @@ const styles = StyleSheet.create({
     borderRadius: 30,
     overflow: 'hidden',
     borderWidth: 1,
-    borderColor: 'rgba(255,255,255,0.15)',
-    boxShadow: '0px 4px 8px rgba(0, 0, 0, 0.3)',
+    borderColor: 'rgba(255,255,255,0.2)',
+    boxShadow: '0px 4px 8px rgba(0, 0, 0, 0.15)',
     elevation: 5,
   },
   floatingHintTouch: {

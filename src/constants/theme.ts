@@ -14,7 +14,7 @@ export const Colors = {
     primary: '#0c1618', // Deep Charcoal
     accent: '#C8AA6E', // Dusty Golden
     highlight: '#4c956c', // Sage Green
-    border: 'rgba(226, 232, 240, 0.5)',
+    border: 'rgba(12, 22, 24, 0.15)',
     glassTint: 'light',
   },
   dark: {

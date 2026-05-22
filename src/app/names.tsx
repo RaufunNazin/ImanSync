@@ -7,6 +7,7 @@ import { ActivityIndicator, FlatList, StyleSheet, Text, useColorScheme, View } f
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useTranslation } from 'react-i18next';
 import { formatNumber } from '@/utils/formatNumber';
+import { useThemeStore } from '@/store/themeStore';
 
 interface NameItem {
   id: string;
@@ -16,7 +17,7 @@ interface NameItem {
 }
 
 export default function NamesScreen() {
-  const scheme = useColorScheme();
+  const scheme = useThemeStore((s) => s.theme);
   const colors = Colors[scheme === 'unspecified' ? 'light' : scheme];
   const router = useRouter();
   const { t, i18n } = useTranslation();

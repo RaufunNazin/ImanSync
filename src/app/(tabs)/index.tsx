@@ -1,12 +1,12 @@
 import PageHeader from '@/components/page-header';
-import { BottomTabInset, Colors, Fonts, Spacing } from '@/constants/theme';
+import { Colors, Fonts, Spacing } from '@/constants/theme';
 import { getDistrictName } from '@/utils/districts';
 import { formatNumber } from '@/utils/formatNumber';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { BlurView } from 'expo-blur';
 import * as Haptics from 'expo-haptics';
 import { useRouter } from 'expo-router';
-import { Book, BookOpen, Compass, Heart, MapPin, Moon, RotateCcw, Star, Sunset } from 'lucide-react-native';
+import { Book, BookOpen, Compass, GraduationCap, MapPin, Moon, RotateCcw, Star, Sunset } from 'lucide-react-native';
 import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import {
@@ -20,6 +20,7 @@ import {
 import Animated, { useAnimatedProps, useAnimatedStyle, useSharedValue, withSpring, withTiming } from 'react-native-reanimated';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import Svg, { Circle, G } from 'react-native-svg';
+import { useThemeStore } from '@/store/themeStore';
 
 // ── Types ────────────────────────────────────────────────────────────────────
 interface PrayerEntry {
@@ -85,7 +86,7 @@ const RESTRICTED_WINDOWS = [
 
 // ── Component ────────────────────────────────────────────────────────────────
 export default function HomeScreen() {
-  const scheme = useColorScheme();
+  const scheme = useThemeStore((s) => s.theme);
   const colors = Colors[scheme === 'unspecified' ? 'light' : scheme ?? 'light'];
   const router = useRouter();
   const { t, i18n } = useTranslation();
@@ -481,9 +482,9 @@ export default function HomeScreen() {
               <Text style={[styles.actionText, { color: colors.text }]}>{t('home.names')}</Text>
             </TouchableOpacity>
             <View style={[styles.actionDivider, { backgroundColor: colors.border }]} />
-            <TouchableOpacity style={styles.actionItem} onPress={() => router.navigate('/dua')}>
-              <Heart size={24} color={colors.accent} />
-              <Text style={[styles.actionText, { color: colors.text }]}>{t('home.duas')}</Text>
+            <TouchableOpacity style={styles.actionItem} onPress={() => router.push('/quran-learn' as any)}>
+              <GraduationCap size={24} color={colors.accent} />
+              <Text style={[styles.actionText, { color: colors.text }]}>{t('home.learnQuran')}</Text>
             </TouchableOpacity>
           </BlurView>
         </View>
@@ -591,8 +592,6 @@ export default function HomeScreen() {
             </BlurView>
           </View>
         )}
-
-        <View style={{ height: Spacing.six }} />
       </ScrollView>
 
       {/* ── Floating Tasbeeh Counter ──────────────────────────────── */}
@@ -676,7 +675,7 @@ function TasbeehFAB({ colors, t, i18n }: { colors: any; t: any; i18n: any }) {
         <BlurView
           intensity={60}
           tint={colors.glassTint as any}
-          style={[fabStyles.label, { borderColor: colors.border }]}
+          style={[fabStyles.label, { backgroundColor: colors.backgroundElement, borderColor: colors.border }]}
         >
           <Text style={[fabStyles.labelText, { color: colors.accent }]}>
             {TASBEEH_CYCLE[cycleIndex]} ✓
@@ -707,7 +706,7 @@ function TasbeehFAB({ colors, t, i18n }: { colors: any; t: any; i18n: any }) {
                 r={radius}
                 stroke={colors.border}
                 strokeWidth={strokeWidth}
-                fill="none"
+                fill={colors.backgroundElement}
               />
               <G transform={`rotate(-90, ${size / 2}, ${size / 2})`}>
                 <AnimatedCircle
@@ -723,7 +722,7 @@ function TasbeehFAB({ colors, t, i18n }: { colors: any; t: any; i18n: any }) {
                 />
               </G>
             </Svg>
-            <BlurView intensity={70} tint={colors.glassTint as any} style={fabStyles.inner}>
+            <BlurView intensity={70} tint={colors.glassTint as any} style={[fabStyles.inner, { backgroundColor: colors.backgroundElement }]}>
               <Text style={[fabStyles.count, { color: colors.text }]}>
                 {formatNumber(count, i18n.language)}
               </Text>
@@ -735,7 +734,7 @@ function TasbeehFAB({ colors, t, i18n }: { colors: any; t: any; i18n: any }) {
   );
 }
 
-const FAB_BOTTOM = Spacing.two + 80;
+const FAB_BOTTOM = Spacing.two + 20;
 
 const fabStyles = StyleSheet.create({
   container: {
