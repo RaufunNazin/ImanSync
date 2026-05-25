@@ -9,6 +9,7 @@ import { BlurView } from 'expo-blur';
 import { ChevronRight } from 'lucide-react-native';
 import duasBn from '@/data/duas_bn.json';
 import { useThemeStore } from '@/store/themeStore';
+import SkeletonBox from '@/components/SkeletonBox';
 
 interface DuaItem {
   id: number;
@@ -49,7 +50,19 @@ export default function DuaCategoryScreen() {
       
       <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={styles.container}>
         {loading ? (
-          <ActivityIndicator size="large" color={colors.accent} style={{ marginTop: 40 }} />
+          <View style={[styles.list, { marginTop: 8 }]}>
+            {[...Array(5)].map((_, i) => (
+              <View key={i} style={[styles.itemWrapper, { backgroundColor: colors.backgroundElement, borderColor: colors.border }]}>
+                <View style={[styles.item]}>
+                  <View style={[styles.itemContent]}>
+                    <SkeletonBox width={'85%' as any} height={16} borderRadius={8} color={colors.border} />
+                    <SkeletonBox width={'60%' as any} height={13} borderRadius={6} color={colors.border} />
+                    <SkeletonBox width={'75%' as any} height={18} borderRadius={8} color={colors.border} style={{ alignSelf: 'flex-end' }} />
+                  </View>
+                </View>
+              </View>
+            ))}
+          </View>
         ) : (
           <View style={styles.list}>
             {duas.map((dua) => {

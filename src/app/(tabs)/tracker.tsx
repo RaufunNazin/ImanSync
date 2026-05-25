@@ -12,6 +12,7 @@ import Animated, { useAnimatedProps, useAnimatedStyle, useSharedValue, withSprin
 import { SafeAreaView } from 'react-native-safe-area-context';
 import Svg, { Circle } from 'react-native-svg';
 import { useThemeStore } from '@/store/themeStore';
+import SkeletonBox from '@/components/SkeletonBox';
 
 const DAILY_TASKS = [
   { id: 'fajr', icon: Activity },
@@ -103,6 +104,7 @@ export default function TrackerScreen() {
   
   const [activeTab, setActiveTab] = useState<'Daily' | 'Weekly' | 'Monthly'>('Daily');
   const [history, setHistory] = useState<Record<string, Record<string, boolean>>>({});
+  const [loading, setLoading] = useState(true);
   
   const [todayStr, setTodayStr] = useState(getLocalYYYYMMDD());
 
@@ -129,7 +131,8 @@ export default function TrackerScreen() {
           }
         });
       }
-    }).catch(err => console.error("Error loading history", err));
+    }).catch(err => console.error("Error loading history", err))
+      .finally(() => setLoading(false));
   }, [todayStr]);
 
   const toggleTask = (id: string) => {
@@ -279,7 +282,7 @@ export default function TrackerScreen() {
       <PageHeader titleEn={t('tracker.titleEn')} titleAr={t('tracker.titleAr')} />
       <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={styles.container}>
         
-        {/* Segmented Control */}
+        {/* Segmented Control — always visible */}
         <BlurView intensity={30} tint={colors.glassTint as any} style={styles.segmentContainer}>
           {['Daily', 'Weekly', 'Monthly'].map((tab) => (
             <TouchableOpacity 
@@ -295,61 +298,95 @@ export default function TrackerScreen() {
           ))}
         </BlurView>
 
-        {/* Visual Progress Card */}
-        <BlurView intensity={50} tint={colors.glassTint as any} style={[styles.progressCard, { borderColor: colors.border }]}>
-          <View style={styles.progressHeader}>
-            <View style={{ flex: 1 }}>
-              <Text style={[styles.progressTitle, { color: colors.text }]}>
-                {activeTab === 'Daily' ? t('tracker.progress') : activeTab === 'Weekly' ? t('tracker.weeklyOverview') : t('tracker.monthly')}
-              </Text>
-              <Text style={[styles.progressSubtitle, { color: colors.textSecondary }]}>
-                {activeTab === 'Daily' ? t('tracker.tasksCompleted', { 
-                  count: formatNumber(completedCount, i18n.language), 
-                  total: formatNumber(DAILY_TASKS.length, i18n.language) 
-                }) : t('tracker.trackingCons')}
-              </Text>
+        {loading ? (
+          <>
+            {/* Skeleton Progress Card */}
+            <View style={[styles.progressCard, { borderColor: colors.border, backgroundColor: colors.backgroundElement }]}>
+              <View style={styles.progressHeader}>
+                <View style={{ flex: 1, gap: 10 }}>
+                  <SkeletonBox width={140} height={20} borderRadius={8} color={colors.border} />
+                  <SkeletonBox width={180} height={14} borderRadius={7} color={colors.border} />
+                </View>
+                <SkeletonBox width={64} height={64} borderRadius={32} color={colors.border} />
+              </View>
+              <SkeletonBox width={200} height={14} borderRadius={7} color={colors.border} style={{ marginTop: 12 }} />
             </View>
-            
-            {activeTab === 'Daily' && (
-              <View style={styles.progressCircleContainer}>
-                <Svg width={64} height={64} viewBox="0 0 64 64" style={[styles.svgAbsolute, { transform: [{ rotate: '-90deg' }] }]}>
-                  <Circle
-                    cx={32}
-                    cy={32}
-                    r={radius}
-                    stroke={colors.border}
-                    strokeWidth={strokeWidth}
-                    fill="none"
-                  />
-                  <AnimatedCircle
-                    cx={32}
-                    cy={32}
-                    r={radius}
-                    stroke={colors.accent}
-                    strokeWidth={strokeWidth}
-                    fill="none"
-                    strokeDasharray={circumference}
-                    animatedProps={animatedCircleProps}
-                    strokeLinecap="round"
-                  />
-                </Svg>
-                <View style={styles.progressTextContainer}>
-                  <Text style={[styles.progressText, { color: colors.accent }]}>
-                    {formatNumber(progressPercentage, i18n.language)}%
+
+            {/* Skeleton Task Grid */}
+            <View style={styles.gridSection}>
+              <SkeletonBox width={140} height={18} borderRadius={8} color={colors.border} style={{ marginBottom: 12 }} />
+              <View style={styles.taskGrid}>
+                {[...Array(9)].map((_, i) => (
+                  <View key={i} style={[styles.taskCardWrapper]}>
+                    <View style={[styles.taskCardBlur, { backgroundColor: colors.backgroundElement, borderColor: colors.border, borderWidth: 1 }]}>
+                      <View style={[styles.taskCard]}>
+                        <SkeletonBox width={60} height={12} borderRadius={6} color={colors.border} />
+                      </View>
+                    </View>
+                  </View>
+                ))}
+              </View>
+            </View>
+          </>
+        ) : (
+          <>
+            {/* Visual Progress Card */}
+            <BlurView intensity={50} tint={colors.glassTint as any} style={[styles.progressCard, { borderColor: colors.border }]}>
+              <View style={styles.progressHeader}>
+                <View style={{ flex: 1 }}>
+                  <Text style={[styles.progressTitle, { color: colors.text }]}>
+                    {activeTab === 'Daily' ? t('tracker.progress') : activeTab === 'Weekly' ? t('tracker.weeklyOverview') : t('tracker.monthly')}
+                  </Text>
+                  <Text style={[styles.progressSubtitle, { color: colors.textSecondary }]}>
+                    {activeTab === 'Daily' ? t('tracker.tasksCompleted', { 
+                      count: formatNumber(completedCount, i18n.language), 
+                      total: formatNumber(DAILY_TASKS.length, i18n.language) 
+                    }) : t('tracker.trackingCons')}
                   </Text>
                 </View>
+                
+                {activeTab === 'Daily' && (
+                  <View style={styles.progressCircleContainer}>
+                    <Svg width={64} height={64} viewBox="0 0 64 64" style={[styles.svgAbsolute, { transform: [{ rotate: '-90deg' }] }]}>
+                      <Circle
+                        cx={32}
+                        cy={32}
+                        r={radius}
+                        stroke={colors.border}
+                        strokeWidth={strokeWidth}
+                        fill="none"
+                      />
+                      <AnimatedCircle
+                        cx={32}
+                        cy={32}
+                        r={radius}
+                        stroke={colors.accent}
+                        strokeWidth={strokeWidth}
+                        fill="none"
+                        strokeDasharray={circumference}
+                        animatedProps={animatedCircleProps}
+                        strokeLinecap="round"
+                      />
+                    </Svg>
+                    <View style={styles.progressTextContainer}>
+                      <Text style={[styles.progressText, { color: colors.accent }]}>
+                        {formatNumber(progressPercentage, i18n.language)}%
+                      </Text>
+                    </View>
+                  </View>
+                )}
               </View>
-            )}
-          </View>
-          
-          <Text style={[styles.encouragement, { color: colors.accent }]}>
-            {getEncouragementMsg(progressPercentage)}
-          </Text>
-        </BlurView>
+              
+              <Text style={[styles.encouragement, { color: colors.accent }]}>
+                {getEncouragementMsg(progressPercentage)}
+              </Text>
+            </BlurView>
 
-        {activeTab === 'Daily' && renderDaily()}
-        {activeTab === 'Weekly' && renderRealChart(7, t('tracker.weekly'))}
-        {activeTab === 'Monthly' && renderRealChart(30, t('tracker.monthly'))}
+            {activeTab === 'Daily' && renderDaily()}
+            {activeTab === 'Weekly' && renderRealChart(7, t('tracker.weekly'))}
+            {activeTab === 'Monthly' && renderRealChart(30, t('tracker.monthly'))}
+          </>
+        )}
       </ScrollView>
     </SafeAreaView>
   );

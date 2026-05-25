@@ -36,6 +36,7 @@
   "home": {
     "titleEn": "ইমান সিঙ্ক",
     "titleAr": "إيمان سينك",
+    "tabTitle": "হোম",
     "greeting": "السَّلَامُ عَلَيْكُمْ",
     "quickActions": "প্রয়োজনীয় ফিচার",
     "qibla": "কিবলা কম্পাস",
@@ -259,7 +260,11 @@
     "masterToggle": "সকল নোটিফিকেশন",
     "prayerAlerts": "নামাজের এলার্ট",
     "dailyReminders": "দৈনিক রিমাইন্ডার",
-    "quietHours": "নীরব সময় (Do Not Disturb)"
+    "doNotDisturb": "ডু নট ডিস্টার্ব",
+    "dndFrom": "শুরু",
+    "dndTo": "শেষ",
+    "save": "সংরক্ষণ",
+    "cancel": "বাতিল"
   },
   "names": {
     "titleEn": "Allah's Names",

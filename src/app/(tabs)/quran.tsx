@@ -10,6 +10,7 @@ import { useTranslation } from 'react-i18next';
 import { ActivityIndicator, ScrollView, StyleSheet, Text, TextInput, TouchableOpacity, useColorScheme, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useThemeStore } from '@/store/themeStore';
+import SkeletonBox from '@/components/SkeletonBox';
 
 interface Surah {
   id: number;
@@ -152,8 +153,21 @@ export default function QuranScreen() {
 
         {/* Tab Content */}
         {loading && activeTab === 'surah' ? (
-          <View style={styles.loaderContainer}>
-            <ActivityIndicator size="large" color={colors.highlight} />
+          <View style={[styles.listContainer, { marginTop: 8 }]}>
+            {[...Array(8)].map((_, i) => (
+              <View key={i} style={[styles.surahRowWrapper, { borderColor: colors.border, backgroundColor: colors.backgroundElement }]}>
+                <View style={[styles.surahRow]}>
+                  <View style={styles.surahLeft}>
+                    <SkeletonBox width={28} height={28} borderRadius={8} color={colors.border} />
+                    <View style={{ flex: 1, gap: 6 }}>
+                      <SkeletonBox width={110} height={14} borderRadius={7} color={colors.border} />
+                      <SkeletonBox width={70} height={11} borderRadius={5} color={colors.border} />
+                    </View>
+                  </View>
+                  <SkeletonBox width={56} height={20} borderRadius={8} color={colors.border} />
+                </View>
+              </View>
+            ))}
           </View>
         ) : activeTab === 'surah' ? (
           <View style={styles.listContainer}>
@@ -364,13 +378,13 @@ const styles = StyleSheet.create({
   },
   tabsContainer: {
     flexDirection: 'row',
-    marginVertical: Spacing.two,
+    marginBottom: Spacing.two,
     borderBottomWidth: 1,
     borderBottomColor: 'rgba(255,255,255,0.2)',
   },
   tabBtn: {
     flex: 1,
-    paddingVertical: Spacing.three,
+    paddingVertical: Spacing.one,
     alignItems: 'center',
   },
   tabText: {

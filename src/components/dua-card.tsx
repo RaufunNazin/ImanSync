@@ -54,11 +54,9 @@ export default function DuaCard({
             <Text style={[styles.name, { color: colors.accent }]} numberOfLines={2}>
               {name}
             </Text>
-            {description ? (
-              <Text style={[styles.description, { color: colors.textSecondary }]} numberOfLines={2}>
-                {description}
-              </Text>
-            ) : null}
+            {count !== undefined && (
+              <Text style={[styles.countText, { color: colors.textSecondary }]}>{t('dua.duaCount', { count: formatNumber(count, i18n.language) })}</Text>
+            )}
           </View>
 
           <View style={styles.bgIconBox}>
@@ -66,16 +64,10 @@ export default function DuaCard({
               <Star size={32} color={colors.accent} opacity={0.15} />
             ) : id === 'bookmarks' ? (
               <Bookmark size={32} color={colors.highlight} opacity={0.15} fill={colors.highlight} />
-            ) : (
-              <FolderOpen size={32} color={colors.highlight} opacity={0.15} />
-            )}
+            ) : null}
           </View>
 
-          {count !== undefined && (
-            <View style={[styles.countBadge, { backgroundColor: 'transparent' }]}>
-              <Text style={[styles.countText, { color: colors.textSecondary }]}>{t('dua.duaCount', { count: formatNumber(count, i18n.language) })}</Text>
-            </View>
-          )}
+
         </TouchableOpacity>
     </View>
   );
@@ -85,15 +77,15 @@ const styles = StyleSheet.create({
   wrapper: {
     borderRadius: 20,
     overflow: 'hidden',
-    width: '100%',
     borderWidth: 1,
+    flex: 1,
   },
   card: {
     padding: Spacing.two,
-    paddingVertical: Spacing.four,
+    paddingVertical: Spacing.two,
     alignItems: 'center',
     justifyContent: 'center',
-    minHeight: 100,
+    minHeight: 70,
   },
   pinBadge: {
     position: 'absolute',
@@ -105,21 +97,16 @@ const styles = StyleSheet.create({
   content: {
     alignItems: 'center',
     justifyContent: 'center',
-    gap: 4,
+    gap: 2,
     zIndex: 2,
-    paddingHorizontal: Spacing.four,
+    paddingHorizontal: Spacing.two,
   },
   name: {
     fontFamily: Fonts.outfit,
-    fontSize: 20,
+    fontSize: 16,
     textAlign: 'center',
   },
-  description: {
-    fontFamily: Fonts.outfit,
-    fontSize: 14,
-    opacity: 0.8,
-    textAlign: 'center',
-  },
+
   bgIconBox: {
     position: 'absolute',
     bottom: -5,
@@ -127,16 +114,10 @@ const styles = StyleSheet.create({
     zIndex: 1,
     padding: Spacing.three,
   },
-  countBadge: {
-    position: 'absolute',
-    top: Spacing.three,
-    right: Spacing.three,
-    paddingHorizontal: 8,
-    paddingVertical: 4,
-    borderRadius: 10,
-  },
+
   countText: {
     fontFamily: Fonts.outfit,
-    fontSize: 11,
+    fontSize: 12,
+    marginTop: 2,
   },
 });

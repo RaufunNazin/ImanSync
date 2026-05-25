@@ -1,0 +1,28 @@
+{
+  "latestVersion": "1.0.0",
+  "changelog": {
+    "version": "1.0.0",
+    "en": [
+      "🎉 ImanSync is officially launched!",
+      "🕌 Full Quran with Bengali translation and audio",
+      "🧭 Accurate Qibla compass using your live location",
+      "🔔 Smart prayer time notifications with quiet hours",
+      "📿 Dua library with categories and personal Dua saving",
+      "🌙 Dark mode and Bengali language support"
+    ],
+    "bn": [
+      "🎉 ইমান সিঙ্ক আনুষ্ঠানিকভাবে চালু হয়েছে!",
+      "🕌 বাংলা অনুবাদ ও অডিওসহ সম্পূর্ণ কুরআন",
+      "🧭 লাইভ লোকেশন ব্যবহার করে সঠিক কিবলা কম্পাস",
+      "🔔 নীরব সময়সহ স্মার্ট নামাজের সময় নোটিফিকেশন",
+      "📿 শ্রেণিবিভাগসহ দোয়া লাইব্রেরি এবং ব্যক্তিগত দোয়া সংরক্ষণ",
+      "🌙 ডার্ক মোড এবং বাংলা ভাষার সমর্থন"
+    ]
+  },
+  "notification": {
+    "id": "launch_welcome_v1",
+    "timestamp": "2026-05-25T00:00:00Z",
+    "en": "Welcome to ImanSync! 🌙 May this app bring you closer to Allah. Explore your prayer times, Qibla direction, and Duas all in one place.",
+    "bn": "ইমান সিঙ্কে স্বাগতম! 🌙 এই অ্যাপটি আপনাকে আল্লাহর আরও কাছে নিয়ে যাক। নামাজের সময়, কিবলার দিক এবং দোয়া — সব এক জায়গায় পাবেন।"
+  }
+}

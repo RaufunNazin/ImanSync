@@ -8,10 +8,12 @@ import { useRouter } from 'expo-router';
 import { ChevronRight, Search } from 'lucide-react-native';
 import React, { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { ActivityIndicator, Dimensions, ScrollView, StyleSheet, Text, TouchableOpacity, useColorScheme, View } from 'react-native';
-import { TextInput } from 'react-native-gesture-handler';
+import { ActivityIndicator, Dimensions, ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import { TextInput, GestureHandlerRootView } from 'react-native-gesture-handler';
+import DraggableFlatList, { ScaleDecorator } from 'react-native-draggable-flatlist';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useThemeStore } from '@/store/themeStore';
+import SkeletonBox from '@/components/SkeletonBox';
 
 interface Category {
   id: string;
@@ -123,7 +125,10 @@ export default function DuaScreen() {
     return translated === key ? cat.description : translated;
   };
 
-  const pinnedCategories = categories.filter(c => pinnedIds.includes(c.id));
+  const pinnedCategories = pinnedIds
+    .map(id => categories.find(c => c.id === id))
+    .filter(Boolean) as Category[];
+    
   const unpinnedCategories = categories.filter(c => !pinnedIds.includes(c.id));
 
   // Filter global duas
@@ -149,8 +154,9 @@ export default function DuaScreen() {
   });
 
   return (
-    <SafeAreaView style={[styles.safeArea, { backgroundColor: colors.background }]}>
-      <PageHeader titleEn={t('dua.titleEn')} titleAr={t('dua.titleAr')} />
+    <GestureHandlerRootView style={{ flex: 1 }}>
+      <SafeAreaView style={[styles.safeArea, { backgroundColor: colors.background }]}>
+        <PageHeader titleEn={t('dua.titleEn')} titleAr={t('dua.titleAr')} />
       
       <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={styles.container}>
 
@@ -224,29 +230,48 @@ export default function DuaScreen() {
           <>
             {/* Pinned Section */}
             {pinnedCategories.length > 0 && (
-          <View style={styles.section}>
-            <Text style={[styles.sectionTitle, { color: colors.text }]}>{t('dua.pinned')}</Text>
-            <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.pinnedScroll}>
-              {pinnedCategories.map(cat => (
-                <View key={cat.id} style={{ width: 160 }}>
-                  <DuaCard
-                    id={cat.id}
-                    name={getCategoryName(cat)}
-                    description={getCategoryDesc(cat)}
-                    count={cat.count}
-                    isPinned={true}
-                    colors={colors}
-                    onPress={() => handleCategoryPress(cat)}
-                    onLongPress={() => openPinSheet(cat)}
+              <View style={[styles.section, { paddingLeft: Spacing.four }]}>
+                <Text style={[styles.sectionTitle, { color: colors.text, marginBottom: Spacing.three }]}>{t('dua.pinned')}</Text>
+                <View style={{ height: 110 }}>
+                  <DraggableFlatList
+                    horizontal
+                    showsHorizontalScrollIndicator={false}
+                    data={pinnedCategories}
+                    onDragEnd={({ data }) => {
+                      const newIds = data.map(c => c.id);
+                      setPinnedIds(newIds);
+                      AsyncStorage.setItem(PIN_STORAGE_KEY, JSON.stringify(newIds));
+                    }}
+                    keyExtractor={(item) => item.id}
+                    contentContainerStyle={styles.pinnedScroll}
+                    renderItem={({ item, drag, isActive }) => (
+                      <ScaleDecorator>
+                        <TouchableOpacity
+                          onLongPress={drag}
+                          disabled={isActive}
+                          activeOpacity={1}
+                          style={{ width: 160, opacity: isActive ? 0.7 : 1 }}
+                        >
+                          <DuaCard
+                            id={item.id}
+                            name={getCategoryName(item)}
+                            description={getCategoryDesc(item)}
+                            count={item.count}
+                            isPinned={true}
+                            colors={colors}
+                            onPress={() => handleCategoryPress(item)}
+                            onLongPress={drag}
+                          />
+                        </TouchableOpacity>
+                      </ScaleDecorator>
+                    )}
                   />
                 </View>
-              ))}
-            </ScrollView>
-          </View>
-        )}
+              </View>
+            )}
 
         {/* Main Grid Section */}
-        <View style={styles.section}>
+        <View style={[styles.section, { paddingHorizontal: Spacing.four }]}>
           <Text style={[styles.sectionTitle, { color: colors.text }]}>{t('dua.categories')}</Text>
           
           <View style={styles.grid}>
@@ -274,7 +299,14 @@ export default function DuaScreen() {
             </View>
 
             {loading ? (
-              <ActivityIndicator size="large" color={colors.accent} style={{ alignSelf: 'center', margin: 40 }} />
+              [...Array(4)].map((_, i) => (
+                <View key={i} style={[styles.gridItem]}>
+                  <View style={[{ height: 90, borderRadius: 16, borderWidth: 1, borderColor: colors.border, backgroundColor: colors.backgroundElement, padding: 16, justifyContent: 'space-between' }]}>
+                    <SkeletonBox width={110} height={16} borderRadius={8} color={colors.border} />
+                    <SkeletonBox width={70} height={11} borderRadius={5} color={colors.border} />
+                  </View>
+                </View>
+              ))
             ) : (
               unpinnedCategories.map(cat => (
                 <View key={cat.id} style={styles.gridItem}>
@@ -294,6 +326,7 @@ export default function DuaScreen() {
         </View>
         </>
       )}
+      <View style={{ height: 100 }} />
       </ScrollView>
 
       {/* Pin Action Sheet */}
@@ -307,7 +340,8 @@ export default function DuaScreen() {
           colors={colors}
         />
       )}
-    </SafeAreaView>
+      </SafeAreaView>
+    </GestureHandlerRootView>
   );
 }
 
@@ -319,16 +353,17 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   container: {
-    padding: Spacing.four,
     paddingTop: 0,
   },
   searchContainer: {
     flexDirection: 'row',
     alignItems: 'center',
+    marginHorizontal: Spacing.four,
     paddingHorizontal: Spacing.four,
     paddingVertical: 12,
     borderRadius: 20,
     borderWidth: 1,
+    marginBottom: Spacing.two,
   },
   searchInput: {
     flex: 1,
@@ -347,14 +382,16 @@ const styles = StyleSheet.create({
     gap: Spacing.three,
   },
   grid: {
-    flexDirection: 'column',
+    flexDirection: 'row',
+    flexWrap: 'wrap',
     gap: Spacing.three,
   },
   gridItem: {
-    width: '100%',
+    width: cardWidth,
   },
   list: {
     gap: Spacing.three,
+    paddingHorizontal: Spacing.four,
   },
   itemWrapper: {
     borderRadius: 16,

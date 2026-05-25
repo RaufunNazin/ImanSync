@@ -123,7 +123,9 @@ export default function QiblaScreen() {
 
             {/* Central Needle pointing to Qibla relative to phone heading */}
             <Animated.View style={[styles.needleContainer, { transform: [{ rotate: `${rotation}deg` }] }]}>
-              <Navigation size={80} color={colors.highlight} fill={colors.highlight} style={styles.needle} />
+              <View style={styles.needleWrapper}>
+                <Navigation size={72} color={colors.highlight} fill={colors.highlight} />
+              </View>
             </Animated.View>
 
             {/* Center Dot */}
@@ -221,11 +223,15 @@ const styles = StyleSheet.create({
   },
   needleContainer: {
     position: 'absolute',
+    width: '100%',
+    height: '100%',
     alignItems: 'center',
     justifyContent: 'center',
   },
-  needle: {
-    marginBottom: 40,
+  needleWrapper: {
+    alignItems: 'center',
+    justifyContent: 'center',
+    transform: [{ translateY: -30 }],
   },
   centerDot: {
     position: 'absolute',

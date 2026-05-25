@@ -64,7 +64,7 @@ export default function TabLayout() {
       <SwipeableTabs.Screen
         name="index"
         options={{
-          title: t('home.titleEn'),
+          title: t('home.tabTitle', { defaultValue: 'Home' }),
           tabBarIcon: ({ color }: { color: string }) => <Home size={24} color={color} />,
         }}
       />

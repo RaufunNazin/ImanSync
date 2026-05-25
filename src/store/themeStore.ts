@@ -1,5 +1,5 @@
 import { create } from 'zustand';
-import { Appearance, ColorSchemeName } from 'react-native';
+import { ColorSchemeName } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
 interface ThemeState {
@@ -9,30 +9,21 @@ interface ThemeState {
 }
 
 export const useThemeStore = create<ThemeState>((set) => ({
-  theme: Appearance.getColorScheme() || 'light',
+  theme: 'light', // safe default before AsyncStorage loads
   setTheme: (theme) => {
     set({ theme });
-    // Defer heavy native bridge operations to let React render instantly
-    setTimeout(() => {
-      try {
-        Appearance.setColorScheme(theme);
-      } catch (e) {}
-      AsyncStorage.setItem('imansync_dark_mode', String(theme === 'dark'));
-    }, 50);
+    // Only persist the preference — do NOT call Appearance.setColorScheme()
+    // On Android production, that API triggers an Activity recreation (app restart/crash)
+    AsyncStorage.setItem('imansync_dark_mode', String(theme === 'dark'));
   },
   initialize: async () => {
     try {
       const val = await AsyncStorage.getItem('imansync_dark_mode');
       if (val !== null) {
-        const isDark = val === 'true';
-        const theme = isDark ? 'dark' : 'light';
-        set({ theme });
-        try {
-          Appearance.setColorScheme(theme);
-        } catch (e) {}
+        set({ theme: val === 'true' ? 'dark' : 'light' });
       }
     } catch (e) {
-      console.error(e);
+      console.error('ThemeStore init error:', e);
     }
   }
 }));

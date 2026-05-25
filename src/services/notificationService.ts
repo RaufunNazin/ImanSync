@@ -9,15 +9,20 @@ const TASKS_CHANNEL = 'tasks_channel';
 
 // Helper to check if a Date is within quiet hours
 function isQuietHour(date: Date, qh: QuietHours): boolean {
+  if (!qh.enabled) return false;
+
   const h = date.getHours();
-  // Check night rest
-  if (qh.nightStart > qh.nightEnd) { // e.g. 23 to 5
-    if (h >= qh.nightStart || h < qh.nightEnd) return true;
+  const m = date.getMinutes();
+  const time = h * 60 + m;
+  const start = qh.startHour * 60 + qh.startMinute;
+  const end = qh.endHour * 60 + qh.endMinute;
+
+  if (start > end) {
+    // crosses midnight (e.g. 23:30 to 05:00)
+    if (time >= start || time <= end) return true;
   } else {
-    if (h >= qh.nightStart && h < qh.nightEnd) return true;
+    if (time >= start && time <= end) return true;
   }
-  // Check afternoon rest
-  if (h >= qh.afternoonStart && h < qh.afternoonEnd) return true;
   
   return false;
 }

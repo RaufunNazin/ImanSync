@@ -21,6 +21,7 @@ import Animated, { useAnimatedProps, useAnimatedStyle, useSharedValue, withSprin
 import { SafeAreaView } from 'react-native-safe-area-context';
 import Svg, { Circle, G } from 'react-native-svg';
 import { useThemeStore } from '@/store/themeStore';
+import SkeletonBox from '@/components/SkeletonBox';
 
 // ── Types ────────────────────────────────────────────────────────────────────
 interface PrayerEntry {
@@ -326,12 +327,14 @@ export default function HomeScreen() {
             <Text style={[styles.hijriLabel, { color: colors.textSecondary }]}>
               {formatNumber(hijriDate, i18n.language)}
             </Text>
-          ) : null}
+          ) : (
+            <SkeletonBox width={180} height={14} borderRadius={7} style={{ marginTop: 4 }} color={colors.border} />
+          )}
         </View>
 
 
         {/* ── Current Prayer Card (compact) ────────────────────── */}
-        {prayersWithStatus.length > 0 && (
+        {prayersWithStatus.length > 0 ? (
           <BlurView
             intensity={50}
             tint={colors.glassTint as any}
@@ -379,10 +382,25 @@ export default function HomeScreen() {
               </View>
             </View>
           </BlurView>
+        ) : (
+          <View style={[styles.heroCard, { borderColor: colors.border, backgroundColor: colors.backgroundElement, borderWidth: 1, borderRadius: 24, padding: 20 }]}>
+            <View style={styles.heroRow}>
+              <View style={styles.heroLeft}>
+                <SkeletonBox width={60} height={12} borderRadius={6} color={colors.border} />
+                <SkeletonBox width={100} height={22} borderRadius={8} style={{ marginTop: 8 }} color={colors.border} />
+                <SkeletonBox width={70} height={12} borderRadius={6} style={{ marginTop: 6 }} color={colors.border} />
+              </View>
+              <View style={[styles.heroRight, { alignItems: 'flex-end' }]}>
+                <SkeletonBox width={80} height={12} borderRadius={6} color={colors.border} />
+                <SkeletonBox width={120} height={28} borderRadius={8} style={{ marginTop: 8 }} color={colors.border} />
+                <SkeletonBox width={80} height={10} borderRadius={5} style={{ marginTop: 6 }} color={colors.border} />
+              </View>
+            </View>
+          </View>
         )}
 
         {/* ── Today's Prayers — Horizontal 5-Point Timeline ──── */}
-        {prayersWithStatus.length > 0 && (
+        {prayersWithStatus.length > 0 ? (
           <View style={styles.section}>
             <Text style={[styles.sectionTitle, { color: colors.text }]}>
               {t('home.todaysPrayers')}
@@ -412,7 +430,6 @@ export default function HomeScreen() {
 
                   return (
                     <View key={prayer.id} style={styles.timelineCol}>
-                      {/* Prayer name on top */}
                       <Text
                         style={[
                           styles.timelineName,
@@ -428,17 +445,13 @@ export default function HomeScreen() {
                       >
                         {prayer.name}
                       </Text>
-
-                      {/* Dot + horizontal connectors */}
                       <View style={styles.timelineDotRow}>
-                        {/* Left connector */}
                         <View
                           style={[
                             styles.timelineConnectorLeft,
                             { backgroundColor: isFirst ? 'transparent' : lineColor },
                           ]}
                         />
-                        {/* Dot */}
                         <View
                           style={[
                             styles.timelineDot,
@@ -450,7 +463,6 @@ export default function HomeScreen() {
                             },
                           ]}
                         />
-                        {/* Right connector */}
                         <View
                           style={[
                             styles.timelineConnectorRight,
@@ -458,8 +470,6 @@ export default function HomeScreen() {
                           ]}
                         />
                       </View>
-
-                      {/* Time below */}
                       <Text
                         style={[
                           styles.timelineTime,
@@ -471,8 +481,6 @@ export default function HomeScreen() {
                       >
                         {formatNumber(prayer.time, i18n.language)}
                       </Text>
-
-                      {/* Next badge */}
                       {isNext && (
                         <View
                           style={[
@@ -490,6 +498,25 @@ export default function HomeScreen() {
                 })}
               </View>
             </BlurView>
+          </View>
+        ) : (
+          <View style={styles.section}>
+            <SkeletonBox width={140} height={18} borderRadius={8} style={{ marginBottom: 12 }} color={colors.border} />
+            <View style={[styles.timelineCard, { borderColor: colors.border, backgroundColor: colors.backgroundElement, borderWidth: 1, borderRadius: 20, padding: 20 }]}>
+              <View style={styles.timelineRow}>
+                {[0,1,2,3,4].map(i => (
+                  <View key={i} style={[styles.timelineCol, { alignItems: 'center' }]}>
+                    <SkeletonBox width={38} height={12} borderRadius={6} color={colors.border} />
+                    <View style={[styles.timelineDotRow, { marginVertical: 8 }]}>
+                      <SkeletonBox width={'100%' as any} height={2} borderRadius={1} color={colors.border} style={{ flex: 1 }} />
+                      <SkeletonBox width={10} height={10} borderRadius={5} color={colors.border} style={{ marginHorizontal: 2 }} />
+                      <SkeletonBox width={'100%' as any} height={2} borderRadius={1} color={colors.border} style={{ flex: 1 }} />
+                    </View>
+                    <SkeletonBox width={44} height={10} borderRadius={5} color={colors.border} />
+                  </View>
+                ))}
+              </View>
+            </View>
           </View>
         )}
 
@@ -515,7 +542,7 @@ export default function HomeScreen() {
         </View>
 
         {/* ── Suhur · Iftar · Tahajjud ─────────────────────────── */}
-        {specialTimes.length > 0 && (
+        {specialTimes.length > 0 ? (
           <View style={styles.section}>
             <Text style={[styles.sectionTitle, { color: colors.text }]}>
               {t('home.specialTimes')}
@@ -529,7 +556,6 @@ export default function HomeScreen() {
                   style={[styles.specialCard, { borderColor: colors.border }]}
                 >
                   <View style={styles.specialCardInner}>
-                    {/* Top: name + sublabel */}
                     <View>
                       <Text style={[styles.specialLabel, { color: colors.text }]}>
                         {item.label}
@@ -538,7 +564,6 @@ export default function HomeScreen() {
                         {item.sublabel}
                       </Text>
                     </View>
-                    {/* Bottom: time left + icon right */}
                     <View style={styles.specialBottom}>
                       <Text style={[styles.specialTime, { color: colors.highlight }]}>
                         {formatNumber(item.time, i18n.language)}
@@ -547,6 +572,21 @@ export default function HomeScreen() {
                     </View>
                   </View>
                 </BlurView>
+              ))}
+            </View>
+          </View>
+        ) : (
+          <View style={styles.section}>
+            <SkeletonBox width={140} height={18} borderRadius={8} style={{ marginBottom: 12 }} color={colors.border} />
+            <View style={styles.specialGrid}>
+              {[0,1,2].map(i => (
+                <View key={i} style={[styles.specialCard, { backgroundColor: colors.backgroundElement, borderColor: colors.border, borderWidth: 1, borderRadius: 20 }]}>
+                  <View style={[styles.specialCardInner, { justifyContent: 'space-between', paddingVertical: 14, paddingHorizontal: 14 }]}>
+                    <SkeletonBox width={64} height={14} borderRadius={7} color={colors.border} />
+                    <SkeletonBox width={40} height={10} borderRadius={5} style={{ marginTop: 6 }} color={colors.border} />
+                    <SkeletonBox width={52} height={18} borderRadius={8} style={{ marginTop: 12 }} color={colors.border} />
+                  </View>
+                </View>
               ))}
             </View>
           </View>
@@ -587,7 +627,7 @@ export default function HomeScreen() {
         )}
 
         {/* ── Daily Inspiration ─────────────────────────────────── */}
-        {dailyVerse && (
+        {dailyVerse ? (
           <View>
             <Text style={[styles.sectionTitle, { color: colors.text }]}>
               {t('home.dailyInspiration')}
@@ -615,6 +655,21 @@ export default function HomeScreen() {
                 </Text>
               </View>
             </BlurView>
+          </View>
+        ) : (
+          <View>
+            <SkeletonBox width={160} height={18} borderRadius={8} style={{ marginBottom: 12 }} color={colors.border} />
+            <View style={[styles.inspirationCard, { backgroundColor: colors.backgroundElement, borderColor: colors.border, borderWidth: 1, borderRadius: 24, padding: 28 }]}>
+              <View style={{ alignItems: 'center', gap: 12 }}>
+                <SkeletonBox width={40} height={40} borderRadius={20} color={colors.border} />
+                <SkeletonBox width={200} height={18} borderRadius={8} color={colors.border} />
+                <SkeletonBox width={260} height={18} borderRadius={8} color={colors.border} />
+                <SkeletonBox width={180} height={18} borderRadius={8} color={colors.border} />
+                <SkeletonBox width={240} height={14} borderRadius={7} color={colors.border} style={{ marginTop: 4 }} />
+                <SkeletonBox width={200} height={14} borderRadius={7} color={colors.border} />
+                <SkeletonBox width={120} height={12} borderRadius={6} color={colors.border} style={{ marginTop: 4 }} />
+              </View>
+            </View>
           </View>
         )}
       </ScrollView>

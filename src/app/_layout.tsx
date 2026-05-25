@@ -1,7 +1,7 @@
 import { DarkTheme, DefaultTheme, ThemeProvider } from '@react-navigation/native';
 import { Stack, SplashScreen } from 'expo-router';
 import React, { useEffect } from 'react';
-import { useColorScheme, StyleSheet, View } from 'react-native';
+import { StyleSheet, View } from 'react-native';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import { Colors } from '@/constants/theme';
 import { SQLiteProvider } from 'expo-sqlite';
@@ -11,7 +11,7 @@ import { useFonts } from 'expo-font';
 import { Outfit_400Regular, Outfit_500Medium, Outfit_600SemiBold } from '@expo-google-fonts/outfit';
 import { NotoNaskhArabic_400Regular, NotoNaskhArabic_700Bold } from '@expo-google-fonts/noto-naskh-arabic';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import { Alert, Platform, Appearance } from 'react-native';
+import { Alert } from 'react-native';
 import { initStorage } from '@/utils/my-duas-storage';
 import { StatusBar } from 'expo-status-bar';
 import { setAudioModeAsync } from 'expo-audio';

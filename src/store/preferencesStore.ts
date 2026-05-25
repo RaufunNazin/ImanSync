@@ -2,10 +2,11 @@ import { create } from 'zustand';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
 export interface QuietHours {
-  nightStart: number;
-  nightEnd: number;
-  afternoonStart: number;
-  afternoonEnd: number;
+  enabled: boolean;
+  startHour: number;
+  startMinute: number;
+  endHour: number;
+  endMinute: number;
 }
 
 interface PreferencesState {
@@ -18,10 +19,11 @@ interface PreferencesState {
 }
 
 export const defaultQuietHours: QuietHours = {
-  nightStart: 23,
-  nightEnd: 5,
-  afternoonStart: 15,
-  afternoonEnd: 16,
+  enabled: false,
+  startHour: 23,
+  startMinute: 0,
+  endHour: 5,
+  endMinute: 0,
 };
 
 export const usePreferencesStore = create<PreferencesState>((set, get) => ({

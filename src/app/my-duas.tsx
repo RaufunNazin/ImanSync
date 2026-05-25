@@ -9,7 +9,7 @@ import { BlurView } from 'expo-blur';
 import { Plus, Trash2, Play } from 'lucide-react-native';
 import { initStorage, loadMyDuas, saveMyDuas, saveMediaFile, UserDua, getMediaUri } from '@/utils/my-duas-storage';
 import AddDuaModal from '@/components/add-dua-modal';
-import { useVideoPlayer, VideoView } from 'expo-video';
+
 import * as DocumentPicker from 'expo-document-picker';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useThemeStore } from '@/store/themeStore';
@@ -124,7 +124,7 @@ export default function MyDuasScreen() {
     }
 
     if (dua.type === 'video') {
-      return <VideoPreview uri={localUri} />;
+      return <Text style={{ color: colors.textSecondary, marginTop: Spacing.two, fontFamily: Fonts.outfit, fontStyle: 'italic' }}>Video playback is not supported. Please use text, image, or audio.</Text>;
     }
 
     return null;
@@ -228,22 +228,7 @@ export default function MyDuasScreen() {
   );
 }
 
-function VideoPreview({ uri }: { uri: string }) {
-  const player = useVideoPlayer(uri, player => {
-    player.loop = false;
-  });
 
-  return (
-    <View style={styles.mediaPreview}>
-      <VideoView
-        player={player}
-        style={StyleSheet.absoluteFill}
-        nativeControls={true}
-        contentFit="cover"
-      />
-    </View>
-  );
-}
 
 const styles = StyleSheet.create({
   safeArea: {

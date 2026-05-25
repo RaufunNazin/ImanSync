@@ -1,16 +1,17 @@
 import PageHeader from '@/components/page-header';
+import TimePickerModal from '@/components/TimePickerModal';
+import { formatNumber } from '@/utils/formatNumber';
 import { Colors, Fonts, Spacing } from '@/constants/theme';
 import { setLanguage } from '@/i18n';
 import { useThemeStore } from '@/store/themeStore';
 import { usePreferencesStore } from '@/store/preferencesStore';
 import { getDistrictName } from '@/utils/districts';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import { BlurView } from 'expo-blur';
 import * as Location from 'expo-location';
 import { Bell, ChevronRight, Globe, MapPin, Moon, Settings as SettingsIcon, Shield } from 'lucide-react-native';
 import React, { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { ActivityIndicator, Alert, Image, Linking, ScrollView, StyleSheet, Switch, Text, TouchableOpacity, View, Platform } from 'react-native';
+import { ActivityIndicator, Alert, Image, InteractionManager, Linking, ScrollView, StyleSheet, Switch, Text, TouchableOpacity, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 const CALC_METHODS = [
@@ -26,8 +27,11 @@ export default function SettingsScreen() {
   const { t, i18n } = useTranslation();
   
   const [calcMethodIndex, setCalcMethodIndex] = useState(0);
-  const [locationName, setLocationName] = useState('');
+  const [locationName, setLocationName] = useState<string>('Unknown Location');
   const [fetchingLoc, setFetchingLoc] = useState(false);
+  
+  const [pickerVisible, setPickerVisible] = useState(false);
+  const [pickerType, setPickerType] = useState<'start' | 'end'>('start');
 
   const prefs = usePreferencesStore();
 
@@ -80,7 +84,10 @@ export default function SettingsScreen() {
   };
 
   const toggleDarkMode = (enabled: boolean) => {
-    setTheme(enabled ? 'dark' : 'light');
+    // Defer the heavy native Appearance + BlurView cascade until after the toggle animation
+    InteractionManager.runAfterInteractions(() => {
+      setTheme(enabled ? 'dark' : 'light');
+    });
   };
 
   const cycleLanguage = () => {
@@ -94,6 +101,15 @@ export default function SettingsScreen() {
     const nextIdx = (calcMethodIndex + 1) % CALC_METHODS.length;
     setCalcMethodIndex(nextIdx);
     await AsyncStorage.setItem('imansync_calc_method', String(CALC_METHODS[nextIdx].id));
+  };
+
+  const formatTime12h = (hour: number, minute: number, lang: string) => {
+    const isAM = hour < 12;
+    const h12 = hour % 12 === 0 ? 12 : hour % 12;
+    const period = isAM ? (lang === 'bn' ? 'এএম' : 'AM') : (lang === 'bn' ? 'পিএম' : 'PM');
+    const hStr = formatNumber(h12, lang).padStart(2, formatNumber(0, lang));
+    const mStr = formatNumber(minute, lang).padStart(2, formatNumber(0, lang));
+    return `${hStr}:${mStr} ${period}`;
   };
 
   const fetchLocation = async () => {
@@ -134,8 +150,14 @@ export default function SettingsScreen() {
         styles.settingRow, 
         !isLast && { borderBottomWidth: StyleSheet.hairlineWidth, borderBottomColor: colors.border }
       ]} 
-      activeOpacity={type === 'navigate' ? 0.7 : 1}
-      onPress={onPress}
+      activeOpacity={type === 'navigate' ? 0.7 : 0.9}
+      onPress={() => {
+        if (type === 'toggle') {
+          if (onPress) onPress(!value);
+        } else if (onPress) {
+          onPress();
+        }
+      }}
     >
       <View style={styles.settingLeft}>
         <View style={[styles.iconBox, { backgroundColor: 'rgba(255,255,255,0.1)' }]}>
@@ -153,13 +175,10 @@ export default function SettingsScreen() {
         <Switch
           value={value}
           onValueChange={(val) => {
-            if (id === 'notifications') toggleNotifications(val);
-            else if (id === 'prayerAlerts') togglePrayerAlerts(val);
-            else if (id === 'taskReminders') toggleTaskReminders(val);
-            else toggleDarkMode(val);
+            if (onPress) onPress(val);
           }}
           trackColor={{ false: colors.border, true: colors.highlight }}
-          thumbColor="#f4f3f4"
+          thumbColor={value ? '#FFFFFF' : '#f4f3f4'}
         />
       ) : type === 'loading' ? (
         <ActivityIndicator size="small" color={colors.highlight} />
@@ -182,47 +201,81 @@ export default function SettingsScreen() {
         </View>
 
         <Text style={[styles.sectionTitle, { color: colors.textSecondary }]}>{t('settings.preferences')}</Text>
-        <BlurView intensity={40} tint={colors.glassTint as any} style={[styles.card, { borderColor: colors.border }]}>
+        <View style={[styles.card, { borderColor: colors.border, backgroundColor: colors.backgroundElement }]}>
           <SettingRow id="language" icon={Globe} title={t('settings.language')} value={i18n.language === 'bn' ? 'বাংলা' : 'English'} onPress={cycleLanguage} />
-          <SettingRow id="theme" icon={Moon} title={t('settings.theme')} value={scheme === 'dark'} type="toggle" isLast={true} />
-        </BlurView>
+          <SettingRow id="theme" icon={Moon} title={t('settings.theme')} value={scheme === 'dark'} type="toggle" isLast={true} onPress={(v: boolean) => toggleDarkMode(v)} />
+        </View>
 
         <Text style={[styles.sectionTitle, { color: colors.textSecondary, marginTop: Spacing.four }]}>{t('settings.notificationsTitle', { defaultValue: 'Notifications Settings' })}</Text>
-        <BlurView intensity={40} tint={colors.glassTint as any} style={[styles.card, { borderColor: colors.border }]}>
-          <SettingRow id="notifications" icon={Bell} title={t('settings.masterToggle', { defaultValue: 'Master Toggle' })} value={prefs.notificationsEnabled} type="toggle" isLast={!prefs.notificationsEnabled} />
+        <View style={[styles.card, { borderColor: colors.border, backgroundColor: colors.backgroundElement }]}>
+          <SettingRow id="notifications" icon={Bell} title={t('settings.masterToggle', { defaultValue: 'Master Toggle' })} value={prefs.notificationsEnabled} type="toggle" isLast={!prefs.notificationsEnabled} onPress={(v: boolean) => toggleNotifications(v)} />
           {prefs.notificationsEnabled && (
             <>
               <SettingRow id="prayerAlerts" icon={Bell} title={t('settings.prayerAlerts', { defaultValue: 'Prayer Alerts' })} value={prefs.prayerAlertsEnabled} type="toggle" onPress={(v: boolean) => togglePrayerAlerts(v)} />
               <SettingRow id="taskReminders" icon={Bell} title={t('settings.dailyReminders', { defaultValue: 'Daily Reminders' })} value={prefs.taskRemindersEnabled} type="toggle" onPress={(v: boolean) => toggleTaskReminders(v)} />
               <SettingRow 
-                id="quietHours" 
+                id="dndToggle" 
                 icon={Moon} 
-                title={t('settings.quietHours', { defaultValue: 'Quiet Hours' })} 
-                value={`${prefs.quietHours.nightStart}:00 - 0${prefs.quietHours.nightEnd}:00`} 
-                type="navigate" 
-                isLast={true}
-                onPress={() => {
-                  const currentNightStart = prefs.quietHours.nightStart;
-                  let nextPreset;
-                  
-                  if (currentNightStart === 23) {
-                    nextPreset = { nightStart: 22, nightEnd: 4, afternoonStart: 14, afternoonEnd: 15 };
-                  } else if (currentNightStart === 22) {
-                    nextPreset = { nightStart: 21, nightEnd: 6, afternoonStart: 0, afternoonEnd: 0 };
-                  } else {
-                    nextPreset = { nightStart: 23, nightEnd: 5, afternoonStart: 15, afternoonEnd: 16 };
-                  }
-                  
-                  prefs.setPreferences({ quietHours: nextPreset });
+                title={t('settings.doNotDisturb')} 
+                value={prefs.quietHours.enabled} 
+                type="toggle" 
+                isLast={!prefs.quietHours.enabled}
+                onPress={(v: boolean) => {
+                  prefs.setPreferences({ quietHours: { ...prefs.quietHours, enabled: v } });
                   import('../../services/notificationService').then(s => s.scheduleAllNotifications());
                 }} 
               />
+              {prefs.quietHours.enabled && (
+                <>
+                  <SettingRow 
+                    id="dndFrom" 
+                    icon={Moon} 
+                    title={t('settings.dndFrom')} 
+                    value={formatTime12h(prefs.quietHours.startHour, prefs.quietHours.startMinute, i18n.language)} 
+                    type="navigate" 
+                    onPress={() => {
+                      setPickerType('start');
+                      setPickerVisible(true);
+                    }} 
+                  />
+                  <SettingRow 
+                    id="dndTo" 
+                    icon={Moon} 
+                    title={t('settings.dndTo')} 
+                    value={formatTime12h(prefs.quietHours.endHour, prefs.quietHours.endMinute, i18n.language)} 
+                    type="navigate" 
+                    isLast={true}
+                    onPress={() => {
+                      setPickerType('end');
+                      setPickerVisible(true);
+                    }} 
+                  />
+                </>
+              )}
             </>
           )}
-        </BlurView>
+        </View>
+
+        <TimePickerModal 
+          visible={pickerVisible}
+          onClose={() => setPickerVisible(false)}
+          title={pickerType === 'start' ? t('settings.dndFrom') : t('settings.dndTo')}
+          initialHour={pickerType === 'start' ? prefs.quietHours.startHour : prefs.quietHours.endHour}
+          initialMinute={pickerType === 'start' ? prefs.quietHours.startMinute : prefs.quietHours.endMinute}
+          colors={colors}
+          onSave={(hour, minute) => {
+            setPickerVisible(false);
+            if (pickerType === 'start') {
+              prefs.setPreferences({ quietHours: { ...prefs.quietHours, startHour: hour, startMinute: minute } });
+            } else {
+              prefs.setPreferences({ quietHours: { ...prefs.quietHours, endHour: hour, endMinute: minute } });
+            }
+            import('../../services/notificationService').then(s => s.scheduleAllNotifications());
+          }}
+        />
 
         <Text style={[styles.sectionTitle, { color: colors.textSecondary, marginTop: Spacing.four }]}>{t('settings.locationCalc')}</Text>
-        <BlurView intensity={40} tint={colors.glassTint as any} style={[styles.card, { borderColor: colors.border }]}>
+        <View style={[styles.card, { borderColor: colors.border, backgroundColor: colors.backgroundElement }]}>
           <SettingRow 
             id="location" 
             icon={MapPin} 
@@ -239,10 +292,10 @@ export default function SettingsScreen() {
             onPress={cycleCalcMethod}
             isLast={true}
           />
-        </BlurView>
+        </View>
 
         <Text style={[styles.sectionTitle, { color: colors.textSecondary, marginTop: Spacing.four }]}>{t('settings.system')}</Text>
-        <BlurView intensity={40} tint={colors.glassTint as any} style={[styles.card, { borderColor: colors.border }]}>
+        <View style={[styles.card, { borderColor: colors.border, backgroundColor: colors.backgroundElement }]}>
           <SettingRow 
             id="permissions"
             icon={Shield} 
@@ -251,7 +304,7 @@ export default function SettingsScreen() {
             onPress={() => Linking.openSettings()} 
             isLast={true}
           />
-        </BlurView>
+        </View>
       </ScrollView>
     </SafeAreaView>
   );

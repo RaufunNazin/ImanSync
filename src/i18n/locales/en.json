@@ -36,6 +36,7 @@
   "home": {
     "titleEn": "ImanSync",
     "titleAr": "إيمان سينك",
+    "tabTitle": "Home",
     "greeting": "السَّلَامُ عَلَيْكُمْ",
     "quickActions": "Quick Actions",
     "qibla": "Qibla Compass",
@@ -225,12 +226,16 @@
     "calcMethod_1": "Karachi",
     "calcMethod_2": "ISNA",
     "calcMethod_3": "MWL",
-    "footerSubtitle": "Created seeking the satisfaction of Allah",
+    "footerSubtitle": "Created seeking satisfaction of Allah",
     "notificationsTitle": "Notifications Settings",
     "masterToggle": "Master Toggle",
     "prayerAlerts": "Prayer Alerts",
     "dailyReminders": "Daily Reminders",
-    "quietHours": "Quiet Hours"
+    "doNotDisturb": "Do Not Disturb",
+    "dndFrom": "From",
+    "dndTo": "To",
+    "save": "Save",
+    "cancel": "Cancel"
   },
   "names": {
     "titleEn": "Allah's Names",
