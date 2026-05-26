@@ -13,20 +13,14 @@
       "distribution": "internal",
       "android": {
         "buildType": "apk",
-        "gradleCommand": ":app:assembleRelease",
-        "abiFilter": [
-          "arm64-v8a"
-        ]
+        "gradleCommand": ":app:assembleRelease"
       },
       "channel": "preview"
     },
     "production-apk": {
       "distribution": "internal",
       "android": {
-        "buildType": "apk",
-        "abiFilter": [
-          "arm64-v8a"
-        ]
+        "buildType": "apk"
       },
       "channel": "production"
     },

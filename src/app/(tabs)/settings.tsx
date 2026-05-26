@@ -11,7 +11,7 @@ import * as Location from 'expo-location';
 import { Bell, ChevronRight, Globe, MapPin, Moon, Settings as SettingsIcon, Shield } from 'lucide-react-native';
 import React, { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { ActivityIndicator, Alert, Image, InteractionManager, Linking, ScrollView, StyleSheet, Switch, Text, TouchableOpacity, View } from 'react-native';
+import { ActivityIndicator, Alert, Image, Linking, ScrollView, StyleSheet, Switch, Text, TouchableOpacity, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 const CALC_METHODS = [
@@ -20,25 +20,81 @@ const CALC_METHODS = [
   { id: 3, name: 'MWL (Muslim World League)' }
 ];
 
+// ─── SettingRow MUST live OUTSIDE the screen component ───────────────────────
+// If it's defined inside, React sees a brand-new component type on every render,
+// unmounts all rows, and remounts them — causing the visible hang/freeze.
+interface SettingRowProps {
+  icon: React.ComponentType<{ size: number; color: string }>;
+  title: string;
+  value?: any;
+  type?: 'navigate' | 'toggle' | 'loading';
+  onPress?: (val?: any) => void;
+  isLast?: boolean;
+  colors: typeof Colors.light | typeof Colors.dark;
+}
+
+function SettingRow({ icon: Icon, title, value, type = 'navigate', onPress, isLast, colors }: SettingRowProps) {
+  return (
+    <TouchableOpacity
+      style={[
+        styles.settingRow,
+        !isLast && { borderBottomWidth: StyleSheet.hairlineWidth, borderBottomColor: colors.border }
+      ]}
+      activeOpacity={type === 'navigate' ? 0.7 : 0.9}
+      onPress={() => {
+        if (type === 'toggle') {
+          if (onPress) onPress(!value);
+        } else if (onPress) {
+          onPress();
+        }
+      }}
+    >
+      <View style={styles.settingLeft}>
+        <View style={[styles.iconBox, { backgroundColor: 'rgba(255,255,255,0.1)' }]}>
+          <Icon size={20} color={colors.highlight} />
+        </View>
+        <Text style={[styles.settingTitle, { color: colors.text }]}>{title}</Text>
+      </View>
+
+      {type === 'navigate' ? (
+        <View style={{ flexDirection: 'row', alignItems: 'center', flexShrink: 1 }}>
+          <Text style={[styles.settingValue, { color: colors.textSecondary }]} numberOfLines={1} ellipsizeMode="tail">{value}</Text>
+          <ChevronRight size={20} color={colors.textSecondary} />
+        </View>
+      ) : type === 'toggle' ? (
+        <Switch
+          value={!!value}
+          onValueChange={(val) => {
+            if (onPress) onPress(val);
+          }}
+          trackColor={{ false: colors.border, true: colors.highlight }}
+          thumbColor={value ? '#FFFFFF' : '#f4f3f4'}
+        />
+      ) : type === 'loading' ? (
+        <ActivityIndicator size="small" color={colors.highlight} />
+      ) : null}
+    </TouchableOpacity>
+  );
+}
+// ─────────────────────────────────────────────────────────────────────────────
+
 export default function SettingsScreen() {
   const scheme = useThemeStore((s) => s.theme);
   const setTheme = useThemeStore((s) => s.setTheme);
   const colors = Colors[scheme === 'unspecified' ? 'light' : scheme];
   const { t, i18n } = useTranslation();
-  
+
   const [calcMethodIndex, setCalcMethodIndex] = useState(0);
   const [locationName, setLocationName] = useState<string>('Unknown Location');
   const [fetchingLoc, setFetchingLoc] = useState(false);
-  
+
   const [pickerVisible, setPickerVisible] = useState(false);
   const [pickerType, setPickerType] = useState<'start' | 'end'>('start');
 
   const prefs = usePreferencesStore();
 
   useEffect(() => {
-    prefs.initialize();
-    
-    AsyncStorage.multiGet(['imansync_dark_mode', 'imansync_calc_method', 'imansync_location']).then((values) => {
+    AsyncStorage.multiGet(['imansync_calc_method', 'imansync_location']).then((values) => {
       values.forEach(([key, value]) => {
         if (value !== null) {
           if (key === 'imansync_calc_method') {
@@ -50,10 +106,9 @@ export default function SettingsScreen() {
             try {
               const loc = JSON.parse(value);
               setLocationName(loc.city);
-            } catch(e){}
+            } catch (e) {}
           }
         } else {
-          // Defaults
           if (key === 'imansync_location') {
             setLocationName('Dhaka (Default)');
           }
@@ -65,10 +120,8 @@ export default function SettingsScreen() {
   const toggleNotifications = async (enabled: boolean) => {
     prefs.setPreferences({ notificationsEnabled: enabled });
     if (enabled) {
-      // Re-schedule everything
       import('../../services/notificationService').then(s => s.scheduleAllNotifications());
     } else {
-      // Cancel all
       import('@notifee/react-native').then(n => n.default.cancelAllNotifications());
     }
   };
@@ -84,16 +137,15 @@ export default function SettingsScreen() {
   };
 
   const toggleDarkMode = (enabled: boolean) => {
-    // Defer the heavy native Appearance + BlurView cascade until after the toggle animation
-    InteractionManager.runAfterInteractions(() => {
-      setTheme(enabled ? 'dark' : 'light');
-    });
+    // DO NOT wrap in InteractionManager — setTheme is a simple Zustand set().
+    // Deferring caused setTheme to fire after the Switch component was already
+    // unmounted by the in-flight re-render, producing the crash.
+    setTheme(enabled ? 'dark' : 'light');
   };
 
   const cycleLanguage = () => {
     const nextLang = i18n.language === 'en' ? 'bn' : 'en';
     setLanguage(nextLang);
-    // Re-schedule notifications so they are generated in the new language
     import('../../services/notificationService').then(s => s.scheduleAllNotifications());
   };
 
@@ -127,70 +179,28 @@ export default function SettingsScreen() {
         latitude: location.coords.latitude,
         longitude: location.coords.longitude
       });
-      
+
       let city = reverse[0]?.city || reverse[0]?.subregion || reverse[0]?.region || 'Unknown Location';
       setLocationName(city);
-      
+
       await AsyncStorage.setItem('imansync_location', JSON.stringify({
         latitude: location.coords.latitude,
         longitude: location.coords.longitude,
         city
       }));
     } catch (e) {
-      console.log("Error fetching location", e);
+      console.log('Error fetching location', e);
       Alert.alert('Error', 'Could not fetch location.');
     } finally {
       setFetchingLoc(false);
     }
   };
 
-  const SettingRow = ({ id, icon: Icon, title, value, type = 'navigate', onPress, isLast }: any) => (
-    <TouchableOpacity 
-      style={[
-        styles.settingRow, 
-        !isLast && { borderBottomWidth: StyleSheet.hairlineWidth, borderBottomColor: colors.border }
-      ]} 
-      activeOpacity={type === 'navigate' ? 0.7 : 0.9}
-      onPress={() => {
-        if (type === 'toggle') {
-          if (onPress) onPress(!value);
-        } else if (onPress) {
-          onPress();
-        }
-      }}
-    >
-      <View style={styles.settingLeft}>
-        <View style={[styles.iconBox, { backgroundColor: 'rgba(255,255,255,0.1)' }]}>
-          <Icon size={20} color={colors.highlight} />
-        </View>
-        <Text style={[styles.settingTitle, { color: colors.text }]}>{title}</Text>
-      </View>
-      
-      {type === 'navigate' ? (
-        <View style={{ flexDirection: 'row', alignItems: 'center', flexShrink: 1 }}>
-          <Text style={[styles.settingValue, { color: colors.textSecondary }]} numberOfLines={1} ellipsizeMode="tail">{value}</Text>
-          <ChevronRight size={20} color={colors.textSecondary} />
-        </View>
-      ) : type === 'toggle' ? (
-        <Switch
-          value={value}
-          onValueChange={(val) => {
-            if (onPress) onPress(val);
-          }}
-          trackColor={{ false: colors.border, true: colors.highlight }}
-          thumbColor={value ? '#FFFFFF' : '#f4f3f4'}
-        />
-      ) : type === 'loading' ? (
-        <ActivityIndicator size="small" color={colors.highlight} />
-      ) : null}
-    </TouchableOpacity>
-  );
-
   return (
     <SafeAreaView style={[styles.safeArea, { backgroundColor: colors.background }]}>
       <PageHeader titleEn={t('settings.titleEn')} titleAr={t('settings.titleAr')} />
       <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={styles.container}>
-        
+
         <View style={[styles.appFooter, { borderColor: colors.accent, backgroundColor: colors.backgroundElement }]}>
           <Image source={require('../../../assets/images/android-icon-foreground.png')} style={styles.footerLogo} resizeMode="contain" />
           <View style={styles.footerTextContainer}>
@@ -202,53 +212,53 @@ export default function SettingsScreen() {
 
         <Text style={[styles.sectionTitle, { color: colors.textSecondary }]}>{t('settings.preferences')}</Text>
         <View style={[styles.card, { borderColor: colors.border, backgroundColor: colors.backgroundElement }]}>
-          <SettingRow id="language" icon={Globe} title={t('settings.language')} value={i18n.language === 'bn' ? 'বাংলা' : 'English'} onPress={cycleLanguage} />
-          <SettingRow id="theme" icon={Moon} title={t('settings.theme')} value={scheme === 'dark'} type="toggle" isLast={true} onPress={(v: boolean) => toggleDarkMode(v)} />
+          <SettingRow icon={Globe} title={t('settings.language')} value={i18n.language === 'bn' ? 'বাংলা' : 'English'} onPress={cycleLanguage} colors={colors} />
+          <SettingRow icon={Moon} title={t('settings.theme')} value={scheme === 'dark'} type="toggle" isLast={true} onPress={toggleDarkMode} colors={colors} />
         </View>
 
         <Text style={[styles.sectionTitle, { color: colors.textSecondary, marginTop: Spacing.four }]}>{t('settings.notificationsTitle', { defaultValue: 'Notifications Settings' })}</Text>
         <View style={[styles.card, { borderColor: colors.border, backgroundColor: colors.backgroundElement }]}>
-          <SettingRow id="notifications" icon={Bell} title={t('settings.masterToggle', { defaultValue: 'Master Toggle' })} value={prefs.notificationsEnabled} type="toggle" isLast={!prefs.notificationsEnabled} onPress={(v: boolean) => toggleNotifications(v)} />
+          <SettingRow icon={Bell} title={t('settings.masterToggle', { defaultValue: 'Master Toggle' })} value={prefs.notificationsEnabled} type="toggle" isLast={!prefs.notificationsEnabled} onPress={toggleNotifications} colors={colors} />
           {prefs.notificationsEnabled && (
             <>
-              <SettingRow id="prayerAlerts" icon={Bell} title={t('settings.prayerAlerts', { defaultValue: 'Prayer Alerts' })} value={prefs.prayerAlertsEnabled} type="toggle" onPress={(v: boolean) => togglePrayerAlerts(v)} />
-              <SettingRow id="taskReminders" icon={Bell} title={t('settings.dailyReminders', { defaultValue: 'Daily Reminders' })} value={prefs.taskRemindersEnabled} type="toggle" onPress={(v: boolean) => toggleTaskReminders(v)} />
-              <SettingRow 
-                id="dndToggle" 
-                icon={Moon} 
-                title={t('settings.doNotDisturb')} 
-                value={prefs.quietHours.enabled} 
-                type="toggle" 
+              <SettingRow icon={Bell} title={t('settings.prayerAlerts', { defaultValue: 'Prayer Alerts' })} value={prefs.prayerAlertsEnabled} type="toggle" onPress={togglePrayerAlerts} colors={colors} />
+              <SettingRow icon={Bell} title={t('settings.dailyReminders', { defaultValue: 'Daily Reminders' })} value={prefs.taskRemindersEnabled} type="toggle" onPress={toggleTaskReminders} colors={colors} />
+              <SettingRow
+                icon={Moon}
+                title={t('settings.doNotDisturb')}
+                value={prefs.quietHours.enabled}
+                type="toggle"
                 isLast={!prefs.quietHours.enabled}
                 onPress={(v: boolean) => {
                   prefs.setPreferences({ quietHours: { ...prefs.quietHours, enabled: v } });
                   import('../../services/notificationService').then(s => s.scheduleAllNotifications());
-                }} 
+                }}
+                colors={colors}
               />
               {prefs.quietHours.enabled && (
                 <>
-                  <SettingRow 
-                    id="dndFrom" 
-                    icon={Moon} 
-                    title={t('settings.dndFrom')} 
-                    value={formatTime12h(prefs.quietHours.startHour, prefs.quietHours.startMinute, i18n.language)} 
-                    type="navigate" 
+                  <SettingRow
+                    icon={Moon}
+                    title={t('settings.dndFrom')}
+                    value={formatTime12h(prefs.quietHours.startHour, prefs.quietHours.startMinute, i18n.language)}
+                    type="navigate"
                     onPress={() => {
                       setPickerType('start');
                       setPickerVisible(true);
-                    }} 
+                    }}
+                    colors={colors}
                   />
-                  <SettingRow 
-                    id="dndTo" 
-                    icon={Moon} 
-                    title={t('settings.dndTo')} 
-                    value={formatTime12h(prefs.quietHours.endHour, prefs.quietHours.endMinute, i18n.language)} 
-                    type="navigate" 
+                  <SettingRow
+                    icon={Moon}
+                    title={t('settings.dndTo')}
+                    value={formatTime12h(prefs.quietHours.endHour, prefs.quietHours.endMinute, i18n.language)}
+                    type="navigate"
                     isLast={true}
                     onPress={() => {
                       setPickerType('end');
                       setPickerVisible(true);
-                    }} 
+                    }}
+                    colors={colors}
                   />
                 </>
               )}
@@ -256,7 +266,7 @@ export default function SettingsScreen() {
           )}
         </View>
 
-        <TimePickerModal 
+        <TimePickerModal
           visible={pickerVisible}
           onClose={() => setPickerVisible(false)}
           title={pickerType === 'start' ? t('settings.dndFrom') : t('settings.dndTo')}
@@ -276,33 +286,33 @@ export default function SettingsScreen() {
 
         <Text style={[styles.sectionTitle, { color: colors.textSecondary, marginTop: Spacing.four }]}>{t('settings.locationCalc')}</Text>
         <View style={[styles.card, { borderColor: colors.border, backgroundColor: colors.backgroundElement }]}>
-          <SettingRow 
-            id="location" 
-            icon={MapPin} 
-            title={t('settings.location')} 
-            value={getDistrictName(locationName, i18n.language)} 
-            type={fetchingLoc ? 'loading' : 'navigate'} 
-            onPress={fetchLocation} 
+          <SettingRow
+            icon={MapPin}
+            title={t('settings.location')}
+            value={getDistrictName(locationName, i18n.language)}
+            type={fetchingLoc ? 'loading' : 'navigate'}
+            onPress={fetchLocation}
+            colors={colors}
           />
-          <SettingRow 
-            id="method" 
-            icon={SettingsIcon} 
-            title={t('settings.calcMethod')} 
-            value={t('settings.calcMethod_' + CALC_METHODS[calcMethodIndex].id)} 
+          <SettingRow
+            icon={SettingsIcon}
+            title={t('settings.calcMethod')}
+            value={t('settings.calcMethod_' + CALC_METHODS[calcMethodIndex].id)}
             onPress={cycleCalcMethod}
             isLast={true}
+            colors={colors}
           />
         </View>
 
         <Text style={[styles.sectionTitle, { color: colors.textSecondary, marginTop: Spacing.four }]}>{t('settings.system')}</Text>
         <View style={[styles.card, { borderColor: colors.border, backgroundColor: colors.backgroundElement }]}>
-          <SettingRow 
-            id="permissions"
-            icon={Shield} 
-            title={t('settings.managePermissions')} 
-            value="" 
-            onPress={() => Linking.openSettings()} 
+          <SettingRow
+            icon={Shield}
+            title={t('settings.managePermissions')}
+            value=""
+            onPress={() => Linking.openSettings()}
             isLast={true}
+            colors={colors}
           />
         </View>
       </ScrollView>
@@ -311,25 +321,12 @@ export default function SettingsScreen() {
 }
 
 const styles = StyleSheet.create({
-  safeArea: { 
-    flex: 1, 
+  safeArea: {
+    flex: 1,
   },
-  container: { 
+  container: {
     padding: Spacing.four,
     paddingTop: 0,
-  },
-  header: {
-  },
-  title: { 
-    fontFamily: Fonts.outfit,
-    fontSize: 32, 
-  },
-  iconBtnWrapper: {
-    borderRadius: 16,
-    overflow: 'hidden',
-  },
-  iconBtn: {
-    padding: Spacing.two,
   },
   sectionTitle: {
     fontFamily: Fonts.outfit,

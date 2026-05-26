@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { ActivityIndicator, Dimensions, Image, Platform, ScrollView, StyleSheet, Text, TouchableOpacity, useColorScheme, View } from 'react-native';
+import { ActivityIndicator, Dimensions, Image, Platform, ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import { useRouter } from 'expo-router';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Colors, Fonts, Spacing } from '@/constants/theme';
@@ -13,6 +13,8 @@ import AddDuaModal from '@/components/add-dua-modal';
 import * as DocumentPicker from 'expo-document-picker';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useThemeStore } from '@/store/themeStore';
+
+import { ChevronRight, Image as ImageIcon, Video, Type } from 'lucide-react-native';
 
 export default function MyDuasScreen() {
   const scheme = useThemeStore((s) => s.theme);
@@ -102,33 +104,7 @@ export default function MyDuasScreen() {
     await saveMyDuas(updated);
   };
 
-  const renderMedia = (dua: UserDua) => {
-    const [localUri, setLocalUri] = useState<string | null>(null);
 
-    useEffect(() => {
-      if (dua.mediaUri && dua.type !== 'text') {
-        getMediaUri(dua.mediaUri).then(setLocalUri);
-      }
-    }, [dua]);
-
-    if (!localUri) return null;
-
-    if (dua.type === 'image') {
-      return (
-        <Image 
-          source={{ uri: localUri }} 
-          style={styles.mediaPreview} 
-          resizeMode="cover"
-        />
-      );
-    }
-
-    if (dua.type === 'video') {
-      return <Text style={{ color: colors.textSecondary, marginTop: Spacing.two, fontFamily: Fonts.outfit, fontStyle: 'italic' }}>Video playback is not supported. Please use text, image, or audio.</Text>;
-    }
-
-    return null;
-  };
 
   if (needsSetup) {
     return (
@@ -169,40 +145,39 @@ export default function MyDuasScreen() {
         ) : (
           <View style={styles.list}>
             {duas.map((dua) => (
-              <BlurView
+              <TouchableOpacity
                 key={dua.id}
-                intensity={40}
-                tint={colors.glassTint as any}
-                style={[styles.duaCard, { borderColor: colors.border }]}
+                activeOpacity={0.7}
+                onPress={() => router.push(`/my-dua-detail/${dua.id}` as any)}
               >
-                <View style={styles.duaHeader}>
-                  <Text style={[styles.duaTitle, { color: colors.text }]} numberOfLines={1}>
-                    {dua.title}
-                  </Text>
-                  <TouchableOpacity onPress={() => handleDelete(dua.id)}>
-                    <Trash2 size={18} color="#EF4444" />
-                  </TouchableOpacity>
-                </View>
-
-                {dua.type === 'text' ? (
-                  <View style={styles.textDuaContent}>
-                    {dua.arabic && (
-                      <Text style={[styles.duaArabic, { color: colors.text }]}>{dua.arabic}</Text>
-                    )}
-                    {dua.transliteration && (
-                      <Text style={[styles.duaLatin, { color: colors.textSecondary }]}>{dua.transliteration}</Text>
-                    )}
-                    <Text style={[styles.duaTranslation, { color: colors.text }]}>{dua.translation}</Text>
+                <BlurView
+                  intensity={40}
+                  tint={colors.glassTint as any}
+                  style={[styles.duaCard, { borderColor: colors.border }]}
+                >
+                  <View style={styles.duaHeader}>
+                    <View style={styles.duaTitleContainer}>
+                      {dua.type === 'text' && <Type size={16} color={colors.accent} />}
+                      {dua.type === 'image' && <ImageIcon size={16} color={colors.accent} />}
+                      {dua.type === 'video' && <Video size={16} color={colors.accent} />}
+                      <Text style={[styles.duaTitle, { color: colors.text }]} numberOfLines={1}>
+                        {dua.title}
+                      </Text>
+                    </View>
+                    <View style={{ flexDirection: 'row', alignItems: 'center', gap: Spacing.three }}>
+                      <TouchableOpacity onPress={() => handleDelete(dua.id)}>
+                        <Trash2 size={18} color="#EF4444" />
+                      </TouchableOpacity>
+                      <ChevronRight size={20} color={colors.textSecondary} />
+                    </View>
                   </View>
-                ) : (
-                  renderMedia(dua)
-                )}
-              </BlurView>
+                </BlurView>
+              </TouchableOpacity>
             ))}
 
             {duas.length === 0 && (
               <Text style={{ color: colors.textSecondary, textAlign: 'center', marginTop: 40, fontFamily: Fonts.outfit }}>
-                No duas added yet.
+                {t('dua.noMyDuas', { defaultValue: 'No custom duas added.' })}
               </Text>
             )}
           </View>
@@ -280,49 +255,27 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
+    paddingVertical: Spacing.two,
+  },
+  duaTitleContainer: {
+    flex: 1,
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: Spacing.three,
   },
   duaTitle: {
     fontFamily: Fonts.outfit,
     fontSize: 18,
     flex: 1,
   },
-  textDuaContent: {
-    gap: Spacing.two,
-    marginTop: Spacing.two,
-    borderTopWidth: 1,
-    borderTopColor: 'rgba(150,150,150,0.2)',
-    paddingTop: Spacing.three,
-  },
-  duaArabic: {
-    fontFamily: Fonts.arabic,
-    fontSize: 22,
-    textAlign: 'right',
-  },
-  duaLatin: {
-    fontFamily: Fonts.outfit,
-    fontSize: 14,
-    fontStyle: 'italic',
-  },
-  duaTranslation: {
-    fontFamily: Fonts.outfit,
-    fontSize: 16,
-    lineHeight: 24,
-  },
-  mediaPreview: {
-    width: '100%',
-    height: 200,
-    borderRadius: 12,
-    backgroundColor: 'rgba(0,0,0,0.1)',
-    marginTop: Spacing.two,
-    overflow: 'hidden',
-  },
+
   fab: {
     position: 'absolute',
-    bottom: Spacing.six,
-    right: Spacing.six,
-    width: 60,
-    height: 60,
-    borderRadius: 30,
+    bottom: Spacing.four,
+    right: Spacing.four,
+    width: 56,
+    height: 56,
+    borderRadius: 28,
     alignItems: 'center',
     justifyContent: 'center',
     boxShadow: '0px 4px 4px rgba(0, 0, 0, 0.3)',

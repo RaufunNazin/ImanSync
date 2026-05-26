@@ -2,7 +2,7 @@ import { Colors, Fonts, Spacing } from '@/constants/theme';
 import { useRouter } from 'expo-router';
 import { ChevronLeft } from 'lucide-react-native';
 import React from 'react';
-import { StyleSheet, Text, TouchableOpacity, useColorScheme, View, Image } from 'react-native';
+import { StyleSheet, Text, TouchableOpacity, View, Image } from 'react-native';
 import { useThemeStore } from '@/store/themeStore';
 
 interface PageHeaderProps {

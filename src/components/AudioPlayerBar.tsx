@@ -3,14 +3,13 @@ import { View, Text, StyleSheet, TouchableOpacity, ActivityIndicator } from 'rea
 import { useAudioStore } from '@/store/audioStore';
 import { Play, Pause, X, SkipForward } from 'lucide-react-native';
 import { Colors, Fonts, Spacing } from '@/constants/theme';
-import { useColorScheme } from 'react-native';
 import { useTranslation } from 'react-i18next';
 import { formatNumber } from '@/utils/formatNumber';
 import { BlurView } from 'expo-blur';
 import { useThemeStore } from '@/store/themeStore';
 
 export default function AudioPlayerBar() {
-  const { currentSurahId, isPlaying, isLoading, pause, resume, stop, playNext, playlist } = useAudioStore();
+  const { currentSurahId, isPlaying, isLoading, pause, resume, stop, playNext, playlist, playbackMode, currentAyahNumber } = useAudioStore();
   const scheme = useThemeStore((s) => s.theme);
   const colors = Colors[scheme === 'unspecified' ? 'light' : scheme];
   const { t, i18n } = useTranslation();
@@ -25,7 +24,11 @@ export default function AudioPlayerBar() {
             {t('surahNames.' + currentSurahId, { defaultValue: 'Surah ' + currentSurahId })}
           </Text>
           <Text style={[styles.subtitle, { color: colors.textSecondary }]} numberOfLines={1}>
-            {playlist.length > 0 ? t('quran.playingJuz', { defaultValue: `Playing Queue (${formatNumber(playlist.length, i18n.language)} left)` }) : t('quran.nowPlaying', { defaultValue: 'Now Playing' })}
+            {playlist.length > 0 
+              ? t('quran.playingJuz', { defaultValue: `Playing Queue (${formatNumber(playlist.length, i18n.language)} left)` }) 
+              : playbackMode === 'ayah' && currentAyahNumber 
+                ? `${t('surah.ayah', { defaultValue: 'Ayah' })} ${formatNumber(currentAyahNumber, i18n.language)}`
+                : t('quran.nowPlaying', { defaultValue: 'Now Playing' })}
           </Text>
         </View>
 

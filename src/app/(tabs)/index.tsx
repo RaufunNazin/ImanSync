@@ -14,7 +14,6 @@ import {
   StyleSheet,
   Text,
   TouchableOpacity,
-  useColorScheme,
   View
 } from 'react-native';
 import Animated, { useAnimatedProps, useAnimatedStyle, useSharedValue, withSpring, withTiming } from 'react-native-reanimated';
@@ -690,6 +689,13 @@ function TasbeehFAB({ colors, t, i18n }: { colors: any; t: any; i18n: any }) {
   const [cycleIndex, setCycleIndex] = useState(0);
   const [showLabel, setShowLabel] = useState(false);
   const labelTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  // Fix #5: clean up timer on unmount to prevent state update on unmounted component
+  useEffect(() => {
+    return () => {
+      if (labelTimerRef.current) clearTimeout(labelTimerRef.current);
+    };
+  }, []);
 
   const size = 60;
   const strokeWidth = 3;

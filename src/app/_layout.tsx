@@ -1,7 +1,7 @@
 import { DarkTheme, DefaultTheme, ThemeProvider } from '@react-navigation/native';
 import { Stack, SplashScreen } from 'expo-router';
-import React, { useEffect } from 'react';
-import { StyleSheet, View } from 'react-native';
+import React, { useEffect, useMemo, useRef, useState } from 'react';
+import { StyleSheet, View, Animated } from 'react-native';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import { Colors } from '@/constants/theme';
 import { SQLiteProvider } from 'expo-sqlite';
@@ -58,10 +58,16 @@ export default function RootLayout() {
       setThemeLoaded(true);
     });
 
-    // Listen to app state changes to aggressively re-schedule
+    // Fix #3: only re-schedule when the calendar date actually changes,
+    // not on every app-foreground event (which fires many times per day).
+    let lastScheduledDate = '';
     const subscription = AppState.addEventListener('change', (nextAppState: AppStateStatus) => {
       if (nextAppState === 'active') {
-        scheduleAllNotifications();
+        const today = new Date().toDateString();
+        if (today !== lastScheduledDate) {
+          lastScheduledDate = today;
+          scheduleAllNotifications();
+        }
       }
     });
 
@@ -96,31 +102,71 @@ export default function RootLayout() {
     }
   }, [fontsLoaded, fontError, i18nLoaded, themeLoaded]);
 
-  if (!(fontsLoaded || fontError) || !i18nLoaded || !themeLoaded) {
-    return null;
-  }
 
-  const colors = Colors[colorScheme === 'unspecified' ? 'light' : colorScheme || 'light'];
 
-  const navTheme = colorScheme === 'dark' ? {
+  const colors = useMemo(
+    () => Colors[colorScheme === 'unspecified' ? 'light' : colorScheme || 'light'],
+    [colorScheme]
+  );
+
+  const [prevColor, setPrevColor] = useState(colors.background);
+  const fadeAnim = useRef(new Animated.Value(0)).current;
+  const isMounted = useRef(false);
+
+  useEffect(() => {
+    if (isMounted.current) {
+      fadeAnim.setValue(1);
+      Animated.timing(fadeAnim, {
+        toValue: 0,
+        duration: 300,
+        useNativeDriver: true,
+      }).start();
+      
+      const timer = setTimeout(() => {
+        setPrevColor(colors.background);
+      }, 300);
+      return () => clearTimeout(timer);
+    } else {
+      isMounted.current = true;
+      setPrevColor(colors.background);
+    }
+  }, [colors.background]);
+
+  const navTheme = useMemo(() => colorScheme === 'dark' ? {
     ...DarkTheme,
     colors: { ...DarkTheme.colors, background: colors.background }
   } : {
     ...DefaultTheme,
     colors: { ...DefaultTheme.colors, background: colors.background }
-  };
+  }, [colorScheme, colors.background]);
+
+  if (!(fontsLoaded || fontError) || !i18nLoaded || !themeLoaded) {
+    return null;
+  }
 
   return (
     <GestureHandlerRootView style={{ flex: 1 }}>
       <SQLiteProvider databaseName="islamic.db" onInit={migrateDbIfNeeded}>
         <ThemeProvider value={navTheme}>
-          <StatusBar style={colorScheme === 'dark' ? 'light' : 'dark'} backgroundColor={colors.background} />
+          <StatusBar style={colorScheme === 'dark' ? 'light' : 'dark'} backgroundColor={colors.background} animated={true} />
           <View style={[styles.background, { backgroundColor: colors.background }]}>
             <Stack screenOptions={{ headerShown: false, contentStyle: { backgroundColor: 'transparent' } }}>
               <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
             </Stack>
             <AudioPlayerBar />
             <SystemAnnouncer />
+
+            <Animated.View 
+              pointerEvents="none"
+              style={[
+                StyleSheet.absoluteFill, 
+                { 
+                  backgroundColor: prevColor, 
+                  opacity: fadeAnim,
+                  zIndex: 9999 
+                }
+              ]} 
+            />
           </View>
         </ThemeProvider>
       </SQLiteProvider>

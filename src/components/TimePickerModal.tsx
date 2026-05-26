@@ -78,11 +78,11 @@ export default function TimePickerModal({
   }, [visible, initialHour, initialMinute]);
 
   const handleSetAM = () => {
-    if (!isAM) setSelectedHour(selectedHour - 12);
+    if (!isAM) setSelectedHour(Math.max(0, selectedHour - 12));
   };
   
   const handleSetPM = () => {
-    if (isAM) setSelectedHour(selectedHour + 12);
+    if (isAM) setSelectedHour(Math.min(23, selectedHour + 12));
   };
 
   // 1-12 value based on selectedHour

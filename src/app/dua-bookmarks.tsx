@@ -1,5 +1,5 @@
 import React, { useCallback, useState } from 'react';
-import { ScrollView, StyleSheet, Text, TouchableOpacity, useColorScheme, View } from 'react-native';
+import { ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Colors, Fonts, Spacing } from '@/constants/theme';
 import PageHeader from '@/components/page-header';
@@ -8,11 +8,13 @@ import { ChevronRight, Bookmark } from 'lucide-react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useFocusEffect, useRouter } from 'expo-router';
 import { useThemeStore } from '@/store/themeStore';
+import { useTranslation } from 'react-i18next';
 
 export default function DuaBookmarksScreen() {
   const scheme = useThemeStore((s) => s.theme);
   const colors = Colors[scheme === 'unspecified' ? 'light' : scheme];
   const router = useRouter();
+  const { t } = useTranslation();
 
   const [bookmarks, setBookmarks] = useState<any[]>([]);
 
@@ -20,7 +22,12 @@ export default function DuaBookmarksScreen() {
     useCallback(() => {
       AsyncStorage.getItem('imansync_dua_bookmarks').then(val => {
         if (val) {
-          setBookmarks(JSON.parse(val));
+          try {
+            setBookmarks(JSON.parse(val));
+          } catch (e) {
+            console.error('Failed to parse dua bookmarks', e);
+            setBookmarks([]);
+          }
         }
       });
     }, [])
@@ -75,7 +82,7 @@ export default function DuaBookmarksScreen() {
             <View style={{ alignItems: 'center', marginTop: 60, opacity: 0.5 }}>
               <Bookmark size={48} color={colors.textSecondary} />
               <Text style={{ color: colors.textSecondary, textAlign: 'center', marginTop: Spacing.four, fontFamily: Fonts.outfit, fontSize: 16 }}>
-                You haven't bookmarked any duas yet.
+                {t('dua.noBookmarks', { defaultValue: "You haven't bookmarked any duas yet." })}
               </Text>
             </View>
           )}

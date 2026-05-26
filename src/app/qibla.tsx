@@ -5,7 +5,7 @@ import { useRouter } from 'expo-router';
 import { Magnetometer } from 'expo-sensors';
 import { Navigation } from 'lucide-react-native';
 import React, { useEffect, useState } from 'react';
-import { Animated, StyleSheet, Text, useColorScheme, View } from 'react-native';
+import { Animated, StyleSheet, Text, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useTranslation } from 'react-i18next';
 import AsyncStorage from '@react-native-async-storage/async-storage';

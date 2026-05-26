@@ -4,7 +4,7 @@ import { BlurView } from 'expo-blur';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { Bookmark, ChevronLeft, Minus, Plus, Settings2, X, Play, Pause } from 'lucide-react-native';
 import React, { useEffect, useRef, useState, useMemo } from 'react';
-import { ActivityIndicator, FlatList, Modal, ScrollView, StyleSheet, Switch, Text, TouchableOpacity, useColorScheme, View } from 'react-native';
+import { ActivityIndicator, FlatList, Modal, ScrollView, StyleSheet, Switch, Text, TouchableOpacity, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useTranslation } from 'react-i18next';
 import { formatNumber } from '@/utils/formatNumber';
@@ -61,7 +61,9 @@ export default function JuzScreen() {
   // Load Settings and Bookmarks
   useEffect(() => {
     AsyncStorage.getItem('imansync_quran_settings').then(val => {
-      if (val) setSettings(prev => ({ ...prev, ...JSON.parse(val) }));
+      if (val) {
+        try { setSettings(prev => ({ ...prev, ...JSON.parse(val) })); } catch (e) { console.error('Corrupted quran settings', e); }
+      }
     });
     loadBookmarks();
   }, []);

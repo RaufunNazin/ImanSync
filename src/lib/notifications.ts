@@ -14,13 +14,13 @@ export async function setupNotificationChannels() {
     id: 'prayers',
     name: 'Prayer Times',
     importance: AndroidImportance.HIGH,
-    sound: 'birds_singing', 
+    sound: 'bird', 
   });
   await notifee.createChannel({
     id: 'announcements',
     name: 'Islamic Reminders',
     importance: AndroidImportance.DEFAULT,
-    sound: 'water_stream', 
+    sound: 'bird', 
   });
   */
 }
@@ -37,7 +37,7 @@ export async function schedulePrayerNotification(title: string, body: string, da
       title,
       body,
       android: { channelId: 'prayers', pressAction: { id: 'default' } },
-      ios: { sound: 'birds_singing.wav' }
+      ios: { sound: 'bird.wav' }
   }, trigger as any);
   */
 }

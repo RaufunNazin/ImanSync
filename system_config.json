@@ -8,7 +8,8 @@
       "🧭 Accurate Qibla compass using your live location",
       "🔔 Smart prayer time notifications with quiet hours",
       "📿 Dua library with categories and personal Dua saving",
-      "🌙 Dark mode and Bengali language support"
+      "🌙 Dark mode and Bengali language support",
+      "🐛 Fixed issue where prayer time notifications were not firing reliably in the background"
     ],
     "bn": [
       "🎉 ইমান সিঙ্ক আনুষ্ঠানিকভাবে চালু হয়েছে!",
@@ -16,7 +17,8 @@
       "🧭 লাইভ লোকেশন ব্যবহার করে সঠিক কিবলা কম্পাস",
       "🔔 নীরব সময়সহ স্মার্ট নামাজের সময় নোটিফিকেশন",
       "📿 শ্রেণিবিভাগসহ দোয়া লাইব্রেরি এবং ব্যক্তিগত দোয়া সংরক্ষণ",
-      "🌙 ডার্ক মোড এবং বাংলা ভাষার সমর্থন"
+      "🌙 ডার্ক মোড এবং বাংলা ভাষার সমর্থন",
+      "🐛 ব্যাকগ্রাউন্ডে নামাজের নোটিফিকেশন সঠিকভাবে না আসার সমস্যা সমাধান করা হয়েছে"
     ]
   },
   "notification": {

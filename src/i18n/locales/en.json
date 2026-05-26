@@ -93,7 +93,8 @@
     "enTrans": "English Translation",
     "bnTrans": "Bangla Translation",
     "translit": "Transliteration",
-    "enTranslit": "English Transliteration"
+    "enTranslit": "English Transliteration",
+    "autoPlayNextAyah": "Auto-Play Next Ayah"
   },
   "tracker": {
     "titleEn": "Daily Tracker",
@@ -192,7 +193,14 @@
     "bookmarksDesc": "Your saved duas",
     "source": "Source",
     "reference": "Reference",
-    "duaCount": "{{count}} duas"
+    "duaCount": "{{count}} duas",
+    "noDuasCategory": "No duas found in this category.",
+    "noBookmarks": "You haven't bookmarked any duas yet.",
+    "noMyDuas": "No custom duas added.",
+    "notFound": "Dua not found.",
+    "loading": "Loading...",
+    "mediaSelected": "Media selected ready to save.",
+    "removeMedia": "Remove"
   },
   "duaSettings": {
     "title": "Dua Settings",

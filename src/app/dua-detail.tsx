@@ -7,7 +7,7 @@ import { useLocalSearchParams } from 'expo-router';
 import { Bookmark, BookOpen, Minus, Plus, Settings2, X } from 'lucide-react-native';
 import React, { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { Modal, ScrollView, StyleSheet, Text, TouchableOpacity, TouchableWithoutFeedback, useColorScheme, View } from 'react-native';
+import { Modal, ScrollView, StyleSheet, Text, TouchableOpacity, TouchableWithoutFeedback, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useThemeStore } from '@/store/themeStore';
 
@@ -54,14 +54,20 @@ export default function DuaDetailScreen() {
 
   useEffect(() => {
     AsyncStorage.getItem('imansync_dua_settings').then(val => {
-      if (val) setSettings(prev => ({ ...prev, ...JSON.parse(val) }));
+      if (val) {
+        try { setSettings(prev => ({ ...prev, ...JSON.parse(val) })); } catch (e) { console.error('Corrupted dua settings', e); }
+      }
     }).catch(e => console.error(e));
 
     AsyncStorage.getItem('imansync_dua_bookmarks').then(val => {
       if (val) {
-        const parsed = JSON.parse(val);
-        setBookmarks(parsed);
-        setIsBookmarked(parsed.some((b: any) => b.id.toString() === params.id.toString()));
+        try {
+          const parsed = JSON.parse(val);
+          setBookmarks(parsed);
+          setIsBookmarked(parsed.some((b: any) => b.id.toString() === params.id.toString()));
+        } catch (e) {
+          console.error('Corrupted dua bookmarks', e);
+        }
       }
     });
   }, [params.id]);

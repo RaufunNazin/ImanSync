@@ -132,9 +132,9 @@ export default function AddDuaModal({ visible, onClose, onSave, colors }: AddDua
 
               {mediaUri && mediaType !== 'text' && (
                 <View style={[styles.mediaPreview, { backgroundColor: colors.card, borderColor: colors.border }]}>
-                  <Text style={{ color: colors.textSecondary, fontFamily: Fonts.outfit }}>Media selected ready to save.</Text>
+                  <Text style={{ color: colors.textSecondary, fontFamily: Fonts.outfit }}>{t('dua.mediaSelected', { defaultValue: 'Media selected ready to save.' })}</Text>
                   <TouchableOpacity onPress={() => { setMediaUri(null); setMediaType('text'); }}>
-                    <Text style={{ color: '#EF4444', marginTop: 8, fontFamily: Fonts.outfit }}>Remove</Text>
+                    <Text style={{ color: '#EF4444', marginTop: 8, fontFamily: Fonts.outfit }}>{t('dua.removeMedia', { defaultValue: 'Remove' })}</Text>
                   </TouchableOpacity>
                 </View>
               )}

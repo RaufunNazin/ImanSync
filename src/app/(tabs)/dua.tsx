@@ -46,7 +46,14 @@ export default function DuaScreen() {
   useEffect(() => {
     // Load pins
     AsyncStorage.getItem(PIN_STORAGE_KEY).then((val) => {
-      if (val) setPinnedIds(JSON.parse(val));
+      if (val) {
+        try {
+          setPinnedIds(JSON.parse(val));
+        } catch (e) {
+          console.error('Failed to parse pinned duas', e);
+          setPinnedIds([]);
+        }
+      }
     });
 
     // Fetch categories

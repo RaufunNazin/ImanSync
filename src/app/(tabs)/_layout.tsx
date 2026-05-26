@@ -4,11 +4,7 @@ import { Colors } from '@/constants/theme';
 import { Home, BookOpen, Map, Heart, Settings } from 'lucide-react-native';
 import { useTranslation } from 'react-i18next';
 import { useThemeStore } from '@/store/themeStore';
-import { withLayoutContext } from 'expo-router';
-import { createMaterialTopTabNavigator } from '@react-navigation/material-top-tabs';
-
-const { Navigator } = createMaterialTopTabNavigator();
-const SwipeableTabs = withLayoutContext(Navigator);
+import { Tabs } from 'expo-router';
 
 export default function TabLayout() {
   const scheme = useThemeStore((s) => s.theme);
@@ -16,15 +12,12 @@ export default function TabLayout() {
   const { t } = useTranslation();
 
   return (
-    <SwipeableTabs
-      tabBarPosition="bottom"
+    <Tabs
       screenOptions={{
+        headerShown: false,
         tabBarActiveTintColor: colors.highlight,
         tabBarInactiveTintColor: colors.textSecondary,
-        tabBarShowIcon: true,
         tabBarShowLabel: true,
-        tabBarIndicatorStyle: { display: 'none' }, // Remove the top tab underline
-        swipeEnabled: true, // Enable swipe between tabs
         tabBarStyle: {
           backgroundColor: colors.background,
           borderTopWidth: 1,
@@ -34,54 +27,49 @@ export default function TabLayout() {
           height: Platform.OS === 'ios' ? 88 : 70,
           paddingBottom: Platform.OS === 'ios' ? 28 : 8,
         },
-        tabBarItemStyle: {
-          padding: 0,
-          margin: 0,
-          flex: 1,
-        },
         tabBarLabelStyle: {
           fontSize: 10,
-          textTransform: 'none', // Prevents ALL CAPS default
-          margin: 0,
-          marginTop: 4,
+          textTransform: 'none',
+          marginTop: 2,
         },
+        lazy: true,
       }}
     >
-      <SwipeableTabs.Screen
+      <Tabs.Screen
         name="tracker"
         options={{
           title: t('tracker.titleEn'),
           tabBarIcon: ({ color }: { color: string }) => <Heart size={24} color={color} />,
         }}
       />
-      <SwipeableTabs.Screen
+      <Tabs.Screen
         name="quran"
         options={{
           title: t('quran.titleEn'),
           tabBarIcon: ({ color }: { color: string }) => <BookOpen size={24} color={color} />,
         }}
       />
-      <SwipeableTabs.Screen
+      <Tabs.Screen
         name="index"
         options={{
           title: t('home.tabTitle', { defaultValue: 'Home' }),
           tabBarIcon: ({ color }: { color: string }) => <Home size={24} color={color} />,
         }}
       />
-      <SwipeableTabs.Screen
+      <Tabs.Screen
         name="dua"
         options={{
           title: t('dua.titleEn'),
           tabBarIcon: ({ color }: { color: string }) => <Map size={24} color={color} />,
         }}
       />
-      <SwipeableTabs.Screen
+      <Tabs.Screen
         name="settings"
         options={{
           title: t('settings.titleEn'),
           tabBarIcon: ({ color }: { color: string }) => <Settings size={24} color={color} />,
         }}
       />
-    </SwipeableTabs>
+    </Tabs>
   );
 }

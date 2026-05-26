@@ -42,17 +42,21 @@ export default function SystemAnnouncer() {
   }, []);
 
   const checkSystem = async () => {
-    try {
-      // 1. Check for OTA Updates
-      if (!__DEV__) {
+    // 1. Check for OTA Updates
+    if (!__DEV__) {
+      try {
         const update = await Updates.checkForUpdateAsync();
         if (update.isAvailable) {
           await Updates.fetchUpdateAsync();
           setUpdateReady(true);
           return; // Stop here, force restart first
         }
+      } catch (e) {
+        console.log('OTA Update Error:', e);
       }
+    }
 
+    try {
       // 2. Fetch Server Config
       const response = await fetch(SYSTEM_CONFIG_URL);
       if (!response.ok) return;

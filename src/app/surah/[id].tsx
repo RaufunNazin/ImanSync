@@ -4,7 +4,7 @@ import { BlurView } from 'expo-blur';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { Bookmark, ChevronLeft, Minus, Plus, Settings2, X, Play, Pause } from 'lucide-react-native';
 import React, { useEffect, useRef, useState } from 'react';
-import { ActivityIndicator, FlatList, Modal, ScrollView, StyleSheet, Switch, Text, TouchableOpacity, useColorScheme, View } from 'react-native';
+import { ActivityIndicator, FlatList, Modal, ScrollView, StyleSheet, Switch, Text, TouchableOpacity, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useTranslation } from 'react-i18next';
 import { formatNumber } from '@/utils/formatNumber';
@@ -26,6 +26,7 @@ interface Settings {
   showEnglish: boolean;
   showBangla: boolean;
   showEnglishTranslit: boolean;
+  autoPlayNextAyah: boolean;
 }
 
 const DEFAULT_SETTINGS: Settings = {
@@ -33,8 +34,9 @@ const DEFAULT_SETTINGS: Settings = {
   translationFontSize: 16,
   translitFontSize: 14,
   showEnglish: true,
-  showBangla: false,
+  showBangla: true,
   showEnglishTranslit: false,
+  autoPlayNextAyah: true,
 };
 
 export default function SurahScreen() {
@@ -44,7 +46,7 @@ export default function SurahScreen() {
   const router = useRouter();
   const { t, i18n } = useTranslation();
   
-  const { playSurah, pause, resume, isPlaying, currentSurahId, currentReciterId, setReciter, isLoading: isAudioLoading } = useAudioStore();
+  const { playSurah, playAyah, pause, resume, isPlaying, currentSurahId, currentAyahNumber, playbackMode, currentReciterId, setReciter, isLoading: isAudioLoading } = useAudioStore();
 
   const [surahName, setSurahName] = useState('Loading...');
   const surahNameRef = useRef('Loading...');
@@ -61,7 +63,9 @@ export default function SurahScreen() {
   // Load Settings and Bookmarks
   useEffect(() => {
     AsyncStorage.getItem('imansync_quran_settings').then(val => {
-      if (val) setSettings(prev => ({ ...prev, ...JSON.parse(val) }));
+      if (val) {
+        try { setSettings(prev => ({ ...prev, ...JSON.parse(val) })); } catch (e) { console.error('Corrupted quran settings', e); }
+      }
     });
     loadBookmarks();
   }, []);
@@ -272,6 +276,11 @@ export default function SurahScreen() {
 
             {/* Audio Reciter */}
             <Text style={[styles.sectionTitle, { color: colors.textSecondary, marginTop: Spacing.four }]}>{t('quranSettings.reciter', { defaultValue: 'Audio Reciter' })}</Text>
+            
+            <View style={[styles.settingRow, { borderBottomColor: colors.border, marginBottom: Spacing.two }]}>
+              <Text style={[styles.settingLabel, { color: colors.text }]}>{t('quranSettings.autoPlayNextAyah', { defaultValue: 'Auto-Play Next Ayah' })}</Text>
+              <Switch value={settings.autoPlayNextAyah} onValueChange={(v) => updateSetting('autoPlayNextAyah', v)} trackColor={{ false: colors.border, true: colors.highlight }} thumbColor="#FFFFFF" />
+            </View>
             <View style={{ flexDirection: 'column', alignItems: 'stretch', gap: 12, paddingBottom: Spacing.four }}>
               <TouchableOpacity 
                 style={[{ padding: 12, borderRadius: 12, borderWidth: 1, borderColor: colors.border }, currentReciterId === 7 && { borderColor: colors.highlight, backgroundColor: colors.highlight + '15' }]} 
@@ -356,13 +365,30 @@ export default function SurahScreen() {
                   <View style={[styles.numberCircle, { borderColor: colors.border, backgroundColor: 'rgba(255,255,255,0.05)' }]}>
                     <Text style={[styles.numberText, { color: colors.textSecondary }]}>{formatNumber(item.numberInSurah, i18n.language)}</Text>
                   </View>
-                  <TouchableOpacity onPress={() => toggleBookmark(item)}>
-                    <Bookmark 
-                      size={20} 
-                      color={colors.accent} 
-                      fill={bookmarkedAyahs[item.numberInSurah] ? colors.accent : 'transparent'} 
-                    />
-                  </TouchableOpacity>
+                  <View style={{ flexDirection: 'row', gap: Spacing.two, alignItems: 'center' }}>
+                    <TouchableOpacity onPress={() => {
+                      if (currentSurahId === Number(id) && currentAyahNumber === item.numberInSurah && playbackMode === 'ayah') {
+                        isPlaying ? pause() : resume();
+                      } else {
+                        playAyah(Number(id), item.numberInSurah, settings.autoPlayNextAyah);
+                      }
+                    }} style={{ padding: Spacing.one }}>
+                      {isAudioLoading && currentSurahId === Number(id) && currentAyahNumber === item.numberInSurah && playbackMode === 'ayah' ? (
+                        <ActivityIndicator size="small" color={colors.accent} />
+                      ) : isPlaying && currentSurahId === Number(id) && currentAyahNumber === item.numberInSurah && playbackMode === 'ayah' ? (
+                        <Pause size={20} color={colors.accent} fill={colors.accent} />
+                      ) : (
+                        <Play size={20} color={colors.accent} fill={colors.accent} />
+                      )}
+                    </TouchableOpacity>
+                    <TouchableOpacity onPress={() => toggleBookmark(item)} style={{ padding: Spacing.one }}>
+                      <Bookmark 
+                        size={20} 
+                        color={colors.accent} 
+                        fill={bookmarkedAyahs[item.numberInSurah] ? colors.accent : 'transparent'} 
+                      />
+                    </TouchableOpacity>
+                  </View>
                 </View>
                 
                 <Text style={[styles.arabicText, { color: colors.text, fontSize: settings.arabicFontSize, lineHeight: settings.arabicFontSize * 1.8 }]}>

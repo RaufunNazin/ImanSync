@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { View, Text, StyleSheet, ScrollView, TouchableOpacity, ActivityIndicator, Dimensions, useColorScheme } from 'react-native';
+import { View, Text, StyleSheet, ScrollView, TouchableOpacity, ActivityIndicator, Dimensions } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { Colors, Fonts, Spacing } from '@/constants/theme';
@@ -34,6 +34,7 @@ export default function QuranLearnScreen() {
   
   const [currentSurahId, setCurrentSurahId] = useState(parseInt(surahId, 10) || 1);
   const [currentAyah, setCurrentAyah] = useState(parseInt(ayahId, 10) || 1);
+  const [ayahAudioUrl, setAyahAudioUrl] = useState<string | null>(null);
   
   const { playAudio, isPlaying } = useAudioPlayer();
   const { t, i18n } = useTranslation();
@@ -42,10 +43,15 @@ export default function QuranLearnScreen() {
     setLoading(true);
     setSelectedWord(null);
     try {
-      const res = await fetch(`https://api.quran.com/api/v4/verses/by_key/${sId}:${aId}?language=${i18n.language}&words=true&word_fields=text_uthmani,text_uthmani_tajweed,audio_url`);
+      const res = await fetch(`https://api.quran.com/api/v4/verses/by_key/${sId}:${aId}?language=${i18n.language}&words=true&word_fields=text_uthmani,text_uthmani_tajweed,audio_url&audio=1`);
       const json = await res.json();
       if (json.verse && json.verse.words) {
         setWords(json.verse.words);
+      }
+      if (json.verse && json.verse.audio && json.verse.audio.url) {
+        setAyahAudioUrl(json.verse.audio.url);
+      } else {
+        setAyahAudioUrl(null);
       }
     } catch (e) {
       console.error(e);
@@ -60,12 +66,13 @@ export default function QuranLearnScreen() {
 
   const handleWordPress = (word: Word) => {
     setSelectedWord(word);
+    let audioUrl = null;
     if (word.audio_url) {
-      const audioUrl = word.audio_url.startsWith('http') 
+      audioUrl = word.audio_url.startsWith('http') 
         ? word.audio_url 
         : `https://audio.qurancdn.com/${word.audio_url}`;
-      playAudio(audioUrl);
     }
+    playAudio(audioUrl, word.text_uthmani);
   };
 
   const goNext = () => {
@@ -90,11 +97,21 @@ export default function QuranLearnScreen() {
         
         {/* Helper Banner */}
         <BlurView intensity={40} tint={colors.glassTint as any} style={[styles.banner, { borderColor: colors.border }]}>
-          <Volume2 size={20} color={colors.accent} />
+          <TouchableOpacity 
+            onPress={() => {
+              if (ayahAudioUrl) {
+                const fullUrl = ayahAudioUrl.startsWith('//') ? `https:${ayahAudioUrl}` : ayahAudioUrl;
+                playAudio(fullUrl);
+              }
+            }}
+            style={[styles.playAyahBtn, { backgroundColor: colors.highlight }]}
+          >
+            <Volume2 size={24} color={colors.background} />
+          </TouchableOpacity>
           <Text style={[styles.bannerText, { color: colors.textSecondary }]}>
             {i18n.language === 'bn' 
-              ? 'উচ্চারণ ও অর্থ জানতে যেকোনো আরবি শব্দের উপর ট্যাপ করুন।' 
-              : 'Tap on any Arabic word to hear its pronunciation and see its meaning.'}
+              ? 'উচ্চারণ ও অর্থ জানতে যেকোনো আরবি শব্দের উপর ট্যাপ করুন। অথবা সম্পূর্ণ আয়াত শুনতে প্লে বাটনে চাপুন।' 
+              : 'Tap on any Arabic word to hear its pronunciation. Or press Play to hear the full Ayah.'}
           </Text>
         </BlurView>
 
@@ -203,6 +220,13 @@ const styles = StyleSheet.create({
     marginBottom: Spacing.three,
     gap: Spacing.three,
   },
+  playAyahBtn: {
+    width: 44,
+    height: 44,
+    borderRadius: 22,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
   bannerText: {
     fontFamily: Fonts.outfit,
     fontSize: 13,
@@ -276,6 +300,7 @@ const styles = StyleSheet.create({
     fontFamily: Fonts.arabic,
     fontSize: 36,
     lineHeight: 50,
+    includeFontPadding: false,
   },
   ayahEndMark: {
     paddingHorizontal: 8,

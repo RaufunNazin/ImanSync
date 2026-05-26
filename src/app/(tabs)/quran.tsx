@@ -7,7 +7,7 @@ import { useFocusEffect, useRouter } from 'expo-router';
 import { Bookmark, BookOpen, ChevronRight, GraduationCap, Search, X } from 'lucide-react-native';
 import React, { useCallback, useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { ActivityIndicator, ScrollView, StyleSheet, Text, TextInput, TouchableOpacity, useColorScheme, View } from 'react-native';
+import { ActivityIndicator, ScrollView, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useThemeStore } from '@/store/themeStore';
 import SkeletonBox from '@/components/SkeletonBox';
@@ -56,16 +56,23 @@ export default function QuranScreen() {
 
   useFocusEffect(
     useCallback(() => {
+      // Fix #2: guard all JSON.parse calls against corrupted AsyncStorage data
       AsyncStorage.getItem('last_read_surah').then(val => {
-        if (val) setLastReadSurah(JSON.parse(val));
+        if (val) {
+          try { setLastReadSurah(JSON.parse(val)); } catch (e) { console.error('Corrupted last_read_surah', e); }
+        }
       }).catch(e => console.error(e));
 
       AsyncStorage.getItem('last_read_juz').then(val => {
-        if (val) setLastReadJuz(JSON.parse(val));
+        if (val) {
+          try { setLastReadJuz(JSON.parse(val)); } catch (e) { console.error('Corrupted last_read_juz', e); }
+        }
       }).catch(e => console.error(e));
 
       AsyncStorage.getItem('imansync_quran_bookmarks').then(val => {
-        if (val) setBookmarks(JSON.parse(val));
+        if (val) {
+          try { setBookmarks(JSON.parse(val)); } catch (e) { console.error('Corrupted quran_bookmarks', e); }
+        }
       }).catch(e => console.error(e));
 
       AsyncStorage.getItem('imansync_hide_learn_banner').then(val => {

@@ -1,24 +1,23 @@
 {
   "expo": {
     "name": "ImanSync",
-    "slug": "DeenJourney",
+    "slug": "imansync",
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/expo.icon/Assets/expo.png",
     "scheme": "imansync",
-    "userInterfaceStyle": "light",
+    "userInterfaceStyle": "automatic",
     "ios": {
       "icon": "./assets/expo.icon/Assets/expo.png",
       "infoPlist": {
         "UIBackgroundModes": [
-          "audio",
           "audio"
         ],
         "NSLocationWhenInUseUsageDescription": "We need your location to calculate accurate Qibla and prayer times."
       }
     },
     "android": {
-      "package": "com.rax13.imansync",
+      "package": "com.nusrat294.imansync",
       "adaptiveIcon": {
         "backgroundColor": "#0c1618",
         "foregroundImage": "./assets/images/android-icon-foreground.png",
@@ -39,7 +38,11 @@
         "android.permission.RECORD_AUDIO",
         "android.permission.MODIFY_AUDIO_SETTINGS",
         "android.permission.FOREGROUND_SERVICE",
-        "android.permission.FOREGROUND_SERVICE_MEDIA_PLAYBACK"
+        "android.permission.FOREGROUND_SERVICE_MEDIA_PLAYBACK",
+        "android.permission.SCHEDULE_EXACT_ALARM",
+        "android.permission.USE_EXACT_ALARM",
+        "android.permission.POST_NOTIFICATIONS",
+        "android.permission.RECEIVE_BOOT_COMPLETED"
       ]
     },
     "web": {
@@ -51,8 +54,11 @@
       [
         "expo-splash-screen",
         {
-          "backgroundColor": "#0c1618",
-          "android": {
+          "backgroundColor": "#f1f7ed",
+          "image": "./assets/images/splash-icon.png",
+          "imageWidth": 76,
+          "dark": {
+            "backgroundColor": "#0c1618",
             "image": "./assets/images/splash-icon.png",
             "imageWidth": 76
           }
@@ -60,7 +66,18 @@
       ],
       "expo-sqlite",
       "expo-image",
-      "expo-audio"
+      "expo-audio",
+      [
+        "expo-build-properties",
+        {
+          "android": {
+            "buildArchs": [
+              "arm64-v8a"
+            ]
+          }
+        }
+      ],
+      "expo-video"
     ],
     "experiments": {
       "typedRoutes": true,
@@ -69,15 +86,15 @@
     "extra": {
       "router": {},
       "eas": {
-        "projectId": "25b53bfa-cbd8-4b78-aad3-a9b94d1db26c"
+        "projectId": "6803bd52-61a9-4bad-a599-30186bd55bd7"
       }
     },
     "runtimeVersion": {
       "policy": "appVersion"
     },
+    "owner": "nusrat294",
     "updates": {
-      "url": "https://u.expo.dev/25b53bfa-cbd8-4b78-aad3-a9b94d1db26c"
-    },
-    "owner": "rax13"
+      "url": "https://u.expo.dev/6803bd52-61a9-4bad-a599-30186bd55bd7"
+    }
   }
 }

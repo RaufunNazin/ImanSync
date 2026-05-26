@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useMemo } from 'react';
+import React, { useEffect, useState, useMemo, useRef } from 'react';
 import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Dimensions } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useLocalSearchParams, useRouter } from 'expo-router';
@@ -17,11 +17,12 @@ export default function LessonPlayerScreen() {
   const { id } = useLocalSearchParams<{ id: string }>();
   const scheme = useThemeStore((s) => s.theme);
   const colors = Colors[scheme === 'unspecified' ? 'light' : scheme];
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
   const router = useRouter();
   const { playAudio } = useAudioPlayer();
 
   const [completed, setCompleted] = useState(false);
+  const completedRef = useRef(false);
   const [tappedItems, setTappedItems] = useState<Set<string>>(new Set());
 
   // Flashcard & Quiz State
@@ -53,7 +54,8 @@ export default function LessonPlayerScreen() {
   useEffect(() => {
     if (activeLesson && activeLesson.items) {
       if (tappedItems.size >= activeLesson.items.length && activeLesson.items.length > 0) {
-        if (!completed) {
+        if (!completedRef.current) {
+          completedRef.current = true;
           setCompleted(true);
           markAsComplete();
         }
@@ -73,7 +75,7 @@ export default function LessonPlayerScreen() {
   };
 
   const handleGridPress = (item: LessonItem) => {
-    if (item.audioUrl) playAudio(item.audioUrl);
+    playAudio(item.audioUrl, item.arabic);
     setTappedItems(prev => new Set(prev).add(item.id));
   };
 
@@ -141,13 +143,16 @@ export default function LessonPlayerScreen() {
                 <TouchableOpacity 
                   key={item.id} 
                   style={[
-                    styles.gridItem, 
+                    styles.gridItem,
+                    activeLesson.items && activeLesson.items.length <= 6 && { width: '45%' }, 
                     { backgroundColor: isTapped ? colors.highlight + '20' : colors.backgroundElement, borderColor: isTapped ? colors.highlight : colors.border }
                   ]}
                   onPress={() => handleGridPress(item)}
                 >
                   <Text style={[styles.arabicText, { color: colors.text }]}>{item.arabic}</Text>
-                  <Text style={[styles.translitText, { color: colors.textSecondary }]}>{item.transliteration}</Text>
+                  <Text style={[styles.translitText, { color: colors.textSecondary }]}>
+                    {i18n.language === 'bn' && item.transliterationBn ? item.transliterationBn : item.transliteration}
+                  </Text>
                 </TouchableOpacity>
               );
             })}
@@ -161,8 +166,8 @@ export default function LessonPlayerScreen() {
               style={[styles.flashcard, { backgroundColor: colors.backgroundElement, borderColor: colors.border }]}
               onPress={() => {
                 setFlipped(!flipped);
-                if (!flipped && activeLesson!.items![currentIndex].audioUrl) {
-                  playAudio(activeLesson!.items![currentIndex].audioUrl);
+                if (!flipped) {
+                  playAudio(activeLesson!.items![currentIndex].audioUrl, activeLesson!.items![currentIndex].arabic);
                 }
               }}
               activeOpacity={0.8}
@@ -173,7 +178,9 @@ export default function LessonPlayerScreen() {
               
               {flipped ? (
                 <Text style={[styles.flashcardTranslit, { color: colors.highlight }]}>
-                  {activeLesson.items[currentIndex].transliteration}
+                  {i18n.language === 'bn' && activeLesson.items[currentIndex].transliterationBn 
+                    ? activeLesson.items[currentIndex].transliterationBn 
+                    : activeLesson.items[currentIndex].transliteration}
                 </Text>
               ) : (
                 <Text style={[styles.tapToFlip, { color: colors.textSecondary }]}>
@@ -198,7 +205,10 @@ export default function LessonPlayerScreen() {
           <View style={styles.sequentialContainer}>
             <TouchableOpacity 
               style={[styles.audioBtn, { backgroundColor: colors.highlight + '20', borderColor: colors.highlight }]}
-              onPress={() => playAudio(activeLesson!.items![currentIndex].audioUrl)}
+              onPress={() => {
+                const url = activeLesson!.items![currentIndex].audioUrl;
+                playAudio(url, activeLesson!.items![currentIndex].arabic);
+              }}
             >
               <Volume2 size={48} color={colors.highlight} />
               <Text style={[styles.tapToListen, { color: colors.highlight }]}>Tap to Listen</Text>
@@ -275,7 +285,8 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
   },
   gridItem: {
-    width: (width - (Spacing.four * 2) - (Spacing.three * 2)) / 3,
+    width: '30%',
+    minWidth: 100,
     aspectRatio: 1,
     borderRadius: 16,
     borderWidth: 1,
@@ -285,7 +296,8 @@ const styles = StyleSheet.create({
   arabicText: {
     fontFamily: Fonts.arabic,
     fontSize: 40,
-    marginTop: -10, // Slight nudge up to perfectly balance the diacritics
+    includeFontPadding: false,
+    marginBottom: 10, // give some space above transliteration
   },
   translitText: {
     position: 'absolute',
@@ -310,6 +322,7 @@ const styles = StyleSheet.create({
   flashcardArabic: {
     fontFamily: Fonts.arabic,
     fontSize: 72,
+    includeFontPadding: false,
     marginBottom: Spacing.four,
   },
   flashcardTranslit: {
@@ -368,6 +381,7 @@ const styles = StyleSheet.create({
   quizOptText: {
     fontFamily: Fonts.arabic,
     fontSize: 42,
+    includeFontPadding: false,
   },
   footer: {
     position: 'absolute',

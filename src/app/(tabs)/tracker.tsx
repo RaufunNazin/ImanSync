@@ -7,7 +7,7 @@ import * as Haptics from 'expo-haptics';
 import { Activity, BookOpen, CheckCircle2, HandCoins, Heart, Moon } from 'lucide-react-native';
 import React, { useEffect, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { ScrollView, StyleSheet, Text, TouchableOpacity, useColorScheme, View, AppState } from 'react-native';
+import { ScrollView, StyleSheet, Text, TouchableOpacity, View, AppState } from 'react-native';
 import Animated, { useAnimatedProps, useAnimatedStyle, useSharedValue, withSpring, withTiming } from 'react-native-reanimated';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import Svg, { Circle } from 'react-native-svg';
@@ -120,18 +120,28 @@ export default function TrackerScreen() {
   useEffect(() => {
     AsyncStorage.getItem('imansync_tracker_history').then(val => {
       if (val) {
-        setHistory(JSON.parse(val));
+        // Fix #2: guard against corrupted AsyncStorage data
+        try {
+          setHistory(JSON.parse(val));
+        } catch (e) {
+          console.error('Corrupted tracker history, resetting', e);
+          setHistory({});
+        }
       } else {
-        // Migration from old logic if exists
+        // Migration from old data format if present
         AsyncStorage.getItem('imansync_tracker_tasks').then(oldVal => {
           if (oldVal) {
-            const parsed = JSON.parse(oldVal);
-            setHistory({ [todayStr]: parsed });
-            AsyncStorage.setItem('imansync_tracker_history', JSON.stringify({ [todayStr]: parsed }));
+            try {
+              const parsed = JSON.parse(oldVal);
+              setHistory({ [todayStr]: parsed });
+              AsyncStorage.setItem('imansync_tracker_history', JSON.stringify({ [todayStr]: parsed }));
+            } catch (e) {
+              console.error('Corrupted legacy tracker data, ignoring', e);
+            }
           }
         });
       }
-    }).catch(err => console.error("Error loading history", err))
+    }).catch(err => console.error('Error loading history', err))
       .finally(() => setLoading(false));
   }, [todayStr]);
 
