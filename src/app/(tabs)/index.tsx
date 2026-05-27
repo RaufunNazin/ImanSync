@@ -57,9 +57,9 @@ interface DailyVerse {
 const formatAMPM = (date: Date, lang: string = 'en'): string => {
   let hours = date.getHours();
   let minutes = date.getMinutes();
-  const ampm = hours >= 12 ? 'PM' : 'AM';
+  const ampm = hours >= 12 ? ' PM' : ' AM';
   hours = hours % 12 || 12;
-  const timeStr = `${hours}:${String(minutes).padStart(2, '0')} ${ampm}`;
+  const timeStr = `${hours}:${String(minutes).padStart(2, '0')}${ampm}`;
   return formatNumber(timeStr, lang);
 };
 
@@ -97,7 +97,7 @@ export default function HomeScreen() {
   const [hijriRaw, setHijriRaw] = useState<{day: string, monthEn: string, monthNumber: number, year: string} | null>(null);
   const [dailyVerse, setDailyVerse] = useState<DailyVerse | null>(null);
   const prefs = usePreferencesStore();
-  const locationCity = prefs.location?.city || 'Dhaka';
+  const locationCity = prefs.manualCity || prefs.location?.city || 'Dhaka';
   const locationName = getDistrictName(locationCity, i18n.language);
 
   // Tick every second
@@ -112,13 +112,14 @@ export default function HomeScreen() {
     let lon = prefs.location?.longitude ?? 90.4125;
     let method = prefs.calcMethod ?? 1;
     let madhab = prefs.madhab ?? 1;
-    let isCityBased = !prefs.location;
-    let city = prefs.location?.city || 'Dhaka';
+    let isCityBased = !!prefs.manualCity || !prefs.location;
+    let city = prefs.manualCity || prefs.location?.city || 'Dhaka';
     let country = 'Bangladesh';
+    let adj = prefs.hijriOffset || 0;
     
     let url = isCityBased 
-      ? `https://api.aladhan.com/v1/timingsByCity?city=${city}&country=${country}&method=${method}&school=${madhab}`
-      : `https://api.aladhan.com/v1/timings?latitude=${lat}&longitude=${lon}&method=${method}&school=${madhab}`;
+      ? `https://api.aladhan.com/v1/timingsByCity?city=${city}&country=${country}&method=${method}&school=${madhab}&adj=${adj}`
+      : `https://api.aladhan.com/v1/timings?latitude=${lat}&longitude=${lon}&method=${method}&school=${madhab}&adj=${adj}`;
 
     fetch(url)
       .then((r) => r.json())
@@ -250,17 +251,25 @@ export default function HomeScreen() {
     const nightDuration = tomorrowFajr.getTime() - maghribDate.getTime();
     const tahajjudDate = new Date(maghribDate.getTime() + (nightDuration * 2 / 3));
 
+    let isEid = false;
+    if (hijriRaw) {
+      const hDay = parseInt(hijriRaw.day, 10);
+      const hMonth = hijriRaw.monthNumber;
+      if (hMonth === 10 && hDay === 1) isEid = true;
+      if (hMonth === 12 && hDay >= 10 && hDay <= 13) isEid = true;
+    }
+
     return [
       {
         label: t('home.suhur'),
         sublabel: t('home.suhurDesc'),
-        time: formatAMPM(suhurDate, i18n.language),
+        time: isEid ? '--:--' : formatAMPM(suhurDate, i18n.language),
         Icon: Moon,
       },
       {
         label: t('home.iftar'),
         sublabel: t('home.iftarDesc'),
-        time: formatAMPM(maghribDate, i18n.language),
+        time: isEid ? '--:--' : formatAMPM(maghribDate, i18n.language),
         Icon: Sunset,
       },
       {
@@ -270,7 +279,7 @@ export default function HomeScreen() {
         Icon: Star,
       },
     ];
-  }, [rawTimings, today, t, i18n.language]);
+  }, [rawTimings, today, t, i18n.language, hijriRaw]);
 
   // Restricted times
   const restrictedTimes: RestrictedTime[] = useMemo(() => {
@@ -311,8 +320,14 @@ export default function HomeScreen() {
     const monthKey = `hijri.${HIJRI_MONTHS[hijriRaw.monthNumber - 1]}`;
     const month = t(monthKey, { defaultValue: hijriRaw.monthEn });
     const suffix = t('hijri.ah', { defaultValue: 'AH' });
-    return `${formatNumber(hijriRaw.day, i18n.language)} ${month} ${formatNumber(hijriRaw.year, i18n.language)} ${suffix}`;
-  }, [hijriRaw, t, i18n.language]);
+    
+    let displayDay = parseInt(hijriRaw.day, 10) + (prefs.hijriOffset || 0);
+    // basic bounds
+    if (displayDay < 1) displayDay = 1;
+    if (displayDay > 30) displayDay = 30;
+
+    return `${formatNumber(displayDay.toString(), i18n.language)} ${month} ${formatNumber(hijriRaw.year, i18n.language)} ${suffix}`;
+  }, [hijriRaw, t, i18n.language, prefs.hijriOffset]);
 
   return (
     <SafeAreaView style={[styles.safeArea, { backgroundColor: colors.background }]}>
@@ -372,7 +387,7 @@ export default function HomeScreen() {
                         { 
                           color: colors.accent,
                           width: char === ':' || char === ' ' ? 12 : 22,
-                          textAlign: 'center'
+                          textAlign: idx === displayCountdown.length - 1 ? 'right' : 'center'
                         }
                       ]}
                     >
@@ -696,7 +711,8 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     overflow: 'hidden',
     marginBottom: Spacing.four,
-    padding: Spacing.three,
+    paddingVertical: Spacing.three,
+    paddingHorizontal: 20,
   },
   heroRow: {
     flexDirection: 'row',
@@ -715,8 +731,8 @@ const styles = StyleSheet.create({
   },
   heroPrayerName: {
     fontFamily: Fonts.outfit,
-    fontSize: 28,
-    lineHeight: 34,
+    fontSize: 32,
+    lineHeight: 47.5,
   },
   heroTime: {
     fontFamily: Fonts.outfit,

@@ -21,6 +21,8 @@ interface PreferencesState {
     longitude: number;
     city: string;
   } | null;
+  hijriOffset: number;
+  manualCity: string | null;
   setPreferences: (partial: Partial<Omit<PreferencesState, 'setPreferences' | 'initialize'>>) => void;
   initialize: () => Promise<void>;
 }
@@ -41,6 +43,8 @@ export const usePreferencesStore = create<PreferencesState>((set, get) => ({
   calcMethod: 1, // Default to Karachi (UIS)
   madhab: 1, // Default to Hanafi
   location: null,
+  hijriOffset: 0,
+  manualCity: null,
   
   setPreferences: (partial) => {
     set(partial);
@@ -53,6 +57,8 @@ export const usePreferencesStore = create<PreferencesState>((set, get) => ({
       calcMethod: state.calcMethod,
       madhab: state.madhab,
       location: state.location,
+      hijriOffset: state.hijriOffset,
+      manualCity: state.manualCity,
     };
     AsyncStorage.setItem('imansync_preferences', JSON.stringify(toSave));
   },
@@ -85,6 +91,8 @@ export const usePreferencesStore = create<PreferencesState>((set, get) => ({
             calcMethod: state.calcMethod,
             madhab: state.madhab,
             location: state.location,
+            hijriOffset: state.hijriOffset,
+            manualCity: state.manualCity,
           }));
         }
       }

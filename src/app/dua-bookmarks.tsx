@@ -1,10 +1,10 @@
 import React, { useCallback, useState } from 'react';
-import { ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import { ScrollView, StyleSheet, Text, TouchableOpacity, View, TextInput } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Colors, Fonts, Spacing } from '@/constants/theme';
 import PageHeader from '@/components/page-header';
 import { BlurView } from 'expo-blur';
-import { ChevronRight, Bookmark } from 'lucide-react-native';
+import { ChevronRight, Bookmark, Search } from 'lucide-react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useFocusEffect, useRouter } from 'expo-router';
 import { useThemeStore } from '@/store/themeStore';
@@ -17,6 +17,7 @@ export default function DuaBookmarksScreen() {
   const { t } = useTranslation();
 
   const [bookmarks, setBookmarks] = useState<any[]>([]);
+  const [searchQuery, setSearchQuery] = useState('');
 
   useFocusEffect(
     useCallback(() => {
@@ -33,13 +34,33 @@ export default function DuaBookmarksScreen() {
     }, [])
   );
 
+  const filteredBookmarks = bookmarks.filter(dua => {
+    if (!searchQuery) return true;
+    const q = searchQuery.toLowerCase();
+    const titleEn = (dua.translationEn || '').toLowerCase();
+    const titleBn = (dua.translationBn || '').toLowerCase();
+    const arabic = (dua.arabic || '').toLowerCase();
+    return titleEn.includes(q) || titleBn.includes(q) || arabic.includes(q);
+  });
+
   return (
     <SafeAreaView style={[styles.safeArea, { backgroundColor: colors.background }]}>
       <PageHeader titleEn="Bookmarks" titleAr="" showBack />
       
-      <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={styles.container}>
+      <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={styles.container} keyboardDismissMode="on-drag" keyboardShouldPersistTaps="handled">
+        <View style={[styles.searchContainer, { backgroundColor: colors.backgroundElement, borderColor: colors.border }]}>
+          <Search size={20} color={colors.textSecondary} style={{ marginRight: 8 }} />
+          <TextInput
+            style={[styles.searchInput, { color: colors.text }]}
+            placeholder={t('duaSettings.searchPlaceholder', { defaultValue: 'Search by name, translation...' })}
+            placeholderTextColor={colors.textSecondary}
+            value={searchQuery}
+            onChangeText={setSearchQuery}
+          />
+        </View>
+
         <View style={styles.list}>
-          {bookmarks.map((dua, index) => {
+          {filteredBookmarks.map((dua, index) => {
             // we stored the params object directly which has translationEn, translationBn etc.
             // we can render it exactly as it was.
             // However, to keep it simple, we just use the english translation as title
@@ -97,11 +118,27 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   container: {
-    padding: Spacing.four,
     paddingTop: 0,
+  },
+  searchContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginHorizontal: Spacing.four,
+    paddingHorizontal: Spacing.four,
+    paddingVertical: 12,
+    borderRadius: 20,
+    borderWidth: 1,
+    marginBottom: Spacing.two,
+  },
+  searchInput: {
+    flex: 1,
+    fontFamily: Fonts.outfit,
+    fontSize: 16,
+    padding: 0,
   },
   list: {
     gap: Spacing.three,
+    paddingHorizontal: Spacing.four,
   },
   itemWrapper: {
     borderRadius: 16,

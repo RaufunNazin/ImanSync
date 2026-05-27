@@ -118,21 +118,33 @@ export async function saveMyDuas(duas: UserDua[]): Promise<void> {
   const uri = await getStorageUri();
   if (!uri) throw new Error('Storage not initialized');
 
+  const content = JSON.stringify(duas, null, 2);
+
   if (uri.startsWith('content://')) {
     const files = await StorageAccessFramework.readDirectoryAsync(uri);
     let fileUri = files.find((f: string) => f.endsWith(FILE_NAME));
     
+    let existingLength = 0;
     if (!fileUri) {
       fileUri = await StorageAccessFramework.createFileAsync(
         uri,
         FILE_NAME,
         'application/json'
       );
+    } else {
+      try {
+        const old = await FileSystem.readAsStringAsync(fileUri);
+        existingLength = old.length;
+      } catch (e) {}
     }
-    await FileSystem.writeAsStringAsync(fileUri, JSON.stringify(duas, null, 2));
+    
+    // Fix for Android SAF truncation bug: pad the new content with spaces 
+    // to ensure we completely overwrite the old file contents.
+    const paddedContent = content.padEnd(existingLength, ' ');
+    await FileSystem.writeAsStringAsync(fileUri, paddedContent);
   } else {
     const fileUri = uri + FILE_NAME;
-    await FileSystem.writeAsStringAsync(fileUri, JSON.stringify(duas, null, 2));
+    await FileSystem.writeAsStringAsync(fileUri, content);
   }
 }
 

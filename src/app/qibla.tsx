@@ -1,16 +1,13 @@
-import { Colors, Fonts, Spacing } from '@/constants/theme';
 import PageHeader from '@/components/page-header';
-import { BlurView } from 'expo-blur';
-import { useRouter } from 'expo-router';
+import { Colors, Fonts, Spacing } from '@/constants/theme';
+import { useThemeStore } from '@/store/themeStore';
+import { formatNumber } from '@/utils/formatNumber';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import { Magnetometer } from 'expo-sensors';
-import { Navigation } from 'lucide-react-native';
 import React, { useEffect, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { Animated, StyleSheet, Text, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { useTranslation } from 'react-i18next';
-import AsyncStorage from '@react-native-async-storage/async-storage';
-import { formatNumber } from '@/utils/formatNumber';
-import { useThemeStore } from '@/store/themeStore';
 
 // Kaaba Coordinates
 const KAABA_LAT = 21.4225;
@@ -89,77 +86,66 @@ export default function QiblaScreen() {
       <PageHeader titleEn={t('qibla.titleEn')} titleAr={t('qibla.titleAr')} showBack />
 
       <View style={styles.container}>
-        <BlurView intensity={50} tint={colors.glassTint as any} style={styles.card}>
-          
-          <View style={styles.compassWrapper}>
-            {/* The Compass Dial that rotates based on phone's heading */}
-            <Animated.View style={[styles.compassDial, { transform: [{ rotate: `${-heading}deg` }] }]}>
-              <View style={[styles.dialCircle, { borderColor: colors.border }]} />
-              
-              {/* Markers */}
-              <View style={styles.markerN}>
-                <Text style={[styles.markerText, { color: colors.accent, fontWeight: 'bold' }]}>N</Text>
-              </View>
-              <View style={styles.markerE}>
-                <Text style={[styles.markerText, { color: colors.textSecondary }]}>E</Text>
-              </View>
-              <View style={styles.markerS}>
-                <Text style={[styles.markerText, { color: colors.textSecondary }]}>S</Text>
-              </View>
-              <View style={styles.markerW}>
-                <Text style={[styles.markerText, { color: colors.textSecondary }]}>W</Text>
-              </View>
-
-              {/* Minor Markers */}
-              <View style={styles.markerNE}><Text style={[styles.markerTextSm, { color: colors.textSecondary }]}>NE</Text></View>
-              <View style={styles.markerSE}><Text style={[styles.markerTextSm, { color: colors.textSecondary }]}>SE</Text></View>
-              <View style={styles.markerSW}><Text style={[styles.markerTextSm, { color: colors.textSecondary }]}>SW</Text></View>
-              <View style={styles.markerNW}><Text style={[styles.markerTextSm, { color: colors.textSecondary }]}>NW</Text></View>
-
-              {/* Tick Marks for Degrees */}
-              {[...Array(24)].map((_, i) => (
+        <View style={styles.compassWrapper}>
+          {/* The Compass Dial that rotates based on phone's heading */}
+          <Animated.View style={[styles.compassDial, { transform: [{ rotate: `${-heading}deg` }] }]}>
+            
+            {/* Tick Marks for Degrees */}
+            {[...Array(72)].map((_, i) => {
+              const isMajor = i % 18 === 0; // 0, 90, 180, 270
+              const isMedium = i % 2 === 0;
+              return (
                 <View 
                   key={i} 
                   style={[
                     styles.tickMark, 
-                    { backgroundColor: colors.border, transform: [{ rotate: `${i * 15}deg` }, { translateY: -110 }] }
+                    { 
+                      backgroundColor: isMajor ? colors.text : (isMedium ? colors.textSecondary : colors.border),
+                      height: isMajor ? 14 : (isMedium ? 10 : 6),
+                      opacity: isMajor ? 0.9 : 0.5,
+                      transform: [{ rotate: `${i * 5}deg` }, { translateY: -130 }] 
+                    }
                   ]} 
                 />
-              ))}
+              );
+            })}
 
-              {/* Qibla Fixed Indicator on the Dial */}
-              <View style={[styles.qiblaFixedIndicator, { transform: [{ rotate: `${qiblaBearing}deg` }, { translateY: -120 }] }]}>
-                <Navigation size={20} color={colors.highlight} fill={colors.highlight} />
-              </View>
-            </Animated.View>
-
-            {/* Central Needle pointing to Qibla relative to phone heading */}
-            <Animated.View style={[styles.needleContainer, { transform: [{ rotate: `${rotation}deg` }] }]}>
-              <View style={styles.needleWrapper}>
-                <Navigation size={72} color={colors.highlight} fill={colors.highlight} />
-              </View>
-            </Animated.View>
-
-            {/* Center Dot */}
-            <View style={[styles.centerDot, { backgroundColor: colors.text }]} />
-          </View>
-
-          <View style={styles.infoRow}>
-            <View style={styles.infoBox}>
-              <Text style={[styles.infoLabel, { color: colors.textSecondary }]}>{t('qibla.currentHeading')}</Text>
-              <Text style={[styles.infoValue, { color: colors.text }]}>{formatNumber(Math.round(heading), i18n.language)}°</Text>
+            {/* Markers */}
+            <View style={[styles.markerContainer, { transform: [{ rotate: '0deg' }, { translateY: -100 }] }]}>
+              <Text style={[styles.markerText, { color: colors.textSecondary }]}>N</Text>
             </View>
-            <View style={[styles.infoDivider, { backgroundColor: colors.border }]} />
-            <View style={styles.infoBox}>
-              <Text style={[styles.infoLabel, { color: colors.textSecondary }]}>{t('qibla.qiblaDirection')}</Text>
-              <Text style={[styles.infoValue, { color: colors.highlight }]}>{formatNumber(Math.round(qiblaBearing), i18n.language)}°</Text>
+            <View style={[styles.markerContainer, { transform: [{ rotate: '90deg' }, { translateY: -100 }] }]}>
+              <Text style={[styles.markerText, { color: colors.textSecondary }]}>E</Text>
+            </View>
+            <View style={[styles.markerContainer, { transform: [{ rotate: '180deg' }, { translateY: -100 }] }]}>
+              <Text style={[styles.markerText, { color: colors.textSecondary }]}>S</Text>
+            </View>
+            <View style={[styles.markerContainer, { transform: [{ rotate: '270deg' }, { translateY: -100 }] }]}>
+              <Text style={[styles.markerText, { color: colors.textSecondary }]}>W</Text>
+            </View>
+
+            {/* Qibla Fixed Indicator on the Dial */}
+            <View style={[styles.qiblaFixedIndicator, { transform: [{ rotate: `${qiblaBearing}deg` }, { translateY: -130 }] }]}>
+              <View style={[styles.qiblaBadge, { backgroundColor: '#4c956c' }]}>
+                <View style={styles.kaabaIcon}>
+                  <View style={styles.kaabaGoldBand} />
+                </View>
+              </View>
+            </View>
+          </Animated.View>
+
+          {/* Fixed Central Needle pointing always UP */}
+          <View style={styles.needleContainer}>
+            <View style={styles.needleWrapper}>
+              <View style={[styles.centerRing, { borderColor: colors.text }]} />
+              <View style={[styles.centerPointer, { borderBottomColor: colors.text }]} />
             </View>
           </View>
+        </View>
 
-          <Text style={[styles.description, { color: Math.abs(diff) <= 2 ? colors.highlight : colors.textSecondary, fontWeight: Math.abs(diff) <= 2 ? 'bold' : 'normal' }]}>
-            {turnText}
-          </Text>
-        </BlurView>
+        <Text style={[styles.description, { color: Math.abs(diff) <= 2 ? colors.accent : colors.text }]}>
+          {turnText}
+        </Text>
       </View>
     </SafeAreaView>
   );
@@ -179,15 +165,14 @@ const styles = StyleSheet.create({
     padding: Spacing.six,
     borderRadius: 32,
     alignItems: 'center',
-    borderWidth: 1,
-    borderColor: 'rgba(255,255,255,0.1)',
   },
   compassWrapper: {
-    width: 280,
-    height: 280,
+    width: 320,
+    height: 320,
     alignItems: 'center',
     justifyContent: 'center',
     marginBottom: Spacing.six,
+    alignSelf: 'center',
   },
   compassDial: {
     position: 'absolute',
@@ -196,42 +181,49 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
   },
-  dialCircle: {
+  markerContainer: {
     position: 'absolute',
-    width: 260,
-    height: 260,
-    borderRadius: 130,
-    borderWidth: 2,
-    borderStyle: 'dashed',
-    opacity: 0.3,
+    alignItems: 'center',
+    justifyContent: 'center',
   },
   markerText: {
     fontFamily: Fonts.outfit,
-    fontSize: 22,
+    fontSize: 18,
   },
-  markerTextSm: {
-    fontFamily: Fonts.outfit,
-    fontSize: 14,
-    opacity: 0.7,
-  },
-  markerN: { position: 'absolute', top: 5 },
-  markerS: { position: 'absolute', bottom: 5 },
-  markerE: { position: 'absolute', right: 10 },
-  markerW: { position: 'absolute', left: 10 },
-  markerNE: { position: 'absolute', top: 40, right: 40 },
-  markerNW: { position: 'absolute', top: 40, left: 40 },
-  markerSE: { position: 'absolute', bottom: 40, right: 40 },
-  markerSW: { position: 'absolute', bottom: 40, left: 40 },
   tickMark: {
     position: 'absolute',
     width: 2,
-    height: 8,
-    opacity: 0.5,
+    borderRadius: 1,
   },
   qiblaFixedIndicator: {
     position: 'absolute',
     alignItems: 'center',
     justifyContent: 'center',
+  },
+  qiblaBadge: {
+    width: 44,
+    height: 44,
+    borderRadius: 22,
+    alignItems: 'center',
+    justifyContent: 'center',
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.2,
+    shadowRadius: 4,
+    elevation: 4,
+  },
+  kaabaIcon: {
+    width: 16,
+    height: 18,
+    backgroundColor: '#000',
+    borderRadius: 2,
+    alignItems: 'center',
+  },
+  kaabaGoldBand: {
+    width: '100%',
+    height: 3,
+    backgroundColor: '#FFD700',
+    marginTop: 4,
   },
   needleContainer: {
     position: 'absolute',
@@ -244,41 +236,27 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
   },
-  centerDot: {
-    position: 'absolute',
-    width: 12,
-    height: 12,
-    borderRadius: 6,
-  },
-  infoRow: {
-    flexDirection: 'row',
-    width: '100%',
-    justifyContent: 'space-evenly',
-    alignItems: 'center',
-    marginBottom: Spacing.four,
-  },
-  infoBox: {
-    alignItems: 'center',
-  },
-  infoDivider: {
-    width: 1,
+  centerRing: {
+    width: 40,
     height: 40,
+    borderRadius: 20,
+    borderWidth: 4,
   },
-  infoLabel: {
-    fontFamily: Fonts.outfit,
-    fontSize: 12,
-    textTransform: 'uppercase',
-    letterSpacing: 1,
-    marginBottom: 4,
-  },
-  infoValue: {
-    fontFamily: Fonts.outfit,
-    fontSize: 24,
+  centerPointer: {
+    position: 'absolute',
+    top: -14,
+    width: 0,
+    height: 0,
+    borderLeftWidth: 10,
+    borderRightWidth: 10,
+    borderBottomWidth: 18,
+    borderLeftColor: 'transparent',
+    borderRightColor: 'transparent',
   },
   description: {
     fontFamily: Fonts.outfit,
-    fontSize: 15,
+    fontSize: 24,
     textAlign: 'center',
-    lineHeight: 22,
+    lineHeight: 32,
   }
 });

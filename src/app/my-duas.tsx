@@ -1,12 +1,12 @@
 import React, { useEffect, useState } from 'react';
-import { ActivityIndicator, Dimensions, Image, Platform, ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import { ActivityIndicator, Dimensions, Image, Platform, ScrollView, StyleSheet, Text, TouchableOpacity, View, TextInput } from 'react-native';
 import { useRouter } from 'expo-router';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Colors, Fonts, Spacing } from '@/constants/theme';
 import PageHeader from '@/components/page-header';
 import { useTranslation } from 'react-i18next';
 import { BlurView } from 'expo-blur';
-import { Plus, Trash2, Play } from 'lucide-react-native';
+import { Plus, Trash2, Play, Search } from 'lucide-react-native';
 import { initStorage, loadMyDuas, saveMyDuas, saveMediaFile, UserDua, getMediaUri } from '@/utils/my-duas-storage';
 import AddDuaModal from '@/components/add-dua-modal';
 
@@ -27,6 +27,7 @@ export default function MyDuasScreen() {
   const [modalVisible, setModalVisible] = useState(false);
   const [needsSetup, setNeedsSetup] = useState(false);
   const [setupLoading, setSetupLoading] = useState(false);
+  const [searchQuery, setSearchQuery] = useState('');
 
   useEffect(() => {
     checkStorage();
@@ -135,16 +136,37 @@ export default function MyDuasScreen() {
     );
   }
 
+  const filteredDuas = duas.filter(dua => {
+    if (!searchQuery) return true;
+    const q = searchQuery.toLowerCase();
+    const title = (dua.title || '').toLowerCase();
+    const translation = (dua.translation || '').toLowerCase();
+    const arabic = (dua.arabic || '').toLowerCase();
+    const transliteration = (dua.transliteration || '').toLowerCase();
+    return title.includes(q) || translation.includes(q) || arabic.includes(q) || transliteration.includes(q);
+  });
+
   return (
     <SafeAreaView style={[styles.safeArea, { backgroundColor: colors.background }]}>
       <PageHeader titleEn={t('dua.myDuas')} titleAr="" showBack />
       
-      <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={styles.container}>
+      <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={styles.container} keyboardDismissMode="on-drag" keyboardShouldPersistTaps="handled">
+        <View style={[styles.searchContainer, { backgroundColor: colors.backgroundElement, borderColor: colors.border }]}>
+          <Search size={20} color={colors.textSecondary} style={{ marginRight: 8 }} />
+          <TextInput
+            style={[styles.searchInput, { color: colors.text }]}
+            placeholder={t('duaSettings.searchPlaceholder', { defaultValue: 'Search by name, translation...' })}
+            placeholderTextColor={colors.textSecondary}
+            value={searchQuery}
+            onChangeText={setSearchQuery}
+          />
+        </View>
+
         {loading ? (
           <ActivityIndicator size="large" color={colors.accent} style={{ marginTop: 40 }} />
         ) : (
           <View style={styles.list}>
-            {duas.map((dua) => (
+            {filteredDuas.map((dua) => (
               <TouchableOpacity
                 key={dua.id}
                 activeOpacity={0.7}
@@ -175,7 +197,7 @@ export default function MyDuasScreen() {
               </TouchableOpacity>
             ))}
 
-            {duas.length === 0 && (
+            {filteredDuas.length === 0 && (
               <Text style={{ color: colors.textSecondary, textAlign: 'center', marginTop: 40, fontFamily: Fonts.outfit }}>
                 {t('dua.noMyDuas', { defaultValue: 'No custom duas added.' })}
               </Text>
@@ -238,11 +260,27 @@ const styles = StyleSheet.create({
     color: '#FFF',
   },
   container: {
-    padding: Spacing.four,
     paddingTop: 0,
+  },
+  searchContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginHorizontal: Spacing.four,
+    paddingHorizontal: Spacing.four,
+    paddingVertical: 12,
+    borderRadius: 20,
+    borderWidth: 1,
+    marginBottom: Spacing.two,
+  },
+  searchInput: {
+    flex: 1,
+    fontFamily: Fonts.outfit,
+    fontSize: 16,
+    padding: 0,
   },
   list: {
     gap: Spacing.four,
+    paddingHorizontal: Spacing.four,
   },
   duaCard: {
     borderRadius: 16,

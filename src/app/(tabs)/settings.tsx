@@ -1,11 +1,12 @@
 import PageHeader from '@/components/page-header';
 import TimePickerModal from '@/components/TimePickerModal';
+import OptionsModal from '@/components/OptionsModal';
 import { formatNumber } from '@/utils/formatNumber';
 import { Colors, Fonts, Spacing } from '@/constants/theme';
 import { setLanguage } from '@/i18n';
 import { useThemeStore } from '@/store/themeStore';
 import { usePreferencesStore } from '@/store/preferencesStore';
-import { getDistrictName } from '@/utils/districts';
+import { getDistrictName, districtMapBn } from '@/utils/districts';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import * as Location from 'expo-location';
 import * as Updates from 'expo-updates';
@@ -98,6 +99,9 @@ export default function SettingsScreen() {
   const [pickerVisible, setPickerVisible] = useState(false);
   const [pickerType, setPickerType] = useState<'start' | 'end'>('start');
 
+  const [optionsModalVisible, setOptionsModalVisible] = useState(false);
+  const [optionsModalType, setOptionsModalType] = useState<'calc' | 'madhab' | 'hijri' | 'location' | null>(null);
+
   const prefs = usePreferencesStore();
 
   const toggleNotifications = async (enabled: boolean) => {
@@ -132,27 +136,15 @@ export default function SettingsScreen() {
     import('../../services/notificationService').then(s => s.scheduleAllNotifications());
   };
 
-  const cycleCalcMethod = () => {
-    const currentIdx = CALC_METHODS.findIndex(m => m.id === prefs.calcMethod) || 0;
-    const nextIdx = (currentIdx + 1) % CALC_METHODS.length;
-    prefs.setPreferences({ calcMethod: CALC_METHODS[nextIdx].id });
-    import('../../services/notificationService').then(s => s.scheduleAllNotifications());
-  };
 
-  const cycleMadhab = () => {
-    const currentIdx = MADHABS.findIndex(m => m.id === prefs.madhab) || 0;
-    const nextIdx = (currentIdx + 1) % MADHABS.length;
-    prefs.setPreferences({ madhab: MADHABS[nextIdx].id });
-    import('../../services/notificationService').then(s => s.scheduleAllNotifications());
-  };
 
   const formatTime12h = (hour: number, minute: number, lang: string) => {
     const isAM = hour < 12;
     const h12 = hour % 12 === 0 ? 12 : hour % 12;
-    const period = isAM ? (lang === 'bn' ? 'এএম' : 'AM') : (lang === 'bn' ? 'পিএম' : 'PM');
+    const period = isAM ? ' AM' : ' PM';
     const hStr = formatNumber(h12, lang).padStart(2, formatNumber(0, lang));
     const mStr = formatNumber(minute, lang).padStart(2, formatNumber(0, lang));
-    return `${hStr}:${mStr} ${period}`;
+    return `${hStr}:${mStr}${period}`;
   };
 
   const fetchLocation = async () => {
@@ -287,23 +279,42 @@ export default function SettingsScreen() {
           <SettingRow
             icon={MapPin}
             title={t('settings.location')}
-            value={getDistrictName(prefs.location?.city || 'Dhaka (Default)', i18n.language)}
+            value={prefs.manualCity ? getDistrictName(prefs.manualCity, i18n.language) : (prefs.location ? getDistrictName(prefs.location.city, i18n.language) : 'Auto (GPS)')}
             type={fetchingLoc ? 'loading' : 'navigate'}
-            onPress={fetchLocation}
+            onPress={() => {
+              setOptionsModalType('location');
+              setOptionsModalVisible(true);
+            }}
             colors={colors}
           />
           <SettingRow
             icon={SettingsIcon}
             title={t('settings.calcMethod')}
             value={CALC_METHODS.find(m => m.id === prefs.calcMethod)?.name || 'University of Islamic Sciences, Karachi'}
-            onPress={cycleCalcMethod}
+            onPress={() => {
+              setOptionsModalType('calc');
+              setOptionsModalVisible(true);
+            }}
             colors={colors}
           />
           <SettingRow
             icon={SettingsIcon}
             title={t('settings.asrMethod', { defaultValue: 'Asr Method (Madhab)' })}
             value={MADHABS.find(m => m.id === prefs.madhab)?.name || 'Hanafi'}
-            onPress={cycleMadhab}
+            onPress={() => {
+              setOptionsModalType('madhab');
+              setOptionsModalVisible(true);
+            }}
+            colors={colors}
+          />
+          <SettingRow
+            icon={SettingsIcon}
+            title={t('settings.hijriOffset', { defaultValue: 'Hijri Date Adjustment' })}
+            value={`${prefs.hijriOffset > 0 ? '+' : ''}${prefs.hijriOffset || 0} Days`}
+            onPress={() => {
+              setOptionsModalType('hijri');
+              setOptionsModalVisible(true);
+            }}
             isLast={true}
             colors={colors}
           />
@@ -340,6 +351,48 @@ export default function SettingsScreen() {
           />
         </View>
       </ScrollView>
+
+      {/* Options Modal */}
+      {optionsModalType && (
+        <OptionsModal
+          visible={optionsModalVisible}
+          onClose={() => setOptionsModalVisible(false)}
+          title={
+            optionsModalType === 'calc' ? t('settings.calcMethod') :
+            optionsModalType === 'madhab' ? t('settings.asrMethod') :
+            optionsModalType === 'hijri' ? t('settings.hijriOffset') :
+            t('settings.location')
+          }
+          options={
+            optionsModalType === 'calc' ? CALC_METHODS.map(m => ({ id: m.id, name: m.name })) :
+            optionsModalType === 'madhab' ? MADHABS.map(m => ({ id: m.id, name: m.name })) :
+            optionsModalType === 'hijri' ? [-2, -1, 0, 1, 2].map(n => ({ id: n, name: `${n > 0 ? '+' : ''}${n} ${t('days', { defaultValue: 'Days' })}` })) :
+            [{ id: 'auto', name: 'Auto (GPS)' }, ...Object.keys(districtMapBn).sort().map(k => ({ id: k, name: getDistrictName(k, i18n.language) }))]
+          }
+          selectedValue={
+            optionsModalType === 'calc' ? prefs.calcMethod :
+            optionsModalType === 'madhab' ? prefs.madhab :
+            optionsModalType === 'hijri' ? prefs.hijriOffset :
+            (prefs.manualCity || 'auto')
+          }
+          enableSearch={optionsModalType === 'location'}
+          onSelect={(val) => {
+            if (optionsModalType === 'calc') prefs.setPreferences({ calcMethod: val as number });
+            else if (optionsModalType === 'madhab') prefs.setPreferences({ madhab: val as number });
+            else if (optionsModalType === 'hijri') prefs.setPreferences({ hijriOffset: val as number });
+            else if (optionsModalType === 'location') {
+              if (val === 'auto') {
+                prefs.setPreferences({ manualCity: null });
+                fetchLocation();
+              } else {
+                prefs.setPreferences({ manualCity: val as string });
+              }
+            }
+            import('../../services/notificationService').then(s => s.scheduleAllNotifications());
+          }}
+          colors={colors}
+        />
+      )}
     </SafeAreaView>
   );
 }
