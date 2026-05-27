@@ -8,16 +8,23 @@ import { usePreferencesStore } from '@/store/preferencesStore';
 import { getDistrictName } from '@/utils/districts';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import * as Location from 'expo-location';
-import { Bell, ChevronRight, Globe, MapPin, Moon, Settings as SettingsIcon, Shield } from 'lucide-react-native';
+import * as Updates from 'expo-updates';
+import { useRouter } from 'expo-router';
+import { Bell, ChevronRight, Globe, MapPin, Moon, Settings as SettingsIcon, Shield, Info, FileText, RefreshCw } from 'lucide-react-native';
 import React, { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { ActivityIndicator, Alert, Image, Linking, ScrollView, StyleSheet, Switch, Text, TouchableOpacity, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 const CALC_METHODS = [
-  { id: 1, name: 'Karachi (UIS)' },
-  { id: 2, name: 'ISNA (North America)' },
-  { id: 3, name: 'MWL (Muslim World League)' }
+  { id: 1, name: 'University of Islamic Sciences, Karachi' },
+  { id: 2, name: 'Islamic Society of North America (ISNA)' },
+  { id: 3, name: 'Muslim World League (MWL)' }
+];
+
+const MADHABS = [
+  { id: 0, name: 'Shafi/Hanbali/Maliki' },
+  { id: 1, name: 'Hanafi' }
 ];
 
 // ─── SettingRow MUST live OUTSIDE the screen component ───────────────────────
@@ -53,12 +60,12 @@ function SettingRow({ icon: Icon, title, value, type = 'navigate', onPress, isLa
         <View style={[styles.iconBox, { backgroundColor: 'rgba(255,255,255,0.1)' }]}>
           <Icon size={20} color={colors.highlight} />
         </View>
-        <Text style={[styles.settingTitle, { color: colors.text }]}>{title}</Text>
+        <Text style={[styles.settingTitle, { color: colors.text }]} numberOfLines={2}>{title}</Text>
       </View>
 
       {type === 'navigate' ? (
-        <View style={{ flexDirection: 'row', alignItems: 'center', flexShrink: 1 }}>
-          <Text style={[styles.settingValue, { color: colors.textSecondary }]} numberOfLines={1} ellipsizeMode="tail">{value}</Text>
+        <View style={{ flexDirection: 'row', alignItems: 'center', flex: value ? 1 : undefined, flexShrink: 1, justifyContent: 'flex-end', paddingLeft: value ? 10 : 0 }}>
+          {!!value && <Text style={[styles.settingValue, { color: colors.textSecondary }]} numberOfLines={2}>{value}</Text>}
           <ChevronRight size={20} color={colors.textSecondary} />
         </View>
       ) : type === 'toggle' ? (
@@ -83,39 +90,15 @@ export default function SettingsScreen() {
   const setTheme = useThemeStore((s) => s.setTheme);
   const colors = Colors[scheme === 'unspecified' ? 'light' : scheme];
   const { t, i18n } = useTranslation();
+  const router = useRouter();
 
-  const [calcMethodIndex, setCalcMethodIndex] = useState(0);
-  const [locationName, setLocationName] = useState<string>('Unknown Location');
   const [fetchingLoc, setFetchingLoc] = useState(false);
+  const [checkingUpdate, setCheckingUpdate] = useState(false);
 
   const [pickerVisible, setPickerVisible] = useState(false);
   const [pickerType, setPickerType] = useState<'start' | 'end'>('start');
 
   const prefs = usePreferencesStore();
-
-  useEffect(() => {
-    AsyncStorage.multiGet(['imansync_calc_method', 'imansync_location']).then((values) => {
-      values.forEach(([key, value]) => {
-        if (value !== null) {
-          if (key === 'imansync_calc_method') {
-            const methodId = parseInt(value, 10);
-            const idx = CALC_METHODS.findIndex(m => m.id === methodId);
-            if (idx >= 0) setCalcMethodIndex(idx);
-          }
-          if (key === 'imansync_location') {
-            try {
-              const loc = JSON.parse(value);
-              setLocationName(loc.city);
-            } catch (e) {}
-          }
-        } else {
-          if (key === 'imansync_location') {
-            setLocationName('Dhaka (Default)');
-          }
-        }
-      });
-    });
-  }, []);
 
   const toggleNotifications = async (enabled: boolean) => {
     prefs.setPreferences({ notificationsEnabled: enabled });
@@ -149,10 +132,18 @@ export default function SettingsScreen() {
     import('../../services/notificationService').then(s => s.scheduleAllNotifications());
   };
 
-  const cycleCalcMethod = async () => {
-    const nextIdx = (calcMethodIndex + 1) % CALC_METHODS.length;
-    setCalcMethodIndex(nextIdx);
-    await AsyncStorage.setItem('imansync_calc_method', String(CALC_METHODS[nextIdx].id));
+  const cycleCalcMethod = () => {
+    const currentIdx = CALC_METHODS.findIndex(m => m.id === prefs.calcMethod) || 0;
+    const nextIdx = (currentIdx + 1) % CALC_METHODS.length;
+    prefs.setPreferences({ calcMethod: CALC_METHODS[nextIdx].id });
+    import('../../services/notificationService').then(s => s.scheduleAllNotifications());
+  };
+
+  const cycleMadhab = () => {
+    const currentIdx = MADHABS.findIndex(m => m.id === prefs.madhab) || 0;
+    const nextIdx = (currentIdx + 1) % MADHABS.length;
+    prefs.setPreferences({ madhab: MADHABS[nextIdx].id });
+    import('../../services/notificationService').then(s => s.scheduleAllNotifications());
   };
 
   const formatTime12h = (hour: number, minute: number, lang: string) => {
@@ -181,13 +172,9 @@ export default function SettingsScreen() {
       });
 
       let city = reverse[0]?.city || reverse[0]?.subregion || reverse[0]?.region || 'Unknown Location';
-      setLocationName(city);
 
-      await AsyncStorage.setItem('imansync_location', JSON.stringify({
-        latitude: location.coords.latitude,
-        longitude: location.coords.longitude,
-        city
-      }));
+      prefs.setPreferences({ location: { latitude: location.coords.latitude, longitude: location.coords.longitude, city } });
+      import('../../services/notificationService').then(s => s.scheduleAllNotifications());
     } catch (e) {
       console.log('Error fetching location', e);
       Alert.alert('Error', 'Could not fetch location.');
@@ -196,19 +183,30 @@ export default function SettingsScreen() {
     }
   };
 
+  const checkForUpdates = async () => {
+    try {
+      setCheckingUpdate(true);
+      const update = await Updates.checkForUpdateAsync();
+      if (update.isAvailable) {
+        Alert.alert(t('settings.updatesAvailable'));
+        await Updates.fetchUpdateAsync();
+        Alert.alert(t('settings.updateRestarting'));
+        await Updates.reloadAsync();
+      } else {
+        Alert.alert(t('settings.updatesNotAvailable'));
+      }
+    } catch (error) {
+      console.log('Error checking for updates', error);
+      Alert.alert(t('settings.errorCheckingUpdates'));
+    } finally {
+      setCheckingUpdate(false);
+    }
+  };
+
   return (
     <SafeAreaView style={[styles.safeArea, { backgroundColor: colors.background }]}>
       <PageHeader titleEn={t('settings.titleEn')} titleAr={t('settings.titleAr')} />
       <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={styles.container}>
-
-        <View style={[styles.appFooter, { borderColor: colors.accent, backgroundColor: colors.backgroundElement }]}>
-          <Image source={require('../../../assets/images/android-icon-foreground.png')} style={styles.footerLogo} resizeMode="contain" />
-          <View style={styles.footerTextContainer}>
-            <Text style={[styles.footerAppName, { color: colors.text }]}>ImanSync</Text>
-            <Text style={[styles.footerSubtitle, { color: colors.textSecondary }]}>{t('settings.footerSubtitle', { defaultValue: 'Crafted seeking the satisfaction of Allah' })}</Text>
-            <Text style={[styles.footerVersion, { color: colors.textSecondary }]}>v1.0.0</Text>
-          </View>
-        </View>
 
         <Text style={[styles.sectionTitle, { color: colors.textSecondary }]}>{t('settings.preferences')}</Text>
         <View style={[styles.card, { borderColor: colors.border, backgroundColor: colors.backgroundElement }]}>
@@ -289,7 +287,7 @@ export default function SettingsScreen() {
           <SettingRow
             icon={MapPin}
             title={t('settings.location')}
-            value={getDistrictName(locationName, i18n.language)}
+            value={getDistrictName(prefs.location?.city || 'Dhaka (Default)', i18n.language)}
             type={fetchingLoc ? 'loading' : 'navigate'}
             onPress={fetchLocation}
             colors={colors}
@@ -297,8 +295,15 @@ export default function SettingsScreen() {
           <SettingRow
             icon={SettingsIcon}
             title={t('settings.calcMethod')}
-            value={t('settings.calcMethod_' + CALC_METHODS[calcMethodIndex].id)}
+            value={CALC_METHODS.find(m => m.id === prefs.calcMethod)?.name || 'University of Islamic Sciences, Karachi'}
             onPress={cycleCalcMethod}
+            colors={colors}
+          />
+          <SettingRow
+            icon={SettingsIcon}
+            title={t('settings.asrMethod', { defaultValue: 'Asr Method (Madhab)' })}
+            value={MADHABS.find(m => m.id === prefs.madhab)?.name || 'Hanafi'}
+            onPress={cycleMadhab}
             isLast={true}
             colors={colors}
           />
@@ -311,8 +316,27 @@ export default function SettingsScreen() {
             title={t('settings.managePermissions')}
             value=""
             onPress={() => Linking.openSettings()}
-            isLast={true}
             colors={colors}
+          />
+          <SettingRow 
+            icon={RefreshCw} 
+            title={t('settings.checkForUpdates')} 
+            type={checkingUpdate ? 'loading' : 'navigate'} 
+            onPress={checkForUpdates} 
+            colors={colors} 
+          />
+          <SettingRow 
+            icon={FileText} 
+            title={t('settings.changelog')} 
+            onPress={() => router.push('/changelog')} 
+            colors={colors} 
+          />
+          <SettingRow 
+            icon={Info} 
+            title={t('settings.aboutImanSync')} 
+            onPress={() => router.push('/about')} 
+            isLast={true} 
+            colors={colors} 
           />
         </View>
       </ScrollView>
@@ -375,41 +399,5 @@ const styles = StyleSheet.create({
     flexShrink: 1,
     textAlign: 'right',
     marginRight: 4,
-  },
-  appFooter: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'center',
-    paddingVertical: Spacing.four,
-    paddingHorizontal: Spacing.four,
-    marginBottom: Spacing.four,
-    borderWidth: 1,
-    borderRadius: 24,
-  },
-  footerLogo: {
-    width: 64,
-    height: 64,
-    marginRight: Spacing.four,
-  },
-  footerTextContainer: {
-    flex: 1,
-    justifyContent: 'center',
-  },
-  footerAppName: {
-    fontFamily: Fonts.outfit,
-    fontSize: 24,
-    letterSpacing: 1,
-  },
-  footerSubtitle: {
-    fontFamily: Fonts.outfit,
-    fontSize: 12,
-    marginTop: 4,
-    lineHeight: 16,
-  },
-  footerVersion: {
-    fontFamily: Fonts.outfit,
-    fontSize: 12,
-    marginTop: 4,
-    opacity: 0.7,
   },
 });

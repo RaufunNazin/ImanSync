@@ -59,6 +59,9 @@ export default function LessonPlayerScreen() {
           setCompleted(true);
           markAsComplete();
         }
+      } else if (completedRef.current) {
+        completedRef.current = false;
+        setCompleted(false);
       }
     }
   }, [tappedItems, currentIndex]);
@@ -76,7 +79,15 @@ export default function LessonPlayerScreen() {
 
   const handleGridPress = (item: LessonItem) => {
     playAudio(item.audioUrl, item.arabic);
-    setTappedItems(prev => new Set(prev).add(item.id));
+    setTappedItems(prev => {
+      const next = new Set(prev);
+      if (next.has(item.id)) {
+        next.delete(item.id);
+      } else {
+        next.add(item.id);
+      }
+      return next;
+    });
   };
 
   const handleNextSequential = () => {
@@ -153,6 +164,9 @@ export default function LessonPlayerScreen() {
                   <Text style={[styles.translitText, { color: colors.textSecondary }]}>
                     {i18n.language === 'bn' && item.transliterationBn ? item.transliterationBn : item.transliteration}
                   </Text>
+                  <View style={{ position: 'absolute', top: 8, right: 8 }}>
+                    <Volume2 size={12} color={isTapped ? colors.highlight : colors.textSecondary} opacity={isTapped ? 1 : 0.4} />
+                  </View>
                 </TouchableOpacity>
               );
             })}

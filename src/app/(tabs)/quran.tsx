@@ -95,7 +95,7 @@ export default function QuranScreen() {
       
       <PageHeader titleEn={t('quran.titleEn')} titleAr={t('quran.titleAr')} />
 
-      <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={styles.container}>
+      <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={styles.container} keyboardDismissMode="on-drag" keyboardShouldPersistTaps="handled">
         
         {/* Search Bar */}
         <View style={[styles.searchContainer, { backgroundColor: colors.backgroundElement, borderColor: colors.border }]}>

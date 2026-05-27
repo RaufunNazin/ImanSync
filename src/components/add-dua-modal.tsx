@@ -91,7 +91,7 @@ export default function AddDuaModal({ visible, onClose, onSave, colors }: AddDua
     <Modal visible={visible} transparent animationType="slide" onRequestClose={handleClose}>
       <KeyboardAvoidingView 
         style={{ flex: 1 }} 
-        behavior={Platform.OS === 'ios' ? 'padding' : undefined}
+        behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
       >
         <View style={styles.overlay}>
           <View style={[styles.modal, { backgroundColor: colors.background, borderColor: colors.border }]}>
@@ -102,7 +102,7 @@ export default function AddDuaModal({ visible, onClose, onSave, colors }: AddDua
               </TouchableOpacity>
             </View>
 
-            <ScrollView contentContainerStyle={styles.content} keyboardShouldPersistTaps="handled">
+            <ScrollView contentContainerStyle={styles.content} keyboardShouldPersistTaps="handled" keyboardDismissMode="on-drag">
               
               <View style={styles.typeSelector}>
                 <TouchableOpacity 

@@ -45,6 +45,10 @@
         "android.permission.RECEIVE_BOOT_COMPLETED"
       ]
     },
+    "notification": {
+      "icon": "./assets/images/notification-icon.png",
+      "color": "#808080"
+    },
     "web": {
       "output": "static",
       "favicon": "./assets/images/favicon.png"
@@ -83,7 +87,8 @@
           }
         }
       ],
-      "expo-video"
+      "expo-video",
+      "./plugins/withAndroidSound.js"
     ],
     "experiments": {
       "typedRoutes": true,

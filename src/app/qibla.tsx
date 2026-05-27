@@ -71,6 +71,18 @@ export default function QiblaScreen() {
   }, []);
 
   const rotation = qiblaBearing - heading;
+  
+  let diff = (rotation + 360) % 360;
+  if (diff > 180) diff -= 360;
+  
+  let turnText = '';
+  if (Math.abs(diff) <= 2) {
+    turnText = t('qibla.facingQibla');
+  } else if (diff > 0) {
+    turnText = t('qibla.turnRight', { degrees: formatNumber(Math.round(diff), i18n.language) });
+  } else {
+    turnText = t('qibla.turnLeft', { degrees: formatNumber(Math.round(Math.abs(diff)), i18n.language) });
+  }
 
   return (
     <SafeAreaView style={[styles.safeArea, { backgroundColor: colors.background }]}>
@@ -144,8 +156,8 @@ export default function QiblaScreen() {
             </View>
           </View>
 
-          <Text style={[styles.description, { color: colors.textSecondary }]}>
-            {t('qibla.align')}
+          <Text style={[styles.description, { color: Math.abs(diff) <= 2 ? colors.highlight : colors.textSecondary, fontWeight: Math.abs(diff) <= 2 ? 'bold' : 'normal' }]}>
+            {turnText}
           </Text>
         </BlurView>
       </View>
@@ -231,7 +243,6 @@ const styles = StyleSheet.create({
   needleWrapper: {
     alignItems: 'center',
     justifyContent: 'center',
-    transform: [{ translateY: -30 }],
   },
   centerDot: {
     position: 'absolute',

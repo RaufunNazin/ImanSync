@@ -20,6 +20,7 @@ import Animated, { useAnimatedProps, useAnimatedStyle, useSharedValue, withSprin
 import { SafeAreaView } from 'react-native-safe-area-context';
 import Svg, { Circle, G } from 'react-native-svg';
 import { useThemeStore } from '@/store/themeStore';
+import { usePreferencesStore } from '@/store/preferencesStore';
 import SkeletonBox from '@/components/SkeletonBox';
 
 // ── Types ────────────────────────────────────────────────────────────────────
@@ -93,9 +94,10 @@ export default function HomeScreen() {
 
   const [currentTime, setCurrentTime] = useState(new Date());
   const [rawTimings, setRawTimings] = useState<Record<string, string>>({});
-  const [hijriRaw, setHijriRaw] = useState<{day: string, monthEn: string, year: string} | null>(null);
+  const [hijriRaw, setHijriRaw] = useState<{day: string, monthEn: string, monthNumber: number, year: string} | null>(null);
   const [dailyVerse, setDailyVerse] = useState<DailyVerse | null>(null);
-  const [locationCity, setLocationCity] = useState('Dhaka');
+  const prefs = usePreferencesStore();
+  const locationCity = prefs.location?.city || 'Dhaka';
   const locationName = getDistrictName(locationCity, i18n.language);
 
   // Tick every second
@@ -106,47 +108,29 @@ export default function HomeScreen() {
 
   // Fetch prayer times
   useEffect(() => {
-    AsyncStorage.multiGet(['imansync_location', 'imansync_calc_method']).then(values => {
-      let lat = 23.8103;
-      let lon = 90.4125;
-      let method = 1; // 1 = Karachi, 2 = ISNA, 3 = MWL
-      let isCityBased = true;
-      let city = 'Dhaka';
-      let country = 'Bangladesh';
-      
-      values.forEach(([key, value]) => {
-        if (value && key === 'imansync_location') {
-          try {
-             let loc = JSON.parse(value);
-             lat = loc.latitude;
-             lon = loc.longitude;
-             city = loc.city;
-             isCityBased = false;
-          } catch(e){}
+    let lat = prefs.location?.latitude ?? 23.8103;
+    let lon = prefs.location?.longitude ?? 90.4125;
+    let method = prefs.calcMethod ?? 1;
+    let madhab = prefs.madhab ?? 1;
+    let isCityBased = !prefs.location;
+    let city = prefs.location?.city || 'Dhaka';
+    let country = 'Bangladesh';
+    
+    let url = isCityBased 
+      ? `https://api.aladhan.com/v1/timingsByCity?city=${city}&country=${country}&method=${method}&school=${madhab}`
+      : `https://api.aladhan.com/v1/timings?latitude=${lat}&longitude=${lon}&method=${method}&school=${madhab}`;
+
+    fetch(url)
+      .then((r) => r.json())
+      .then((json) => {
+        if (json.data) {
+          setRawTimings(json.data.timings);
+          const hj = json.data.date.hijri;
+          setHijriRaw({day: hj.day, monthEn: hj.month.en, monthNumber: hj.month.number, year: hj.year});
         }
-        if (value && key === 'imansync_calc_method') {
-           method = parseInt(value, 10);
-        }
-      });
-
-      setLocationCity(city);
-
-      let url = isCityBased 
-        ? `https://api.aladhan.com/v1/timingsByCity?city=${city}&country=${country}&method=${method}`
-        : `https://api.aladhan.com/v1/timings?latitude=${lat}&longitude=${lon}&method=${method}`;
-
-      fetch(url)
-        .then((r) => r.json())
-        .then((json) => {
-          if (json.data) {
-            setRawTimings(json.data.timings);
-            const hj = json.data.date.hijri;
-            setHijriRaw({day: hj.day, monthEn: hj.month.en, year: hj.year});
-          }
-        })
-        .catch((e) => console.error('Prayer fetch error:', e));
-    });
-  }, []);
+      })
+      .catch((e) => console.error('Prayer fetch error:', e));
+  }, [prefs.calcMethod, prefs.madhab, prefs.location]);
 
   // Fetch a random Quran verse (Arabic + English)
   useEffect(() => {
@@ -254,24 +238,35 @@ export default function HomeScreen() {
 
   // Special times: Suhur (Imsak), Iftar (Maghrib), Tahajjud (Lastthird)
   const specialTimes: SpecialTime[] = useMemo(() => {
-    if (!rawTimings.Imsak) return [];
+    if (!rawTimings.Fajr || !rawTimings.Maghrib) return [];
+    
+    // Calculate Suhur: 1 min before Fajr
+    const fajrDate = parseTime(rawTimings.Fajr, today);
+    const suhurDate = new Date(fajrDate.getTime() - 1 * 60000);
+    
+    // Calculate Tahajjud (Last third of the night): Maghrib to tomorrow's Fajr
+    const maghribDate = parseTime(rawTimings.Maghrib, today);
+    const tomorrowFajr = new Date(fajrDate.getTime() + 24 * 3600000);
+    const nightDuration = tomorrowFajr.getTime() - maghribDate.getTime();
+    const tahajjudDate = new Date(maghribDate.getTime() + (nightDuration * 2 / 3));
+
     return [
       {
         label: t('home.suhur'),
         sublabel: t('home.suhurDesc'),
-        time: formatAMPM(parseTime(rawTimings.Imsak, today), i18n.language),
+        time: formatAMPM(suhurDate, i18n.language),
         Icon: Moon,
       },
       {
         label: t('home.iftar'),
         sublabel: t('home.iftarDesc'),
-        time: formatAMPM(parseTime(rawTimings.Maghrib, today), i18n.language),
+        time: formatAMPM(maghribDate, i18n.language),
         Icon: Sunset,
       },
       {
         label: t('home.tahajjud'),
         sublabel: t('home.tahajjudDesc'),
-        time: formatAMPM(parseTime(rawTimings.Lastthird, today), i18n.language),
+        time: formatAMPM(tahajjudDate, i18n.language),
         Icon: Star,
       },
     ];
@@ -308,7 +303,12 @@ export default function HomeScreen() {
 
   const hijriDisplay = useMemo(() => {
     if (!hijriRaw) return '';
-    const monthKey = `hijri.${hijriRaw.monthEn.toLowerCase().replace(/\s/g, '_')}`;
+    const HIJRI_MONTHS = [
+      'muharram', 'safar', 'rabi_al-awwal', 'rabi_al-thani', 
+      'jumada_al-awwal', 'jumada_al-thani', 'rajab', 'sha\'ban', 
+      'ramadan', 'shawwal', 'dhu_al-qi\'dah', 'dhu_al-hijjah'
+    ];
+    const monthKey = `hijri.${HIJRI_MONTHS[hijriRaw.monthNumber - 1]}`;
     const month = t(monthKey, { defaultValue: hijriRaw.monthEn });
     const suffix = t('hijri.ah', { defaultValue: 'AH' });
     return `${formatNumber(hijriRaw.day, i18n.language)} ${month} ${formatNumber(hijriRaw.year, i18n.language)} ${suffix}`;
@@ -438,7 +438,6 @@ export default function HomeScreen() {
               tint={colors.glassTint as any}
               style={[styles.timelineCard, { borderColor: colors.border }]}
             >
-              <Text style={[styles.subSectionLabel, { color: colors.textSecondary }]}>{t('home.todaysPrayers')}</Text>
               <View style={styles.timelineRow}>
                 {prayersWithStatus.map((prayer, index) => {
                   const isCurrent = prayer.status === 'current';
@@ -510,18 +509,6 @@ export default function HomeScreen() {
                       >
                         {formatNumber(prayer.time, i18n.language)}
                       </Text>
-                      {isNext && (
-                        <View
-                          style={[
-                            styles.nextBadge,
-                            { backgroundColor: colors.highlight + '22' },
-                          ]}
-                        >
-                          <Text style={[styles.nextBadgeText, { color: colors.highlight }]}>
-                            {t('home.next')}
-                          </Text>
-                        </View>
-                      )}
                     </View>
                   );
                 })}
@@ -671,215 +658,9 @@ export default function HomeScreen() {
           </View>
         )}
       </ScrollView>
-
-      {/* ── Floating Tasbeeh Counter ──────────────────────────────── */}
-      <TasbeehFAB colors={colors} t={t} i18n={i18n} />
     </SafeAreaView>
   );
 }
-
-// ── Tasbeeh FAB ──────────────────────────────────────────────────────────────
-const TASBEEH_CYCLE = ['Subhanallah', 'Alhamdulillah', 'Allahu Akbar'];
-const TASBEEH_GOAL = 33;
-const AnimatedCircle = Animated.createAnimatedComponent(Circle);
-
-function TasbeehFAB({ colors, t, i18n }: { colors: any; t: any; i18n: any }) {
-  const [count, setCount] = useState(0);
-  const [cycleIndex, setCycleIndex] = useState(0);
-  const [showLabel, setShowLabel] = useState(false);
-  const labelTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
-
-  // Fix #5: clean up timer on unmount to prevent state update on unmounted component
-  useEffect(() => {
-    return () => {
-      if (labelTimerRef.current) clearTimeout(labelTimerRef.current);
-    };
-  }, []);
-
-  const size = 60;
-  const strokeWidth = 3;
-  const radius = (size - strokeWidth) / 2;
-  const circumference = 2 * Math.PI * radius;
-
-  const animatedProgress = useSharedValue(0);
-  const animatedCircleProps = useAnimatedProps(() => ({
-    strokeDashoffset: circumference - (circumference * animatedProgress.value) / TASBEEH_GOAL,
-  }));
-
-  const scale = useSharedValue(1);
-  const animatedScale = useAnimatedStyle(() => ({
-    transform: [{ scale: scale.value }],
-  }));
-
-  const handlePress = () => {
-    scale.value = withSpring(0.88, { damping: 18, stiffness: 200 }, () => {
-      scale.value = withSpring(1, { damping: 20, stiffness: 200 });
-    });
-    const next = count + 1;
-    if (next > TASBEEH_GOAL) {
-      const nextCycle = (cycleIndex + 1) % TASBEEH_CYCLE.length;
-      setCycleIndex(nextCycle);
-      setCount(1);
-      animatedProgress.value = 0;
-      animatedProgress.value = withTiming(1, { duration: 300 });
-      Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
-      setShowLabel(true);
-      if (labelTimerRef.current) clearTimeout(labelTimerRef.current);
-      labelTimerRef.current = setTimeout(() => setShowLabel(false), 1800);
-    } else {
-      setCount(next);
-      animatedProgress.value = withTiming(next, { duration: 250 });
-      if (next === TASBEEH_GOAL) {
-        Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
-        setShowLabel(true);
-        if (labelTimerRef.current) clearTimeout(labelTimerRef.current);
-        labelTimerRef.current = setTimeout(() => setShowLabel(false), 1800);
-      } else {
-        Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-      }
-    }
-  };
-
-  const handleReset = () => {
-    setCount(0);
-    setCycleIndex(0);
-    animatedProgress.value = withTiming(0, { duration: 300 });
-    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
-    setShowLabel(false);
-  };
-
-  const progressFraction = count / TASBEEH_GOAL;
-  const ringColor =
-    progressFraction >= 1 ? colors.accent
-    : progressFraction >= 0.6 ? colors.highlight
-    : colors.textSecondary;
-
-  return (
-    <View style={fabStyles.container} pointerEvents="box-none">
-      {showLabel && (
-        <BlurView
-          intensity={60}
-          tint={colors.glassTint as any}
-          style={[fabStyles.label, { backgroundColor: colors.backgroundElement, borderColor: colors.border }]}
-        >
-          <Text style={[fabStyles.labelText, { color: colors.accent }]}>
-            {TASBEEH_CYCLE[cycleIndex]} ✓
-          </Text>
-          <Text style={[fabStyles.labelSub, { color: colors.textSecondary }]}>
-            {t('dua.cycleGoal', { cycle: formatNumber(cycleIndex + 1, i18n.language) })}
-          </Text>
-        </BlurView>
-      )}
-
-      <View style={fabStyles.row}>
-        {count > 0 && (
-          <TouchableOpacity
-            onPress={handleReset}
-            style={[fabStyles.reset, { backgroundColor: colors.background + 'CC', borderColor: colors.border }]}
-            hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
-          >
-            <RotateCcw size={13} color={colors.textSecondary} />
-          </TouchableOpacity>
-        )}
-
-        <Animated.View style={animatedScale}>
-          <TouchableOpacity activeOpacity={0.85} onPress={handlePress} style={fabStyles.button}>
-            <Svg width={size} height={size} style={StyleSheet.absoluteFill}>
-              <Circle
-                cx={size / 2}
-                cy={size / 2}
-                r={radius}
-                stroke={colors.border}
-                strokeWidth={strokeWidth}
-                fill={colors.backgroundElement}
-              />
-              <G transform={`rotate(-90, ${size / 2}, ${size / 2})`}>
-                <AnimatedCircle
-                  cx={size / 2}
-                  cy={size / 2}
-                  r={radius}
-                  stroke={ringColor}
-                  strokeWidth={strokeWidth}
-                  fill="none"
-                  strokeDasharray={circumference}
-                  animatedProps={animatedCircleProps}
-                  strokeLinecap="round"
-                />
-              </G>
-            </Svg>
-            <BlurView intensity={70} tint={colors.glassTint as any} style={[fabStyles.inner, { backgroundColor: colors.backgroundElement }]}>
-              <Text style={[fabStyles.count, { color: colors.text }]}>
-                {formatNumber(count, i18n.language)}
-              </Text>
-            </BlurView>
-          </TouchableOpacity>
-        </Animated.View>
-      </View>
-    </View>
-  );
-}
-
-const FAB_BOTTOM = Spacing.two + 20;
-
-const fabStyles = StyleSheet.create({
-  container: {
-    position: 'absolute',
-    bottom: FAB_BOTTOM,
-    right: 20,
-    alignItems: 'flex-end',
-    gap: 8,
-    zIndex: 10,
-  },
-  label: {
-    borderRadius: 14,
-    borderWidth: 1,
-    paddingHorizontal: 14,
-    paddingVertical: 8,
-    overflow: 'hidden',
-    alignItems: 'center',
-    marginBottom: 4,
-  },
-  labelText: {
-    fontFamily: Fonts.outfit,
-    fontSize: 13,
-  },
-  labelSub: {
-    fontFamily: Fonts.outfit,
-    fontSize: 11,
-    marginTop: 1,
-  },
-  row: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 8,
-  },
-  reset: {
-    width: 28,
-    height: 28,
-    borderRadius: 14,
-    borderWidth: 1,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  button: {
-    width: 60,
-    height: 60,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  inner: {
-    width: 50,
-    height: 50,
-    borderRadius: 25,
-    alignItems: 'center',
-    justifyContent: 'center',
-    overflow: 'hidden',
-  },
-  count: {
-    fontFamily: Fonts.outfit,
-    fontSize: 18,
-  },
-});
 
 // ── Styles ───────────────────────────────────────────────────────────────────
 const styles = StyleSheet.create({

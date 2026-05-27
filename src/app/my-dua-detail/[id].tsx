@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { View, Text, StyleSheet, ScrollView, ActivityIndicator } from 'react-native';
+import { View, Text, StyleSheet, ScrollView, ActivityIndicator, Image } from 'react-native';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Colors, Fonts, Spacing } from '@/constants/theme';
@@ -7,7 +7,7 @@ import { useThemeStore } from '@/store/themeStore';
 import { useTranslation } from 'react-i18next';
 import PageHeader from '@/components/page-header';
 import { loadMyDuas, UserDua, getMediaUri } from '@/utils/my-duas-storage';
-import { Image } from 'expo-image';
+
 import { useVideoPlayer, VideoView } from 'expo-video';
 
 export default function MyDuaDetailScreen() {
@@ -81,7 +81,7 @@ export default function MyDuaDetailScreen() {
             <Image 
               source={{ uri: localUri }} 
               style={styles.image} 
-              contentFit="contain"
+              resizeMode="contain"
             />
           </View>
         )}

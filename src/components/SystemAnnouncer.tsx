@@ -154,7 +154,7 @@ export default function SystemAnnouncer() {
               ))}
             </ScrollView>
 
-            <TouchableOpacity style={[styles.btn, { backgroundColor: colors.accent, width: '100%', marginTop: Spacing.four }]} onPress={dismissChangelog}>
+            <TouchableOpacity style={[styles.btn, { backgroundColor: colors.accent, width: '100%', marginTop: Spacing.two }]} onPress={dismissChangelog}>
               <Text style={styles.btnText}>{t('system.awesome', 'Awesome!')}</Text>
             </TouchableOpacity>
           </View>
@@ -166,13 +166,13 @@ export default function SystemAnnouncer() {
         <View style={styles.overlay}>
           <View style={[styles.card, { backgroundColor: colors.background, borderColor: colors.border }]}>
             <View style={[styles.iconWrap, { backgroundColor: colors.highlight + '20' }]}>
-              <Bell size={32} color={colors.highlight} />
+              <Bell size={16} color={colors.highlight} />
             </View>
             <Text style={[styles.title, { color: colors.text }]}>{t('system.notification', 'Notice')}</Text>
             <Text style={[styles.desc, { color: colors.text, textAlign: 'center', fontSize: 16 }]}>
               {notification && getLocalizedText(notification)}
             </Text>
-            <TouchableOpacity style={[styles.btn, { backgroundColor: colors.highlight, width: '100%', marginTop: Spacing.four }]} onPress={dismissNotification}>
+            <TouchableOpacity style={[styles.btn, { backgroundColor: colors.highlight, width: '100%', marginTop: Spacing.two }]} onPress={dismissNotification}>
               <Text style={styles.btnText}>{t('system.gotIt', 'Got It')}</Text>
             </TouchableOpacity>
           </View>
@@ -194,16 +194,16 @@ const styles = StyleSheet.create({
     width: '100%',
     borderRadius: 24,
     borderWidth: 1,
-    padding: Spacing.six,
+    padding: Spacing.four,
     alignItems: 'center',
   },
   iconWrap: {
-    width: 64,
-    height: 64,
-    borderRadius: 32,
+    width: 32,
+    height: 32,
+    borderRadius: 16,
     alignItems: 'center',
     justifyContent: 'center',
-    marginBottom: Spacing.four,
+    marginBottom: Spacing.two,
   },
   title: {
     fontFamily: Fonts.outfit,
@@ -215,7 +215,7 @@ const styles = StyleSheet.create({
     fontFamily: Fonts.outfit,
     fontSize: 14,
     textAlign: 'center',
-    marginBottom: Spacing.six,
+    marginBottom: Spacing.two,
     lineHeight: 22,
   },
   versionTag: {

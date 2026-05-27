@@ -165,7 +165,7 @@ export default function DuaScreen() {
       <SafeAreaView style={[styles.safeArea, { backgroundColor: colors.background }]}>
         <PageHeader titleEn={t('dua.titleEn')} titleAr={t('dua.titleAr')} />
       
-      <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={styles.container}>
+      <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={styles.container} keyboardDismissMode="on-drag" keyboardShouldPersistTaps="handled">
 
         {/* Global Search Bar */}
         <View style={[styles.searchContainer, { backgroundColor: colors.backgroundElement, borderColor: colors.border }]}>

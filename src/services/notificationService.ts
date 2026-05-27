@@ -94,36 +94,23 @@ export async function scheduleAllNotifications() {
   await notifee.cancelAllNotifications();
 
   // Fetch location & method for ALADHAN API
-  let lat = 23.8103;
-  let lon = 90.4125;
-  let method = 1;
-  let city = 'Dhaka';
+  let lat = state.location?.latitude ?? 23.8103;
+  let lon = state.location?.longitude ?? 90.4125;
+  let method = state.calcMethod ?? 1;
+  let madhab = state.madhab ?? 1;
+  let city = state.location?.city || 'Dhaka';
   let country = 'Bangladesh';
-  let isCityBased = true;
+  let isCityBased = !state.location;
 
-  const locVal = await AsyncStorage.getItem('imansync_location');
-  const methVal = await AsyncStorage.getItem('imansync_calc_method');
-  
-  if (locVal) {
-    try {
-      let loc = JSON.parse(locVal);
-      lat = loc.latitude;
-      lon = loc.longitude;
-      city = loc.city;
-      isCityBased = false;
-    } catch(e){}
-  }
-  if (methVal) {
-    method = parseInt(methVal, 10);
-  }
+  // Preferences now handled by store directly
 
   const now = new Date();
   const year = now.getFullYear();
   const month = now.getMonth() + 1; // 1-12
 
   let url = isCityBased 
-    ? `https://api.aladhan.com/v1/calendarByCity/${year}/${month}?city=${city}&country=${country}&method=${method}`
-    : `https://api.aladhan.com/v1/calendar/${year}/${month}?latitude=${lat}&longitude=${lon}&method=${method}`;
+    ? `https://api.aladhan.com/v1/calendarByCity/${year}/${month}?city=${city}&country=${country}&method=${method}&school=${madhab}`
+    : `https://api.aladhan.com/v1/calendar/${year}/${month}?latitude=${lat}&longitude=${lon}&method=${method}&school=${madhab}`;
 
   try {
     const res = await fetch(url);
@@ -262,6 +249,23 @@ async function scheduleEventsDay(dayData: any, targetDate: Date) {
       }, { type: TriggerType.TIMESTAMP, timestamp: triggerDate.getTime(), alarmManager: { allowWhileIdle: true } });
     }
   }
+
+  // 1st of the Gregorian Month (Surah Yaseen)
+  if (targetDate.getDate() === 1) {
+    const hoursToTrigger = [9, 16, 20]; // 9 AM, 4 PM, 8 PM
+    for (const hour of hoursToTrigger) {
+      const triggerDate = new Date(targetDate);
+      triggerDate.setHours(hour, 0, 0, 0);
+      if (triggerDate.getTime() > now.getTime()) {
+        await notifee.createTriggerNotification({
+          title: i18n.t('notifications.yaseenTitle'),
+          body: i18n.t('notifications.yaseenBody'),
+          android: { channelId: EVENTS_CHANNEL },
+          ios: { sound: 'bird.wav', badgeCount: 1 },
+        }, { type: TriggerType.TIMESTAMP, timestamp: triggerDate.getTime(), alarmManager: { allowWhileIdle: true } });
+      }
+    }
+  }
 }
 
 async function scheduleTaskDay(targetDate: Date, qh: QuietHours) {
@@ -269,17 +273,26 @@ async function scheduleTaskDay(targetDate: Date, qh: QuietHours) {
   const triggerDate = getRandomAllowedTime(targetDate, qh);
   
   if (triggerDate.getTime() > now.getTime()) {
-    const messageKeys = [
-      'notifications.taskQuranBody1',
-      'notifications.taskQuranBody2',
-      'notifications.taskQuranBody3',
-      'notifications.taskQuranBody4',
+    const tasks = [
+      { title: 'notifications.taskQuranTitle', body: 'notifications.taskQuranBody1' },
+      { title: 'notifications.taskQuranTitle', body: 'notifications.taskQuranBody2' },
+      { title: 'notifications.taskQuranTitle', body: 'notifications.taskQuranBody3' },
+      { title: 'notifications.taskQuranTitle', body: 'notifications.taskQuranBody4' },
+      { title: 'notifications.taskSmileTitle', body: 'notifications.taskSmileBody' },
+      { title: 'notifications.taskDuaTitle', body: 'notifications.taskDuaBody' },
+      { title: 'notifications.taskDuroodTitle', body: 'notifications.taskDuroodBody' },
+      { title: 'notifications.taskIkhlasTitle', body: 'notifications.taskIkhlasBody' },
+      { title: 'notifications.taskKindnessTitle', body: 'notifications.taskKindnessBody' },
+      { title: 'notifications.taskAlhamdulillahTitle', body: 'notifications.taskAlhamdulillahBody' },
+      { title: 'notifications.taskAstaghfirullahTitle', body: 'notifications.taskAstaghfirullahBody' },
+      { title: 'notifications.taskCharityTitle', body: 'notifications.taskCharityBody' },
+      { title: 'notifications.taskDhikrTitle', body: 'notifications.taskDhikrBody' }
     ];
-    const msgKey = messageKeys[Math.floor(Math.random() * messageKeys.length)];
+    const task = tasks[Math.floor(Math.random() * tasks.length)];
     
     await notifee.createTriggerNotification({
-      title: i18n.t('notifications.taskQuranTitle'),
-      body: i18n.t(msgKey),
+      title: i18n.t(task.title),
+      body: i18n.t(task.body),
       android: { channelId: TASKS_CHANNEL },
     }, { type: TriggerType.TIMESTAMP, timestamp: triggerDate.getTime(), alarmManager: { allowWhileIdle: true } });
   }

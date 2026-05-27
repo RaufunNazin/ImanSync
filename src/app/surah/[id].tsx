@@ -201,10 +201,8 @@ export default function SurahScreen() {
     <Modal visible={modalVisible} transparent animationType="slide" onRequestClose={() => setModalVisible(false)}>
       <View style={styles.modalOverlay}>
         <TouchableOpacity style={StyleSheet.absoluteFill} activeOpacity={1} onPress={() => setModalVisible(false)} />
-        <BlurView 
-          intensity={90} 
-          tint={colors.glassTint as any} 
-          style={[styles.modalContent, { backgroundColor: colors.backgroundElement, borderColor: colors.border }]}
+        <View 
+          style={[styles.modalContent, { backgroundColor: colors.background, borderColor: colors.border }]}
         >
           <View style={{ width: 40, height: 4, backgroundColor: colors.border, borderRadius: 2, alignSelf: 'center', marginBottom: Spacing.four }} />
           <View style={styles.modalHeader}>
@@ -296,7 +294,7 @@ export default function SurahScreen() {
               </TouchableOpacity>
             </View>
           </ScrollView>
-        </BlurView>
+        </View>
       </View>
     </Modal>
   );

@@ -33,7 +33,7 @@ export default function NamesScreen() {
         keyExtractor={item => item.id}
         contentContainerStyle={styles.list}
         renderItem={({ item }) => (
-          <BlurView intensity={40} tint={colors.glassTint as any} style={styles.cardWrapper}>
+          <BlurView intensity={40} tint={colors.glassTint as any} style={[styles.cardWrapper, { borderColor: colors.border }]}>
             <View style={styles.card}>
               <View style={[styles.numberBox, { backgroundColor: 'rgba(255,255,255,0.05)', borderColor: colors.border, borderWidth: 1 }]}>
                 <Text style={[styles.numberText, { color: colors.textSecondary }]}>{formatNumber(item.id, i18n.language)}</Text>
@@ -85,7 +85,6 @@ const styles = StyleSheet.create({
     borderRadius: 20,
     overflow: 'hidden',
     borderWidth: 1,
-    borderColor: 'rgba(255,255,255,0.1)',
   },
   card: {
     flexDirection: 'row',

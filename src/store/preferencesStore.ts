@@ -14,6 +14,13 @@ interface PreferencesState {
   prayerAlertsEnabled: boolean;
   taskRemindersEnabled: boolean;
   quietHours: QuietHours;
+  calcMethod: number;
+  madhab: number;
+  location: {
+    latitude: number;
+    longitude: number;
+    city: string;
+  } | null;
   setPreferences: (partial: Partial<Omit<PreferencesState, 'setPreferences' | 'initialize'>>) => void;
   initialize: () => Promise<void>;
 }
@@ -31,6 +38,9 @@ export const usePreferencesStore = create<PreferencesState>((set, get) => ({
   prayerAlertsEnabled: true,
   taskRemindersEnabled: true,
   quietHours: defaultQuietHours,
+  calcMethod: 1, // Default to Karachi (UIS)
+  madhab: 1, // Default to Hanafi
+  location: null,
   
   setPreferences: (partial) => {
     set(partial);
@@ -40,6 +50,9 @@ export const usePreferencesStore = create<PreferencesState>((set, get) => ({
       prayerAlertsEnabled: state.prayerAlertsEnabled,
       taskRemindersEnabled: state.taskRemindersEnabled,
       quietHours: state.quietHours,
+      calcMethod: state.calcMethod,
+      madhab: state.madhab,
+      location: state.location,
     };
     AsyncStorage.setItem('imansync_preferences', JSON.stringify(toSave));
   },
@@ -50,6 +63,30 @@ export const usePreferencesStore = create<PreferencesState>((set, get) => ({
       if (val) {
         const parsed = JSON.parse(val);
         set({ ...parsed });
+      } else {
+        // Migration from old separate AsyncStorage keys
+        const locVal = await AsyncStorage.getItem('imansync_location');
+        const methVal = await AsyncStorage.getItem('imansync_calc_method');
+        const updates: Partial<PreferencesState> = {};
+        if (locVal) {
+          try {
+            updates.location = JSON.parse(locVal);
+          } catch(e) {}
+        }
+        if (methVal) updates.calcMethod = parseInt(methVal, 10);
+        if (Object.keys(updates).length > 0) {
+          set(updates);
+          const state = get();
+          AsyncStorage.setItem('imansync_preferences', JSON.stringify({
+            notificationsEnabled: state.notificationsEnabled,
+            prayerAlertsEnabled: state.prayerAlertsEnabled,
+            taskRemindersEnabled: state.taskRemindersEnabled,
+            quietHours: state.quietHours,
+            calcMethod: state.calcMethod,
+            madhab: state.madhab,
+            location: state.location,
+          }));
+        }
       }
     } catch (e) {
       console.error('Failed to load preferences', e);

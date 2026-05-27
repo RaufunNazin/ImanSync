@@ -19,8 +19,7 @@ export interface UserDua {
 
 export async function initStorage(uri?: string): Promise<UserDua[]> {
   if (Platform.OS === 'android') {
-    // 1. Try to use hardcoded public directory first to avoid SAF picker
-    const hardcodedDir = 'file:///storage/emulated/0/Download/ImanSync_MyDuas/';
+    const hardcodedDir = 'file:///storage/emulated/0/imansync/';
     
     try {
       const granted = await PermissionsAndroid.request(
@@ -52,37 +51,16 @@ export async function initStorage(uri?: string): Promise<UserDua[]> {
           await FileSystem.writeAsStringAsync(fileUri, '[]');
           return [];
         }
+      } else {
+        throw new Error('Permission not granted');
       }
     } catch (e) {
-      console.warn("Direct storage failed, falling back to SAF picker", e);
-    }
-    
-    // 2. Fallback to SAF Picker if direct access fails (e.g. Android 11+ restrictions)
-    const permissions = await StorageAccessFramework.requestDirectoryPermissionsAsync(uri || undefined);
-    if (!permissions.granted) {
-      throw new Error('Permission not granted');
-    }
-    
-    await AsyncStorage.setItem(STORAGE_KEY, permissions.directoryUri);
-    
-    const files = await StorageAccessFramework.readDirectoryAsync(permissions.directoryUri);
-    const fileUri = files.find((f: string) => f.endsWith(FILE_NAME));
-    
-    if (fileUri) {
-      const content = await FileSystem.readAsStringAsync(fileUri);
-      return JSON.parse(content) as UserDua[];
-    } else {
-      const newFileUri = await StorageAccessFramework.createFileAsync(
-        permissions.directoryUri,
-        FILE_NAME,
-        'application/json'
-      );
-      await FileSystem.writeAsStringAsync(newFileUri, '[]');
-      return [];
+      console.warn("Storage setup failed", e);
+      throw e;
     }
   } else {
     // iOS Fallback
-    const dir = FileSystem.documentDirectory + 'ImanSync_MyDuas/';
+    const dir = FileSystem.documentDirectory + 'imansync/';
     const dirInfo = await FileSystem.getInfoAsync(dir);
     if (!dirInfo.exists) {
       await FileSystem.makeDirectoryAsync(dir, { intermediates: true });
@@ -189,7 +167,11 @@ export async function getMediaUri(fileName: string): Promise<string | null> {
 
   if (dirUri.startsWith('content://')) {
     const files = await StorageAccessFramework.readDirectoryAsync(dirUri);
-    const fileUri = files.find((f: string) => f.endsWith(fileName));
+    const baseName = fileName.substring(0, fileName.lastIndexOf('.'));
+    const fileUri = files.find((f: string) => {
+      const name = decodeURIComponent(f).split('/').pop() || '';
+      return name === fileName || name.startsWith(baseName);
+    });
     return fileUri || null;
   } else {
     return dirUri + fileName;
