@@ -61,6 +61,7 @@
     "next": "Next",
     "currentPrayer": "Current Prayer",
     "todaysPrayers": "Today's Prayers",
+    "prayerTimesGroup": "Prayer Times",
     "dhakaBd": "Dhaka, BD",
     "loading": "Loading..."
   },
@@ -901,5 +902,20 @@
     "taskQuranBody2": "Have you recited any Quran today?",
     "taskQuranBody3": "Nourish your soul with a few verses of the Quran.",
     "taskQuranBody4": "A quick reminder to do your daily Quran reading."
+  },
+  "hijri": {
+    "muharram": "Muharram",
+    "safar": "Safar",
+    "rabi_al-awwal": "Rabi al-Awwal",
+    "rabi_al-thani": "Rabi al-Thani",
+    "jumada_al-awwal": "Jumada al-Awwal",
+    "jumada_al-thani": "Jumada al-Thani",
+    "rajab": "Rajab",
+    "sha'ban": "Sha'ban",
+    "ramadan": "Ramadan",
+    "shawwal": "Shawwal",
+    "dhu_al-qi'dah": "Dhu al-Qi'dah",
+    "dhu_al-hijjah": "Dhu al-Hijjah",
+    "ah": "AH"
   }
 }

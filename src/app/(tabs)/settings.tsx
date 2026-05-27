@@ -330,11 +330,12 @@ const styles = StyleSheet.create({
   },
   sectionTitle: {
     fontFamily: Fonts.outfit,
-    fontSize: 16,
+    fontSize: 10,
+    textTransform: 'uppercase',
+    letterSpacing: 1.2,
+    opacity: 0.6,
     marginBottom: Spacing.two,
     marginLeft: 4,
-    textTransform: 'uppercase',
-    letterSpacing: 1,
   },
   card: {
     borderRadius: 24,

@@ -6,7 +6,7 @@
     "orientation": "portrait",
     "icon": "./assets/expo.icon/Assets/expo.png",
     "scheme": "imansync",
-    "userInterfaceStyle": "automatic",
+    "userInterfaceStyle": "light",
     "ios": {
       "icon": "./assets/expo.icon/Assets/expo.png",
       "infoPlist": {
@@ -51,6 +51,12 @@
     },
     "plugins": [
       "expo-router",
+      [
+        "expo-navigation-bar",
+        {
+          "enforceContrast": false
+        }
+      ],
       [
         "expo-splash-screen",
         {

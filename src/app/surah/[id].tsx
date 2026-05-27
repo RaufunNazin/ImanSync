@@ -497,10 +497,11 @@ const styles = StyleSheet.create({
   
   sectionTitle: {
     fontFamily: Fonts.outfit,
-    fontSize: 14,
+    fontSize: 10,
     textTransform: 'uppercase',
-    letterSpacing: 1,
-    marginBottom: Spacing.three,
+    letterSpacing: 1.2,
+    opacity: 0.6,
+    marginBottom: Spacing.two,
   },
   settingRow: {
     flexDirection: 'row',

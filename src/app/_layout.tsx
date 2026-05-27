@@ -1,8 +1,9 @@
 import { DarkTheme, DefaultTheme, ThemeProvider } from '@react-navigation/native';
 import { Stack, SplashScreen } from 'expo-router';
 import React, { useEffect, useMemo, useRef, useState } from 'react';
-import { StyleSheet, View, Animated } from 'react-native';
+import { StyleSheet, View, Animated, Platform } from 'react-native';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
+import * as NavigationBar from 'expo-navigation-bar';
 import { Colors } from '@/constants/theme';
 import { SQLiteProvider } from 'expo-sqlite';
 import { migrateDbIfNeeded } from '@/lib/db';
@@ -13,7 +14,7 @@ import { NotoNaskhArabic_400Regular, NotoNaskhArabic_700Bold } from '@expo-googl
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { Alert } from 'react-native';
 import { initStorage } from '@/utils/my-duas-storage';
-import { StatusBar } from 'expo-status-bar';
+import { StatusBar, setStatusBarStyle, setStatusBarBackgroundColor } from 'expo-status-bar';
 import { setAudioModeAsync } from 'expo-audio';
 
 import { initI18n } from '@/i18n';
@@ -109,6 +110,42 @@ export default function RootLayout() {
     [colorScheme]
   );
 
+  // ── Imperative system bar sync ─────────────────────────────────────────────
+  // Uses expo-status-bar's OWN imperative API (same module as <StatusBar>)
+  // to avoid the conflict where RNStatusBar writes are overridden by
+  // expo-status-bar re-applying its internal stack on navigation events.
+  // Also attaches an AppState listener to re-apply on every app foreground,
+  // countering Android's native window-flag reset on Activity focus change.
+  useEffect(() => {
+    const isDark = colorScheme === 'dark';
+
+    const applyBars = () => {
+      // expo-status-bar imperative — works on Android + iOS
+      setStatusBarStyle(isDark ? 'light' : 'dark', true);
+
+      if (Platform.OS === 'android') {
+        setStatusBarBackgroundColor(colors.background, true);
+        // Bottom navigation bar — guarded: native module may not exist
+        // on APKs built before expo-navigation-bar was added.
+        try {
+          NavigationBar.setBackgroundColorAsync(colors.background);
+          NavigationBar.setButtonStyleAsync(isDark ? 'light' : 'dark');
+        } catch (_) {}
+      }
+    };
+
+    applyBars();
+
+    // Re-apply every time app comes to foreground so Android can't
+    // override our style via its windowLightStatusBar window flag reset.
+    const sub = AppState.addEventListener('change', (state: AppStateStatus) => {
+      if (state === 'active') applyBars();
+    });
+
+    return () => sub.remove();
+  }, [colorScheme, colors.background]);
+  // ──────────────────────────────────────────────────────────────────────────
+
   const [prevColor, setPrevColor] = useState(colors.background);
   const fadeAnim = useRef(new Animated.Value(0)).current;
   const isMounted = useRef(false);
@@ -148,7 +185,11 @@ export default function RootLayout() {
     <GestureHandlerRootView style={{ flex: 1 }}>
       <SQLiteProvider databaseName="islamic.db" onInit={migrateDbIfNeeded}>
         <ThemeProvider value={navTheme}>
-          <StatusBar style={colorScheme === 'dark' ? 'light' : 'dark'} backgroundColor={colors.background} animated={true} />
+          <StatusBar
+            style={colorScheme === 'dark' ? 'light' : 'dark'}
+            backgroundColor={colors.background}
+            animated={true}
+          />
           <View style={[styles.background, { backgroundColor: colors.background }]}>
             <Stack screenOptions={{ headerShown: false, contentStyle: { backgroundColor: 'transparent' } }}>
               <Stack.Screen name="(tabs)" options={{ headerShown: false }} />

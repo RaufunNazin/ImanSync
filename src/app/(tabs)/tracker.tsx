@@ -185,7 +185,7 @@ export default function TrackerScreen() {
 
   const renderDaily = () => (
     <View style={styles.gridSection}>
-      <Text style={[styles.sectionTitle, { color: colors.text }]}>{t('tracker.checklist')}</Text>
+      <Text style={[styles.sectionTitle, { color: colors.textSecondary }]}>{t('tracker.checklist')}</Text>
       <View style={styles.taskGrid}>
         {DAILY_TASKS.map((task) => (
           <TaskCard
@@ -234,7 +234,7 @@ export default function TrackerScreen() {
 
     return (
       <View style={styles.gridSection}>
-        <Text style={[styles.sectionTitle, { color: colors.text, marginTop: Spacing.four }]}>
+        <Text style={[styles.sectionTitle, { color: colors.textSecondary, marginTop: Spacing.four }]}>
           {t('tracker.consistency', { title })}
         </Text>
         <BlurView intensity={40} tint={colors.glassTint as any} style={[styles.chartCard, { borderColor: colors.border }]}>
@@ -476,7 +476,10 @@ const styles = StyleSheet.create({
   },
   sectionTitle: {
     fontFamily: Fonts.outfit,
-    fontSize: 18,
+    fontSize: 10,
+    textTransform: 'uppercase',
+    letterSpacing: 1.2,
+    opacity: 0.6,
     marginBottom: Spacing.two,
   },
   gridSection: {

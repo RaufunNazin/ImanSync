@@ -61,6 +61,7 @@
     "next": "পরবর্তী",
     "currentPrayer": "বর্তমান নামাজ",
     "todaysPrayers": "আজকের নামাজ",
+    "prayerTimesGroup": "নামাজের সময়",
     "dhakaBd": "ঢাকা, বাংলাদেশ",
     "loading": "লোড হচ্ছে..."
   },
@@ -1046,5 +1047,20 @@
     "taskQuranBody2": "আজ কি একটু কুরআন তিলাওয়াত করেছেন?",
     "taskQuranBody3": "কুরআনের কয়েকটি আয়াত পড়ে আপনার হৃদয়কে প্রশান্ত করুন।",
     "taskQuranBody4": "আপনার প্রতিদিনের কুরআন পড়ার একটি ছোট্ট রিমাইন্ডার।"
+  },
+  "hijri": {
+    "muharram": "মুহাররম",
+    "safar": "সফর",
+    "rabi_al-awwal": "রবিউল আউয়াল",
+    "rabi_al-thani": "রবিউস সানি",
+    "jumada_al-awwal": "জুমাদাল উলা",
+    "jumada_al-thani": "জুমাদাল আখিরাহ",
+    "rajab": "রজব",
+    "sha'ban": "শাবান",
+    "ramadan": "রমজান",
+    "shawwal": "শাওয়াল",
+    "dhu_al-qi'dah": "জ্বিলকদ",
+    "dhu_al-hijjah": "জ্বিলহজ্জ",
+    "ah": "হিজরি"
   }
 }

@@ -238,7 +238,7 @@ export default function DuaScreen() {
             {/* Pinned Section */}
             {pinnedCategories.length > 0 && (
               <View style={[styles.section, { paddingLeft: Spacing.four }]}>
-                <Text style={[styles.sectionTitle, { color: colors.text, marginBottom: Spacing.three }]}>{t('dua.pinned')}</Text>
+                <Text style={[styles.sectionTitle, { color: colors.textSecondary, marginBottom: Spacing.three }]}>{t('dua.pinned')}</Text>
                 <View style={{ height: 110 }}>
                   <DraggableFlatList
                     horizontal
@@ -279,7 +279,7 @@ export default function DuaScreen() {
 
         {/* Main Grid Section */}
         <View style={[styles.section, { paddingHorizontal: Spacing.four }]}>
-          <Text style={[styles.sectionTitle, { color: colors.text }]}>{t('dua.categories')}</Text>
+
           
           <View style={styles.grid}>
             {/* My Duas Tile - Always First */}
@@ -382,8 +382,11 @@ const styles = StyleSheet.create({
   },
   sectionTitle: {
     fontFamily: Fonts.outfit,
-    fontSize: 22,
-    marginVertical: Spacing.three,
+    fontSize: 10,
+    textTransform: 'uppercase',
+    letterSpacing: 1.2,
+    opacity: 0.6,
+    marginBottom: Spacing.two,
   },
   pinnedScroll: {
     gap: Spacing.three,

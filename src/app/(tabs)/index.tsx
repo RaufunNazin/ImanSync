@@ -93,7 +93,7 @@ export default function HomeScreen() {
 
   const [currentTime, setCurrentTime] = useState(new Date());
   const [rawTimings, setRawTimings] = useState<Record<string, string>>({});
-  const [hijriDate, setHijriDate] = useState('');
+  const [hijriRaw, setHijriRaw] = useState<{day: string, monthEn: string, year: string} | null>(null);
   const [dailyVerse, setDailyVerse] = useState<DailyVerse | null>(null);
   const [locationCity, setLocationCity] = useState('Dhaka');
   const locationName = getDistrictName(locationCity, i18n.language);
@@ -141,7 +141,7 @@ export default function HomeScreen() {
           if (json.data) {
             setRawTimings(json.data.timings);
             const hj = json.data.date.hijri;
-            setHijriDate(`${hj.day} ${hj.month.en} ${hj.year} AH`);
+            setHijriRaw({day: hj.day, monthEn: hj.month.en, year: hj.year});
           }
         })
         .catch((e) => console.error('Prayer fetch error:', e));
@@ -306,12 +306,20 @@ export default function HomeScreen() {
     ];
   }, [rawTimings, today, t, i18n.language]);
 
+  const hijriDisplay = useMemo(() => {
+    if (!hijriRaw) return '';
+    const monthKey = `hijri.${hijriRaw.monthEn.toLowerCase().replace(/\s/g, '_')}`;
+    const month = t(monthKey, { defaultValue: hijriRaw.monthEn });
+    const suffix = t('hijri.ah', { defaultValue: 'AH' });
+    return `${formatNumber(hijriRaw.day, i18n.language)} ${month} ${formatNumber(hijriRaw.year, i18n.language)} ${suffix}`;
+  }, [hijriRaw, t, i18n.language]);
+
   return (
     <SafeAreaView style={[styles.safeArea, { backgroundColor: colors.background }]}>
       <PageHeader
         titleEn="ImanSync"
         titleAr={t('home.titleAr')}
-        icon={require('../../../assets/images/android-icon-foreground.png')}
+        icon={require('../../../assets/images/zoomed-icon.png')}
       />
       <ScrollView
         showsVerticalScrollIndicator={false}
@@ -322,9 +330,9 @@ export default function HomeScreen() {
           <Text style={[styles.arabicGreeting, { color: colors.accent }]}>
             {t('home.greeting')}
           </Text>
-          {hijriDate ? (
+          {hijriDisplay ? (
             <Text style={[styles.hijriLabel, { color: colors.textSecondary }]}>
-              {formatNumber(hijriDate, i18n.language)}
+              {hijriDisplay}
             </Text>
           ) : (
             <SkeletonBox width={180} height={14} borderRadius={7} style={{ marginTop: 4 }} color={colors.border} />
@@ -398,17 +406,39 @@ export default function HomeScreen() {
           </View>
         )}
 
-        {/* ── Today's Prayers — Horizontal 5-Point Timeline ──── */}
-        {prayersWithStatus.length > 0 ? (
-          <View style={styles.section}>
-            <Text style={[styles.sectionTitle, { color: colors.text }]}>
-              {t('home.todaysPrayers')}
-            </Text>
+        {/* ── Quick Actions (Unified Toolbar Layout) ──────────────── */}
+        <View style={styles.section}>
+          <Text style={[styles.sectionTitle, { color: colors.textSecondary }]}>{t('home.quickActions')}</Text>
+          <BlurView intensity={40} tint={colors.glassTint as any} style={[styles.quickActionBar, { borderColor: colors.border }]}>
+            <TouchableOpacity style={styles.actionItem} onPress={() => router.push('/qibla')}>
+              <Compass size={24} color={colors.accent} />
+              <Text style={[styles.actionText, { color: colors.text }]}>{t('home.qibla')}</Text>
+            </TouchableOpacity>
+            <View style={[styles.actionDivider, { backgroundColor: colors.border }]} />
+            <TouchableOpacity style={styles.actionItem} onPress={() => router.push('/names')}>
+              <Book size={24} color={colors.highlight} />
+              <Text style={[styles.actionText, { color: colors.text }]}>{t('home.names')}</Text>
+            </TouchableOpacity>
+            <View style={[styles.actionDivider, { backgroundColor: colors.border }]} />
+            <TouchableOpacity style={styles.actionItem} onPress={() => router.push('/quran-learn' as any)}>
+              <GraduationCap size={24} color={colors.accent} />
+              <Text style={[styles.actionText, { color: colors.text }]}>{t('home.learnQuran')}</Text>
+            </TouchableOpacity>
+          </BlurView>
+        </View>
+
+        {/* ── Prayer Times Group ─────────────────────────────────── */}
+        <View style={styles.section}>
+          <Text style={[styles.sectionTitle, { color: colors.textSecondary }]}>{t('home.prayerTimesGroup')}</Text>
+
+          {/* Today's Prayers — Horizontal 5-Point Timeline */}
+          {prayersWithStatus.length > 0 ? (
             <BlurView
               intensity={30}
               tint={colors.glassTint as any}
               style={[styles.timelineCard, { borderColor: colors.border }]}
             >
+              <Text style={[styles.subSectionLabel, { color: colors.textSecondary }]}>{t('home.todaysPrayers')}</Text>
               <View style={styles.timelineRow}>
                 {prayersWithStatus.map((prayer, index) => {
                   const isCurrent = prayer.status === 'current';
@@ -497,10 +527,7 @@ export default function HomeScreen() {
                 })}
               </View>
             </BlurView>
-          </View>
-        ) : (
-          <View style={styles.section}>
-            <SkeletonBox width={140} height={18} borderRadius={8} style={{ marginBottom: 12 }} color={colors.border} />
+          ) : (
             <View style={[styles.timelineCard, { borderColor: colors.border, backgroundColor: colors.backgroundElement, borderWidth: 1, borderRadius: 20, padding: 20 }]}>
               <View style={styles.timelineRow}>
                 {[0,1,2,3,4].map(i => (
@@ -516,119 +543,91 @@ export default function HomeScreen() {
                 ))}
               </View>
             </View>
-          </View>
-        )}
+          )}
 
-        {/* ── Quick Actions (Unified Toolbar Layout) ────────────── */}
-        <View style={styles.section}>
-          <Text style={[styles.sectionTitle, { color: colors.text }]}>{t('home.quickActions')}</Text>
-          <BlurView intensity={40} tint={colors.glassTint as any} style={[styles.quickActionBar, { borderColor: colors.border }]}>
-            <TouchableOpacity style={styles.actionItem} onPress={() => router.push('/qibla')}>
-              <Compass size={24} color={colors.accent} />
-              <Text style={[styles.actionText, { color: colors.text }]}>{t('home.qibla')}</Text>
-            </TouchableOpacity>
-            <View style={[styles.actionDivider, { backgroundColor: colors.border }]} />
-            <TouchableOpacity style={styles.actionItem} onPress={() => router.push('/names')}>
-              <Book size={24} color={colors.highlight} />
-              <Text style={[styles.actionText, { color: colors.text }]}>{t('home.names')}</Text>
-            </TouchableOpacity>
-            <View style={[styles.actionDivider, { backgroundColor: colors.border }]} />
-            <TouchableOpacity style={styles.actionItem} onPress={() => router.push('/quran-learn' as any)}>
-              <GraduationCap size={24} color={colors.accent} />
-              <Text style={[styles.actionText, { color: colors.text }]}>{t('home.learnQuran')}</Text>
-            </TouchableOpacity>
-          </BlurView>
+          {/* Suhur · Iftar · Tahajjud */}
+          {specialTimes.length > 0 ? (
+            <View style={{ marginTop: Spacing.three }}>
+              <Text style={[styles.subSectionLabelOuter, { color: colors.textSecondary }]}>{t('home.specialTimes')}</Text>
+              <View style={styles.specialGrid}>
+                {specialTimes.map((item) => (
+                  <BlurView
+                    key={item.label}
+                    intensity={30}
+                    tint={colors.glassTint as any}
+                    style={[styles.specialCard, { borderColor: colors.border }]}
+                  >
+                    <View style={styles.specialCardInner}>
+                      <View>
+                        <Text style={[styles.specialLabel, { color: colors.text }]}>
+                          {item.label}
+                        </Text>
+                        <Text style={[styles.specialSublabel, { color: colors.textSecondary }]}>
+                          {item.sublabel}
+                        </Text>
+                      </View>
+                      <View style={styles.specialBottom}>
+                        <Text style={[styles.specialTime, { color: colors.highlight }]}>
+                          {formatNumber(item.time, i18n.language)}
+                        </Text>
+                        <item.Icon size={16} color={colors.textSecondary} />
+                      </View>
+                    </View>
+                  </BlurView>
+                ))}
+              </View>
+            </View>
+          ) : (
+            <View style={{ marginTop: Spacing.three }}>
+              <View style={styles.specialGrid}>
+                {[0,1,2].map(i => (
+                  <View key={i} style={[styles.specialCard, { backgroundColor: colors.backgroundElement, borderColor: colors.border, borderWidth: 1, borderRadius: 20 }]}>
+                    <View style={[styles.specialCardInner, { justifyContent: 'space-between', paddingVertical: 14, paddingHorizontal: 14 }]}>
+                      <SkeletonBox width={64} height={14} borderRadius={7} color={colors.border} />
+                      <SkeletonBox width={40} height={10} borderRadius={5} style={{ marginTop: 6 }} color={colors.border} />
+                      <SkeletonBox width={52} height={18} borderRadius={8} style={{ marginTop: 12 }} color={colors.border} />
+                    </View>
+                  </View>
+                ))}
+              </View>
+            </View>
+          )}
+
+          {/* Restricted Prayer Times */}
+          {restrictedTimes.length > 0 && (
+            <View style={{ marginTop: Spacing.three }}>
+              <Text style={[styles.subSectionLabelOuter, { color: colors.textSecondary }]}>{t('home.restrictedTimes')}</Text>
+              <View style={styles.restrictedOuter}>
+                {restrictedTimes.map((rt) => (
+                  <BlurView
+                    key={rt.labelKey}
+                    intensity={30}
+                    tint={colors.glassTint as any}
+                    style={[styles.restrictedCard, { borderColor: 'rgba(220,80,60,0.2)' }]}
+                  >
+                    <View style={styles.restrictedNameCol}>
+                      <Text style={[styles.restrictedLabel, { color: colors.text }]}>
+                        {t('home.' + rt.labelKey)}
+                      </Text>
+                    </View>
+                    <View style={styles.restrictedDivider} />
+                    <View style={styles.restrictedTimeCol}>
+                      <Text style={[styles.restrictedTime, { color: '#dc6040' }]}>
+                        {formatNumber(rt.time, i18n.language)}
+                      </Text>
+                    </View>
+                  </BlurView>
+                ))}
+              </View>
+            </View>
+          )}
         </View>
 
-        {/* ── Suhur · Iftar · Tahajjud ─────────────────────────── */}
-        {specialTimes.length > 0 ? (
-          <View style={styles.section}>
-            <Text style={[styles.sectionTitle, { color: colors.text }]}>
-              {t('home.specialTimes')}
-            </Text>
-            <View style={styles.specialGrid}>
-              {specialTimes.map((item) => (
-                <BlurView
-                  key={item.label}
-                  intensity={30}
-                  tint={colors.glassTint as any}
-                  style={[styles.specialCard, { borderColor: colors.border }]}
-                >
-                  <View style={styles.specialCardInner}>
-                    <View>
-                      <Text style={[styles.specialLabel, { color: colors.text }]}>
-                        {item.label}
-                      </Text>
-                      <Text style={[styles.specialSublabel, { color: colors.textSecondary }]}>
-                        {item.sublabel}
-                      </Text>
-                    </View>
-                    <View style={styles.specialBottom}>
-                      <Text style={[styles.specialTime, { color: colors.highlight }]}>
-                        {formatNumber(item.time, i18n.language)}
-                      </Text>
-                      <item.Icon size={16} color={colors.textSecondary} />
-                    </View>
-                  </View>
-                </BlurView>
-              ))}
-            </View>
-          </View>
-        ) : (
-          <View style={styles.section}>
-            <SkeletonBox width={140} height={18} borderRadius={8} style={{ marginBottom: 12 }} color={colors.border} />
-            <View style={styles.specialGrid}>
-              {[0,1,2].map(i => (
-                <View key={i} style={[styles.specialCard, { backgroundColor: colors.backgroundElement, borderColor: colors.border, borderWidth: 1, borderRadius: 20 }]}>
-                  <View style={[styles.specialCardInner, { justifyContent: 'space-between', paddingVertical: 14, paddingHorizontal: 14 }]}>
-                    <SkeletonBox width={64} height={14} borderRadius={7} color={colors.border} />
-                    <SkeletonBox width={40} height={10} borderRadius={5} style={{ marginTop: 6 }} color={colors.border} />
-                    <SkeletonBox width={52} height={18} borderRadius={8} style={{ marginTop: 12 }} color={colors.border} />
-                  </View>
-                </View>
-              ))}
-            </View>
-          </View>
-        )}
-
-        {/* ── Restricted Prayer Times ──────────────────────────── */}
-        {restrictedTimes.length > 0 && (
-          <View style={styles.section}>
-            <Text style={[styles.sectionTitle, { color: colors.text }]}>
-              {t('home.restrictedTimes')}
-            </Text>
-            <View style={styles.restrictedOuter}>
-              {restrictedTimes.map((rt) => (
-                <BlurView
-                  key={rt.labelKey}
-                  intensity={30}
-                  tint={colors.glassTint as any}
-                  style={[styles.restrictedCard, { borderColor: 'rgba(220,80,60,0.2)' }]}
-                >
-                  {/* 1/3 — short name */}
-                  <View style={styles.restrictedNameCol}>
-                    <Text style={[styles.restrictedLabel, { color: colors.text }]}>
-                      {t('home.' + rt.labelKey)}
-                    </Text>
-                  </View>
-                  {/* divider */}
-                  <View style={styles.restrictedDivider} />
-                  {/* 2/3 — time range */}
-                  <View style={styles.restrictedTimeCol}>
-                    <Text style={[styles.restrictedTime, { color: '#dc6040' }]}>
-                      {formatNumber(rt.time, i18n.language)}
-                    </Text>
-                  </View>
-                </BlurView>
-              ))}
-            </View>
-          </View>
-        )}
 
         {/* ── Daily Inspiration ─────────────────────────────────── */}
         {dailyVerse ? (
           <View>
-            <Text style={[styles.sectionTitle, { color: colors.text }]}>
+            <Text style={[styles.sectionTitle, { color: colors.textSecondary }]}>
               {t('home.dailyInspiration')}
             </Text>
             <BlurView intensity={20} tint={colors.glassTint as any} style={[styles.inspirationCard, { borderColor: colors.border }]}>
@@ -975,7 +974,28 @@ const styles = StyleSheet.create({
   },
   sectionTitle: {
     fontFamily: Fonts.outfit,
-    fontSize: 18,
+    fontSize: 10,
+    marginBottom: Spacing.two,
+    textTransform: 'uppercase',
+    letterSpacing: 1.2,
+    opacity: 0.6,
+  },
+  subSectionLabel: {
+    fontFamily: Fonts.outfit,
+    fontSize: 10,
+    textTransform: 'uppercase',
+    letterSpacing: 1.2,
+    opacity: 0.6,
+    marginBottom: Spacing.two,
+    paddingHorizontal: Spacing.three,
+    paddingTop: Spacing.two,
+  },
+  subSectionLabelOuter: {
+    fontFamily: Fonts.outfit,
+    fontSize: 10,
+    textTransform: 'uppercase',
+    letterSpacing: 1.2,
+    opacity: 0.6,
     marginBottom: Spacing.two,
   },
 
