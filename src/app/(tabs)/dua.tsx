@@ -5,15 +5,20 @@ import { Colors, Fonts, Spacing } from '@/constants/theme';
 import duasBn from '@/data/duas_bn.json';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useRouter } from 'expo-router';
-import { ChevronRight, Search } from 'lucide-react-native';
+import { ChevronRight, FolderLock, Search, X } from 'lucide-react-native';
 import React, { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { ActivityIndicator, Dimensions, ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import AddDuaModal from '@/components/add-dua-modal';
+import { loadMyDuas, saveMyDuas, saveMediaFile, UserDua } from '@/utils/my-duas-storage';
+import { Plus } from 'lucide-react-native';
+
 import { TextInput, GestureHandlerRootView } from 'react-native-gesture-handler';
 import DraggableFlatList, { ScaleDecorator } from 'react-native-draggable-flatlist';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useThemeStore } from '@/store/themeStore';
 import SkeletonBox from '@/components/SkeletonBox';
+import { getStorageMode } from '@/utils/my-duas-storage';
 
 interface Category {
   id: string;
@@ -22,7 +27,8 @@ interface Category {
   count: number;
 }
 
-const PIN_STORAGE_KEY = 'imansync_dua_pins';
+const PIN_STORAGE_KEY    = 'imansync_dua_pins';
+const BANNER_DISMISSED_KEY = 'imansync_storage_banner_dismissed';
 
 export default function DuaScreen() {
   const scheme = useThemeStore((s) => s.theme);
@@ -43,6 +49,11 @@ export default function DuaScreen() {
   const [pinSheetVisible, setPinSheetVisible] = useState(false);
   const [selectedCategory, setSelectedCategory] = useState<Category | null>(null);
 
+  // Permanent storage suggestion banner
+  const [showSuggestBanner, setShowSuggestBanner] = useState(false);
+  const [modalVisible, setModalVisible] = useState(false);
+
+
   useEffect(() => {
     // Load pins
     AsyncStorage.getItem(PIN_STORAGE_KEY).then((val) => {
@@ -54,6 +65,11 @@ export default function DuaScreen() {
           setPinnedIds([]);
         }
       }
+    });
+
+    // Check storage mode for banner
+    Promise.all([getStorageMode(), AsyncStorage.getItem(BANNER_DISMISSED_KEY)]).then(([mode, dismissed]) => {
+      if (mode === 'internal' && dismissed !== 'true') setShowSuggestBanner(true);
     });
 
     // Fetch categories
@@ -160,12 +176,52 @@ export default function DuaScreen() {
     );
   });
 
+
+  const handleAddDua = async (duaData: Omit<UserDua, 'id' | 'createdAt'>) => {
+    try {
+      let finalMediaUri = duaData.mediaUri;
+      if (duaData.mediaUri && duaData.type !== 'text') {
+        finalMediaUri = await saveMediaFile(duaData.mediaUri, duaData.mediaUri);
+      }
+      const newDua: UserDua = {
+        ...duaData,
+        id: Math.random().toString(36).substring(7),
+        createdAt: Date.now(),
+        mediaUri: finalMediaUri,
+      };
+      const duas = await loadMyDuas();
+      const updated = [newDua, ...duas];
+      await saveMyDuas(updated);
+      // Optional: Navigate to My Duas or show a toast
+    } catch (e) {
+      console.error('Failed to add dua', e);
+    }
+  };
+
+  const dismissSuggestBanner = async () => {
+    setShowSuggestBanner(false);
+    await AsyncStorage.setItem(BANNER_DISMISSED_KEY, 'true');
+  };
+
   return (
     <GestureHandlerRootView style={{ flex: 1 }}>
       <SafeAreaView style={[styles.safeArea, { backgroundColor: colors.background }]}>
         <PageHeader titleEn={t('dua.titleEn')} titleAr={t('dua.titleAr')} />
       
       <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={styles.container} keyboardDismissMode="on-drag" keyboardShouldPersistTaps="handled">
+
+        {/* Permanent Storage Suggestion Banner */}
+        {showSuggestBanner && (
+          <View style={[styles.banner, { borderColor: colors.highlight + '60', backgroundColor: colors.highlight + '15' }]}>
+            <FolderLock size={18} color={colors.highlight} style={{ flexShrink: 0 }} />
+            <Text style={[styles.bannerText, { color: colors.text, flex: 1 }]}>
+              {t('dua.suggestPermanentStorage')}
+            </Text>
+            <TouchableOpacity onPress={dismissSuggestBanner} hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}>
+              <X size={16} color={colors.textSecondary} />
+            </TouchableOpacity>
+          </View>
+        )}
 
         {/* Global Search Bar */}
         <View style={[styles.searchContainer, { backgroundColor: colors.backgroundElement, borderColor: colors.border }]}>
@@ -348,6 +404,21 @@ export default function DuaScreen() {
         />
       )}
       </SafeAreaView>
+    
+      <TouchableOpacity
+        style={[styles.fab, { backgroundColor: colors.accent }]}
+        onPress={() => setModalVisible(true)}
+      >
+        <Plus size={24} color="#FFF" />
+      </TouchableOpacity>
+
+      <AddDuaModal
+        visible={modalVisible}
+        onClose={() => setModalVisible(false)}
+        onSave={handleAddDua}
+        colors={colors}
+      />
+
     </GestureHandlerRootView>
   );
 }
@@ -356,11 +427,40 @@ const { width } = Dimensions.get('window');
 const cardWidth = (width - Spacing.four * 2 - Spacing.three) / 2;
 
 const styles = StyleSheet.create({
+
+  fab: {
+    position: 'absolute',
+    bottom: Spacing.four + 80,
+    right: Spacing.four,
+    width: 56,
+    height: 56,
+    borderRadius: 28,
+    alignItems: 'center',
+    justifyContent: 'center',
+    elevation: 5,
+  },
+
   safeArea: {
     flex: 1,
   },
   container: {
     paddingTop: 0,
+  },
+  banner: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: Spacing.three,
+    marginHorizontal: Spacing.four,
+    marginBottom: Spacing.three,
+    paddingHorizontal: Spacing.four,
+    paddingVertical: 12,
+    borderRadius: 16,
+    borderWidth: 1,
+  },
+  bannerText: {
+    fontFamily: Fonts.outfit,
+    fontSize: 13,
+    lineHeight: 18,
   },
   searchContainer: {
     flexDirection: 'row',

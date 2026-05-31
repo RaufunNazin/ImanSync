@@ -11,11 +11,16 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import * as Location from 'expo-location';
 import * as Updates from 'expo-updates';
 import { useRouter } from 'expo-router';
-import { Bell, ChevronRight, Globe, MapPin, Moon, Settings as SettingsIcon, Shield, Info, FileText, RefreshCw } from 'lucide-react-native';
+import { Bell, ChevronRight, Globe, MapPin, Moon, Settings as SettingsIcon, Shield, Info, FileText, RefreshCw, X, CheckCircle, AlertCircle, FolderLock } from 'lucide-react-native';
 import React, { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { ActivityIndicator, Alert, Image, Linking, ScrollView, StyleSheet, Switch, Text, TouchableOpacity, View } from 'react-native';
+import { ActivityIndicator, Alert, Linking, ScrollView, StyleSheet, Switch, Text, TouchableOpacity, View, Modal } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
+import { BlurView } from 'expo-blur';
+import {
+  getStorageMode, StorageMode, initPermanentStorage, switchToInternalMode,
+  migrateDuas, getStorageUri,
+} from '@/utils/my-duas-storage';
 
 const CALC_METHODS = [
   { id: 1, name: 'University of Islamic Sciences, Karachi' },
@@ -102,7 +107,18 @@ export default function SettingsScreen() {
   const [optionsModalVisible, setOptionsModalVisible] = useState(false);
   const [optionsModalType, setOptionsModalType] = useState<'calc' | 'madhab' | 'hijri' | 'location' | null>(null);
 
+  const [updateModal, setUpdateModal] = useState<{ visible: boolean; title: string; message: string; type: 'loading' | 'success' | 'error' } | null>(null);
+
   const prefs = usePreferencesStore();
+
+  // ── Permanent Storage ──────────────────────────────────────────────────────
+  const [storageMode, setStorageMode] = useState<StorageMode>('internal');
+  const [storageProcessing, setStorageProcessing] = useState(false);
+  const [storageConfirmModal, setStorageConfirmModal] = useState<'enable' | 'disable' | null>(null);
+
+  useEffect(() => {
+    getStorageMode().then(setStorageMode);
+  }, []);
 
   const toggleNotifications = async (enabled: boolean) => {
     prefs.setPreferences({ notificationsEnabled: enabled });
@@ -178,20 +194,60 @@ export default function SettingsScreen() {
   const checkForUpdates = async () => {
     try {
       setCheckingUpdate(true);
+      setUpdateModal({ visible: true, title: t('settings.checkingUpdates', 'Checking for Updates'), message: t('settings.pleaseWait', 'Please wait while we check for the latest version...'), type: 'loading' });
+      
       const update = await Updates.checkForUpdateAsync();
+      
       if (update.isAvailable) {
-        Alert.alert(t('settings.updatesAvailable'));
+        setUpdateModal({ visible: true, title: t('settings.updatesAvailable', 'Update Found!'), message: t('settings.downloadingUpdate', 'Downloading and applying the new features...'), type: 'loading' });
         await Updates.fetchUpdateAsync();
-        Alert.alert(t('settings.updateRestarting'));
+        
+        setUpdateModal({ visible: true, title: t('settings.updateRestarting', 'Restarting App'), message: t('settings.restartingApp', 'Applying updates now...'), type: 'loading' });
         await Updates.reloadAsync();
       } else {
-        Alert.alert(t('settings.updatesNotAvailable'));
+        setUpdateModal({ visible: true, title: t('settings.upToDate', 'Up to Date'), message: t('settings.updatesNotAvailable', 'You are already running the latest version.'), type: 'success' });
       }
     } catch (error) {
       console.log('Error checking for updates', error);
-      Alert.alert(t('settings.errorCheckingUpdates'));
+      setUpdateModal({ visible: true, title: t('settings.error', 'Error'), message: t('settings.errorCheckingUpdates', 'Could not check for updates. Please try again later.'), type: 'error' });
     } finally {
       setCheckingUpdate(false);
+    }
+  };
+
+  const togglePermanentStorage = async (enable: boolean) => {
+    setStorageConfirmModal(enable ? 'enable' : 'disable');
+  };
+
+  const confirmStorageChange = async () => {
+    const action = storageConfirmModal;
+    setStorageConfirmModal(null);
+    setStorageProcessing(true);
+    try {
+      if (action === 'enable') {
+        // initPermanentStorage opens the SAF picker
+        const currentUri = await getStorageUri();
+        const result = await initPermanentStorage();
+        if (!result.cancelled) {
+          // Migrate internal duas to permanent
+          const newUri = await getStorageUri();
+          if (newUri) await migrateDuas('to_permanent', newUri);
+          setStorageMode('permanent');
+          // Dismiss suggestion banners
+          await AsyncStorage.setItem('imansync_storage_banner_dismissed', 'true');
+        }
+      } else if (action === 'disable') {
+        const currentUri = await getStorageUri();
+        await switchToInternalMode();
+        setStorageMode('internal');
+        // Reset banner dismiss so it re-shows
+        await AsyncStorage.removeItem('imansync_storage_banner_dismissed');
+      }
+    } catch (e) {
+      console.error('Storage mode change failed', e);
+      Alert.alert(t('settings.error', 'Error'), t('settings.storageChangeFailed', 'Could not change storage mode. Please try again.'));
+    } finally {
+      setStorageProcessing(false);
     }
   };
 
@@ -320,6 +376,19 @@ export default function SettingsScreen() {
           />
         </View>
 
+        <Text style={[styles.sectionTitle, { color: colors.textSecondary, marginTop: Spacing.four }]}>{t('settings.dataStorage')}</Text>
+        <View style={[styles.card, { borderColor: colors.border, backgroundColor: colors.backgroundElement }]}>
+          <SettingRow
+            icon={FolderLock}
+            title={t('settings.permanentStorage')}
+            value={storageMode === 'permanent'}
+            type={storageProcessing ? 'loading' : 'toggle'}
+            isLast={true}
+            onPress={togglePermanentStorage}
+            colors={colors}
+          />
+        </View>
+
         <Text style={[styles.sectionTitle, { color: colors.textSecondary, marginTop: Spacing.four }]}>{t('settings.system')}</Text>
         <View style={[styles.card, { borderColor: colors.border, backgroundColor: colors.backgroundElement }]}>
           <SettingRow
@@ -393,6 +462,97 @@ export default function SettingsScreen() {
           colors={colors}
         />
       )}
+
+      {/* Update Modal */}
+      {updateModal && (
+        <Modal visible={updateModal.visible} transparent animationType="fade">
+          <View style={StyleSheet.absoluteFill}>
+            <BlurView intensity={30} tint="dark" style={StyleSheet.absoluteFill} />
+            <View style={updateStyles.overlay}>
+              <View style={[updateStyles.card, { backgroundColor: colors.background, borderColor: colors.border }]}>
+                {updateModal.type !== 'loading' && (
+                  <TouchableOpacity style={[updateStyles.closeBtn, { backgroundColor: colors.backgroundElement }]} onPress={() => setUpdateModal(null)}>
+                    <X size={20} color={colors.textSecondary} />
+                  </TouchableOpacity>
+                )}
+                
+                <View style={[updateStyles.iconWrap, { backgroundColor: updateModal.type === 'success' ? colors.accent + '20' : updateModal.type === 'error' ? '#ef444420' : colors.highlight + '20' }]}>
+                  {updateModal.type === 'success' ? (
+                    <CheckCircle size={32} color={colors.accent} />
+                  ) : updateModal.type === 'error' ? (
+                    <AlertCircle size={32} color="#ef4444" />
+                  ) : (
+                    <ActivityIndicator size="large" color={colors.highlight} />
+                  )}
+                </View>
+                
+                <Text style={[updateStyles.title, { color: colors.text }]}>{updateModal.title}</Text>
+                <Text style={[updateStyles.desc, { color: colors.textSecondary }]}>{updateModal.message}</Text>
+                
+                {updateModal.type !== 'loading' && (
+                  <TouchableOpacity style={[updateStyles.btn, { backgroundColor: updateModal.type === 'success' ? colors.accent : '#ef4444' }]} onPress={() => setUpdateModal(null)}>
+                    <Text style={updateStyles.btnText}>{t('system.gotIt', 'Got It')}</Text>
+                  </TouchableOpacity>
+                )}
+              </View>
+            </View>
+          </View>
+        </Modal>
+      )}
+
+      {/* Storage Confirm Modal */}
+      {storageConfirmModal && (
+        <Modal visible={true} transparent animationType="fade">
+          <View style={StyleSheet.absoluteFill}>
+            <BlurView intensity={30} tint="dark" style={StyleSheet.absoluteFill} />
+            <View style={updateStyles.overlay}>
+              <View style={[updateStyles.card, { backgroundColor: colors.background, borderColor: colors.border }]}>
+                <TouchableOpacity
+                  style={[updateStyles.closeBtn, { backgroundColor: colors.backgroundElement }]}
+                  onPress={() => setStorageConfirmModal(null)}
+                >
+                  <X size={20} color={colors.textSecondary} />
+                </TouchableOpacity>
+
+                <View style={[updateStyles.iconWrap, { backgroundColor: colors.highlight + '20' }]}>
+                  <FolderLock size={32} color={colors.highlight} />
+                </View>
+
+                <Text style={[updateStyles.title, { color: colors.text }]}>
+                  {storageConfirmModal === 'enable'
+                    ? t('settings.permanentStorageOn')
+                    : t('settings.permanentStorageOff')}
+                </Text>
+                <Text style={[updateStyles.desc, { color: colors.textSecondary }]}>
+                  {storageConfirmModal === 'enable'
+                    ? t('settings.permanentStorageOnDesc')
+                    : t('settings.permanentStorageOffDesc')}
+                </Text>
+
+                <TouchableOpacity
+                  style={[updateStyles.btn, { backgroundColor: storageConfirmModal === 'enable' ? colors.highlight : '#ef4444' }]}
+                  onPress={confirmStorageChange}
+                >
+                  <Text style={updateStyles.btnText}>
+                    {storageConfirmModal === 'enable'
+                      ? t('settings.permanentStorageConfirmEnable')
+                      : t('settings.permanentStorageConfirmDisable')}
+                  </Text>
+                </TouchableOpacity>
+
+                <TouchableOpacity
+                  style={[updateStyles.btn, { backgroundColor: colors.backgroundElement, marginTop: 8 }]}
+                  onPress={() => setStorageConfirmModal(null)}
+                >
+                  <Text style={[updateStyles.btnText, { color: colors.textSecondary }]}>
+                    {t('settings.cancel')}
+                  </Text>
+                </TouchableOpacity>
+              </View>
+            </View>
+          </View>
+        </Modal>
+      )}
     </SafeAreaView>
   );
 }
@@ -454,3 +614,65 @@ const styles = StyleSheet.create({
     marginRight: 4,
   },
 });
+
+const updateStyles = StyleSheet.create({
+  overlay: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    padding: Spacing.four,
+  },
+  card: {
+    width: '100%',
+    maxWidth: 340,
+    borderRadius: 24,
+    padding: Spacing.four,
+    alignItems: 'center',
+    borderWidth: 1,
+  },
+  closeBtn: {
+    position: 'absolute',
+    top: 16,
+    right: 16,
+    width: 32,
+    height: 32,
+    borderRadius: 16,
+    alignItems: 'center',
+    justifyContent: 'center',
+    zIndex: 10,
+  },
+  iconWrap: {
+    width: 64,
+    height: 64,
+    borderRadius: 32,
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginBottom: Spacing.three,
+    marginTop: Spacing.two,
+  },
+  title: {
+    fontFamily: Fonts.outfit,
+    fontSize: 22,
+    marginBottom: Spacing.two,
+    textAlign: 'center',
+  },
+  desc: {
+    fontFamily: Fonts.outfit,
+    fontSize: 15,
+    textAlign: 'center',
+    lineHeight: 22,
+    marginBottom: Spacing.four,
+  },
+  btn: {
+    width: '100%',
+    paddingVertical: Spacing.three,
+    borderRadius: 14,
+    alignItems: 'center',
+  },
+  btnText: {
+    fontFamily: Fonts.outfit,
+    fontSize: 15,
+    color: '#fff',
+  },
+});
+

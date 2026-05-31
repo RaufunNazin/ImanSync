@@ -13,12 +13,12 @@ const CURRENT_APP_VERSION = '1.0.0'; // Manually bump this when publishing non-O
 
 interface SystemConfig {
   latestVersion: string;
-  changelog: {
+  changelog: Array<{
     version: string;
     en: string[];
     bn: string[];
     ar?: string[];
-  };
+  }>;
   notification: {
     id: string;
     timestamp: string;
@@ -34,7 +34,7 @@ export default function SystemAnnouncer() {
   const colors = Colors[scheme === 'unspecified' ? 'light' : scheme || 'light'];
 
   const [updateReady, setUpdateReady] = useState(false);
-  const [changelog, setChangelog] = useState<SystemConfig['changelog'] | null>(null);
+  const [changelog, setChangelog] = useState<SystemConfig['changelog'][0] | null>(null);
   const [notification, setNotification] = useState<SystemConfig['notification'] | null>(null);
 
   useEffect(() => {
@@ -64,10 +64,11 @@ export default function SystemAnnouncer() {
 
       // 3. Process Changelog
       const lastSeenVersion = await AsyncStorage.getItem('last_seen_changelog_version');
-      if (config.changelog && config.changelog.version !== lastSeenVersion) {
-        // If the app just updated to this version, show changelog
-        // OR if you want to show it immediately regardless of true app version, uncomment:
-        setChangelog(config.changelog);
+      if (config.changelog && Array.isArray(config.changelog) && config.changelog.length > 0) {
+        const latestChangelog = config.changelog[0];
+        if (latestChangelog.version !== lastSeenVersion) {
+          setChangelog(latestChangelog);
+        }
       }
 
       // 4. Process Notification

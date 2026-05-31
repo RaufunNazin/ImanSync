@@ -11,9 +11,8 @@ import { setupNotificationChannels } from '@/lib/notifications';
 import { useFonts } from 'expo-font';
 import { Outfit_400Regular, Outfit_500Medium, Outfit_600SemiBold } from '@expo-google-fonts/outfit';
 import { NotoNaskhArabic_400Regular, NotoNaskhArabic_700Bold } from '@expo-google-fonts/noto-naskh-arabic';
-import AsyncStorage from '@react-native-async-storage/async-storage';
-import { Alert } from 'react-native';
-import { initStorage } from '@/utils/my-duas-storage';
+
+import { initStorageOnStartup } from '@/utils/my-duas-storage';
 import { StatusBar, setStatusBarStyle, setStatusBarBackgroundColor } from 'expo-status-bar';
 import { setAudioModeAsync } from 'expo-audio';
 
@@ -72,25 +71,9 @@ export default function RootLayout() {
       }
     });
 
-    // First-open storage setup
-    AsyncStorage.getItem('imansync_my_duas_path').then(val => {
-      if (!val) {
-        // If not set up, prompt user
-        Alert.alert(
-          "Storage Permission Needed",
-          "To permanently save your custom Duas and prevent them from being lost if you uninstall the app, we need to setup a folder.",
-          [
-            { text: "Ask Me Later", style: "cancel" },
-            { 
-              text: "Grant Access", 
-              onPress: () => {
-                initStorage().catch(e => console.log('Storage setup failed or cancelled', e));
-              }
-            }
-          ]
-        );
-      }
-    });
+    // Silently initialize storage on startup.
+    // No blocking prompts — internal mode is automatic; permanent is opt-in via Settings.
+    initStorageOnStartup().catch(e => console.log('Storage startup check failed', e));
 
     return () => {
       subscription.remove();

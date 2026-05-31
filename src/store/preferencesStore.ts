@@ -28,7 +28,7 @@ interface PreferencesState {
 }
 
 export const defaultQuietHours: QuietHours = {
-  enabled: false,
+  enabled: true,
   startHour: 23,
   startMinute: 0,
   endHour: 5,

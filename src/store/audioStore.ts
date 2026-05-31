@@ -3,25 +3,36 @@ import { createAudioPlayer, AudioPlayer } from 'expo-audio';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { Platform } from 'react-native';
 
+export interface JuzAyah {
+  surahId: number;
+  ayahNumber: number;
+  surahName: string;
+}
+
 interface AudioState {
   sound: AudioPlayer | null;
   isPlaying: boolean;
   isLoading: boolean;
   currentSurahId: number | null;
+  currentSurahName: string | null;
   currentReciterId: number;
   playlist: number[]; // Queue of Surah IDs to play
   durationMillis: number;
   positionMillis: number;
   
-  playbackMode: 'surah' | 'ayah';
+  playbackMode: 'surah' | 'ayah' | 'juz';
   currentAyahNumber: number | null;
   ayahAudioList: { verse_key: string, url: string }[];
   audioRequestId: number;
   
+  juzAyahs: JuzAyah[];
+  currentJuzAyahIndex: number | null;
+
   // Actions
   setReciter: (id: number) => Promise<void>;
-  playSurah: (surahId: number, autoPlay?: boolean) => Promise<void>;
-  playAyah: (surahId: number, ayahNumber: number, autoPlayNext: boolean) => Promise<void>;
+  playSurah: (surahId: number, surahName: string, autoPlay?: boolean) => Promise<void>;
+  playAyah: (surahId: number, ayahNumber: number, surahName: string, autoPlayNext: boolean) => Promise<void>;
+  playJuzAyahs: (ayahs: JuzAyah[], startIndex?: number) => Promise<void>;
   playJuz: (juzSurahs: number[]) => Promise<void>;
   pause: () => Promise<void>;
   resume: () => Promise<void>;
@@ -39,6 +50,7 @@ export const useAudioStore = create<AudioState>((set, get) => ({
   isPlaying: false,
   isLoading: false,
   currentSurahId: null,
+  currentSurahName: null,
   currentReciterId: RECITER_MALE_1,
   playlist: [],
   durationMillis: 0,
@@ -48,26 +60,30 @@ export const useAudioStore = create<AudioState>((set, get) => ({
   currentAyahNumber: null,
   ayahAudioList: [],
   audioRequestId: 0,
+  
+  juzAyahs: [],
+  currentJuzAyahIndex: null,
 
   setReciter: async (id: number) => {
-    set({ currentReciterId: id });
+    set({ currentReciterId: id, ayahAudioList: [] });
     await AsyncStorage.setItem('imansync_quran_reciter', String(id));
-    // If currently playing, we should restart the current mode with the new reciter
-    const { isPlaying, currentSurahId, currentAyahNumber, playbackMode, playSurah, playAyah } = get();
-    if (isPlaying && currentSurahId) {
-      if (playbackMode === 'ayah' && currentAyahNumber) {
-        await playAyah(currentSurahId, currentAyahNumber, true);
+    const { isPlaying, currentSurahId, currentSurahName, currentAyahNumber, playbackMode, playSurah, playAyah, playJuzAyahs, juzAyahs, currentJuzAyahIndex } = get();
+    if (isPlaying && currentSurahId && currentSurahName) {
+      if (playbackMode === 'juz' && juzAyahs.length > 0 && currentJuzAyahIndex !== null) {
+        await playJuzAyahs(juzAyahs, currentJuzAyahIndex);
+      } else if (playbackMode === 'ayah' && currentAyahNumber) {
+        await playAyah(currentSurahId, currentAyahNumber, currentSurahName, true);
       } else {
-        await playSurah(currentSurahId, true);
+        await playSurah(currentSurahId, currentSurahName, true);
       }
     }
   },
 
-  playSurah: async (surahId: number, autoPlay: boolean = true) => {
+  playSurah: async (surahId: number, surahName: string, autoPlay: boolean = true) => {
     const { sound, currentReciterId, _updatePlaybackStatus, audioRequestId } = get();
     
     const reqId = audioRequestId + 1;
-    set({ isLoading: true, currentSurahId: surahId, playbackMode: 'surah', currentAyahNumber: null, audioRequestId: reqId });
+    set({ isLoading: true, currentSurahId: surahId, currentSurahName: surahName, playbackMode: 'surah', currentAyahNumber: null, audioRequestId: reqId });
 
     if (sound) {
       sound.pause();
@@ -79,7 +95,7 @@ export const useAudioStore = create<AudioState>((set, get) => ({
       const res = await fetch(`https://api.quran.com/api/v4/chapter_recitations/${currentReciterId}/${surahId}`);
       const json = await res.json();
       
-      if (get().audioRequestId !== reqId) return; // Prevent race condition
+      if (get().audioRequestId !== reqId) return;
 
       if (json.audio_file && json.audio_file.audio_url) {
         let url = json.audio_file.audio_url;
@@ -94,7 +110,7 @@ export const useAudioStore = create<AudioState>((set, get) => ({
           newSound.play();
         }
 
-        set({ sound: newSound, isPlaying: autoPlay, isLoading: false });
+        set({ sound: newSound });
       } else {
         set({ isLoading: false });
       }
@@ -104,11 +120,11 @@ export const useAudioStore = create<AudioState>((set, get) => ({
     }
   },
 
-  playAyah: async (surahId: number, ayahNumber: number, autoPlayNext: boolean) => {
+  playAyah: async (surahId: number, ayahNumber: number, surahName: string, autoPlayNext: boolean) => {
     const { sound, currentReciterId, _updatePlaybackStatus, audioRequestId, currentSurahId, ayahAudioList } = get();
     
     const reqId = audioRequestId + 1;
-    set({ isLoading: true, currentSurahId: surahId, playbackMode: 'ayah', currentAyahNumber: ayahNumber, audioRequestId: reqId });
+    set({ isLoading: true, currentSurahId: surahId, currentSurahName: surahName, playbackMode: 'ayah', currentAyahNumber: ayahNumber, audioRequestId: reqId });
 
     if (sound) {
       sound.pause();
@@ -118,7 +134,6 @@ export const useAudioStore = create<AudioState>((set, get) => ({
 
     try {
       let currentList = ayahAudioList;
-      // Fetch audio list if we switched surah or list is empty
       if (surahId !== currentSurahId || currentList.length === 0) {
         const res = await fetch(`https://api.quran.com/api/v4/recitations/${currentReciterId}/by_chapter/${surahId}`);
         const json = await res.json();
@@ -143,7 +158,7 @@ export const useAudioStore = create<AudioState>((set, get) => ({
         newSound.addListener('playbackStatusUpdate', _updatePlaybackStatus);
         
         newSound.play();
-        set({ sound: newSound, isPlaying: true, isLoading: false });
+        set({ sound: newSound });
       } else {
         set({ isLoading: false });
       }
@@ -153,12 +168,63 @@ export const useAudioStore = create<AudioState>((set, get) => ({
     }
   },
 
+  playJuzAyahs: async (ayahs: JuzAyah[], startIndex: number = 0) => {
+    if (ayahs.length === 0 || startIndex >= ayahs.length) return;
+    const current = ayahs[startIndex];
+    
+    set({ juzAyahs: ayahs, currentJuzAyahIndex: startIndex, playbackMode: 'juz', playlist: [] });
+    
+    const { sound, currentReciterId, _updatePlaybackStatus, audioRequestId, ayahAudioList, currentSurahId } = get();
+    const reqId = audioRequestId + 1;
+    set({ isLoading: true, currentSurahId: current.surahId, currentSurahName: current.surahName, currentAyahNumber: current.ayahNumber, audioRequestId: reqId });
+
+    if (sound) {
+      sound.pause();
+      sound.removeListener('playbackStatusUpdate', _updatePlaybackStatus);
+      set({ sound: null, isPlaying: false, positionMillis: 0, durationMillis: 0 });
+    }
+
+    try {
+      let currentList = ayahAudioList;
+      if (current.surahId !== currentSurahId || currentList.length === 0) {
+        const res = await fetch(`https://api.quran.com/api/v4/recitations/${currentReciterId}/by_chapter/${current.surahId}`);
+        const json = await res.json();
+        if (get().audioRequestId !== reqId) return;
+        if (json.audio_files) {
+          currentList = json.audio_files;
+          set({ ayahAudioList: currentList });
+        }
+      }
+
+      const ayahAudio = currentList.find(a => a.verse_key === `${current.surahId}:${current.ayahNumber}`);
+      
+      if (ayahAudio && ayahAudio.url) {
+        let url = ayahAudio.url;
+        if (url.startsWith('//')) {
+          url = `https:${url}`;
+        } else if (!url.startsWith('http')) {
+          url = `https://audio.qurancdn.com/${url}`;
+        }
+        
+        const newSound = createAudioPlayer(url);
+        newSound.addListener('playbackStatusUpdate', _updatePlaybackStatus);
+        newSound.play();
+        set({ sound: newSound });
+      } else {
+        set({ isLoading: false });
+      }
+    } catch (error) {
+      console.error("Failed to play Juz Ayah:", error);
+      if (get().audioRequestId === reqId) set({ isLoading: false });
+    }
+  },
+
   playJuz: async (juzSurahs: number[]) => {
     if (juzSurahs.length === 0) return;
     const firstSurah = juzSurahs[0];
     const rest = juzSurahs.slice(1);
     set({ playlist: rest });
-    await get().playSurah(firstSurah, true);
+    await get().playSurah(firstSurah, "Surah " + firstSurah, true);
   },
 
   pause: async () => {
@@ -182,7 +248,7 @@ export const useAudioStore = create<AudioState>((set, get) => ({
     if (sound) {
       sound.pause();
       sound.removeListener('playbackStatusUpdate', _updatePlaybackStatus);
-      set({ sound: null, isPlaying: false, currentSurahId: null, currentAyahNumber: null, playlist: [], positionMillis: 0, durationMillis: 0 });
+      set({ sound: null, isPlaying: false, currentSurahId: null, currentSurahName: null, currentAyahNumber: null, playlist: [], juzAyahs: [], currentJuzAyahIndex: null, positionMillis: 0, durationMillis: 0 });
     }
   },
 
@@ -199,7 +265,7 @@ export const useAudioStore = create<AudioState>((set, get) => ({
       const nextSurah = playlist[0];
       const rest = playlist.slice(1);
       set({ playlist: rest });
-      await playSurah(nextSurah, true);
+      await playSurah(nextSurah, "Surah " + nextSurah, true);
     } else {
       await get().stop();
     }
@@ -210,35 +276,37 @@ export const useAudioStore = create<AudioState>((set, get) => ({
       set({ 
         positionMillis: status.currentTime * 1000, 
         durationMillis: status.duration ? status.duration * 1000 : 0,
-        isPlaying: status.playing
+        isPlaying: status.playing,
+        isLoading: status.isBuffering
       });
 
-      // Fix #4: guard against race condition — only call next when not
-      // already loading, and wait 500ms so the store state is fully settled.
       if (status.didJustFinish && !get().isLoading) {
         setTimeout(() => {
-          const { playbackMode, currentSurahId, currentAyahNumber, ayahAudioList } = get();
-          if (playbackMode === 'ayah' && currentSurahId && currentAyahNumber) {
-            // Auto-play logic relies on the UI component intercepting and calling it, 
-            // OR we can do it here if we pass the autoPlay setting.
-            // Wait, the store doesn't know about autoPlayNextAyah setting from UI!
-            // We should use an event or fetch the setting from AsyncStorage here.
+          const { playbackMode, currentSurahId, currentAyahNumber, ayahAudioList, juzAyahs, currentJuzAyahIndex } = get();
+          
+          if (playbackMode === 'juz' && currentJuzAyahIndex !== null) {
+            const nextIndex = currentJuzAyahIndex + 1;
+            if (nextIndex < juzAyahs.length) {
+              get().playJuzAyahs(juzAyahs, nextIndex);
+            } else {
+              get().stop();
+            }
+          } else if (playbackMode === 'ayah' && currentSurahId && currentAyahNumber) {
             AsyncStorage.getItem('imansync_quran_settings').then(val => {
               let autoPlay = true;
               if (val) {
                 try { autoPlay = JSON.parse(val).autoPlayNextAyah !== false; } catch (e) {}
               }
               if (autoPlay) {
-                // Check if next ayah exists
                 const nextAyahStr = `${currentSurahId}:${currentAyahNumber + 1}`;
                 const hasNext = ayahAudioList.some(a => a.verse_key === nextAyahStr);
                 if (hasNext) {
-                  get().playAyah(currentSurahId, currentAyahNumber + 1, true);
+                  get().playAyah(currentSurahId, currentAyahNumber + 1, get().currentSurahName || "", true);
                 } else {
                   get().stop();
                 }
               } else {
-                get().stop(); // if autoPlay is false, we just stop after this ayah.
+                get().stop(); 
               }
             });
           } else {
@@ -248,12 +316,14 @@ export const useAudioStore = create<AudioState>((set, get) => ({
       }
     } else if (status.error) {
       console.error(`Playback Error: ${status.error}`);
-      set({ isPlaying: false });
+      set({ isPlaying: false, isLoading: false });
+    } else {
+      // It's still loading initially
+      set({ isLoading: true });
     }
   }
 }));
 
-// Initialize reciter on load
 if (Platform.OS !== 'web') {
   AsyncStorage.getItem('imansync_quran_reciter').then((val) => {
     if (val) {

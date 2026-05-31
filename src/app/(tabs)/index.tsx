@@ -251,25 +251,39 @@ export default function HomeScreen() {
     const nightDuration = tomorrowFajr.getTime() - maghribDate.getTime();
     const tahajjudDate = new Date(maghribDate.getTime() + (nightDuration * 2 / 3));
 
-    let isEid = false;
+    let hideSahri = false;
+    let hideIftar = false;
+    
     if (hijriRaw) {
       const hDay = parseInt(hijriRaw.day, 10);
       const hMonth = hijriRaw.monthNumber;
-      if (hMonth === 10 && hDay === 1) isEid = true;
-      if (hMonth === 12 && hDay >= 10 && hDay <= 13) isEid = true;
+      
+      const isEidDay = (hMonth === 10 && hDay === 1) || (hMonth === 12 && hDay >= 10 && hDay <= 13);
+      const isDayBeforeEid = (hMonth === 9 && (hDay === 29 || hDay === 30)) || (hMonth === 12 && hDay === 9);
+
+      if (isEidDay) {
+        hideIftar = true; // Eid day: show sahri (for next day/custom fasting), hide iftar
+      }
+      
+      if (isDayBeforeEid && new Date().getTime() > suhurDate.getTime()) {
+        hideSahri = true; // Day before Eid: hide sahri ONLY AFTER the morning fast has started
+      }
     }
+    
+    // Add 1 minute padding to Iftar (Maghrib + 1)
+    const iftarDate = new Date(maghribDate.getTime() + 1 * 60000);
 
     return [
       {
         label: t('home.suhur'),
         sublabel: t('home.suhurDesc'),
-        time: isEid ? '--:--' : formatAMPM(suhurDate, i18n.language),
+        time: hideSahri ? '--:--' : formatAMPM(suhurDate, i18n.language),
         Icon: Moon,
       },
       {
         label: t('home.iftar'),
         sublabel: t('home.iftarDesc'),
-        time: isEid ? '--:--' : formatAMPM(maghribDate, i18n.language),
+        time: hideIftar ? '--:--' : formatAMPM(iftarDate, i18n.language),
         Icon: Sunset,
       },
       {

@@ -136,14 +136,15 @@ export default function DuaDetailScreen() {
         <View style={styles.modalOverlay}>
           <TouchableWithoutFeedback>
             <View style={[styles.modalContent, { backgroundColor: colors.background, borderColor: colors.border }]}>
+              <View style={{ width: 40, height: 4, backgroundColor: colors.border, borderRadius: 2, alignSelf: 'center', marginBottom: Spacing.four }} />
               <View style={[styles.modalHeader, { borderBottomColor: colors.border }]}>
                 <Text style={[styles.modalTitle, { color: colors.text }]}>{t('duaSettings.title')}</Text>
-                <TouchableOpacity onPress={() => setSettingsVisible(false)} style={[styles.closeBtn, { backgroundColor: colors.backgroundElement }]}>
-                  <X size={20} color={colors.textSecondary} />
+                <TouchableOpacity onPress={() => setSettingsVisible(false)} style={styles.closeBtn}>
+                  <X size={24} color={colors.text} />
                 </TouchableOpacity>
               </View>
 
-              <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={{ padding: Spacing.four, gap: Spacing.four }}>
+              <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={{ gap: Spacing.four }}>
                 <Text style={[styles.sectionTitle, { color: colors.textSecondary }]}>{t('duaSettings.textSizes')}</Text>
                 
                 {renderSizeControl(t('duaSettings.arabicFont'), settings.arabicFontSize, v => updateSetting('arabicFontSize', v))}
@@ -171,23 +172,27 @@ export default function DuaDetailScreen() {
 
   return (
     <SafeAreaView style={[styles.safeArea, { backgroundColor: colors.background }]}>
-      <View style={styles.headerWrap}>
-        <PageHeader titleEn={params.categoryName || 'Dua Detail'} titleAr="" showBack />
-        <View style={{ flexDirection: 'row', gap: Spacing.two }}>
-          <TouchableOpacity 
-            style={[styles.settingsIconBtn, { backgroundColor: colors.backgroundElement, borderColor: colors.border }]} 
-            onPress={toggleBookmark}
-          >
-            <Bookmark size={20} color={isBookmarked ? colors.accent : colors.textSecondary} fill={isBookmarked ? colors.accent : 'transparent'} />
-          </TouchableOpacity>
-          <TouchableOpacity 
-            style={[styles.settingsIconBtn, { backgroundColor: colors.backgroundElement, borderColor: colors.border }]} 
-            onPress={() => setSettingsVisible(true)}
-          >
-            <Settings2 size={20} color={colors.textSecondary} />
-          </TouchableOpacity>
-        </View>
-      </View>
+      <PageHeader 
+        titleEn={params.categoryName || 'Dua Detail'} 
+        titleAr="" 
+        showBack 
+        rightElement={
+          <View style={{ flexDirection: 'row', gap: Spacing.two, marginLeft: Spacing.two }}>
+            <TouchableOpacity 
+              style={[styles.settingsIconBtn, { backgroundColor: colors.backgroundElement, borderColor: colors.border }]} 
+              onPress={toggleBookmark}
+            >
+              <Bookmark size={20} color={isBookmarked ? colors.accent : colors.textSecondary} fill={isBookmarked ? colors.accent : 'transparent'} />
+            </TouchableOpacity>
+            <TouchableOpacity 
+              style={[styles.settingsIconBtn, { backgroundColor: colors.backgroundElement, borderColor: colors.border }]} 
+              onPress={() => setSettingsVisible(true)}
+            >
+              <Settings2 size={20} color={colors.textSecondary} />
+            </TouchableOpacity>
+          </View>
+        }
+      />
       
       <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={styles.container}>
         
@@ -317,9 +322,10 @@ const styles = StyleSheet.create({
     justifyContent: 'flex-end',
   },
   modalContent: {
-    height: '70%',
-    borderTopLeftRadius: 24,
-    borderTopRightRadius: 24,
+    borderTopLeftRadius: 32,
+    borderTopRightRadius: 32,
+    maxHeight: '80%',
+    padding: Spacing.five,
     borderTopWidth: 1,
     borderLeftWidth: 1,
     borderRightWidth: 1,
@@ -328,19 +334,14 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
-    padding: Spacing.four,
-    borderBottomWidth: 1,
+    marginBottom: Spacing.five,
   },
   modalTitle: {
     fontFamily: Fonts.outfit,
     fontSize: 18,
   },
   closeBtn: {
-    width: 32,
-    height: 32,
-    borderRadius: 16,
-    alignItems: 'center',
-    justifyContent: 'center',
+    padding: Spacing.two,
   },
   sectionTitle: {
     fontFamily: Fonts.outfit,

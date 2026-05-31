@@ -4,15 +4,17 @@ import { formatNumber } from '@/utils/formatNumber';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { BlurView } from 'expo-blur';
 import * as Haptics from 'expo-haptics';
-import { Activity, BookOpen, CheckCircle2, HandCoins, Heart, Moon } from 'lucide-react-native';
+import { Activity, BookOpen, CheckCircle2, HandCoins, Heart, Moon, X } from 'lucide-react-native';
 import React, { useEffect, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { ScrollView, StyleSheet, Text, TouchableOpacity, View, AppState } from 'react-native';
+import { ScrollView, StyleSheet, Text, TouchableOpacity, View, AppState, Modal, Dimensions } from 'react-native';
 import Animated, { useAnimatedProps, useAnimatedStyle, useSharedValue, withSpring, withTiming } from 'react-native-reanimated';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import Svg, { Circle } from 'react-native-svg';
 import { useThemeStore } from '@/store/themeStore';
 import SkeletonBox from '@/components/SkeletonBox';
+// @ts-ignore
+import ConfettiCannon from 'react-native-confetti-cannon';
 
 const DAILY_TASKS = [
   { id: 'fajr', icon: Activity },
@@ -62,7 +64,6 @@ const TaskCard = ({ task, isDone, onToggle, colors, t }: { task: typeof DAILY_TA
           style={styles.taskCard}
           activeOpacity={0.75}
           onPress={() => {
-            Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
             onToggle(task.id);
           }}
         >
@@ -107,6 +108,10 @@ export default function TrackerScreen() {
   const [loading, setLoading] = useState(true);
   
   const [todayStr, setTodayStr] = useState(getLocalYYYYMMDD());
+  
+  // New features state
+  const [showConfetti, setShowConfetti] = useState(false);
+  const [historyModalDate, setHistoryModalDate] = useState<string | null>(null);
 
   useEffect(() => {
     const sub = AppState.addEventListener('change', (state) => {
@@ -120,7 +125,6 @@ export default function TrackerScreen() {
   useEffect(() => {
     AsyncStorage.getItem('imansync_tracker_history').then(val => {
       if (val) {
-        // Fix #2: guard against corrupted AsyncStorage data
         try {
           setHistory(JSON.parse(val));
         } catch (e) {
@@ -128,7 +132,6 @@ export default function TrackerScreen() {
           setHistory({});
         }
       } else {
-        // Migration from old data format if present
         AsyncStorage.getItem('imansync_tracker_tasks').then(oldVal => {
           if (oldVal) {
             try {
@@ -149,14 +152,19 @@ export default function TrackerScreen() {
     const currentDayStr = getLocalYYYYMMDD();
     setHistory(prev => {
       const todayData = prev[currentDayStr] || {};
+      const wasCompletedCount = Object.values(todayData).filter(Boolean).length;
+      
       const nextToday = { ...todayData, [id]: !todayData[id] };
       const nextHistory = { ...prev, [currentDayStr]: nextToday };
       AsyncStorage.setItem('imansync_tracker_history', JSON.stringify(nextHistory));
       
-      // If completed 100% just now, do a heavy haptic
       const newCompletedCount = Object.values(nextToday).filter(Boolean).length;
-      if (newCompletedCount === DAILY_TASKS.length) {
+      
+      if (newCompletedCount === DAILY_TASKS.length && wasCompletedCount !== DAILY_TASKS.length) {
         setTimeout(() => Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success), 300);
+        setShowConfetti(true);
+      } else {
+        Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
       }
       
       return nextHistory;
@@ -167,11 +175,37 @@ export default function TrackerScreen() {
   const completedCount = Object.values(completedTasks).filter(Boolean).length;
   const progressPercentage = Math.round((completedCount / DAILY_TASKS.length) * 100) || 0;
 
-  // Animated Circular Progress
+  const generatePastDays = (days: number) => {
+    const arr = [];
+    const today = new Date();
+    for (let i = days - 1; i >= 0; i--) {
+      const d = new Date(today);
+      d.setDate(d.getDate() - i);
+      arr.push(getLocalYYYYMMDD(d));
+    }
+    return arr;
+  };
+
+  const getChartData = (days: number) => {
+    const pastDays = generatePastDays(days);
+    const bars = pastDays.map(dateStr => {
+      const dayTasks = history[dateStr] || {};
+      const cCount = Object.values(dayTasks).filter(Boolean).length;
+      return Math.round((cCount / DAILY_TASKS.length) * 100) || 0;
+    });
+    const avg = bars.length ? Math.round(bars.reduce((a, b) => a + b, 0) / days) : 0;
+    return { pastDays, bars, avg };
+  };
+
+  const weeklyData = useMemo(() => getChartData(7), [history, todayStr]);
+  const monthlyData = useMemo(() => getChartData(30), [history, todayStr]);
+
+  const displayPercentage = activeTab === 'Daily' ? progressPercentage : activeTab === 'Weekly' ? weeklyData.avg : monthlyData.avg;
+
   const animatedProgress = useSharedValue(0);
   useEffect(() => {
-    animatedProgress.value = withTiming(progressPercentage, { duration: 600 });
-  }, [progressPercentage]);
+    animatedProgress.value = withTiming(displayPercentage, { duration: 600 });
+  }, [displayPercentage]);
 
   const radius = 28;
   const strokeWidth = 4;
@@ -201,17 +235,6 @@ export default function TrackerScreen() {
     </View>
   );
 
-  const generatePastDays = (days: number) => {
-    const arr = [];
-    const today = new Date();
-    for (let i = days - 1; i >= 0; i--) {
-      const d = new Date(today);
-      d.setDate(d.getDate() - i);
-      arr.push(getLocalYYYYMMDD(d));
-    }
-    return arr;
-  };
-
   const getChartDescMsg = (avg: number) => {
     const formattedAvg = formatNumber(avg.toFixed(0), i18n.language);
     if (avg === 100) return t('tracker.chartMsg_100', { avg: formattedAvg });
@@ -222,15 +245,8 @@ export default function TrackerScreen() {
     return t('tracker.chartMsg_0', { avg: formattedAvg });
   };
 
-  const renderRealChart = (days: number, title: string) => {
-    const pastDays = generatePastDays(days);
-    const bars = pastDays.map(dateStr => {
-      const dayTasks = history[dateStr] || {};
-      const cCount = Object.values(dayTasks).filter(Boolean).length;
-      return Math.round((cCount / DAILY_TASKS.length) * 100) || 0;
-    });
-
-    const avg = bars.reduce((a, b) => a + b, 0) / days;
+  const renderRealChart = (days: number, title: string, chartData: any) => {
+    const { pastDays, bars, avg } = chartData;
 
     return (
       <View style={styles.gridSection}>
@@ -239,8 +255,15 @@ export default function TrackerScreen() {
         </Text>
         <BlurView intensity={40} tint={colors.glassTint as any} style={[styles.chartCard, { borderColor: colors.border }]}>
           <View style={styles.chartContainer}>
-            {bars.map((val, i) => (
-              <View key={i} style={styles.chartBarWrapper}>
+            {bars.map((val: number, i: number) => (
+              <TouchableOpacity 
+                key={i} 
+                style={styles.chartBarWrapper}
+                onPress={() => {
+                  Haptics.selectionAsync();
+                  setHistoryModalDate(pastDays[i]);
+                }}
+              >
                 <View style={[
                   styles.chartBar, 
                   { 
@@ -248,15 +271,18 @@ export default function TrackerScreen() {
                     backgroundColor: val === 100 ? colors.accent : val > 0 ? colors.highlight : colors.border 
                   }
                 ]} />
-              </View>
+              </TouchableOpacity>
             ))}
           </View>
           
-          {/* Calendar Heatmap Grid */}
           <View style={[styles.heatmapGrid, days === 7 ? styles.heatmapWeekly : styles.heatmapMonthly]}>
-            {bars.map((val, i) => (
-              <View 
+            {bars.map((val: number, i: number) => (
+              <TouchableOpacity 
                 key={i} 
+                onPress={() => {
+                  Haptics.selectionAsync();
+                  setHistoryModalDate(pastDays[i]);
+                }}
                 style={[
                   styles.heatmapCell, 
                   days === 7 && styles.heatmapCellWeekly,
@@ -292,7 +318,6 @@ export default function TrackerScreen() {
       <PageHeader titleEn={t('tracker.titleEn')} titleAr={t('tracker.titleAr')} />
       <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={styles.container}>
         
-        {/* Segmented Control — always visible */}
         <BlurView intensity={30} tint={colors.glassTint as any} style={styles.segmentContainer}>
           {['Daily', 'Weekly', 'Monthly'].map((tab) => (
             <TouchableOpacity 
@@ -310,7 +335,6 @@ export default function TrackerScreen() {
 
         {loading ? (
           <>
-            {/* Skeleton Progress Card */}
             <View style={[styles.progressCard, { borderColor: colors.border, backgroundColor: colors.backgroundElement }]}>
               <View style={styles.progressHeader}>
                 <View style={{ flex: 1, gap: 10 }}>
@@ -322,7 +346,6 @@ export default function TrackerScreen() {
               <SkeletonBox width={200} height={14} borderRadius={7} color={colors.border} style={{ marginTop: 12 }} />
             </View>
 
-            {/* Skeleton Task Grid */}
             <View style={styles.gridSection}>
               <SkeletonBox width={140} height={18} borderRadius={8} color={colors.border} style={{ marginBottom: 12 }} />
               <View style={styles.taskGrid}>
@@ -340,7 +363,6 @@ export default function TrackerScreen() {
           </>
         ) : (
           <>
-            {/* Visual Progress Card */}
             <BlurView intensity={50} tint={colors.glassTint as any} style={[styles.progressCard, { borderColor: colors.border }]}>
               <View style={styles.progressHeader}>
                 <View style={{ flex: 1 }}>
@@ -348,235 +370,149 @@ export default function TrackerScreen() {
                     {activeTab === 'Daily' ? t('tracker.progress') : activeTab === 'Weekly' ? t('tracker.weeklyOverview') : t('tracker.monthly')}
                   </Text>
                   <Text style={[styles.progressSubtitle, { color: colors.textSecondary }]}>
-                    {activeTab === 'Daily' ? t('tracker.tasksCompleted', { 
-                      count: formatNumber(completedCount, i18n.language), 
-                      total: formatNumber(DAILY_TASKS.length, i18n.language) 
-                    }) : t('tracker.trackingCons')}
+                    {activeTab === 'Daily' 
+                      ? t('tracker.tasksCompleted', { count: formatNumber(completedCount, i18n.language), total: formatNumber(DAILY_TASKS.length, i18n.language) }) 
+                      : t('tracker.consistency', { title: activeTab === 'Weekly' ? t('tracker.weekly') : t('tracker.monthly') })}
                   </Text>
                 </View>
                 
-                {activeTab === 'Daily' && (
-                  <View style={styles.progressCircleContainer}>
-                    <Svg width={64} height={64} viewBox="0 0 64 64" style={[styles.svgAbsolute, { transform: [{ rotate: '-90deg' }] }]}>
-                      <Circle
-                        cx={32}
-                        cy={32}
-                        r={radius}
-                        stroke={colors.border}
-                        strokeWidth={strokeWidth}
-                        fill="none"
-                      />
-                      <AnimatedCircle
-                        cx={32}
-                        cy={32}
-                        r={radius}
-                        stroke={colors.accent}
-                        strokeWidth={strokeWidth}
-                        fill="none"
-                        strokeDasharray={circumference}
-                        animatedProps={animatedCircleProps}
-                        strokeLinecap="round"
-                      />
-                    </Svg>
-                    <View style={styles.progressTextContainer}>
-                      <Text style={[styles.progressText, { color: colors.accent }]}>
-                        {formatNumber(progressPercentage, i18n.language)}%
-                      </Text>
-                    </View>
+                <View style={styles.progressCircleContainer}>
+                  <Svg width={64} height={64} viewBox="0 0 64 64" style={[styles.svgAbsolute, { transform: [{ rotate: '-90deg' }] }]}>
+                    <Circle cx={32} cy={32} r={radius} stroke={colors.border} strokeWidth={strokeWidth} fill="none" />
+                    <AnimatedCircle
+                      cx={32}
+                      cy={32}
+                      r={radius}
+                      stroke={colors.accent}
+                      strokeWidth={strokeWidth}
+                      fill="none"
+                      strokeDasharray={circumference}
+                      animatedProps={animatedCircleProps}
+                      strokeLinecap="round"
+                    />
+                  </Svg>
+                  <View style={styles.progressTextContainer}>
+                    <Text style={[styles.progressText, { color: colors.accent }]}>
+                      {formatNumber(displayPercentage, i18n.language)}%
+                    </Text>
                   </View>
-                )}
+                </View>
               </View>
               
               <Text style={[styles.encouragement, { color: colors.accent }]}>
-                {getEncouragementMsg(progressPercentage)}
+                {getEncouragementMsg(displayPercentage)}
               </Text>
             </BlurView>
 
             {activeTab === 'Daily' && renderDaily()}
-            {activeTab === 'Weekly' && renderRealChart(7, t('tracker.weekly'))}
-            {activeTab === 'Monthly' && renderRealChart(30, t('tracker.monthly'))}
+            {activeTab === 'Weekly' && renderRealChart(7, t('tracker.weekly'), weeklyData)}
+            {activeTab === 'Monthly' && renderRealChart(30, t('tracker.monthly'), monthlyData)}
           </>
         )}
       </ScrollView>
+
+      {/* Interactive History Modal */}
+      {historyModalDate && (
+        <Modal visible={true} transparent animationType="fade" onRequestClose={() => setHistoryModalDate(null)}>
+          <View style={styles.modalBackdrop}>
+            <TouchableOpacity style={StyleSheet.absoluteFill} activeOpacity={1} onPress={() => setHistoryModalDate(null)}>
+              <BlurView intensity={30} tint="dark" style={StyleSheet.absoluteFill} />
+            </TouchableOpacity>
+            <View style={[styles.modalCard, { backgroundColor: colors.background, borderColor: colors.border }]}>
+              <View style={styles.modalHeader}>
+                <Text style={[styles.modalTitle, { color: colors.text }]}>
+                  {new Date(historyModalDate).toLocaleDateString(i18n.language, { weekday: 'long', month: 'long', day: 'numeric' })}
+                </Text>
+                <TouchableOpacity onPress={() => setHistoryModalDate(null)} style={[styles.closeBtn, { backgroundColor: colors.backgroundElement }]}>
+                  <X size={20} color={colors.textSecondary} />
+                </TouchableOpacity>
+              </View>
+              <ScrollView style={{ maxHeight: Dimensions.get('window').height * 0.5 }} showsVerticalScrollIndicator={false}>
+                {DAILY_TASKS.map(task => {
+                  const isDone = history[historyModalDate]?.[task.id];
+                  const Icon = task.icon;
+                  return (
+                    <View key={task.id} style={[styles.historyRow, { borderBottomColor: colors.border }]}>
+                      <View style={styles.historyRowLeft}>
+                        <Icon size={18} color={isDone ? colors.accent : colors.textSecondary} />
+                        <Text style={[styles.historyRowText, { color: isDone ? colors.text : colors.textSecondary }]}>
+                          {t('tracker.tasks.' + task.id)}
+                        </Text>
+                      </View>
+                      {isDone ? (
+                        <CheckCircle2 size={18} color={colors.accent} />
+                      ) : (
+                        <View style={[styles.historyEmptyCircle, { borderColor: colors.border }]} />
+                      )}
+                    </View>
+                  );
+                })}
+              </ScrollView>
+            </View>
+          </View>
+        </Modal>
+      )}
+
+      {/* Visual Reward Layer */}
+      {showConfetti && (
+        <View style={StyleSheet.absoluteFill} pointerEvents="none">
+          <ConfettiCannon
+            count={120}
+            origin={{ x: Dimensions.get('window').width / 2, y: -20 }}
+            autoStart={true}
+            fadeOut={true}
+            fallSpeed={3000}
+            onAnimationEnd={() => setShowConfetti(false)}
+          />
+        </View>
+      )}
     </SafeAreaView>
   );
 }
 
 const styles = StyleSheet.create({
-  safeArea: { 
-    flex: 1, 
-  },
-  container: { 
-    padding: Spacing.four,
-    paddingTop: 0,
-  },
-  segmentContainer: {
-    flexDirection: 'row',
-    borderRadius: 20,
-    padding: 4,
-    marginBottom: Spacing.three,
-    overflow: 'hidden',
-  },
-  segmentTab: {
-    flex: 1,
-    paddingVertical: 10,
-    borderRadius: 16,
-    alignItems: 'center',
-  },
-  segmentText: {
-    fontFamily: Fonts.outfit,
-    fontSize: 14,
-    color: '#94A3B8',
-  },
-  progressCard: {
-    padding: Spacing.five,
-    borderRadius: 24,
-    marginBottom: Spacing.three,
-    overflow: 'hidden',
-    borderWidth: 1,
-  },
-  progressHeader: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    marginBottom: Spacing.three,
-  },
-  progressTitle: {
-    fontFamily: Fonts.outfit,
-    fontSize: 22,
-    marginBottom: 4,
-  },
-  progressSubtitle: {
-    fontFamily: Fonts.outfit,
-    fontSize: 14,
-  },
-  progressCircleContainer: {
-    width: 64,
-    height: 64,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  svgAbsolute: {
-    position: 'absolute',
-  },
-  progressTextContainer: {
-    position: 'absolute',
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  progressText: {
-    fontFamily: Fonts.outfit,
-    fontSize: 15,
-  },
-  encouragement: {
-    fontFamily: Fonts.outfit,
-    fontSize: 14,
-    fontStyle: 'italic',
-    marginTop: Spacing.two,
-  },
-  sectionTitle: {
-    fontFamily: Fonts.outfit,
-    fontSize: 10,
-    textTransform: 'uppercase',
-    letterSpacing: 1.2,
-    opacity: 0.6,
-    marginBottom: Spacing.two,
-  },
-  gridSection: {
-    flex: 1,
-  },
-  taskGrid: {
-    flexDirection: 'row',
-    flexWrap: 'wrap',
-    gap: 10,
-  },
-  taskCardWrapper: {
-    width: '31%',
-    aspectRatio: 1,
-  },
-  taskCardBlur: {
-    borderRadius: 18,
-    overflow: 'hidden',
-    flex: 1,
-  },
-  taskCard: {
-    flex: 1,
-    padding: 10,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  taskCardIcon: {
-    position: 'absolute',
-    bottom: 8,
-    right: 8,
-    width: 22,
-    height: 22,
-    borderRadius: 6,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  taskCardLabel: {
-    fontFamily: Fonts.outfit,
-    fontSize: 14,
-    flexShrink: 1,
-    textAlign: 'center',
-    marginBottom: 16, // leave room for the icon
-  },
-  taskCardCheck: {
-    position: 'absolute',
-    top: 6,
-    right: 6,
-    borderRadius: 6,
-    padding: 2,
-  },
-  chartCard: {
-    padding: Spacing.four,
-    borderRadius: 20,
-    overflow: 'hidden',
-    borderWidth: 1,
-  },
-  chartContainer: {
-    flexDirection: 'row',
-    height: 150,
-    alignItems: 'flex-end',
-    justifyContent: 'space-between',
-  },
-  chartBarWrapper: {
-    flex: 1,
-    height: '100%',
-    justifyContent: 'flex-end',
-    paddingHorizontal: 2,
-  },
-  chartBar: {
-    borderRadius: 4,
-    width: '100%',
-  },
-  heatmapGrid: {
-    flexDirection: 'row',
-    flexWrap: 'wrap',
-    justifyContent: 'center',
-    marginBottom: Spacing.four,
-    marginTop: Spacing.four,
-  },
-  heatmapWeekly: {
-    gap: 12,
-  },
-  heatmapMonthly: {
-    gap: 6,
-  },
-  heatmapCell: {
-    width: 14,
-    height: 14,
-    borderRadius: 4,
-  },
-  heatmapCellWeekly: {
-    width: 24,
-    height: 24,
-    borderRadius: 8,
-  },
-  chartDesc: {
-    fontFamily: Fonts.outfit,
-    fontSize: 14,
-    textAlign: 'center',
-  }
+  safeArea: { flex: 1 },
+  container: { padding: Spacing.four, paddingTop: 0 },
+  segmentContainer: { flexDirection: 'row', borderRadius: 20, padding: 4, marginBottom: Spacing.three, overflow: 'hidden' },
+  segmentTab: { flex: 1, paddingVertical: 10, borderRadius: 16, alignItems: 'center' },
+  segmentText: { fontFamily: Fonts.outfit, fontSize: 14, color: '#94A3B8' },
+  progressCard: { padding: Spacing.five, borderRadius: 24, marginBottom: Spacing.three, overflow: 'hidden', borderWidth: 1 },
+  progressHeader: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: Spacing.three },
+  progressTitle: { fontFamily: Fonts.outfit, fontSize: 22, marginBottom: 4 },
+  progressSubtitle: { fontFamily: Fonts.outfit, fontSize: 14 },
+  progressCircleContainer: { width: 64, height: 64, alignItems: 'center', justifyContent: 'center' },
+  svgAbsolute: { position: 'absolute' },
+  progressTextContainer: { position: 'absolute', alignItems: 'center', justifyContent: 'center' },
+  progressText: { fontFamily: Fonts.outfit, fontSize: 15 },
+  encouragement: { fontFamily: Fonts.outfit, fontSize: 14, fontStyle: 'italic', marginTop: Spacing.two },
+  sectionTitle: { fontFamily: Fonts.outfit, fontSize: 10, textTransform: 'uppercase', letterSpacing: 1.2, opacity: 0.6, marginBottom: Spacing.two },
+  gridSection: { flex: 1 },
+  taskGrid: { flexDirection: 'row', flexWrap: 'wrap', gap: 10 },
+  taskCardWrapper: { width: '31%', aspectRatio: 1 },
+  taskCardBlur: { borderRadius: 18, overflow: 'hidden', flex: 1 },
+  taskCard: { flex: 1, padding: 10, alignItems: 'center', justifyContent: 'center' },
+  taskCardIcon: { position: 'absolute', bottom: 8, right: 8, width: 22, height: 22, borderRadius: 6, alignItems: 'center', justifyContent: 'center' },
+  taskCardLabel: { fontFamily: Fonts.outfit, fontSize: 14, flexShrink: 1, textAlign: 'center', marginBottom: 16 },
+  taskCardCheck: { position: 'absolute', top: 6, right: 6, borderRadius: 6, padding: 2 },
+  chartCard: { padding: Spacing.four, borderRadius: 20, overflow: 'hidden', borderWidth: 1 },
+  chartContainer: { flexDirection: 'row', height: 150, alignItems: 'flex-end', justifyContent: 'space-between' },
+  chartBarWrapper: { flex: 1, height: '100%', justifyContent: 'flex-end', paddingHorizontal: 2 },
+  chartBar: { borderRadius: 4, width: '100%' },
+  heatmapGrid: { flexDirection: 'row', flexWrap: 'wrap', justifyContent: 'center', marginBottom: Spacing.four, marginTop: Spacing.four },
+  heatmapWeekly: { gap: 12 },
+  heatmapMonthly: { gap: 6 },
+  heatmapCell: { width: 14, height: 14, borderRadius: 4 },
+  heatmapCellWeekly: { width: 24, height: 24, borderRadius: 8 },
+  chartDesc: { fontFamily: Fonts.outfit, fontSize: 14, textAlign: 'center' },
+  
+  // Modal Styles
+  modalBackdrop: { flex: 1, justifyContent: 'center', padding: Spacing.four },
+  modalCard: { padding: Spacing.five, borderRadius: 24, borderWidth: 1, overflow: 'hidden' },
+  modalHeader: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: Spacing.four },
+  modalTitle: { fontFamily: Fonts.outfit, fontSize: 18, textTransform: 'capitalize' },
+  closeBtn: { width: 32, height: 32, borderRadius: 16, alignItems: 'center', justifyContent: 'center' },
+  historyRow: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', paddingVertical: 12, borderBottomWidth: 1 },
+  historyRowLeft: { flexDirection: 'row', alignItems: 'center', gap: 12 },
+  historyRowText: { fontFamily: Fonts.outfit, fontSize: 15 },
+  historyEmptyCircle: { width: 18, height: 18, borderRadius: 9, borderWidth: 1.5, opacity: 0.5 }
 });

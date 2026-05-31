@@ -16,6 +16,8 @@ interface PageHeaderProps {
   onBack?: () => void;
   /** Optional icon to show next to the title */
   icon?: any;
+  /** Element to render on the far right (e.g., action icons) */
+  rightElement?: React.ReactNode;
 }
 
 export default function PageHeader({
@@ -25,6 +27,7 @@ export default function PageHeader({
   subtitle,
   onBack,
   icon,
+  rightElement,
 }: PageHeaderProps) {
   const scheme = useThemeStore((s) => s.theme);
   const colors = Colors[scheme === 'unspecified' ? 'light' : scheme ?? 'light'];
@@ -61,9 +64,13 @@ export default function PageHeader({
       </View>
 
       {/* Arabic title right */}
-      <Text style={[styles.titleAr, { color: colors.textSecondary }]} numberOfLines={1}>
-        {titleAr}
-      </Text>
+      {rightElement ? (
+        rightElement
+      ) : (
+        <Text style={[styles.titleAr, { color: colors.textSecondary }]} numberOfLines={1}>
+          {titleAr}
+        </Text>
+      )}
     </View>
   );
 }
@@ -99,6 +106,7 @@ const styles = StyleSheet.create({
     fontFamily: Fonts.arabic,
     fontSize: 17,
     lineHeight: 22,
+    minHeight: 22,
     textAlign: 'right',
   },
 });

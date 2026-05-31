@@ -57,7 +57,10 @@ export default function DuaCategoryScreen() {
                   <View style={[styles.itemContent]}>
                     <SkeletonBox width={'85%' as any} height={16} borderRadius={8} color={colors.border} />
                     <SkeletonBox width={'60%' as any} height={13} borderRadius={6} color={colors.border} />
-                    <SkeletonBox width={'75%' as any} height={18} borderRadius={8} color={colors.border} style={{ alignSelf: 'flex-end' }} />
+                    <View style={{ gap: 8, alignItems: 'flex-end', marginTop: 8 }}>
+                      <SkeletonBox width={'75%' as any} height={18} borderRadius={8} color={colors.border} />
+                      <SkeletonBox width={'50%' as any} height={18} borderRadius={8} color={colors.border} />
+                    </View>
                   </View>
                 </View>
               </View>

@@ -67,11 +67,12 @@ export default function OptionsModal({
         <View style={styles.overlay}>
           <TouchableWithoutFeedback>
             <View style={[styles.modalContainer, { backgroundColor: colors.background, borderColor: colors.border }]}>
+              <View style={{ width: 40, height: 4, backgroundColor: colors.border, borderRadius: 2, alignSelf: 'center', marginBottom: 24, marginTop: 24 }} />
               {/* Header */}
               <View style={[styles.header, { borderBottomColor: colors.border }]}>
                 <Text style={[styles.title, { color: colors.text }]}>{title}</Text>
                 <TouchableOpacity onPress={onClose} style={styles.closeBtn}>
-                  <X size={20} color={colors.textSecondary} />
+                  <X size={24} color={colors.text} />
                 </TouchableOpacity>
               </View>
 
@@ -140,23 +141,23 @@ const styles = StyleSheet.create({
     justifyContent: 'flex-end',
   },
   modalContainer: {
-    borderTopLeftRadius: 24,
-    borderTopRightRadius: 24,
-    borderWidth: 1,
+    borderTopLeftRadius: 32,
+    borderTopRightRadius: 32,
+    paddingHorizontal: 24,
+    paddingBottom: 24,
+    borderTopWidth: 1,
     maxHeight: '80%',
   },
   header: {
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
-    paddingHorizontal: 20,
-    paddingVertical: 16,
-    borderBottomWidth: StyleSheet.hairlineWidth,
+    marginBottom: 24,
   },
   title: {
     fontFamily: Fonts.outfit,
     fontWeight: '600',
-    fontSize: 18,
+    fontSize: 24,
   },
   closeBtn: {
     padding: 4,
@@ -164,9 +165,7 @@ const styles = StyleSheet.create({
   searchContainer: {
     flexDirection: 'row',
     alignItems: 'center',
-    marginHorizontal: 20,
-    marginTop: 16,
-    marginBottom: 8,
+    marginBottom: 16,
     paddingHorizontal: 12,
     height: 40,
     borderRadius: 8,
@@ -189,7 +188,6 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'space-between',
     paddingVertical: 16,
-    paddingHorizontal: 20,
   },
   optionText: {
     fontFamily: Fonts.outfit,

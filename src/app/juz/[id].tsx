@@ -46,7 +46,7 @@ export default function JuzScreen() {
   const router = useRouter();
   const { t, i18n } = useTranslation();
 
-  const { playJuz, pause, resume, isPlaying, isLoading: isAudioLoading, playlist, currentReciterId, setReciter } = useAudioStore();
+  const { playJuzAyahs, pause, resume, isPlaying, isLoading: isAudioLoading, playbackMode, currentReciterId, setReciter } = useAudioStore();
 
   const [ayahs, setAyahs] = useState<Ayah[]>([]);
   const [loading, setLoading] = useState(true);
@@ -272,6 +272,12 @@ export default function JuzScreen() {
               >
                 <Text style={[styles.settingLabel, { color: currentReciterId === 1 ? colors.highlight : colors.text }]}>AbdulBaset AbdulSamad</Text>
               </TouchableOpacity>
+              <TouchableOpacity 
+                style={[{ padding: 12, borderRadius: 12, borderWidth: 1, borderColor: colors.border }, currentReciterId === 3 && { borderColor: colors.highlight, backgroundColor: colors.highlight + '15' }]} 
+                onPress={() => setReciter(3)}
+              >
+                <Text style={[styles.settingLabel, { color: currentReciterId === 3 ? colors.highlight : colors.text }]}>Abdur-Rahman as-Sudais</Text>
+              </TouchableOpacity>
             </View>
           </ScrollView>
         </View>
@@ -297,15 +303,15 @@ export default function JuzScreen() {
         <View style={{ flexDirection: 'row', gap: Spacing.three, alignItems: 'center' }}>
           <TouchableOpacity 
             onPress={() => {
-              if (playlist.length > 0 || isPlaying) {
+              if (playbackMode === 'juz' || isPlaying) {
                 isPlaying ? pause() : resume();
-              } else if (uniqueSurahsInJuz.length > 0) {
-                playJuz(uniqueSurahsInJuz);
+              } else if (ayahs.length > 0) {
+                playJuzAyahs(ayahs.map(a => ({ ...a, ayahNumber: a.numberInSurah })));
               }
             }} 
             style={styles.backBtn}
           >
-            {isAudioLoading && (playlist.length > 0 || uniqueSurahsInJuz.length > 0) ? (
+            {isAudioLoading && playbackMode === 'juz' ? (
               <ActivityIndicator size="small" color={colors.highlight} />
             ) : isPlaying ? (
               <Pause size={20} color={colors.highlight} fill={colors.highlight} />

@@ -6,7 +6,7 @@
     "orientation": "portrait",
     "icon": "./assets/expo.icon/Assets/expo.png",
     "scheme": "imansync",
-    "userInterfaceStyle": "light",
+    "userInterfaceStyle": "automatic",
     "ios": {
       "icon": "./assets/expo.icon/Assets/expo.png",
       "infoPlist": {
@@ -99,6 +99,9 @@
     },
     "extra": {
       "router": {},
+      "expo-navigation-bar": {
+        "enforceContrast": false
+      },
       "eas": {
         "projectId": "6803bd52-61a9-4bad-a599-30186bd55bd7"
       }

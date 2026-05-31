@@ -5,11 +5,10 @@ import { Play, Pause, X, SkipForward } from 'lucide-react-native';
 import { Colors, Fonts, Spacing } from '@/constants/theme';
 import { useTranslation } from 'react-i18next';
 import { formatNumber } from '@/utils/formatNumber';
-import { BlurView } from 'expo-blur';
 import { useThemeStore } from '@/store/themeStore';
 
 export default function AudioPlayerBar() {
-  const { currentSurahId, isPlaying, isLoading, pause, resume, stop, playNext, playlist, playbackMode, currentAyahNumber } = useAudioStore();
+  const { currentSurahId, currentSurahName, isPlaying, isLoading, pause, resume, stop, playNext, playlist, playbackMode, currentAyahNumber, juzAyahs, currentJuzAyahIndex } = useAudioStore();
   const scheme = useThemeStore((s) => s.theme);
   const colors = Colors[scheme === 'unspecified' ? 'light' : scheme];
   const { t, i18n } = useTranslation();
@@ -18,17 +17,19 @@ export default function AudioPlayerBar() {
 
   return (
     <View style={styles.container}>
-      <BlurView intensity={80} tint={colors.glassTint as any} style={[styles.card, { backgroundColor: colors.backgroundElement, borderColor: colors.border }]}>
+      <View style={[styles.card, { backgroundColor: colors.background, borderColor: colors.accent }]}>
         <View style={styles.info}>
           <Text style={[styles.title, { color: colors.text }]} numberOfLines={1}>
-            {t('surahNames.' + currentSurahId, { defaultValue: 'Surah ' + currentSurahId })}
+            {currentSurahName || t('surahNames.' + currentSurahId, { defaultValue: 'Surah ' + currentSurahId })}
           </Text>
           <Text style={[styles.subtitle, { color: colors.textSecondary }]} numberOfLines={1}>
-            {playlist.length > 0 
-              ? t('quran.playingJuz', { defaultValue: `Playing Queue (${formatNumber(playlist.length, i18n.language)} left)` }) 
-              : playbackMode === 'ayah' && currentAyahNumber 
-                ? `${t('surah.ayah', { defaultValue: 'Ayah' })} ${formatNumber(currentAyahNumber, i18n.language)}`
-                : t('quran.nowPlaying', { defaultValue: 'Now Playing' })}
+            {playbackMode === 'juz' && juzAyahs.length > 0 && currentJuzAyahIndex !== null
+              ? t('quran.playingJuz', { defaultValue: `Queue (${formatNumber(juzAyahs.length - currentJuzAyahIndex - 1, i18n.language)} remaining)`, count: formatNumber(juzAyahs.length - currentJuzAyahIndex - 1, i18n.language) })
+              : playlist.length > 0 
+                ? t('quran.playingJuz', { defaultValue: `Queue (${formatNumber(playlist.length, i18n.language)} remaining)`, count: formatNumber(playlist.length, i18n.language) }) 
+                : playbackMode === 'ayah' && currentAyahNumber 
+                  ? `${t('surah.ayah', { defaultValue: 'Ayah' })} ${formatNumber(currentAyahNumber, i18n.language)}`
+                  : t('quran.nowPlaying', { defaultValue: 'Now Playing'})}
           </Text>
         </View>
 
@@ -57,7 +58,7 @@ export default function AudioPlayerBar() {
             <X size={24} color={colors.textSecondary} />
           </TouchableOpacity>
         </View>
-      </BlurView>
+      </View>
     </View>
   );
 }
@@ -65,7 +66,7 @@ export default function AudioPlayerBar() {
 const styles = StyleSheet.create({
   container: {
     position: 'absolute',
-    bottom: 80, // slightly above tab bar
+    bottom: Spacing.two + 20,
     left: Spacing.four,
     right: Spacing.four,
     zIndex: 1000,
@@ -75,9 +76,11 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     padding: Spacing.three,
     paddingHorizontal: Spacing.four,
-    borderRadius: 20,
+    borderRadius: 30,
     borderWidth: 1,
     overflow: 'hidden',
+    elevation: 5,
+    boxShadow: '0px 4px 8px rgba(0, 0, 0, 0.15)' as any,
   },
   info: {
     flex: 1,

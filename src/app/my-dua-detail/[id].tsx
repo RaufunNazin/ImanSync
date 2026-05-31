@@ -1,5 +1,7 @@
 import React, { useEffect, useState } from 'react';
-import { View, Text, StyleSheet, ScrollView, ActivityIndicator, Image } from 'react-native';
+import { View, Text, StyleSheet, ScrollView, ActivityIndicator, Image, TouchableOpacity, Modal } from 'react-native';
+import { Trash2, X } from 'lucide-react-native';
+import { saveMyDuas } from '@/utils/my-duas-storage';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Colors, Fonts, Spacing } from '@/constants/theme';
@@ -15,10 +17,20 @@ export default function MyDuaDetailScreen() {
   const scheme = useThemeStore((s) => s.theme);
   const colors = Colors[scheme === 'unspecified' ? 'light' : scheme];
   const { t } = useTranslation();
+  const router = useRouter();
   
   const [dua, setDua] = useState<UserDua | null>(null);
   const [localUri, setLocalUri] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
+  const [showDeleteModal, setShowDeleteModal] = useState(false);
+
+  const handleDelete = async () => {
+    const duas = await loadMyDuas();
+    const updated = duas.filter(d => d.id !== id);
+    await saveMyDuas(updated);
+    router.back();
+  };
+
 
   useEffect(() => {
     const fetchDua = async () => {
@@ -61,7 +73,16 @@ export default function MyDuaDetailScreen() {
 
   return (
     <SafeAreaView style={[styles.safeArea, { backgroundColor: colors.background }]}>
-      <PageHeader titleEn={dua.title} titleAr="" showBack />
+      <PageHeader 
+        titleEn={dua.title} 
+        titleAr="" 
+        showBack 
+        rightElement={
+          <TouchableOpacity onPress={() => setShowDeleteModal(true)} style={{ padding: 8 }}>
+            <Trash2 size={20} color="#EF4444" />
+          </TouchableOpacity>
+        } 
+      />
       
       <ScrollView contentContainerStyle={styles.container}>
         {dua.type === 'text' && (
@@ -77,29 +98,63 @@ export default function MyDuaDetailScreen() {
         )}
 
         {dua.type === 'image' && localUri && (
-          <View style={[styles.card, { backgroundColor: colors.backgroundElement, borderColor: colors.border }]}>
+          <View style={[styles.mediaCard, { backgroundColor: colors.backgroundElement, borderColor: colors.border }]}>
             <Image 
               source={{ uri: localUri }} 
-              style={styles.image} 
+              style={styles.imageFull} 
               resizeMode="contain"
             />
           </View>
         )}
 
         {dua.type === 'video' && localUri && (
-          <View style={[styles.card, { backgroundColor: colors.backgroundElement, borderColor: colors.border, padding: 0, overflow: 'hidden' }]}>
+          <View style={[styles.mediaCard, { backgroundColor: colors.backgroundElement, borderColor: colors.border, padding: 0, overflow: 'hidden' }]}>
             <VideoView 
               player={player} 
-              style={styles.video} 
+              style={styles.videoFull} 
             />
           </View>
         )}
+      
+      <Modal visible={showDeleteModal} transparent animationType="fade" onRequestClose={() => setShowDeleteModal(false)}>
+        <View style={{ flex: 1, backgroundColor: 'rgba(0,0,0,0.6)', justifyContent: 'center', alignItems: 'center', padding: 24 }}>
+          <View style={{ width: '100%', backgroundColor: colors.background, borderRadius: 24, padding: 24, borderWidth: 1, borderColor: colors.border }}>
+            <Text style={{ fontFamily: Fonts.outfit, fontSize: 20, color: colors.text, marginBottom: 12 }}>{t('dua.deleteConfirmTitle')}</Text>
+            <Text style={{ fontFamily: Fonts.outfit, fontSize: 16, color: colors.textSecondary, marginBottom: 24, lineHeight: 24 }}>{t('dua.deleteConfirmMsg')}</Text>
+            <View style={{ flexDirection: 'row', gap: 12 }}>
+              <TouchableOpacity style={{ flex: 1, padding: 16, borderRadius: 12, backgroundColor: colors.backgroundElement, alignItems: 'center' }} onPress={() => setShowDeleteModal(false)}>
+                <Text style={{ fontFamily: Fonts.outfit, color: colors.text }}>{t('dua.deleteConfirmNo')}</Text>
+              </TouchableOpacity>
+              <TouchableOpacity style={{ flex: 1, padding: 16, borderRadius: 12, backgroundColor: '#EF4444', alignItems: 'center' }} onPress={handleDelete}>
+                <Text style={{ fontFamily: Fonts.outfit, color: '#FFF' }}>{t('dua.deleteConfirmYes')}</Text>
+              </TouchableOpacity>
+            </View>
+          </View>
+        </View>
+      </Modal>
+
       </ScrollView>
     </SafeAreaView>
   );
 }
 
 const styles = StyleSheet.create({
+
+  mediaCard: {
+    borderRadius: 16,
+    borderWidth: 1,
+    overflow: 'hidden',
+    width: '100%',
+  },
+  imageFull: {
+    width: '100%',
+    aspectRatio: 1,
+  },
+  videoFull: {
+    width: '100%',
+    aspectRatio: 16/9,
+  },
+
   safeArea: {
     flex: 1,
   },

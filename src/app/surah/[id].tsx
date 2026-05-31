@@ -292,6 +292,12 @@ export default function SurahScreen() {
               >
                 <Text style={[styles.settingLabel, { color: currentReciterId === 1 ? colors.highlight : colors.text }]}>AbdulBaset AbdulSamad</Text>
               </TouchableOpacity>
+              <TouchableOpacity 
+                style={[{ padding: 12, borderRadius: 12, borderWidth: 1, borderColor: colors.border }, currentReciterId === 3 && { borderColor: colors.highlight, backgroundColor: colors.highlight + '15' }]} 
+                onPress={() => setReciter(3)}
+              >
+                <Text style={[styles.settingLabel, { color: currentReciterId === 3 ? colors.highlight : colors.text }]}>Abdur-Rahman as-Sudais</Text>
+              </TouchableOpacity>
             </View>
           </ScrollView>
         </View>
@@ -323,7 +329,7 @@ export default function SurahScreen() {
               if (currentSurahId === Number(id)) {
                 isPlaying ? pause() : resume();
               } else {
-                playSurah(Number(id));
+                playSurah(Number(id), surahName);
               }
             }} 
             style={styles.backBtn}
@@ -368,7 +374,7 @@ export default function SurahScreen() {
                       if (currentSurahId === Number(id) && currentAyahNumber === item.numberInSurah && playbackMode === 'ayah') {
                         isPlaying ? pause() : resume();
                       } else {
-                        playAyah(Number(id), item.numberInSurah, settings.autoPlayNextAyah);
+                        playAyah(Number(id), item.numberInSurah, surahName, settings.autoPlayNextAyah);
                       }
                     }} style={{ padding: Spacing.one }}>
                       {isAudioLoading && currentSurahId === Number(id) && currentAyahNumber === item.numberInSurah && playbackMode === 'ayah' ? (

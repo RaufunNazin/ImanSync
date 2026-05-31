@@ -1,20 +1,22 @@
 import React, { useEffect, useState } from 'react';
-import { ActivityIndicator, Dimensions, Image, Platform, ScrollView, StyleSheet, Text, TouchableOpacity, View, TextInput } from 'react-native';
+import { ActivityIndicator, Dimensions, Platform, ScrollView, StyleSheet, Text, TouchableOpacity, View, TextInput } from 'react-native';
 import { useRouter } from 'expo-router';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Colors, Fonts, Spacing } from '@/constants/theme';
 import PageHeader from '@/components/page-header';
 import { useTranslation } from 'react-i18next';
 import { BlurView } from 'expo-blur';
-import { Plus, Trash2, Play, Search } from 'lucide-react-native';
-import { initStorage, loadMyDuas, saveMyDuas, saveMediaFile, UserDua, getMediaUri } from '@/utils/my-duas-storage';
-import AddDuaModal from '@/components/add-dua-modal';
-
-import * as DocumentPicker from 'expo-document-picker';
+import { Plus, Trash2, Search, FolderLock, X, AlertTriangle } from 'lucide-react-native';
+import {
+  loadMyDuas, saveMyDuas, saveMediaFile, UserDua, getMediaUri,
+  getStorageMode, clearRelinkFlag, initPermanentStorage, migrateDuas, getStorageUri,
+} from '@/utils/my-duas-storage';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useThemeStore } from '@/store/themeStore';
-
 import { ChevronRight, Image as ImageIcon, Video, Type } from 'lucide-react-native';
+
+const BANNER_DISMISSED_KEY = 'imansync_storage_banner_dismissed';
+const RELINK_NEEDED_KEY    = 'imansync_storage_relink';
 
 export default function MyDuasScreen() {
   const scheme = useThemeStore((s) => s.theme);
@@ -24,133 +26,121 @@ export default function MyDuasScreen() {
 
   const [duas, setDuas] = useState<UserDua[]>([]);
   const [loading, setLoading] = useState(true);
-  const [modalVisible, setModalVisible] = useState(false);
-  const [needsSetup, setNeedsSetup] = useState(false);
-  const [setupLoading, setSetupLoading] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
 
+  // Banner states
+  const [showSuggestBanner, setShowSuggestBanner] = useState(false);
+  const [showRelinkBanner, setShowRelinkBanner] = useState(false);
+  const [relinkLoading, setRelinkLoading] = useState(false);
+
   useEffect(() => {
-    checkStorage();
+    loadScreen();
   }, []);
 
-  const checkStorage = async () => {
+  const loadScreen = async () => {
     try {
-      const uri = await AsyncStorage.getItem('imansync_my_duas_path');
-      if (!uri) {
-        setNeedsSetup(true);
-        setLoading(false);
-        return;
-      }
-      
-      const loadedDuas = await loadMyDuas();
+      const [loadedDuas, mode, relinkFlag, bannerDismissed] = await Promise.all([
+        loadMyDuas(),
+        getStorageMode(),
+        AsyncStorage.getItem(RELINK_NEEDED_KEY),
+        AsyncStorage.getItem(BANNER_DISMISSED_KEY),
+      ]);
       setDuas(loadedDuas.sort((a, b) => b.createdAt - a.createdAt));
+      setShowRelinkBanner(relinkFlag === 'true');
+      setShowSuggestBanner(mode === 'internal' && bannerDismissed !== 'true');
     } catch (e) {
       console.error(e);
-      setNeedsSetup(true);
     } finally {
       setLoading(false);
     }
   };
 
-  const handleSetup = async () => {
-    setSetupLoading(true);
+  const dismissSuggestBanner = async () => {
+    setShowSuggestBanner(false);
+    await AsyncStorage.setItem(BANNER_DISMISSED_KEY, 'true');
+  };
+
+  const handleRelink = async () => {
+    setRelinkLoading(true);
     try {
-      if (Platform.OS === 'android') {
-        // Will prompt StorageAccessFramework picker in initStorage
-        const initialDuas = await initStorage(''); 
-        setDuas(initialDuas);
-        setNeedsSetup(false);
-      } else {
-        // iOS requires user to pick a folder using document picker or we fallback to documentDirectory
-        // The plan says we ask user to pick folder.
-        // Wait, expo-document-picker doesn't let you pick a *directory* on iOS to write to.
-        // It picks files.
-        // For iOS, we will just fallback to documentDirectory, which is handled in initStorage('').
-        const initialDuas = await initStorage(''); 
-        setDuas(initialDuas);
-        setNeedsSetup(false);
+      const result = await initPermanentStorage();
+      if (!result.cancelled) {
+        // Migrate any internal duas into the new permanent location
+        const newUri = await getStorageUri();
+        if (newUri) await migrateDuas('to_permanent', newUri);
+        await clearRelinkFlag();
+        setShowRelinkBanner(false);
+        setShowSuggestBanner(false);
+        // Reload duas from new location
+        const updated = await loadMyDuas();
+        setDuas(updated.sort((a, b) => b.createdAt - a.createdAt));
       }
     } catch (e) {
-      console.error('Setup failed', e);
+      console.error('Relink failed', e);
     } finally {
-      setSetupLoading(false);
+      setRelinkLoading(false);
     }
   };
 
-  const handleAddDua = async (duaData: Omit<UserDua, 'id' | 'createdAt'>) => {
-    try {
-      let finalMediaUri = duaData.mediaUri;
-      if (duaData.mediaUri && duaData.type !== 'text') {
-        finalMediaUri = await saveMediaFile(duaData.mediaUri, duaData.mediaUri);
-      }
-
-      const newDua: UserDua = {
-        ...duaData,
-        id: Math.random().toString(36).substring(7),
-        createdAt: Date.now(),
-        mediaUri: finalMediaUri,
-      };
-
-      const updated = [newDua, ...duas];
-      setDuas(updated);
-      await saveMyDuas(updated);
-    } catch (e) {
-      console.error('Failed to add dua', e);
-    }
-  };
-
-  const handleDelete = async (id: string) => {
-    const updated = duas.filter(d => d.id !== id);
-    setDuas(updated);
-    await saveMyDuas(updated);
-  };
 
 
 
-  if (needsSetup) {
-    return (
-      <SafeAreaView style={[styles.safeArea, { backgroundColor: colors.background }]}>
-        <PageHeader titleEn={t('dua.myDuas')} titleAr="" showBack />
-        <View style={styles.centerContainer}>
-          <Text style={[styles.setupTitle, { color: colors.text }]}>{t('dua.setupStorage')}</Text>
-          <Text style={[styles.setupDesc, { color: colors.textSecondary }]}>
-            {Platform.OS === 'android' 
-              ? 'We will ask for storage permission to create a "ImanSync_MyDuas" folder in your Downloads, so your custom duas are never lost even if you reinstall the app.\n\nIf automatic creation fails, you will be asked to select a folder manually.'
-              : t('dua.setupStorageDesc')}
-          </Text>
-          <TouchableOpacity 
-            style={[styles.setupBtn, { backgroundColor: colors.accent }]}
-            onPress={handleSetup}
-            disabled={setupLoading}
-          >
-            {setupLoading ? (
-              <ActivityIndicator color="#fff" />
-            ) : (
-              <Text style={styles.setupBtnText}>
-                {Platform.OS === 'android' ? 'Enable Storage' : t('dua.chooseFolder')}
-              </Text>
-            )}
-          </TouchableOpacity>
-        </View>
-      </SafeAreaView>
-    );
-  }
 
   const filteredDuas = duas.filter(dua => {
     if (!searchQuery) return true;
     const q = searchQuery.toLowerCase();
-    const title = (dua.title || '').toLowerCase();
-    const translation = (dua.translation || '').toLowerCase();
-    const arabic = (dua.arabic || '').toLowerCase();
-    const transliteration = (dua.transliteration || '').toLowerCase();
-    return title.includes(q) || translation.includes(q) || arabic.includes(q) || transliteration.includes(q);
+    return (
+      (dua.title || '').toLowerCase().includes(q) ||
+      (dua.translation || '').toLowerCase().includes(q) ||
+      (dua.arabic || '').toLowerCase().includes(q) ||
+      (dua.transliteration || '').toLowerCase().includes(q)
+    );
   });
 
   return (
     <SafeAreaView style={[styles.safeArea, { backgroundColor: colors.background }]}>
       <PageHeader titleEn={t('dua.myDuas')} titleAr="" showBack />
-      
-      <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={styles.container} keyboardDismissMode="on-drag" keyboardShouldPersistTaps="handled">
+
+      <ScrollView
+        showsVerticalScrollIndicator={false}
+        contentContainerStyle={styles.container}
+        keyboardDismissMode="on-drag"
+        keyboardShouldPersistTaps="handled"
+      >
+        {/* ── Relink Banner ─────────────────────────────────────────────── */}
+        {showRelinkBanner && (
+          <View style={[styles.banner, styles.bannerRelink, { borderColor: '#EF4444', backgroundColor: '#FEF2F2' }]}>
+            <AlertTriangle size={18} color="#EF4444" style={{ flexShrink: 0 }} />
+            <Text style={[styles.bannerText, { color: '#B91C1C', flex: 1 }]}>
+              {t('dua.relinkStorage')}
+            </Text>
+            <TouchableOpacity
+              style={[styles.bannerBtn, { backgroundColor: '#EF4444' }]}
+              onPress={handleRelink}
+              disabled={relinkLoading}
+            >
+              {relinkLoading
+                ? <ActivityIndicator size="small" color="#fff" />
+                : <Text style={styles.bannerBtnText}>{t('dua.relinkStorageBtn')}</Text>
+              }
+            </TouchableOpacity>
+          </View>
+        )}
+
+        {/* ── Suggestion Banner ─────────────────────────────────────────── */}
+        {!showRelinkBanner && showSuggestBanner && (
+          <View style={[styles.banner, { borderColor: colors.highlight + '60', backgroundColor: colors.highlight + '15' }]}>
+            <FolderLock size={18} color={colors.highlight} style={{ flexShrink: 0 }} />
+            <Text style={[styles.bannerText, { color: colors.text, flex: 1 }]}>
+              {t('dua.suggestPermanentStorage')}
+            </Text>
+            <TouchableOpacity onPress={dismissSuggestBanner} hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}>
+              <X size={16} color={colors.textSecondary} />
+            </TouchableOpacity>
+          </View>
+        )}
+
+        {/* ── Search ────────────────────────────────────────────────────── */}
         <View style={[styles.searchContainer, { backgroundColor: colors.backgroundElement, borderColor: colors.border }]}>
           <Search size={20} color={colors.textSecondary} style={{ marginRight: 8 }} />
           <TextInput
@@ -179,19 +169,19 @@ export default function MyDuasScreen() {
                 >
                   <View style={styles.duaHeader}>
                     <View style={styles.duaTitleContainer}>
-                      {dua.type === 'text' && <Type size={16} color={colors.accent} />}
-                      {dua.type === 'image' && <ImageIcon size={16} color={colors.accent} />}
-                      {dua.type === 'video' && <Video size={16} color={colors.accent} />}
-                      <Text style={[styles.duaTitle, { color: colors.text }]} numberOfLines={1}>
-                        {dua.title}
-                      </Text>
+                      {dua.type === 'text' && <Type size={24} color={colors.accent} />}
+                      {dua.type === 'image' && <ImageIcon size={24} color={colors.accent} />}
+                      {dua.type === 'video' && <Video size={24} color={colors.accent} />}
+                      <View style={{ flex: 1 }}>
+                        <Text style={[styles.duaTitle, { color: colors.text }]} numberOfLines={1}>
+                          {dua.title}
+                        </Text>
+                        <Text style={{ fontFamily: Fonts.outfit, fontSize: 13, color: colors.textSecondary }}>
+                          {dua.type === 'image' ? t('dua.attachmentImage') : dua.type === 'video' ? t('dua.attachmentVideo') : t('dua.attachmentText')}
+                        </Text>
+                      </View>
                     </View>
-                    <View style={{ flexDirection: 'row', alignItems: 'center', gap: Spacing.three }}>
-                      <TouchableOpacity onPress={() => handleDelete(dua.id)}>
-                        <Trash2 size={18} color="#EF4444" />
-                      </TouchableOpacity>
-                      <ChevronRight size={20} color={colors.textSecondary} />
-                    </View>
+                    <ChevronRight size={20} color={colors.textSecondary} />
                   </View>
                 </BlurView>
               </TouchableOpacity>
@@ -207,60 +197,41 @@ export default function MyDuasScreen() {
         <View style={{ height: 100 }} />
       </ScrollView>
 
-      {/* FAB to Add */}
-      <TouchableOpacity 
-        style={[styles.fab, { backgroundColor: colors.accent }]}
-        onPress={() => setModalVisible(true)}
-      >
-        <Plus size={24} color="#FFF" />
-      </TouchableOpacity>
 
-      <AddDuaModal 
-        visible={modalVisible} 
-        onClose={() => setModalVisible(false)} 
-        onSave={handleAddDua}
-        colors={colors}
-      />
     </SafeAreaView>
   );
 }
 
-
-
 const styles = StyleSheet.create({
-  safeArea: {
-    flex: 1,
-  },
-  centerContainer: {
-    flex: 1,
+  safeArea: { flex: 1 },
+  container: { paddingTop: 0 },
+  banner: {
+    flexDirection: 'row',
     alignItems: 'center',
-    justifyContent: 'center',
-    padding: Spacing.six,
-    gap: Spacing.four,
-  },
-  setupTitle: {
-    fontFamily: Fonts.outfit,
-    fontSize: 24,
-  },
-  setupDesc: {
-    fontFamily: Fonts.outfit,
-    fontSize: 16,
-    textAlign: 'center',
-    lineHeight: 24,
-  },
-  setupBtn: {
-    paddingHorizontal: Spacing.six,
-    paddingVertical: Spacing.three,
+    gap: Spacing.three,
+    marginHorizontal: Spacing.four,
+    marginBottom: Spacing.three,
+    paddingHorizontal: Spacing.four,
+    paddingVertical: 12,
     borderRadius: 16,
-    marginTop: Spacing.four,
+    borderWidth: 1,
   },
-  setupBtnText: {
+  bannerRelink: {},
+  bannerText: {
     fontFamily: Fonts.outfit,
-    fontSize: 16,
-    color: '#FFF',
+    fontSize: 13,
+    lineHeight: 18,
   },
-  container: {
-    paddingTop: 0,
+  bannerBtn: {
+    paddingHorizontal: 12,
+    paddingVertical: 6,
+    borderRadius: 10,
+    flexShrink: 0,
+  },
+  bannerBtnText: {
+    fontFamily: Fonts.outfit,
+    fontSize: 12,
+    color: '#fff',
   },
   searchContainer: {
     flexDirection: 'row',
@@ -306,7 +277,6 @@ const styles = StyleSheet.create({
     fontSize: 18,
     flex: 1,
   },
-
   fab: {
     position: 'absolute',
     bottom: Spacing.four,
@@ -316,7 +286,6 @@ const styles = StyleSheet.create({
     borderRadius: 28,
     alignItems: 'center',
     justifyContent: 'center',
-    boxShadow: '0px 4px 4px rgba(0, 0, 0, 0.3)',
     elevation: 5,
   },
 });
