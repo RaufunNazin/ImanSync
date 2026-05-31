@@ -46,7 +46,7 @@ export default function JuzScreen() {
   const router = useRouter();
   const { t, i18n } = useTranslation();
 
-  const { playJuzAyahs, pause, resume, isPlaying, isLoading: isAudioLoading, playbackMode, currentReciterId, setReciter } = useAudioStore();
+  const { playJuzAyahs, pause, resume, isPlaying, isLoading: isAudioLoading, playbackMode, currentReciterId, setReciter, currentSurahId, juzAyahs: storeJuzAyahs } = useAudioStore();
 
   const [ayahs, setAyahs] = useState<Ayah[]>([]);
   const [loading, setLoading] = useState(true);
@@ -137,15 +137,22 @@ export default function JuzScreen() {
         const engTranslitJson = responses.find(r => r.data && r.data.edition.identifier === 'en.transliteration');
 
         if (arabicJson && arabicJson.data) {
-          const mergedAyahs = arabicJson.data.ayahs.map((arAyah: any, index: number) => ({
-            numberInSurah: arAyah.numberInSurah,
-            arabic: arAyah.text,
-            english: englishJson ? englishJson.data.ayahs[index].text : undefined,
+          const mergedAyahs = arabicJson.data.ayahs.map((arAyah: any, index: number) => {
+            let arabicText = arAyah.text;
+            const surahId = arAyah.surah.number;
+            if (arAyah.numberInSurah === 1 && surahId !== 1 && surahId !== 9) {
+              arabicText = arabicText.replace(/^بِسْمِ ٱللَّهِ ٱلرَّحْمَٰنِ ٱلرَّحِيمِ ?/, "");
+            }
+            return {
+              numberInSurah: arAyah.numberInSurah,
+              arabic: arabicText,
+              english: englishJson ? englishJson.data.ayahs[index].text : undefined,
             bangla: banglaJson ? banglaJson.data.ayahs[index].text : undefined,
             englishTranslit: engTranslitJson ? engTranslitJson.data.ayahs[index].text : undefined,
             surahName: arAyah.surah.englishName,
             surahId: arAyah.surah.number,
-          }));
+            };
+          });
           
           setAyahs(mergedAyahs);
         }
@@ -303,7 +310,11 @@ export default function JuzScreen() {
         <View style={{ flexDirection: 'row', gap: Spacing.three, alignItems: 'center' }}>
           <TouchableOpacity 
             onPress={() => {
-              if (playbackMode === 'juz' || isPlaying) {
+              const isThisJuz = playbackMode === 'juz' && storeJuzAyahs.length > 0 && ayahs.length > 0 && 
+                                storeJuzAyahs[0].surahId === ayahs[0].surahId && 
+                                storeJuzAyahs[0].ayahNumber === ayahs[0].numberInSurah;
+              
+              if (isThisJuz && currentSurahId !== null) {
                 isPlaying ? pause() : resume();
               } else if (ayahs.length > 0) {
                 playJuzAyahs(ayahs.map(a => ({ ...a, ayahNumber: a.numberInSurah })));
@@ -311,9 +322,9 @@ export default function JuzScreen() {
             }} 
             style={styles.backBtn}
           >
-            {isAudioLoading && playbackMode === 'juz' ? (
+            {isAudioLoading && playbackMode === 'juz' && storeJuzAyahs.length > 0 && ayahs.length > 0 && storeJuzAyahs[0].surahId === ayahs[0].surahId && storeJuzAyahs[0].ayahNumber === ayahs[0].numberInSurah ? (
               <ActivityIndicator size="small" color={colors.highlight} />
-            ) : isPlaying ? (
+            ) : isPlaying && playbackMode === 'juz' && storeJuzAyahs.length > 0 && ayahs.length > 0 && storeJuzAyahs[0].surahId === ayahs[0].surahId && storeJuzAyahs[0].ayahNumber === ayahs[0].numberInSurah ? (
               <Pause size={20} color={colors.highlight} fill={colors.highlight} />
             ) : (
               <Play size={20} color={colors.highlight} fill={colors.highlight} />
@@ -396,7 +407,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'space-between',
     paddingHorizontal: Spacing.four,
-    paddingVertical: 14,
+    height: 51,
     borderBottomWidth: StyleSheet.hairlineWidth,
   },
   backBtn: { padding: 2 },

@@ -13,6 +13,7 @@ interface DuaCardProps {
   count?: number;
   isPinned?: boolean;
   isMyDuas?: boolean;
+  isCustom?: boolean;
   onPress: () => void;
   onLongPress?: () => void;
   colors: any;
@@ -25,6 +26,7 @@ export default function DuaCard({
   count,
   isPinned,
   isMyDuas,
+  isCustom,
   onPress,
   onLongPress,
   colors,
@@ -37,7 +39,8 @@ export default function DuaCard({
       <TouchableOpacity
         style={[
           styles.card,
-          (isMyDuas || id === 'bookmarks') && { backgroundColor: colors.accent + '1A' }
+          (isMyDuas || id === 'bookmarks') && { backgroundColor: colors.accent + '1A' },
+          isCustom && { backgroundColor: colors.highlight + '1A' }
         ]}
         activeOpacity={0.7}
         onPress={onPress}
@@ -46,12 +49,12 @@ export default function DuaCard({
       >
           {isPinned && (
             <View style={styles.pinBadge}>
-              <Bookmark size={14} color={colors.accent} fill={colors.accent} />
+              <Bookmark size={14} color={isCustom ? colors.highlight : colors.accent} fill={isCustom ? colors.highlight : colors.accent} />
             </View>
           )}
 
           <View style={styles.content}>
-            <Text style={[styles.name, { color: colors.accent }]} numberOfLines={2}>
+            <Text style={[styles.name, { color: isCustom ? colors.highlight : colors.accent }]} numberOfLines={2}>
               {name}
             </Text>
             {count !== undefined && (
@@ -64,6 +67,8 @@ export default function DuaCard({
               <Star size={32} color={colors.accent} opacity={0.15} />
             ) : id === 'bookmarks' ? (
               <Bookmark size={32} color={colors.highlight} opacity={0.15} fill={colors.highlight} />
+            ) : isCustom ? (
+              <FolderOpen size={32} color={colors.highlight} opacity={0.15} />
             ) : null}
           </View>
 

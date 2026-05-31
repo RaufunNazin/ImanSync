@@ -7,9 +7,10 @@ import PageHeader from '@/components/page-header';
 import { useTranslation } from 'react-i18next';
 import { BlurView } from 'expo-blur';
 import { ChevronRight } from 'lucide-react-native';
-import duasBn from '@/data/duas_bn.json';
 import { useThemeStore } from '@/store/themeStore';
 import SkeletonBox from '@/components/SkeletonBox';
+import DuaService, { UnifiedDuaItem } from '@/services/duaService';
+import { loadMyDuas } from '@/utils/my-duas-storage';
 
 interface DuaItem {
   id: number;
@@ -23,26 +24,43 @@ interface DuaItem {
 }
 
 export default function DuaCategoryScreen() {
-  const { id, name } = useLocalSearchParams<{ id: string; name: string }>();
+  const { id, name, isCustom } = useLocalSearchParams<{ id: string; name: string; isCustom?: string }>();
   const scheme = useThemeStore((s) => s.theme);
   const colors = Colors[scheme === 'unspecified' ? 'light' : scheme];
   const { t, i18n } = useTranslation();
   const router = useRouter();
 
-  const [duas, setDuas] = useState<DuaItem[]>([]);
+  const [duas, setDuas] = useState<UnifiedDuaItem[]>([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    fetch(`https://ummahapi.com/api/duas/category/${id}`)
-      .then((res) => res.json())
-      .then((data) => {
-        if (data.success && data.data.duas) {
-          setDuas(data.data.duas);
-        }
-      })
-      .catch((err) => console.error(err))
-      .finally(() => setLoading(false));
-  }, [id]);
+    if (isCustom === 'true') {
+      loadMyDuas()
+        .then((allCustom) => {
+          const categoryDuas = allCustom.filter(d => d.categoryId === id).map(d => ({
+            id: d.id,
+            name: d.title,
+            arabic: d.arabic || '',
+            latin: d.transliteration || '',
+            translationEn: d.translation || '',
+            translationBn: d.translation || '',
+            reference: '',
+            source: 'user' as const,
+            isCustom: true,
+          }));
+          setDuas(categoryDuas);
+        })
+        .catch(console.error)
+        .finally(() => setLoading(false));
+    } else {
+      DuaService.getDuasByCategory(Number(id))
+        .then((data) => {
+          setDuas(data);
+        })
+        .catch((err) => console.error(err))
+        .finally(() => setLoading(false));
+    }
+  }, [id, isCustom]);
 
   return (
     <SafeAreaView style={[styles.safeArea, { backgroundColor: colors.background }]}>
@@ -70,15 +88,8 @@ export default function DuaCategoryScreen() {
           <View style={styles.list}>
             {duas.map((dua) => {
               // Apply Bangla translation if available and language is bn
-              let translation = dua.translation;
-              let bnTransliteration = '';
-              const bnData = (duasBn as any)[dua.id.toString()];
-              
-              if (i18n.language === 'bn') {
-                if (bnData && bnData.translation) {
-                  translation = bnData.translation;
-                }
-              }
+              let translation = i18n.language === 'bn' ? dua.translationBn : dua.translationEn;
+              if (!translation) translation = dua.name;
 
               return (
                 <BlurView
@@ -97,10 +108,10 @@ export default function DuaCategoryScreen() {
                           id: dua.id,
                           categoryName: name,
                           arabic: dua.arabic,
-                          latin: dua.latin,
-                          translationEn: dua.translation,
-                          translationBn: bnData?.translation || '',
-                          transliterationBn: bnData?.transliteration || '',
+                          latin: dua.latin || '',
+                          translationEn: dua.translationEn,
+                          translationBn: dua.translationBn,
+                          transliterationBn: '',
                           source: dua.source || '',
                         }
                       });

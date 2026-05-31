@@ -143,13 +143,19 @@ export default function SurahScreen() {
           surahNameRef.current = name;
           setSurahName(name);
 
-          const mergedAyahs = arabicData.ayahs.map((arAyah: any, index: number) => ({
-            numberInSurah: arAyah.numberInSurah,
-            arabic: arAyah.text,
-            english: englishData ? englishData.ayahs[index].text : undefined,
+          const mergedAyahs = arabicData.ayahs.map((arAyah: any, index: number) => {
+            let arabicText = arAyah.text;
+            if (arAyah.numberInSurah === 1 && Number(id) !== 1 && Number(id) !== 9) {
+              arabicText = arabicText.replace(/^بِسْمِ ٱللَّهِ ٱلرَّحْمَٰنِ ٱلرَّحِيمِ ?/, "");
+            }
+            return {
+              numberInSurah: arAyah.numberInSurah,
+              arabic: arabicText,
+              english: englishData ? englishData.ayahs[index].text : undefined,
             bangla: banglaData ? banglaData.ayahs[index].text : undefined,
             englishTranslit: engTranslitData ? engTranslitData.ayahs[index].text : undefined,
-          }));
+            };
+          });
           
           setAyahs(mergedAyahs);
         }
@@ -434,7 +440,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'space-between',
     paddingHorizontal: Spacing.four,
-    paddingVertical: 14,
+    height: 51,
     borderBottomWidth: StyleSheet.hairlineWidth,
   },
   backBtn: { padding: 2 },

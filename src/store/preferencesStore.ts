@@ -31,7 +31,7 @@ export const defaultQuietHours: QuietHours = {
   enabled: true,
   startHour: 23,
   startMinute: 0,
-  endHour: 5,
+  endHour: 8,
   endMinute: 0,
 };
 

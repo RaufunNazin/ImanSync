@@ -1,36 +1,40 @@
+import OptionsModal from '@/components/OptionsModal';
 import PageHeader from '@/components/page-header';
 import TimePickerModal from '@/components/TimePickerModal';
-import OptionsModal from '@/components/OptionsModal';
-import { formatNumber } from '@/utils/formatNumber';
 import { Colors, Fonts, Spacing } from '@/constants/theme';
 import { setLanguage } from '@/i18n';
-import { useThemeStore } from '@/store/themeStore';
 import { usePreferencesStore } from '@/store/preferencesStore';
-import { getDistrictName, districtMapBn } from '@/utils/districts';
+import { useThemeStore } from '@/store/themeStore';
+import { districtMapBn, getDistrictName } from '@/utils/districts';
+import { formatNumber } from '@/utils/formatNumber';
+import {
+  getStorageMode,
+  getStorageUri,
+  initPermanentStorage,
+  migrateDuas,
+  StorageMode,
+  switchToInternalMode,
+} from '@/utils/my-duas-storage';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import { BlurView } from 'expo-blur';
 import * as Location from 'expo-location';
+import { useRouter, useLocalSearchParams } from 'expo-router';
 import * as Updates from 'expo-updates';
-import { useRouter } from 'expo-router';
-import { Bell, ChevronRight, Globe, MapPin, Moon, Settings as SettingsIcon, Shield, Info, FileText, RefreshCw, X, CheckCircle, AlertCircle, FolderLock } from 'lucide-react-native';
+import { AlertCircle, Bell, CheckCircle, ChevronRight, FileText, FolderLock, Globe, Info, MapPin, Moon, RefreshCw, Settings as SettingsIcon, Shield, X } from 'lucide-react-native';
 import React, { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { ActivityIndicator, Alert, Linking, ScrollView, StyleSheet, Switch, Text, TouchableOpacity, View, Modal } from 'react-native';
+import { ActivityIndicator, Alert, Linking, Modal, ScrollView, StyleSheet, Switch, Text, TouchableOpacity, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { BlurView } from 'expo-blur';
-import {
-  getStorageMode, StorageMode, initPermanentStorage, switchToInternalMode,
-  migrateDuas, getStorageUri,
-} from '@/utils/my-duas-storage';
 
 const CALC_METHODS = [
-  { id: 1, name: 'University of Islamic Sciences, Karachi' },
-  { id: 2, name: 'Islamic Society of North America (ISNA)' },
-  { id: 3, name: 'Muslim World League (MWL)' }
+  { id: 1, key: 'settings.calcMethod_1' },
+  { id: 2, key: 'settings.calcMethod_2' },
+  { id: 3, key: 'settings.calcMethod_3' }
 ];
 
 const MADHABS = [
-  { id: 0, name: 'Shafi/Hanbali/Maliki' },
-  { id: 1, name: 'Hanafi' }
+  { id: 0, key: 'settings.madhab_0' },
+  { id: 1, key: 'settings.madhab_1' }
 ];
 
 // ─── SettingRow MUST live OUTSIDE the screen component ───────────────────────
@@ -43,15 +47,17 @@ interface SettingRowProps {
   type?: 'navigate' | 'toggle' | 'loading';
   onPress?: (val?: any) => void;
   isLast?: boolean;
+  highlight?: boolean;
   colors: typeof Colors.light | typeof Colors.dark;
 }
 
-function SettingRow({ icon: Icon, title, value, type = 'navigate', onPress, isLast, colors }: SettingRowProps) {
+function SettingRow({ icon: Icon, title, value, type = 'navigate', onPress, isLast, highlight, colors }: SettingRowProps) {
   return (
     <TouchableOpacity
       style={[
         styles.settingRow,
-        !isLast && { borderBottomWidth: StyleSheet.hairlineWidth, borderBottomColor: colors.border }
+        !isLast && { borderBottomWidth: StyleSheet.hairlineWidth, borderBottomColor: colors.border },
+        highlight && { backgroundColor: colors.highlight + '20', borderRadius: 12, paddingHorizontal: Spacing.three, marginHorizontal: -Spacing.three }
       ]}
       activeOpacity={type === 'navigate' ? 0.7 : 0.9}
       onPress={() => {
@@ -110,6 +116,25 @@ export default function SettingsScreen() {
   const [updateModal, setUpdateModal] = useState<{ visible: boolean; title: string; message: string; type: 'loading' | 'success' | 'error' } | null>(null);
 
   const prefs = usePreferencesStore();
+
+  const params = useLocalSearchParams<{ highlight?: string }>();
+  const [highlightedRow, setHighlightedRow] = useState<string | null>(params.highlight || null);
+  const scrollViewRef = React.useRef<ScrollView>(null);
+
+  useEffect(() => {
+    if (params.highlight) {
+      setHighlightedRow(params.highlight);
+      
+      setTimeout(() => {
+        if (params.highlight === 'storage') {
+          scrollViewRef.current?.scrollToEnd({ animated: true });
+        }
+      }, 400);
+
+      const timer = setTimeout(() => setHighlightedRow(null), 3000);
+      return () => clearTimeout(timer);
+    }
+  }, [params.highlight]);
 
   // ── Permanent Storage ──────────────────────────────────────────────────────
   const [storageMode, setStorageMode] = useState<StorageMode>('internal');
@@ -254,7 +279,7 @@ export default function SettingsScreen() {
   return (
     <SafeAreaView style={[styles.safeArea, { backgroundColor: colors.background }]}>
       <PageHeader titleEn={t('settings.titleEn')} titleAr={t('settings.titleAr')} />
-      <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={styles.container}>
+      <ScrollView ref={scrollViewRef} showsVerticalScrollIndicator={false} contentContainerStyle={styles.container}>
 
         <Text style={[styles.sectionTitle, { color: colors.textSecondary }]}>{t('settings.preferences')}</Text>
         <View style={[styles.card, { borderColor: colors.border, backgroundColor: colors.backgroundElement }]}>
@@ -335,7 +360,7 @@ export default function SettingsScreen() {
           <SettingRow
             icon={MapPin}
             title={t('settings.location')}
-            value={prefs.manualCity ? getDistrictName(prefs.manualCity, i18n.language) : (prefs.location ? getDistrictName(prefs.location.city, i18n.language) : 'Auto (GPS)')}
+            value={prefs.manualCity ? getDistrictName(prefs.manualCity, i18n.language) : (prefs.location ? getDistrictName(prefs.location.city, i18n.language) : t('settings.autoGPS', { defaultValue: 'Auto (GPS)' }))}
             type={fetchingLoc ? 'loading' : 'navigate'}
             onPress={() => {
               setOptionsModalType('location');
@@ -346,7 +371,7 @@ export default function SettingsScreen() {
           <SettingRow
             icon={SettingsIcon}
             title={t('settings.calcMethod')}
-            value={CALC_METHODS.find(m => m.id === prefs.calcMethod)?.name || 'University of Islamic Sciences, Karachi'}
+            value={t(CALC_METHODS.find(m => m.id === prefs.calcMethod)?.key as any || 'settings.calcMethod_1')}
             onPress={() => {
               setOptionsModalType('calc');
               setOptionsModalVisible(true);
@@ -356,7 +381,7 @@ export default function SettingsScreen() {
           <SettingRow
             icon={SettingsIcon}
             title={t('settings.asrMethod', { defaultValue: 'Asr Method (Madhab)' })}
-            value={MADHABS.find(m => m.id === prefs.madhab)?.name || 'Hanafi'}
+            value={t(MADHABS.find(m => m.id === prefs.madhab)?.key as any || 'settings.madhab_1')}
             onPress={() => {
               setOptionsModalType('madhab');
               setOptionsModalVisible(true);
@@ -366,7 +391,7 @@ export default function SettingsScreen() {
           <SettingRow
             icon={SettingsIcon}
             title={t('settings.hijriOffset', { defaultValue: 'Hijri Date Adjustment' })}
-            value={`${prefs.hijriOffset > 0 ? '+' : ''}${prefs.hijriOffset || 0} Days`}
+            value={`${prefs.hijriOffset > 0 ? '+' : ''}${formatNumber(prefs.hijriOffset || 0, i18n.language)} ${t('settings.days', { defaultValue: 'Days' })}`}
             onPress={() => {
               setOptionsModalType('hijri');
               setOptionsModalVisible(true);
@@ -376,21 +401,17 @@ export default function SettingsScreen() {
           />
         </View>
 
-        <Text style={[styles.sectionTitle, { color: colors.textSecondary, marginTop: Spacing.four }]}>{t('settings.dataStorage')}</Text>
+        <Text style={[styles.sectionTitle, { color: colors.textSecondary, marginTop: Spacing.four }]}>{t('settings.system')}</Text>
         <View style={[styles.card, { borderColor: colors.border, backgroundColor: colors.backgroundElement }]}>
           <SettingRow
             icon={FolderLock}
             title={t('settings.permanentStorage')}
             value={storageMode === 'permanent'}
             type={storageProcessing ? 'loading' : 'toggle'}
-            isLast={true}
             onPress={togglePermanentStorage}
+            highlight={highlightedRow === 'storage'}
             colors={colors}
           />
-        </View>
-
-        <Text style={[styles.sectionTitle, { color: colors.textSecondary, marginTop: Spacing.four }]}>{t('settings.system')}</Text>
-        <View style={[styles.card, { borderColor: colors.border, backgroundColor: colors.backgroundElement }]}>
           <SettingRow
             icon={Shield}
             title={t('settings.managePermissions')}
@@ -433,10 +454,10 @@ export default function SettingsScreen() {
             t('settings.location')
           }
           options={
-            optionsModalType === 'calc' ? CALC_METHODS.map(m => ({ id: m.id, name: m.name })) :
-            optionsModalType === 'madhab' ? MADHABS.map(m => ({ id: m.id, name: m.name })) :
-            optionsModalType === 'hijri' ? [-2, -1, 0, 1, 2].map(n => ({ id: n, name: `${n > 0 ? '+' : ''}${n} ${t('days', { defaultValue: 'Days' })}` })) :
-            [{ id: 'auto', name: 'Auto (GPS)' }, ...Object.keys(districtMapBn).sort().map(k => ({ id: k, name: getDistrictName(k, i18n.language) }))]
+            optionsModalType === 'calc' ? CALC_METHODS.map(m => ({ id: m.id, name: t(m.key as any) })) :
+            optionsModalType === 'madhab' ? MADHABS.map(m => ({ id: m.id, name: t(m.key as any) })) :
+            optionsModalType === 'hijri' ? [-2, -1, 0, 1, 2].map(n => ({ id: n, name: `${n > 0 ? '+' : ''}${formatNumber(n, i18n.language)} ${t('settings.days', { defaultValue: 'Days' })}` })) :
+            [{ id: 'auto', name: t('settings.autoGPS', { defaultValue: 'Auto (GPS)' }) }, ...Object.keys(districtMapBn).sort().map(k => ({ id: k, name: getDistrictName(k, i18n.language) }))]
           }
           selectedValue={
             optionsModalType === 'calc' ? prefs.calcMethod :
@@ -585,7 +606,7 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
-    paddingVertical: Spacing.three,
+    paddingVertical: Spacing.two,
   },
   settingLeft: {
     flexDirection: 'row',

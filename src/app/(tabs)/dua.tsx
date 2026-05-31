@@ -2,12 +2,12 @@ import DuaCard from '@/components/dua-card';
 import PageHeader from '@/components/page-header';
 import PinSheet from '@/components/pin-sheet';
 import { Colors, Fonts, Spacing } from '@/constants/theme';
-import duasBn from '@/data/duas_bn.json';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useRouter } from 'expo-router';
 import { ChevronRight, FolderLock, Search, X } from 'lucide-react-native';
 import React, { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
+import DuaService, { UnifiedDuaItem } from '@/services/duaService';
 import { ActivityIndicator, Dimensions, ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import AddDuaModal from '@/components/add-dua-modal';
 import { loadMyDuas, saveMyDuas, saveMediaFile, UserDua } from '@/utils/my-duas-storage';
@@ -18,13 +18,14 @@ import DraggableFlatList, { ScaleDecorator } from 'react-native-draggable-flatli
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useThemeStore } from '@/store/themeStore';
 import SkeletonBox from '@/components/SkeletonBox';
-import { getStorageMode } from '@/utils/my-duas-storage';
+import { getStorageMode, loadCustomCategories } from '@/utils/my-duas-storage';
 
 interface Category {
   id: string;
   name: string;
   description: string;
   count: number;
+  isCustom?: boolean;
 }
 
 const PIN_STORAGE_KEY    = 'imansync_dua_pins';
@@ -42,7 +43,7 @@ export default function DuaScreen() {
 
   // Search State
   const [searchQuery, setSearchQuery] = useState('');
-  const [allDuas, setAllDuas] = useState<any[]>([]);
+  const [searchResults, setSearchResults] = useState<UnifiedDuaItem[]>([]);
   const [fetchingAll, setFetchingAll] = useState(false);
 
   // Pin Sheet State
@@ -73,29 +74,49 @@ export default function DuaScreen() {
     });
 
     // Fetch categories
-    fetch('https://ummahapi.com/api/duas/categories')
-      .then((res) => res.json())
-      .then((data) => {
-        if (data.success && data.data.categories) {
-          setCategories(data.data.categories);
-        }
-      })
-      .catch((err) => console.error(err))
-      .finally(() => setLoading(false));
+    Promise.all([
+      DuaService.getCategories(),
+      loadCustomCategories(),
+      loadMyDuas()
+    ])
+    .then(([apiCats, customCats, userDuas]) => {
+      let cats: Category[] = [];
+      if (apiCats && apiCats.length > 0) {
+        cats = apiCats.map(c => ({
+          id: c.id.toString(),
+          name: c.name,
+          description: '', // Desc can be added later or pulled from i18n
+          count: c.dua_count
+        }));
+      }
+      if (customCats && customCats.length > 0) {
+        const formattedCustoms = customCats.map(c => ({
+          id: c.id,
+          name: c.name,
+          description: t('dua.customCategoryDesc', { defaultValue: 'My Custom Category' }),
+          count: userDuas.filter(d => d.categoryId === c.id).length,
+          isCustom: true
+        }));
+        cats = [...cats, ...formattedCustoms];
+      }
+      setCategories(cats);
+    })
+    .catch((err) => console.error(err))
+    .finally(() => setLoading(false));
   }, []);
 
   useEffect(() => {
-    if (searchQuery.length > 0 && allDuas.length === 0 && !fetchingAll) {
-      setFetchingAll(true);
-      fetch('https://ummahapi.com/api/duas')
-        .then(res => res.json())
-        .then(data => {
-          if (data.success && data.data && data.data.duas) {
-            setAllDuas(data.data.duas);
-          }
-        })
-        .catch(err => console.error("Error fetching all duas:", err))
-        .finally(() => setFetchingAll(false));
+    if (searchQuery.length > 0) {
+      const delayDebounceFn = setTimeout(() => {
+        setFetchingAll(true);
+        DuaService.searchHybrid(searchQuery)
+          .then(results => setSearchResults(results))
+          .catch(err => console.error("Error searching duas:", err))
+          .finally(() => setFetchingAll(false));
+      }, 500);
+      return () => clearTimeout(delayDebounceFn);
+    } else {
+      setSearchResults([]);
     }
   }, [searchQuery]);
 
@@ -123,7 +144,7 @@ export default function DuaScreen() {
   const handleCategoryPress = (cat: Category) => {
     router.push({
       pathname: '/dua-category',
-      params: { id: cat.id, name: getCategoryName(cat) }
+      params: { id: cat.id, name: getCategoryName(cat), isCustom: cat.isCustom ? 'true' : 'false' }
     });
   };
 
@@ -155,26 +176,7 @@ export default function DuaScreen() {
   const unpinnedCategories = categories.filter(c => !pinnedIds.includes(c.id));
 
   // Filter global duas
-  const filteredDuas = allDuas.filter(dua => {
-    if (!searchQuery) return true;
-    const q = searchQuery.toLowerCase();
-    
-    let bnTranslation = '';
-    let bnTransliteration = '';
-    const bnData = (duasBn as any)[dua.id.toString()];
-    if (bnData) {
-      bnTranslation = bnData.translation || '';
-      bnTransliteration = bnData.transliteration || '';
-    }
-
-    return (
-      (dua.translation && dua.translation.toLowerCase().includes(q)) ||
-      (bnTranslation && bnTranslation.toLowerCase().includes(q)) ||
-      (dua.latin && dua.latin.toLowerCase().includes(q)) ||
-      (bnTransliteration && bnTransliteration.toLowerCase().includes(q)) ||
-      (dua.arabic && dua.arabic.includes(q))
-    );
-  });
+  const filteredDuas = searchResults;
 
 
   const handleAddDua = async (duaData: Omit<UserDua, 'id' | 'createdAt'>) => {
@@ -212,7 +214,11 @@ export default function DuaScreen() {
 
         {/* Permanent Storage Suggestion Banner */}
         {showSuggestBanner && (
-          <View style={[styles.banner, { borderColor: colors.highlight + '60', backgroundColor: colors.highlight + '15' }]}>
+          <TouchableOpacity 
+            style={[styles.banner, { borderColor: colors.highlight + '60', backgroundColor: colors.highlight + '15' }]}
+            activeOpacity={0.8}
+            onPress={() => router.push({ pathname: '/settings', params: { highlight: 'storage' } })}
+          >
             <FolderLock size={18} color={colors.highlight} style={{ flexShrink: 0 }} />
             <Text style={[styles.bannerText, { color: colors.text, flex: 1 }]}>
               {t('dua.suggestPermanentStorage')}
@@ -220,7 +226,7 @@ export default function DuaScreen() {
             <TouchableOpacity onPress={dismissSuggestBanner} hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}>
               <X size={16} color={colors.textSecondary} />
             </TouchableOpacity>
-          </View>
+          </TouchableOpacity>
         )}
 
         {/* Global Search Bar */}
@@ -240,12 +246,8 @@ export default function DuaScreen() {
             {fetchingAll ? (
               <ActivityIndicator size="large" color={colors.accent} style={{ marginTop: 40 }} />
             ) : filteredDuas.map(dua => {
-              let translation = dua.translation;
-              let bnTransliteration = '';
-              const bnData = (duasBn as any)[dua.id.toString()];
-              if (i18n.language === 'bn' && bnData && bnData.translation) {
-                translation = bnData.translation;
-              }
+              let translation = i18n.language === 'bn' ? dua.translationBn : dua.translationEn;
+              if (!translation) translation = dua.name;
 
               return (
                 <View key={dua.id} style={[styles.itemWrapper, { borderColor: colors.border, backgroundColor: colors.glassTint === 'light' ? 'rgba(255,255,255,0.7)' : 'rgba(0,0,0,0.5)' }]}>
@@ -259,10 +261,10 @@ export default function DuaScreen() {
                           id: dua.id,
                           categoryName: t('duaSettings.searchPlaceholder'), // Or generic title
                           arabic: dua.arabic,
-                          latin: dua.latin,
-                          translationEn: dua.translation,
-                          translationBn: bnData?.translation || '',
-                          transliterationBn: bnData?.transliteration || '',
+                          latin: dua.latin || '',
+                          translationEn: dua.translationEn,
+                          translationBn: dua.translationBn,
+                          transliterationBn: '',
                           source: dua.source || '',
                         }
                       });
@@ -296,45 +298,45 @@ export default function DuaScreen() {
               <View style={[styles.section, { paddingLeft: Spacing.four }]}>
                 <Text style={[styles.sectionTitle, { color: colors.textSecondary, marginBottom: Spacing.three }]}>{t('dua.pinned')}</Text>
                 <View style={{ height: 110 }}>
-                  <DraggableFlatList
+                  <ScrollView
                     horizontal
                     showsHorizontalScrollIndicator={false}
-                    data={pinnedCategories}
-                    onDragEnd={({ data }) => {
-                      const newIds = data.map(c => c.id);
-                      setPinnedIds(newIds);
-                      AsyncStorage.setItem(PIN_STORAGE_KEY, JSON.stringify(newIds));
-                    }}
-                    keyExtractor={(item) => item.id}
                     contentContainerStyle={styles.pinnedScroll}
-                    renderItem={({ item, drag, isActive }) => (
-                      <ScaleDecorator>
-                        <TouchableOpacity
-                          onLongPress={drag}
-                          disabled={isActive}
-                          activeOpacity={1}
-                          style={{ width: 160, opacity: isActive ? 0.7 : 1 }}
-                        >
-                          <DuaCard
-                            id={item.id}
-                            name={getCategoryName(item)}
-                            description={getCategoryDesc(item)}
-                            count={item.count}
-                            isPinned={true}
-                            colors={colors}
-                            onPress={() => handleCategoryPress(item)}
-                            onLongPress={drag}
-                          />
-                        </TouchableOpacity>
-                      </ScaleDecorator>
-                    )}
-                  />
+                  >
+                    {pinnedCategories.map((item) => (
+                      <TouchableOpacity
+                        key={item.id}
+                        activeOpacity={0.8}
+                        style={{ width: 160, height: 90 }}
+                        onPress={() => handleCategoryPress(item)}
+                        onLongPress={() => {
+                          setSelectedCategory(item);
+                          setPinSheetVisible(true);
+                        }}
+                      >
+                        <DuaCard
+                          id={item.id.toString()}
+                          name={getCategoryName(item)}
+                          description={getCategoryDesc(item)}
+                          count={item.count}
+                          isPinned={true}
+                          isCustom={item.isCustom}
+                          colors={colors}
+                          onPress={() => handleCategoryPress(item)}
+                          onLongPress={() => {
+                            setSelectedCategory(item);
+                            setPinSheetVisible(true);
+                          }}
+                        />
+                      </TouchableOpacity>
+                    ))}
+                  </ScrollView>
                 </View>
               </View>
             )}
 
         {/* Main Grid Section */}
-        <View style={[styles.section, { paddingHorizontal: Spacing.four }]}>
+        <View style={[styles.section, { padding: Spacing.four }]}>
 
           
           <View style={styles.grid}>
@@ -378,6 +380,7 @@ export default function DuaScreen() {
                     name={getCategoryName(cat)}
                     description={getCategoryDesc(cat)}
                     count={cat.count}
+                    isCustom={cat.isCustom}
                     colors={colors}
                     onPress={() => handleCategoryPress(cat)}
                     onLongPress={() => openPinSheet(cat)}
@@ -389,7 +392,6 @@ export default function DuaScreen() {
         </View>
         </>
       )}
-      <View style={{ height: 100 }} />
       </ScrollView>
 
       {/* Pin Action Sheet */}
@@ -430,7 +432,7 @@ const styles = StyleSheet.create({
 
   fab: {
     position: 'absolute',
-    bottom: Spacing.four + 80,
+    bottom: Spacing.two + 20,
     right: Spacing.four,
     width: 56,
     height: 56,
@@ -470,7 +472,6 @@ const styles = StyleSheet.create({
     paddingVertical: 12,
     borderRadius: 20,
     borderWidth: 1,
-    marginBottom: Spacing.two,
   },
   searchInput: {
     flex: 1,

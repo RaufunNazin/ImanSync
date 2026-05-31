@@ -88,13 +88,12 @@ const styles = StyleSheet.create({
   },
   title: {
     fontFamily: Fonts.outfit,
-    fontSize: 24,
-    marginBottom: Spacing.five,
+    fontSize: 16,
+    marginBottom: Spacing.three,
   },
   actionBtn: {
     flexDirection: 'row',
     alignItems: 'center',
-    padding: Spacing.four,
     borderRadius: 16,
     gap: Spacing.four,
   },

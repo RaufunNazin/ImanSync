@@ -66,11 +66,11 @@ export default function PageHeader({
       {/* Arabic title right */}
       {rightElement ? (
         rightElement
-      ) : (
+      ) : titleAr ? (
         <Text style={[styles.titleAr, { color: colors.textSecondary }]} numberOfLines={1}>
           {titleAr}
         </Text>
-      )}
+      ) : null}
     </View>
   );
 }
@@ -80,7 +80,7 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     paddingHorizontal: Spacing.four,
-    paddingVertical: 14,
+    height: 51,
     borderBottomWidth: StyleSheet.hairlineWidth,
     marginBottom: Spacing.four,
   },

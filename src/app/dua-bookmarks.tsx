@@ -45,7 +45,7 @@ export default function DuaBookmarksScreen() {
 
   return (
     <SafeAreaView style={[styles.safeArea, { backgroundColor: colors.background }]}>
-      <PageHeader titleEn="Bookmarks" titleAr="" showBack />
+      <PageHeader titleEn={t('dua.bookmarks', { defaultValue: 'Bookmarks' })} titleAr="" showBack />
       
       <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={styles.container} keyboardDismissMode="on-drag" keyboardShouldPersistTaps="handled">
         <View style={[styles.searchContainer, { backgroundColor: colors.backgroundElement, borderColor: colors.border }]}>

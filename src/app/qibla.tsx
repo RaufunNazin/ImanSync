@@ -92,18 +92,22 @@ export default function QiblaScreen() {
             
             {/* Tick Marks for Degrees */}
             {[...Array(72)].map((_, i) => {
+              const deg = i * 5;
               const isMajor = i % 18 === 0; // 0, 90, 180, 270
               const isMedium = i % 2 === 0;
+              // Check if this pin is the closest one to the actual Qibla bearing
+              const isQiblaPin = Math.abs(deg - qiblaBearing) < 2.5 || Math.abs(deg - qiblaBearing) > 357.5;
+              
               return (
                 <View 
                   key={i} 
                   style={[
                     styles.tickMark, 
                     { 
-                      backgroundColor: isMajor ? colors.text : (isMedium ? colors.textSecondary : colors.border),
-                      height: isMajor ? 14 : (isMedium ? 10 : 6),
-                      opacity: isMajor ? 0.9 : 0.5,
-                      transform: [{ rotate: `${i * 5}deg` }, { translateY: -130 }] 
+                      backgroundColor: isQiblaPin ? colors.accent : isMajor ? colors.text : (isMedium ? colors.textSecondary : colors.border),
+                      height: isQiblaPin ? 18 : isMajor ? 14 : (isMedium ? 10 : 6),
+                      opacity: isQiblaPin ? 1 : isMajor ? 0.9 : 0.5,
+                      transform: [{ rotate: `${deg}deg` }, { translateY: -130 }] 
                     }
                   ]} 
                 />

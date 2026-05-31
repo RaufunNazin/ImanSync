@@ -33,6 +33,7 @@ export default function TabLayout() {
           marginTop: 2,
         },
         lazy: true,
+        animation: 'shift',
       }}
     >
       <Tabs.Screen

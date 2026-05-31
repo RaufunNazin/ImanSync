@@ -123,11 +123,11 @@ export default function AddDuaModal({ visible, onClose, onSave, colors }: AddDua
     <Modal visible={visible} transparent animationType="slide" onRequestClose={handleClose}>
       <KeyboardAvoidingView 
         style={{ flex: 1 }} 
-        behavior={Platform.OS === 'ios' ? 'height' : undefined}
+        behavior="padding"
       >
         <View style={styles.overlay}>
           <View style={[styles.modal, { backgroundColor: colors.background, borderColor: colors.border }]}>
-            <View style={{ width: 40, height: 4, backgroundColor: colors.border, borderRadius: 2, alignSelf: 'center', marginBottom: Spacing.four, marginTop: Spacing.four }} />
+            <View style={{ width: 40, height: 4, backgroundColor: colors.border, borderRadius: 2, alignSelf: 'center', marginBottom: Spacing.four }} />
             <View style={[styles.header, { borderBottomColor: colors.border }]}>
               <Text style={[styles.title, { color: colors.text }]}>{t('dua.addDua')}</Text>
               <TouchableOpacity onPress={handleClose} style={[styles.closeBtn, { backgroundColor: colors.card }]}>
@@ -135,7 +135,7 @@ export default function AddDuaModal({ visible, onClose, onSave, colors }: AddDua
               </TouchableOpacity>
             </View>
 
-            <ScrollView contentContainerStyle={styles.content} keyboardShouldPersistTaps="handled" keyboardDismissMode="none">
+            <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={styles.content} keyboardShouldPersistTaps="handled" keyboardDismissMode="none">
               
               <View style={styles.inputGroup}>
                 <Text style={[styles.label, { color: colors.textSecondary }]}>{t('dua.duaTitle')} *</Text>
@@ -203,7 +203,7 @@ export default function AddDuaModal({ visible, onClose, onSave, colors }: AddDua
                   onPress={() => setMediaType('text')}
                 >
                   <Type size={18} color={mediaType === 'text' ? colors.accent : colors.textSecondary} />
-                  <Text style={[styles.typeText, { color: mediaType === 'text' ? colors.accent : colors.textSecondary }]}>{t('dua.addText')}</Text>
+                  <Text style={[styles.typeText, { color: mediaType === 'text' ? colors.accent : colors.textSecondary }]}>{t('dua.typeText', { defaultValue: 'Text' })}</Text>
                 </TouchableOpacity>
                 
                 <TouchableOpacity 
@@ -211,7 +211,7 @@ export default function AddDuaModal({ visible, onClose, onSave, colors }: AddDua
                   onPress={pickImage}
                 >
                   <ImageIcon size={18} color={mediaType === 'image' ? colors.accent : colors.textSecondary} />
-                  <Text style={[styles.typeText, { color: mediaType === 'image' ? colors.accent : colors.textSecondary }]}>{t('dua.addImage')}</Text>
+                  <Text style={[styles.typeText, { color: mediaType === 'image' ? colors.accent : colors.textSecondary }]}>{t('dua.typeImage', { defaultValue: 'Image' })}</Text>
                 </TouchableOpacity>
 
                 <TouchableOpacity 
@@ -219,7 +219,7 @@ export default function AddDuaModal({ visible, onClose, onSave, colors }: AddDua
                   onPress={pickVideo}
                 >
                   <Video size={18} color={mediaType === 'video' ? colors.accent : colors.textSecondary} />
-                  <Text style={[styles.typeText, { color: mediaType === 'video' ? colors.accent : colors.textSecondary }]}>{t('dua.addVideo')}</Text>
+                  <Text style={[styles.typeText, { color: mediaType === 'video' ? colors.accent : colors.textSecondary }]}>{t('dua.typeVideo', { defaultValue: 'Video' })}</Text>
                 </TouchableOpacity>
               </View>
 
@@ -281,7 +281,7 @@ export default function AddDuaModal({ visible, onClose, onSave, colors }: AddDua
 
             </ScrollView>
 
-            <View style={[styles.footer, { borderTopColor: colors.border }]}>
+            <View style={styles.footer}>
               <TouchableOpacity 
                 style={[styles.saveBtn, { backgroundColor: isValid ? colors.accent : colors.border }]} 
                 onPress={handleSave}
@@ -307,7 +307,7 @@ const styles = StyleSheet.create({
     borderTopLeftRadius: 32,
     borderTopRightRadius: 32,
     maxHeight: '90%',
-    padding: Spacing.five,
+    paddingTop: Spacing.four,
     borderTopWidth: 1,
     borderLeftWidth: 1,
     borderRightWidth: 1,
@@ -316,6 +316,7 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
+    paddingHorizontal: Spacing.five,
     marginBottom: Spacing.five,
   },
   title: {
@@ -326,6 +327,8 @@ const styles = StyleSheet.create({
     padding: Spacing.two,
   },
   content: {
+    paddingHorizontal: Spacing.five,
+    paddingBottom: Spacing.five,
     gap: Spacing.four,
   },
   typeSelector: {
@@ -373,8 +376,9 @@ const styles = StyleSheet.create({
     textAlignVertical: 'top',
   },
   footer: {
-    padding: Spacing.four,
-    borderTopWidth: 1,
+    paddingHorizontal: Spacing.five,
+    paddingTop: Spacing.four,
+    paddingBottom: Platform.OS === 'ios' ? Spacing.six : Spacing.five,
   },
   saveBtn: {
     padding: Spacing.four,

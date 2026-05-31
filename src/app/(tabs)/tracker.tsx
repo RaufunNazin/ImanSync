@@ -298,6 +298,9 @@ export default function TrackerScreen() {
           <Text style={[styles.chartDesc, { color: colors.textSecondary }]}>
             {getChartDescMsg(avg)}
           </Text>
+          <Text style={[styles.chartDesc, { color: colors.textSecondary, fontSize: 11, opacity: 0.6, marginTop: 8 }]}>
+            {t('tracker.clickBarsHint', { defaultValue: 'Click on the bars to view daily details' })}
+          </Text>
         </BlurView>
       </View>
     );

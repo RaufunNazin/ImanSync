@@ -140,11 +140,11 @@ export async function scheduleAllNotifications() {
         
         // 1. Prayer Alerts
         if (state.prayerAlertsEnabled) {
-          await schedulePrayerDay(dayData.timings, targetDate, i === 0);
+          await schedulePrayerDay(dayData.timings, targetDate, i === 0, state.quietHours);
         }
 
         // 2. Events (Jumu'ah, White Days, etc)
-        await scheduleEventsDay(dayData, targetDate);
+        await scheduleEventsDay(dayData, targetDate, state.quietHours);
 
         // 3. Random Tasks (Quran)
         if (state.taskRemindersEnabled) {
@@ -157,7 +157,7 @@ export async function scheduleAllNotifications() {
   }
 }
 
-async function schedulePrayerDay(timings: any, targetDate: Date, isToday: boolean) {
+async function schedulePrayerDay(timings: any, targetDate: Date, isToday: boolean, quietHours: QuietHours) {
   const prayers = [
     { id: 'fajr', name: 'Fajr', time: timings.Fajr },
     { id: 'dhuhr', name: 'Dhuhr', time: timings.Dhuhr },
@@ -173,7 +173,7 @@ async function schedulePrayerDay(timings: any, targetDate: Date, isToday: boolea
     const prayerTime = parseTimeString(current.time, targetDate);
     
     // Start notification
-    if (prayerTime.getTime() > now.getTime()) {
+    if (prayerTime.getTime() > now.getTime() && !isQuietHour(prayerTime, quietHours)) {
       const trigger: TimestampTrigger = {
         type: TriggerType.TIMESTAMP,
         timestamp: prayerTime.getTime(),
@@ -193,7 +193,7 @@ async function schedulePrayerDay(timings: any, targetDate: Date, isToday: boolea
       const nextTime = parseTimeString(next.time, targetDate);
       const warningTime = new Date(nextTime.getTime() - 15 * 60000);
       
-      if (warningTime.getTime() > now.getTime()) {
+      if (warningTime.getTime() > now.getTime() && !isQuietHour(warningTime, quietHours)) {
         const trigger: TimestampTrigger = {
           type: TriggerType.TIMESTAMP,
           timestamp: warningTime.getTime(),
@@ -210,7 +210,7 @@ async function schedulePrayerDay(timings: any, targetDate: Date, isToday: boolea
   }
 }
 
-async function scheduleEventsDay(dayData: any, targetDate: Date) {
+async function scheduleEventsDay(dayData: any, targetDate: Date, quietHours: QuietHours) {
   const now = new Date();
   const dayOfWeek = targetDate.getDay();
   const hijriMonth = parseInt(dayData.date.hijri.month.number, 10);
@@ -221,7 +221,7 @@ async function scheduleEventsDay(dayData: any, targetDate: Date) {
   if (targetDate.getDay() === 4) { // Thursday
     const triggerDate = new Date(targetDate);
     triggerDate.setHours(18, 0, 0, 0); // 6 PM Thursday
-    if (triggerDate.getTime() > now.getTime()) {
+    if (triggerDate.getTime() > now.getTime() && !isQuietHour(triggerDate, quietHours)) {
       await notifee.createTriggerNotification({
         title: i18n.t('notifications.jumuahTitle'),
         body: i18n.t('notifications.jumuahBody'),
@@ -277,7 +277,7 @@ async function scheduleEventsDay(dayData: any, targetDate: Date) {
     
     // Iftar Reminder: 5 mins before Iftar time starts
     const iftarTrigger = new Date(iftarTime.getTime() - 5 * 60000);
-    if (iftarTrigger.getTime() > now.getTime()) {
+    if (iftarTrigger.getTime() > now.getTime() && !isQuietHour(iftarTrigger, quietHours)) {
       notifee.createTriggerNotification({
         title: i18n.t('notifications.iftarReminderTitle', { defaultValue: 'Iftar Reminder' }),
         body: i18n.t('notifications.iftarReminderBody', { time: formatAMPM(iftarTime), defaultValue: 'Iftar starts exactly at ' + formatAMPM(iftarTime) }),
@@ -292,7 +292,7 @@ async function scheduleEventsDay(dayData: any, targetDate: Date) {
     const triggerDate = new Date(targetDate);
     triggerDate.setDate(triggerDate.getDate() - 1); // Sunday or Wednesday
     triggerDate.setHours(20, 0, 0, 0); // 8 PM
-    if (triggerDate.getTime() > now.getTime()) {
+    if (triggerDate.getTime() > now.getTime() && !isQuietHour(triggerDate, quietHours)) {
       await notifee.createTriggerNotification({
         title: i18n.t('notifications.fastingTitle'),
         body: i18n.t('notifications.fastingBody', { day: dayOfWeek === 1 ? 'Monday' : 'Thursday' }),
@@ -307,7 +307,7 @@ async function scheduleEventsDay(dayData: any, targetDate: Date) {
     const triggerDate = new Date(targetDate);
     triggerDate.setDate(triggerDate.getDate() - 1);
     triggerDate.setHours(19, 30, 0, 0);
-    if (triggerDate.getTime() > now.getTime()) {
+    if (triggerDate.getTime() > now.getTime() && !isQuietHour(triggerDate, quietHours)) {
       await notifee.createTriggerNotification({
         title: i18n.t('notifications.whiteDaysTitle'),
         body: i18n.t('notifications.whiteDaysBody', { day: hijriDay }),
@@ -323,7 +323,7 @@ async function scheduleEventsDay(dayData: any, targetDate: Date) {
     for (const hour of hoursToTrigger) {
       const triggerDate = new Date(targetDate);
       triggerDate.setHours(hour, 0, 0, 0);
-      if (triggerDate.getTime() > now.getTime()) {
+      if (triggerDate.getTime() > now.getTime() && !isQuietHour(triggerDate, quietHours)) {
         await notifee.createTriggerNotification({
           title: i18n.t('notifications.yaseenTitle'),
           body: i18n.t('notifications.yaseenBody'),

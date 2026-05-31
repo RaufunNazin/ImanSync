@@ -10,6 +10,7 @@ import { useTranslation } from 'react-i18next';
 import { ActivityIndicator, ScrollView, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useThemeStore } from '@/store/themeStore';
+import { useAudioStore } from '@/store/audioStore';
 import SkeletonBox from '@/components/SkeletonBox';
 
 interface Surah {
@@ -25,6 +26,7 @@ export default function QuranScreen() {
   const colors = Colors[scheme === 'unspecified' ? 'light' : scheme];
   const router = useRouter();
   const { t, i18n } = useTranslation();
+  const { currentSurahId } = useAudioStore();
   
   const [activeTab, setActiveTab] = useState('surah');
   const [surahs, setSurahs] = useState<any[]>([]);
@@ -257,7 +259,7 @@ export default function QuranScreen() {
 
       {/* Floating Last Read Pill */}
       {activeTab !== 'bookmarks' && (
-        <View style={styles.floatingHintContainer}>
+        <View style={[styles.floatingHintContainer, currentSurahId ? { bottom: Spacing.two + 20 + 85 } : {}]}>
           <View style={[styles.floatingHintCard, { borderColor: colors.accent, backgroundColor: colors.background }]}>
             <TouchableOpacity 
               style={styles.floatingHintTouch}

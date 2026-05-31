@@ -1,6 +1,6 @@
-# 🌙 ImanSync
+# 🌙 DeenJourney
 
-**ImanSync** is a beautifully designed, premium, and feature-rich Islamic companion application built using React Native and Expo. It serves as a comprehensive tool to sync your daily spiritual journey with modern features like local notifications, prayer times, full Quran with audio playback, Qibla compass, and custom Duas.
+**DeenJourney** is a beautifully designed, premium, and feature-rich Islamic companion application built using React Native and Expo. It serves as a comprehensive tool to sync your daily spiritual journey with modern features like local notifications, prayer times, full Quran with audio playback, Qibla compass, and custom Duas.
 
 ---
 
@@ -12,8 +12,9 @@
   - Automatically calculates correct prayer timings using location coordinates (Aladhan API).
   - Features precise reminders using **Notifee** for exact triggers.
   - Custom quiet hours/Do Not Disturb configuration.
-- 📿 **Dua & Adhkar Library**: Multi-category Dua collection with the ability to bookmark and save personal custom Duas.
-- 🌓 **Rich & Premium UI**: Harmonious colors, custom dark mode, Outfit and Noto Naskh Arabic typography, and smooth micro-animations.
+- 📿 **Dua & Adhkar Library**: Multi-category Dua collection powered by the authentic Hisnul Muslim API. Includes the ability to bookmark and save personal custom Duas.
+- 💾 **Permanent Storage**: Save your personal Duas securely using the Storage Access Framework (SAF), ensuring your data persists even if you uninstall the app.
+- 🌓 **Rich & Premium UI**: Harmonious colors, custom dark mode, smooth sliding tab transitions, and elegant Outfit and Noto Naskh Arabic typography.
 - 🌐 **Full Localization**: Seamlessly toggles between English and Bengali interfaces.
 
 ---
@@ -42,7 +43,7 @@
 
 1. Clone the repository and navigate to the directory:
    ```bash
-   cd ImanSync
+   cd DeenJourney
    ```
 
 2. Install dependencies:
@@ -103,7 +104,7 @@ eas update --channel production --message "Describe your updates here"
 │   ├── lib/              # Database helper & notification setup files
 │   ├── services/         # API fetchers, location & notification manager
 │   ├── store/            # Zustand global stores (audio, preferences, theme)
-│   └── utils/            # Helper utilities and formatters
+│   └── utils/            # Helper utilities and formatters (including SAF storage)
 ├── app.json              # Expo system configuration
 ├── eas.json              # Build configurations & release channels
 └── system_config.json    # Application versioning and dynamic changelog
