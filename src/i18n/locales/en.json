@@ -40,13 +40,13 @@
     "greeting": "السَّلَامُ عَلَيْكُمْ",
     "quickActions": "Quick Actions",
     "qibla": "Qibla Compass",
-    "names": "99 Names of Allah",
+    "names": "Allah's 99 Names",
     "duas": "Duas",
     "learnQuran": "Learn the Quran",
     "specialTimes": "Special Times",
     "dailyInspiration": "Daily Verse",
     "restrictedTimes": "Prohibited Prayer Times",
-    "suhur": "Last time of Sahri",
+    "suhur": "Sahri End",
     "suhurDesc": "Fasting starts after Suhur",
     "tahajjud": "Tahajjud",
     "tahajjudDesc": "Last third of the night",
@@ -286,7 +286,7 @@
     "error": "Error"
   },
   "names": {
-    "titleEn": "Allah's Names",
+    "titleEn": "Allah's 99 Names",
     "titleAr": "أسماء الله الحسنى"
   },
   "qibla": {
@@ -1015,5 +1015,21 @@
     "dhu_al-qi'dah": "Dhu al-Qi'dah",
     "dhu_al-hijjah": "Dhu al-Hijjah",
     "ah": "AH"
+  },
+  "calendar": {
+    "titleEn": "Islamic Calendar",
+    "titleAr": "التقويم الإسلامي",
+    "sahriEnd": "Sahri Ends",
+    "iftarTime": "Iftar Time",
+    "events": "Special Events",
+    "noEvents": "No special events today.",
+    "hijriAdjustment": "Hijri Offset",
+    "sun": "Sun",
+    "mon": "Mon",
+    "tue": "Tue",
+    "wed": "Wed",
+    "thu": "Thu",
+    "fri": "Fri",
+    "sat": "Sat"
   }
 }

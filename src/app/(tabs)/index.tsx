@@ -7,7 +7,7 @@ import { BlurView } from 'expo-blur';
 import * as Haptics from 'expo-haptics';
 import { LinearGradient } from 'expo-linear-gradient';
 import { useFocusEffect, useRouter } from 'expo-router';
-import { Book, BookOpen, Check, Compass, GraduationCap, MapPin, Moon, RotateCcw, Star, Sunset } from 'lucide-react-native';
+import { Book, BookOpen, CalendarDays, Check, Compass, GraduationCap, MapPin, Moon, RotateCcw, Star, Sunset } from 'lucide-react-native';
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import {
@@ -498,9 +498,11 @@ export default function HomeScreen() {
             {t('home.greeting')}
           </Text>
           {hijriDisplay ? (
-            <Text style={[styles.hijriLabel, { color: colors.textSecondary }]}>
-              {hijriDisplay}
-            </Text>
+            <TouchableOpacity onPress={() => router.push('/calendar' as any)}>
+              <Text style={[styles.hijriLabel, { color: colors.textSecondary }]}>
+                {hijriDisplay}
+              </Text>
+            </TouchableOpacity>
           ) : (
             <SkeletonBox width={180} height={14} borderRadius={7} style={{ marginTop: 4 }} color={colors.border} />
           )}
@@ -616,25 +618,54 @@ export default function HomeScreen() {
           </View>
         )}
 
-        {/* ── Quick Actions (Unified Toolbar Layout) ──────────────── */}
+        {/* ── Quick Actions (2x2 Grid) ──────────────── */}
         <View style={styles.section}>
           <Text style={[styles.sectionTitle, { color: colors.textSecondary }]}>{t('home.quickActions')}</Text>
-          <BlurView intensity={40} tint={colors.glassTint as any} style={[styles.quickActionBar, { borderColor: colors.border }]}>
-            <TouchableOpacity style={styles.actionItem} onPress={() => router.push('/qibla')}>
-              <Compass size={24} color={colors.accent} />
-              <Text style={[styles.actionText, { color: colors.text }]}>{t('home.qibla')}</Text>
+          <View style={{ flexDirection: 'row', flexWrap: 'wrap', justifyContent: 'space-between' }}>
+            <TouchableOpacity 
+              activeOpacity={0.7}
+              style={[styles.actionItemCard, { borderColor: colors.border }]} 
+              onPress={() => router.push('/qibla')}
+            >
+              <BlurView intensity={40} tint={colors.glassTint as any} style={styles.actionItemBlur}>
+                <Compass size={20} color={colors.accent} />
+                <Text style={[styles.actionText, { color: colors.text }]}>{t('home.qibla')}</Text>
+              </BlurView>
             </TouchableOpacity>
-            <View style={[styles.actionDivider, { backgroundColor: colors.border }]} />
-            <TouchableOpacity style={styles.actionItem} onPress={() => router.push('/names')}>
-              <Book size={24} color={colors.highlight} />
-              <Text style={[styles.actionText, { color: colors.text }]}>{t('home.names')}</Text>
+            
+            <TouchableOpacity 
+              activeOpacity={0.7}
+              style={[styles.actionItemCard, { borderColor: colors.border }]} 
+              onPress={() => router.push('/names')}
+            >
+              <BlurView intensity={40} tint={colors.glassTint as any} style={styles.actionItemBlur}>
+                <Book size={20} color={colors.highlight} />
+                <Text style={[styles.actionText, { color: colors.text }]}>{t('home.names')}</Text>
+              </BlurView>
             </TouchableOpacity>
-            <View style={[styles.actionDivider, { backgroundColor: colors.border }]} />
-            <TouchableOpacity style={styles.actionItem} onPress={() => router.push('/quran-learn' as any)}>
-              <GraduationCap size={24} color={colors.accent} />
-              <Text style={[styles.actionText, { color: colors.text }]}>{t('home.learnQuran')}</Text>
+            
+            <TouchableOpacity 
+              activeOpacity={0.7}
+              style={[styles.actionItemCard, { borderColor: colors.border }]} 
+              onPress={() => router.push('/quran-learn' as any)}
+            >
+              <BlurView intensity={40} tint={colors.glassTint as any} style={styles.actionItemBlur}>
+                <GraduationCap size={20} color={colors.accent} />
+                <Text style={[styles.actionText, { color: colors.text }]}>{t('home.learnQuran')}</Text>
+              </BlurView>
             </TouchableOpacity>
-          </BlurView>
+
+            <TouchableOpacity 
+              activeOpacity={0.7}
+              style={[styles.actionItemCard, { borderColor: colors.border }]} 
+              onPress={() => router.push('/calendar' as any)}
+            >
+              <BlurView intensity={40} tint={colors.glassTint as any} style={styles.actionItemBlur}>
+                <CalendarDays size={20} color={colors.highlight} />
+                <Text style={[styles.actionText, { color: colors.text }]}>{t('calendar.titleEn', { defaultValue: 'Islamic Calendar' })}</Text>
+              </BlurView>
+            </TouchableOpacity>
+          </View>
         </View>
 
         {/* ── Prayer Times Group ─────────────────────────────────── */}
@@ -1128,30 +1159,25 @@ const styles = StyleSheet.create({
     textAlign: 'right',
   },
 
-  // Quick actions (Unified Toolbar)
-  quickActionBar: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    borderRadius: 24,
-    paddingVertical: Spacing.two,
+  // Quick actions (2x2 Grid Layout)
+  actionItemCard: {
+    width: '48%',
+    marginBottom: 12,
+    borderRadius: 16,
     borderWidth: 1,
     overflow: 'hidden',
   },
-  actionItem: {
-    flex: 1,
+  actionItemBlur: {
+    flexDirection: 'row',
     alignItems: 'center',
-    justifyContent: 'center',
-    paddingVertical: Spacing.three,
-  },
-  actionDivider: {
-    width: 1,
-    height: '60%',
-    opacity: 0.5,
+    paddingVertical: 12,
+    paddingHorizontal: 12,
   },
   actionText: {
     fontFamily: Fonts.outfit,
-    marginTop: Spacing.one,
     fontSize: 13,
+    marginLeft: 8,
+    flexShrink: 1,
   },
 
   // Daily inspiration card
