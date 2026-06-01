@@ -3,31 +3,31 @@
   "changelog": [
     {
       "version": "1.0.0",
-      "date": "May 25, 2026",
+      "date": "June 1, 2026",
       "en": [
-        "🎉 ImanSync is officially launched!",
-        "🕌 Full Quran with Bengali translation and audio",
-        "🧭 Accurate Qibla compass using your live location",
-        "🔔 Smart prayer time notifications with quiet hours",
-        "📿 Dua library with categories and personal Dua saving",
-        "🌙 Dark mode and Bengali language support",
-        "🐛 Fixed issue where prayer time notifications were not firing reliably in the background"
+        "🎉 Welcome to ImanSync! Your premium Islamic companion is now live.",
+        "🕌 Experience the complete Quran with rich audio playback and Bengali translations.",
+        "🧭 Discover precise, real-time Qibla direction powered by your device's location.",
+        "🔔 Stay consistent with smart, customizable prayer notifications and automated quiet hours.",
+        "📿 Explore a vast Dua library backed by the Hisnul Muslim API, and save personal Duas directly to your device storage.",
+        "🌙 Enjoy an ad-free, stunning interface crafted with a soothing dark mode and native dual-language support.",
+        "✨ Fluid navigation with modern sliding tab animations and polished micro-interactions."
       ],
       "bn": [
-        "🎉 ইমান সিঙ্ক আনুষ্ঠানিকভাবে চালু হয়েছে!",
-        "🕌 বাংলা অনুবাদ ও অডিওসহ সম্পূর্ণ কুরআন",
-        "🧭 লাইভ লোকেশন ব্যবহার করে সঠিক কিবলা কম্পাস",
-        "🔔 নীরব সময়সহ স্মার্ট নামাজের সময় নোটিফিকেশন",
-        "📿 শ্রেণিবিভাগসহ দোয়া লাইব্রেরি এবং ব্যক্তিগত দোয়া সংরক্ষণ",
-        "🌙 ডার্ক মোড এবং বাংলা ভাষার সমর্থন",
-        "🐛 ব্যাকগ্রাউন্ডে নামাজের নোটিফিকেশন সঠিকভাবে না আসার সমস্যা সমাধান করা হয়েছে"
+        "🎉 ইমান সিঙ্ক (ImanSync)-এর সাথে আপনার নতুন পথচলা শুরু হোক!",
+        "🕌 স্পষ্ট অডিও এবং বিশুদ্ধ বাংলা অনুবাদসহ সম্পূর্ণ আল-কুরআন।",
+        "🧭 আপনার বর্তমান লোকেশনের উপর ভিত্তি করে রিয়েল-টাইম কিবলা নির্দেশিকা।",
+        "🔔 স্মার্ট নামাজের নোটিফিকেশন, সাথে অটোমেটিক সাইলেন্ট মোড (Do Not Disturb)।",
+        "📿 হিসনুল মুসলিম এর দোয়া কালেকশন এবং পার্মানেন্ট স্টোরেজের মাধ্যমে নিজের দোয়া সেভ করার সুবিধা।",
+        "🌙 প্রিমিয়াম ডার্ক মোড এবং সম্পূর্ণ বাংলা ও ইংরেজি ভাষার সাপোর্ট।",
+        "✨ অ্যাপ জুড়ে আকর্ষণীয় স্মুথ অ্যানিমেশন এবং প্রিমিয়াম ইউজার ইন্টারফেস (UI)।"
       ]
     }
   ],
   "notification": {
     "id": "launch_welcome_v1",
-    "timestamp": "2026-05-25T00:00:00Z",
-    "en": "Welcome to ImanSync! 🌙 May this app bring you closer to Allah.",
-    "bn": "ইমান সিঙ্কে স্বাগতম! 🌙 এই অ্যাপটি আপনাকে আল্লাহর আরও কাছে নিয়ে যাক।"
+    "timestamp": "2026-06-01T00:00:00Z",
+    "en": "Welcome to ImanSync! 🌙 May this app become a meaningful companion on your spiritual path.",
+    "bn": "ইমান সিঙ্কে আপনাকে স্বাগতম! 🌙 এই অ্যাপটি আপনার প্রতিদিনের আমলের সঙ্গী হোক।"
   }
 }

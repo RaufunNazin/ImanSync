@@ -62,16 +62,6 @@ export default function DuaCard({
             )}
           </View>
 
-          <View style={styles.bgIconBox}>
-            {isMyDuas ? (
-              <Star size={32} color={colors.accent} opacity={0.15} />
-            ) : id === 'bookmarks' ? (
-              <Bookmark size={32} color={colors.highlight} opacity={0.15} fill={colors.highlight} />
-            ) : isCustom ? (
-              <FolderOpen size={32} color={colors.highlight} opacity={0.15} />
-            ) : null}
-          </View>
-
 
         </TouchableOpacity>
     </View>
@@ -96,7 +86,7 @@ const styles = StyleSheet.create({
     position: 'absolute',
     top: Spacing.three,
     left: Spacing.three,
-    padding: 4,
+    paddingHorizontal: 4,
     zIndex: 2,
   },
   content: {

@@ -296,8 +296,8 @@ export default function DuaScreen() {
             {/* Pinned Section */}
             {pinnedCategories.length > 0 && (
               <View style={[styles.section, { paddingLeft: Spacing.four }]}>
-                <Text style={[styles.sectionTitle, { color: colors.textSecondary, marginBottom: Spacing.three }]}>{t('dua.pinned')}</Text>
-                <View style={{ height: 110 }}>
+                <Text style={[styles.sectionTitle, { color: colors.textSecondary, marginVertical: Spacing.one }]}>{t('dua.pinned')}</Text>
+                <View>
                   <ScrollView
                     horizontal
                     showsHorizontalScrollIndicator={false}
@@ -307,7 +307,7 @@ export default function DuaScreen() {
                       <TouchableOpacity
                         key={item.id}
                         activeOpacity={0.8}
-                        style={{ width: 160, height: 90 }}
+                        style={{ width: 160 }}
                         onPress={() => handleCategoryPress(item)}
                         onLongPress={() => {
                           setSelectedCategory(item);

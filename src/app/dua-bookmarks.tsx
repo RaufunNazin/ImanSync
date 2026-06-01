@@ -87,7 +87,7 @@ export default function DuaBookmarksScreen() {
                     <Text style={[styles.itemTitle, { color: colors.text }]} numberOfLines={3}>
                       {title}
                     </Text>
-                    {dua.arabic && (
+                    {!!dua.arabic && (
                       <Text style={[styles.itemArabic, { color: colors.textSecondary }]} numberOfLines={2}>
                         {dua.arabic}
                       </Text>

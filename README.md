@@ -1,6 +1,6 @@
-# 🌙 DeenJourney
+# 🌙 ImanSync
 
-**DeenJourney** is a beautifully designed, premium, and feature-rich Islamic companion application built using React Native and Expo. It serves as a comprehensive tool to sync your daily spiritual journey with modern features like local notifications, prayer times, full Quran with audio playback, Qibla compass, and custom Duas.
+**ImanSync** is a beautifully designed, premium, and feature-rich Islamic companion application built using React Native and Expo. It serves as a comprehensive tool to sync your daily spiritual journey with modern features like local notifications, prayer times, full Quran with audio playback, Qibla compass, and custom Duas.
 
 ---
 
@@ -43,7 +43,7 @@
 
 1. Clone the repository and navigate to the directory:
    ```bash
-   cd DeenJourney
+   cd ImanSync
    ```
 
 2. Install dependencies:

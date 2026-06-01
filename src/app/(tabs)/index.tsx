@@ -10,6 +10,7 @@ import { Book, BookOpen, Compass, GraduationCap, MapPin, Moon, RotateCcw, Star, 
 import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import {
+  Image,
   ScrollView,
   StyleSheet,
   Text,
@@ -84,6 +85,16 @@ const RESTRICTED_WINDOWS = [
   { labelKey: 'restrict2', noteKey: 'restrict2Desc' },
   { labelKey: 'restrict3', noteKey: 'restrict3Desc' },
 ];
+
+const PRAYER_IMAGES: Record<string, any> = {
+  fajr: require('../../../assets/images/prayers/fajr.png'),
+  dhuha: require('../../../assets/images/prayers/dhuha.png'),
+  dhuhr: require('../../../assets/images/prayers/dhuhr.png'),
+  asr: require('../../../assets/images/prayers/asr.png'),
+  maghrib: require('../../../assets/images/prayers/maghrib.png'),
+  isha: require('../../../assets/images/prayers/isha.png'),
+  tahajjud: require('../../../assets/images/prayers/tahajjud.png'),
+};
 
 // ── Component ────────────────────────────────────────────────────────────────
 export default function HomeScreen() {
@@ -173,6 +184,7 @@ export default function HomeScreen() {
     if (!rawTimings.Fajr) return [];
     const keys = [
       { id: 'fajr', key: 'Fajr' },
+      { id: 'sunrise', key: 'Sunrise' },
       { id: 'dhuhr', key: 'Dhuhr' },
       { id: 'asr', key: 'Asr' },
       { id: 'maghrib', key: 'Maghrib' },
@@ -187,7 +199,7 @@ export default function HomeScreen() {
     }));
   }, [rawTimings, today, t, i18n.language]);
 
-  const { currentPrayer, nextPrayer, timeToNextMs, prayersWithStatus } =
+  const { currentPrayer, nextPrayer, timeToNextMs, prayersWithStatus, progressPercent } =
     useMemo(() => {
       if (fardPrayers.length === 0) {
         return {
@@ -195,6 +207,7 @@ export default function HomeScreen() {
           nextPrayer: { name: t('home.loading'), time: '' },
           timeToNextMs: 0,
           prayersWithStatus: [],
+          progressPercent: 0,
         };
       }
 
@@ -212,9 +225,30 @@ export default function HomeScreen() {
       }
 
       // After Isha — current is Isha, next is tomorrow's Fajr
-      const curP =
-        currentIdx >= 0 ? fardPrayers[currentIdx] : fardPrayers[fardPrayers.length - 1];
+      let curP = currentIdx >= 0 ? fardPrayers[currentIdx] : fardPrayers[fardPrayers.length - 1];
       const nxtP = nextIdx >= 0 ? fardPrayers[nextIdx] : fardPrayers[0];
+
+      if (curP.id === 'sunrise') {
+        curP = { ...curP, id: 'dhuha', name: t('prayerTimes.dhuha') };
+      } else if (curP.id === 'isha') {
+        if (rawTimings.Maghrib && rawTimings.Fajr) {
+          const isAfterMidnightDay = currentIdx === -1;
+          const maghribDate = parseTime(rawTimings.Maghrib, today);
+          if (isAfterMidnightDay) {
+            maghribDate.setDate(maghribDate.getDate() - 1);
+          }
+          
+          const fajrDate = parseTime(rawTimings.Fajr, today);
+          const nextFajr = isAfterMidnightDay ? fajrDate : new Date(fajrDate.getTime() + 24 * 3600000);
+          
+          const nightDuration = nextFajr.getTime() - maghribDate.getTime();
+          const tahajjudDate = new Date(maghribDate.getTime() + (nightDuration * 2 / 3));
+          
+          if (now >= tahajjudDate.getTime()) {
+            curP = { ...curP, id: 'tahajjud', name: t('prayerTimes.tahajjud') };
+          }
+        }
+      }
 
       const nxtDate =
         nextIdx >= 0
@@ -231,7 +265,15 @@ export default function HomeScreen() {
         return { ...p, status };
       });
 
-      return { currentPrayer: curP, nextPrayer: nxtP, timeToNextMs, prayersWithStatus };
+      let curStartDate = curP.date.getTime();
+      if (currentIdx === -1) {
+        curStartDate -= 24 * 3600000;
+      }
+      const totalDuration = nxtDate.getTime() - curStartDate;
+      const elapsed = now - curStartDate;
+      const progressPercent = Math.max(0, Math.min(100, (elapsed / totalDuration) * 100));
+
+      return { currentPrayer: curP, nextPrayer: nxtP, timeToNextMs, prayersWithStatus, progressPercent };
     }, [fardPrayers, currentTime]);
 
   const countdownStr = useMemo(() => formatCountdown(timeToNextMs), [timeToNextMs]);
@@ -371,66 +413,64 @@ export default function HomeScreen() {
 
         {/* ── Current Prayer Card (compact) ────────────────────── */}
         {prayersWithStatus.length > 0 ? (
-          <BlurView
-            intensity={50}
-            tint={colors.glassTint as any}
-            style={[styles.heroCard, { borderColor: colors.border }]}
-          >
-            <View style={styles.heroRow}>
-              <View style={styles.heroLeft}>
-                <Text style={[styles.heroLabel, { color: colors.textSecondary }]}>
-                  {t('home.currentPrayer')}
-                </Text>
-                <Text style={[styles.heroPrayerName, { color: colors.text }]}>
-                  {currentPrayer.name}
-                </Text>
-                <Text style={[styles.heroTime, { color: colors.textSecondary }]}>
-                  {currentPrayer.time}
-                </Text>
+          <View style={[styles.heroCard, { borderColor: colors.border, paddingVertical: 20, paddingHorizontal: 24, height: 130, flexDirection: 'row', backgroundColor: colors.backgroundElement }]}>
+            
+            {/* Left Side: Time & Progress */}
+            <View style={{ flex: 1, justifyContent: 'space-around', paddingVertical: 4 }}>
+              <Text style={{ fontFamily: Fonts.outfit, fontSize: 11, color: colors.textSecondary, textTransform: 'uppercase', letterSpacing: 1.5 }}>
+                {currentPrayer.name}
+              </Text>
+              
+              <View style={{ flexDirection: 'row', alignItems: 'baseline' }}>
+                {displayCountdown.split('').map((char, idx) => (
+                  <Text 
+                    key={idx} 
+                    style={[
+                      styles.heroCountdown, 
+                      { 
+                        color: scheme === 'dark' ? colors.accent : colors.highlight,
+                        fontSize: 34,
+                        width: char === ':' || char === ' ' ? 14 : 22,
+                        textAlign: 'center',
+                        fontWeight: 'bold'
+                      }
+                    ]}
+                  >
+                    {char}
+                  </Text>
+                ))}
               </View>
-              <View style={styles.heroRight}>
-                <Text style={[styles.heroNextLabel, { color: colors.textSecondary }]}>
-                  {t('home.next')} · {nextPrayer.name}
-                </Text>
-                <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'flex-end' }}>
-                  {displayCountdown.split('').map((char, idx) => (
-                    <Text 
-                      key={idx} 
-                      style={[
-                        styles.heroCountdown, 
-                        { 
-                          color: colors.accent,
-                          width: char === ':' || char === ' ' ? 12 : 22,
-                          textAlign: idx === displayCountdown.length - 1 ? 'right' : 'center'
-                        }
-                      ]}
-                    >
-                      {char}
-                    </Text>
-                  ))}
+
+              {/* Progress Bar */}
+              <View style={{ width: '100%' }}>
+                <View style={{ height: 4, backgroundColor: colors.border, borderRadius: 2, overflow: 'hidden' }}>
+                  <View style={{ height: '100%', width: `${progressPercent}%`, backgroundColor: colors.highlight, borderRadius: 2 }} />
                 </View>
-                <View style={styles.locationRow}>
-                  <MapPin size={12} color={colors.textSecondary} />
-                  <Text style={[styles.locationText, { color: colors.textSecondary }]}>
-                    {locationName}
+                <View style={{ flexDirection: 'row', justifyContent: 'space-between', marginTop: 4 }}>
+                  <Text style={{ fontFamily: Fonts.outfit, fontSize: 10, color: colors.textSecondary }}>
+                    {currentPrayer.time}
+                  </Text>
+                  <Text style={{ fontFamily: Fonts.outfit, fontSize: 10, color: colors.textSecondary }}>
+                    {nextPrayer.time}
                   </Text>
                 </View>
               </View>
             </View>
-          </BlurView>
+
+            {/* Right Side: Icon */}
+            <View style={{ width: 55, height: 55, marginLeft: 16, alignSelf: 'center', justifyContent: 'center', alignItems: 'center' }}>
+              <Image 
+                source={PRAYER_IMAGES[currentPrayer.id] || PRAYER_IMAGES['fajr']} 
+                style={{ width: '100%', height: '100%' }} 
+                resizeMode="contain" 
+              />
+            </View>
+          </View>
         ) : (
-          <View style={[styles.heroCard, { borderColor: colors.border, backgroundColor: colors.backgroundElement, borderWidth: 1, borderRadius: 24, padding: 20 }]}>
-            <View style={styles.heroRow}>
-              <View style={styles.heroLeft}>
-                <SkeletonBox width={60} height={12} borderRadius={6} color={colors.border} />
-                <SkeletonBox width={100} height={22} borderRadius={8} style={{ marginTop: 8 }} color={colors.border} />
-                <SkeletonBox width={70} height={12} borderRadius={6} style={{ marginTop: 6 }} color={colors.border} />
-              </View>
-              <View style={[styles.heroRight, { alignItems: 'flex-end' }]}>
-                <SkeletonBox width={80} height={12} borderRadius={6} color={colors.border} />
-                <SkeletonBox width={120} height={28} borderRadius={8} style={{ marginTop: 8 }} color={colors.border} />
-                <SkeletonBox width={80} height={10} borderRadius={5} style={{ marginTop: 6 }} color={colors.border} />
-              </View>
+          <View style={[styles.heroCard, { borderColor: colors.border, backgroundColor: colors.backgroundElement, borderWidth: 1, borderRadius: 24, padding: 24, height: 120 }]}>
+            <View style={{ flex: 1, flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' }}>
+              <SkeletonBox width={120} height={36} borderRadius={8} color={colors.border} />
+              <SkeletonBox width={100} height={36} borderRadius={8} color={colors.border} />
             </View>
           </View>
         )}
@@ -468,12 +508,12 @@ export default function HomeScreen() {
               style={[styles.timelineCard, { borderColor: colors.border }]}
             >
               <View style={styles.timelineRow}>
-                {prayersWithStatus.map((prayer, index) => {
+                {prayersWithStatus.filter(p => p.id !== 'sunrise').map((prayer, index, arr) => {
                   const isCurrent = prayer.status === 'current';
                   const isNext = prayer.status === 'next';
                   const isPast = prayer.status === 'past';
                   const isFirst = index === 0;
-                  const isLast = index === prayersWithStatus.length - 1;
+                  const isLast = index === arr.length - 1;
                   const dotColor = isCurrent
                     ? colors.highlight
                     : isNext
@@ -481,9 +521,8 @@ export default function HomeScreen() {
                     : isPast
                     ? colors.textSecondary
                     : colors.border;
-                  const lineColor = isPast
-                    ? colors.highlight + '88'
-                    : colors.border;
+                  const leftLineColor = (isPast || isCurrent) ? colors.highlight + '88' : colors.border;
+                  const rightLineColor = (isPast || isCurrent) ? colors.highlight + '88' : colors.border;
 
                   return (
                     <View key={prayer.id} style={styles.timelineCol}>
@@ -493,8 +532,6 @@ export default function HomeScreen() {
                           {
                             color: isCurrent
                               ? colors.highlight
-                              : isNext
-                              ? colors.text
                               : colors.textSecondary,
                             opacity: isPast ? 0.55 : 1,
                           },
@@ -506,7 +543,7 @@ export default function HomeScreen() {
                         <View
                           style={[
                             styles.timelineConnectorLeft,
-                            { backgroundColor: isFirst ? 'transparent' : lineColor },
+                            { backgroundColor: isFirst ? 'transparent' : leftLineColor },
                           ]}
                         />
                         <View
@@ -523,7 +560,7 @@ export default function HomeScreen() {
                         <View
                           style={[
                             styles.timelineConnectorRight,
-                            { backgroundColor: isLast ? 'transparent' : lineColor },
+                            { backgroundColor: isLast ? 'transparent' : rightLineColor },
                           ]}
                         />
                       </View>

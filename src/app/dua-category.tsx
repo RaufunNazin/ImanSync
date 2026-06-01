@@ -121,7 +121,7 @@ export default function DuaCategoryScreen() {
                       <Text style={[styles.itemTitle, { color: colors.text }]} numberOfLines={3}>
                         {translation}
                       </Text>
-                      {dua.arabic && (
+                      {!!dua.arabic && (
                         <Text style={[styles.itemArabic, { color: colors.textSecondary }]} numberOfLines={2}>
                           {dua.arabic}
                         </Text>

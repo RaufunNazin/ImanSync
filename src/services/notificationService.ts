@@ -159,11 +159,11 @@ export async function scheduleAllNotifications() {
 
 async function schedulePrayerDay(timings: any, targetDate: Date, isToday: boolean, quietHours: QuietHours) {
   const prayers = [
-    { id: 'fajr', name: 'Fajr', time: timings.Fajr },
-    { id: 'dhuhr', name: 'Dhuhr', time: timings.Dhuhr },
-    { id: 'asr', name: 'Asr', time: timings.Asr },
-    { id: 'maghrib', name: 'Maghrib', time: timings.Maghrib },
-    { id: 'isha', name: 'Isha', time: timings.Isha },
+    { id: 'fajr', name: i18n.t('prayerTimes.fajr'), time: timings.Fajr },
+    { id: 'dhuhr', name: i18n.t('prayerTimes.dhuhr'), time: timings.Dhuhr },
+    { id: 'asr', name: i18n.t('prayerTimes.asr'), time: timings.Asr },
+    { id: 'maghrib', name: i18n.t('prayerTimes.maghrib'), time: timings.Maghrib },
+    { id: 'isha', name: i18n.t('prayerTimes.isha'), time: timings.Isha },
   ];
 
   const now = new Date();

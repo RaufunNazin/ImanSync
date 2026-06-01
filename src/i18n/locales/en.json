@@ -44,7 +44,7 @@
     "duas": "Duas",
     "learnQuran": "Learn the Quran",
     "specialTimes": "Special Times",
-    "dailyInspiration": "Daily Inspiration",
+    "dailyInspiration": "Daily Verse",
     "restrictedTimes": "Prohibited Prayer Times",
     "suhur": "Suhur",
     "suhurDesc": "Fasting starts after Suhur",
@@ -312,10 +312,12 @@
   "prayerTimes": {
     "fajr": "Fajr",
     "sunrise": "Sunrise",
+    "dhuha": "Dhuha",
     "dhuhr": "Dhuhr",
     "asr": "Asr",
     "maghrib": "Maghrib",
-    "isha": "Isha"
+    "isha": "Isha",
+    "tahajjud": "Tahajjud"
   },
   "namesList": [
     {

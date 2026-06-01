@@ -26,8 +26,8 @@ const DEFAULT_SETTINGS: DuaSettings = {
   showBnTrans: true,
   showEnTranslit: true,
   showBnTranslit: true,
-  arabicFontSize: 28,
-  translationFontSize: 18,
+  arabicFontSize: 20,
+  translationFontSize: 16,
   translitFontSize: 16,
 };
 
@@ -208,13 +208,13 @@ export default function DuaDetailScreen() {
               style={[styles.settingsIconBtn, { backgroundColor: colors.backgroundElement, borderColor: colors.border }]} 
               onPress={toggleBookmark}
             >
-              <Bookmark size={20} color={isBookmarked ? colors.accent : colors.textSecondary} fill={isBookmarked ? colors.accent : 'transparent'} />
+              <Bookmark size={16} color={isBookmarked ? colors.accent : colors.textSecondary} fill={isBookmarked ? colors.accent : 'transparent'} />
             </TouchableOpacity>
             <TouchableOpacity 
               style={[styles.settingsIconBtn, { backgroundColor: colors.backgroundElement, borderColor: colors.border }]} 
               onPress={() => setSettingsVisible(true)}
             >
-              <Settings2 size={20} color={colors.textSecondary} />
+              <Settings2 size={16} color={colors.textSecondary} />
             </TouchableOpacity>
           </View>
         }
@@ -224,21 +224,21 @@ export default function DuaDetailScreen() {
         
         <BlurView intensity={40} tint={colors.glassTint as any} style={[styles.card, { borderColor: colors.border }]}>
           
-          {duaData.arabic && (
+          {!!duaData.arabic && (
             <View style={styles.section}>
               <Text style={[styles.arabic, { color: colors.text, fontSize: settings.arabicFontSize, lineHeight: settings.arabicFontSize * 1.6 }]}>{duaData.arabic}</Text>
             </View>
           )}
 
           {/* Transliterations */}
-          {(settings.showEnTranslit && duaData.latin) && (
+          {(settings.showEnTranslit && !!duaData.latin) && (
             <View style={[styles.section, { borderTopWidth: 1, borderTopColor: colors.border + '55', paddingTop: Spacing.four }]}>
               <Text style={[styles.languageTag, { color: colors.textSecondary }]}>{t('duaSettings.enTranslit')}</Text>
               <Text style={[styles.latin, { color: colors.textSecondary, fontSize: settings.translitFontSize, lineHeight: settings.translitFontSize * 1.5 }]}>{duaData.latin}</Text>
             </View>
           )}
 
-          {(isBanglaMode && settings.showBnTranslit && duaData.transliterationBn) && (
+          {(isBanglaMode && settings.showBnTranslit && !!duaData.transliterationBn) && (
             <View style={[styles.section, { borderTopWidth: 1, borderTopColor: colors.border + '55', paddingTop: Spacing.four }]}>
               <Text style={[styles.languageTag, { color: colors.textSecondary }]}>{t('duaSettings.bnTranslit')}</Text>
               <Text style={[styles.latin, { color: colors.textSecondary, fontSize: settings.translitFontSize, lineHeight: settings.translitFontSize * 1.5 }]}>{duaData.transliterationBn}</Text>
@@ -246,14 +246,14 @@ export default function DuaDetailScreen() {
           )}
 
           {/* Translations */}
-          {(settings.showEnTrans && duaData.translationEn) && (
+          {(settings.showEnTrans && !!duaData.translationEn) && (
             <View style={[styles.section, { borderTopWidth: 1, borderTopColor: colors.border + '55', paddingTop: Spacing.four }]}>
               <Text style={[styles.languageTag, { color: colors.textSecondary }]}>{t('duaSettings.enTrans')}</Text>
               <Text style={[styles.translation, { color: colors.text, fontSize: settings.translationFontSize, lineHeight: settings.translationFontSize * 1.5 }]}>{duaData.translationEn}</Text>
             </View>
           )}
 
-          {(isBanglaMode && settings.showBnTrans && duaData.translationBn) && (
+          {(isBanglaMode && settings.showBnTrans && !!duaData.translationBn) && (
             <View style={[styles.section, { borderTopWidth: 1, borderTopColor: colors.border + '55', paddingTop: Spacing.four }]}>
               <Text style={[styles.languageTag, { color: colors.textSecondary }]}>{t('duaSettings.bnTrans')}</Text>
               <Text style={[styles.translation, { color: colors.text, fontSize: settings.translationFontSize, lineHeight: settings.translationFontSize * 1.5 }]}>{duaData.translationBn}</Text>
@@ -261,7 +261,7 @@ export default function DuaDetailScreen() {
           )}
 
           {/* Source */}
-          {duaData.source && (
+          {!!duaData.source && (
             <View style={[styles.sourceBox, { backgroundColor: colors.backgroundElement, borderColor: colors.border }]}>
               <BookOpen size={16} color={colors.accent} />
               <Text style={[styles.sourceText, { color: colors.textSecondary }]}>{t('dua.source')}: {duaData.source}</Text>
@@ -287,13 +287,12 @@ const styles = StyleSheet.create({
     paddingRight: Spacing.four,
   },
   settingsIconBtn: {
-    width: 40,
-    height: 40,
-    borderRadius: 20,
+    width: 32,
+    height: 32,
+    borderRadius: 16,
     borderWidth: 1,
     alignItems: 'center',
     justifyContent: 'center',
-    marginTop: 8,
   },
   container: {
     padding: Spacing.four,
@@ -302,7 +301,7 @@ const styles = StyleSheet.create({
   card: {
     borderRadius: 24,
     borderWidth: 1,
-    padding: Spacing.six,
+    padding: Spacing.four,
     gap: Spacing.four,
     overflow: 'hidden',
   },

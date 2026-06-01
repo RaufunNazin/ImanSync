@@ -31,7 +31,7 @@ interface Settings {
 }
 
 const DEFAULT_SETTINGS: Settings = {
-  arabicFontSize: 28,
+  arabicFontSize: 20,
   translationFontSize: 16,
   showEnglish: true,
   showBangla: false,

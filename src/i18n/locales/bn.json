@@ -44,7 +44,7 @@
     "duas": "দোয়া",
     "learnQuran": "কুরআন শিক্ষা",
     "specialTimes": "বিশেষ সময়",
-    "dailyInspiration": "দৈনিক অনুপ্রেরণা",
+    "dailyInspiration": "দৈনিক আয়াত",
     "restrictedTimes": "মাকরুহ সময়",
     "suhur": "সাহরি",
     "suhurDesc": "সেহরির সময়",
@@ -314,10 +314,12 @@
   "prayerTimes": {
     "fajr": "ফজর",
     "sunrise": "সূর্যোদয়",
+    "dhuha": "চাশত",
     "dhuhr": "যোহর",
     "asr": "আসর",
     "maghrib": "মাগরিব",
-    "isha": "ইশা"
+    "isha": "ইশা",
+    "tahajjud": "তাহাজ্জুদ"
   },
   "namesList": [
     {

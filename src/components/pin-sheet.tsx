@@ -46,14 +46,14 @@ export default function PinSheet({
                   onClose();
                 }}
               >
-                <View style={[styles.iconBox, { backgroundColor: isPinned ? colors.red + '22' : colors.accent + '22' }]}>
+                <View style={[styles.iconBox, { backgroundColor: colors.accent + '22' }]}>
                   {isPinned ? (
-                    <BookmarkMinus size={20} color={colors.red} />
+                    <BookmarkMinus size={20} color={colors.accent} />
                   ) : (
                     <Bookmark size={20} color={colors.accent} />
                   )}
                 </View>
-                <Text style={[styles.actionText, { color: isPinned ? colors.red : colors.text }]}>
+                <Text style={[styles.actionText, { color: colors.text }]}>
                   {isPinned ? t('dua.unpin') : t('dua.pin')}
                 </Text>
               </TouchableOpacity>
