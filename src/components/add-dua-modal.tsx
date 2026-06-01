@@ -153,21 +153,23 @@ export default function AddDuaModal({ visible, onClose, onSave, colors }: AddDua
                 <Text style={[styles.label, { color: colors.textSecondary }]}>{t('dua.selectCategory', { defaultValue: 'Select Category' })}</Text>
                 
                 {isCreatingCategory ? (
-                  <View style={{ flexDirection: 'row', gap: 8 }}>
+                  <View style={{ gap: 8 }}>
                     <TextInput
-                      style={[styles.input, { flex: 1, color: colors.text, backgroundColor: colors.card, borderColor: colors.border }]}
+                      style={[styles.input, { color: colors.text, backgroundColor: colors.card, borderColor: colors.border }]}
                       placeholder={t('dua.categoryName', { defaultValue: 'Category Name' })}
                       placeholderTextColor={colors.textSecondary + '88'}
                       value={newCategoryName}
                       onChangeText={setNewCategoryName}
                       autoFocus
                     />
-                    <TouchableOpacity style={[styles.createBtn, { backgroundColor: colors.accent }]} onPress={handleCreateCategory}>
-                      <Text style={{ color: '#FFF', fontFamily: Fonts.outfit }}>{t('dua.createCategoryBtn', { defaultValue: 'Create' })}</Text>
-                    </TouchableOpacity>
-                    <TouchableOpacity style={[styles.createBtn, { backgroundColor: colors.card, borderColor: colors.border, borderWidth: 1 }]} onPress={() => setIsCreatingCategory(false)}>
-                      <Text style={{ color: colors.text, fontFamily: Fonts.outfit }}>{t('dua.cancel', { defaultValue: 'Cancel' })}</Text>
-                    </TouchableOpacity>
+                    <View style={{ flexDirection: 'row', gap: 8, justifyContent: 'flex-end' }}>
+                      <TouchableOpacity style={[styles.createBtn, { paddingVertical: 10, backgroundColor: colors.card, borderColor: colors.border, borderWidth: 1 }]} onPress={() => setIsCreatingCategory(false)}>
+                        <Text style={{ color: colors.text, fontFamily: Fonts.outfit }}>{t('dua.cancel', { defaultValue: 'Cancel' })}</Text>
+                      </TouchableOpacity>
+                      <TouchableOpacity style={[styles.createBtn, { paddingVertical: 10, backgroundColor: colors.accent }]} onPress={handleCreateCategory}>
+                        <Text style={{ color: '#FFF', fontFamily: Fonts.outfit }}>{t('dua.createCategoryBtn', { defaultValue: 'Create' })}</Text>
+                      </TouchableOpacity>
+                    </View>
                   </View>
                 ) : (
                   <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 8 }}>
@@ -321,14 +323,13 @@ const styles = StyleSheet.create({
   },
   title: {
     fontFamily: Fonts.outfit,
-    fontSize: 20,
+    fontSize: 18,
   },
   closeBtn: {
     padding: Spacing.two,
   },
   content: {
     paddingHorizontal: Spacing.five,
-    paddingBottom: Spacing.five,
     gap: Spacing.four,
   },
   typeSelector: {

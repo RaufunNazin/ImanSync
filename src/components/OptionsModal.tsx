@@ -157,7 +157,7 @@ const styles = StyleSheet.create({
   title: {
     fontFamily: Fonts.outfit,
     fontWeight: '600',
-    fontSize: 24,
+    fontSize: 18,
   },
   closeBtn: {
     padding: 4,

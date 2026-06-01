@@ -374,6 +374,7 @@ const styles = StyleSheet.create({
     textTransform: 'uppercase',
     letterSpacing: 1.2,
     opacity: 0.6,
+    height: 15,
     marginBottom: Spacing.two,
   },
   settingRow: {

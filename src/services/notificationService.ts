@@ -55,13 +55,20 @@ function getRandomAllowedTime(targetDate: Date, qh: QuietHours): Date {
   return date;
 }
 
-// Convert "04:30" (24h) to a Date object on a specific day
 function parseTimeString(timeStr: string, date: Date): Date {
   const clean = timeStr.split(' ')[0]; // remove " (EST)" if present
   const [h, m] = clean.split(':').map(Number);
   const d = new Date(date);
   d.setHours(h, m, 0, 0);
   return d;
+}
+
+function formatAMPM(date: Date) {
+  let hours = date.getHours();
+  let minutes = date.getMinutes();
+  const ampm = hours >= 12 ? ' PM' : ' AM';
+  hours = hours % 12 || 12;
+  return hours + ':' + String(minutes).padStart(2, '0') + ampm;
 }
 
 export async function setupChannels() {
@@ -179,9 +186,18 @@ async function schedulePrayerDay(timings: any, targetDate: Date, isToday: boolea
         timestamp: prayerTime.getTime(),
         alarmManager: { allowWhileIdle: true },
       };
+      
+      let endTimeStr = '';
+      if (current.id === 'fajr') endTimeStr = timings.Sunrise;
+      else if (current.id === 'dhuhr') endTimeStr = timings.Asr;
+      else if (current.id === 'asr') endTimeStr = timings.Maghrib;
+      else if (current.id === 'maghrib') endTimeStr = timings.Isha;
+      else if (current.id === 'isha') endTimeStr = timings.Midnight;
+
+      const endTimeFormatted = endTimeStr ? formatAMPM(parseTimeString(endTimeStr, targetDate)) : '';
+
       await notifee.createTriggerNotification({
-        title: i18n.t('notifications.prayerStartTitle', { prayer: current.name }),
-        body: i18n.t('notifications.prayerStartBody', { prayer: current.name }),
+        title: i18n.t('notifications.prayerStartTitle', { prayer: current.name, endTime: endTimeFormatted }),
         android: { showTimestamp: true, channelId: PRAYERS_CHANNEL, smallIcon: 'notification_icon', color: '#4c956c' , pressAction: { id: 'default' } },
         ios: { sound: 'bird.wav', badgeCount: 1 },
       }, trigger);
@@ -200,8 +216,7 @@ async function schedulePrayerDay(timings: any, targetDate: Date, isToday: boolea
           alarmManager: { allowWhileIdle: true },
         };
         await notifee.createTriggerNotification({
-          title: i18n.t('notifications.prayerEndTitle', { prayer: current.name }),
-          body: i18n.t('notifications.prayerEndBody', { nextPrayer: next.name }),
+          title: i18n.t('notifications.prayerEndTitle', { nextPrayer: next.name }),
           android: { showTimestamp: true, channelId: PRAYERS_CHANNEL, smallIcon: 'notification_icon', color: '#4c956c' , pressAction: { id: 'default' } },
           ios: { sound: 'bird.wav', badgeCount: 1 },
         }, trigger);
@@ -253,15 +268,7 @@ async function scheduleEventsDay(dayData: any, targetDate: Date, quietHours: Qui
     maghribDate.setHours(mh, mm, 0, 0);
     const iftarTime = new Date(maghribDate.getTime() + 1 * 60000);
     
-    // Format times for notification body
-    const formatAMPM = (date: Date) => {
-      let hours = date.getHours();
-      let minutes = date.getMinutes();
-      const ampm = hours >= 12 ? ' PM' : ' AM';
-      hours = hours % 12 || 12;
-      return hours + ':' + String(minutes).padStart(2, '0') + ampm;
-    };
-    
+
     // Sahri Reminder: 10 mins before Sahri time ends
     // ONLY if it's not Eid morning. Actually if hijriMonth===9, it's Ramadan.
     // But wait, the API might say 30th Ramadan, but it could be Eid. We just rely on API calendar.

@@ -208,7 +208,7 @@ const styles = StyleSheet.create({
   },
   title: {
     fontFamily: Fonts.outfit,
-    fontSize: 24,
+    fontSize: 18,
     marginBottom: Spacing.two,
     textAlign: 'center',
   },

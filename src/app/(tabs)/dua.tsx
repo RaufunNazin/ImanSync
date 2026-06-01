@@ -41,10 +41,6 @@ export default function DuaScreen() {
   const [pinnedIds, setPinnedIds] = useState<string[]>([]);
   const [loading, setLoading] = useState(true);
 
-  // Search State
-  const [searchQuery, setSearchQuery] = useState('');
-  const [searchResults, setSearchResults] = useState<UnifiedDuaItem[]>([]);
-  const [fetchingAll, setFetchingAll] = useState(false);
 
   // Pin Sheet State
   const [pinSheetVisible, setPinSheetVisible] = useState(false);
@@ -105,20 +101,7 @@ export default function DuaScreen() {
     .finally(() => setLoading(false));
   }, []);
 
-  useEffect(() => {
-    if (searchQuery.length > 0) {
-      const delayDebounceFn = setTimeout(() => {
-        setFetchingAll(true);
-        DuaService.searchHybrid(searchQuery)
-          .then(results => setSearchResults(results))
-          .catch(err => console.error("Error searching duas:", err))
-          .finally(() => setFetchingAll(false));
-      }, 500);
-      return () => clearTimeout(delayDebounceFn);
-    } else {
-      setSearchResults([]);
-    }
-  }, [searchQuery]);
+
 
   const togglePin = async () => {
     if (!selectedCategory) return;
@@ -175,8 +158,6 @@ export default function DuaScreen() {
     
   const unpinnedCategories = categories.filter(c => !pinnedIds.includes(c.id));
 
-  // Filter global duas
-  const filteredDuas = searchResults;
 
 
   const handleAddDua = async (duaData: Omit<UserDua, 'id' | 'createdAt'>) => {
@@ -208,7 +189,14 @@ export default function DuaScreen() {
   return (
     <GestureHandlerRootView style={{ flex: 1 }}>
       <SafeAreaView style={[styles.safeArea, { backgroundColor: colors.background }]}>
-        <PageHeader titleEn={t('dua.titleEn')} titleAr={t('dua.titleAr')} />
+        <PageHeader 
+          titleEn={t('dua.titleEn')} 
+          rightElement={
+            <TouchableOpacity onPress={() => router.push('/dua-search' as any)} hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}>
+              <Search size={22} color={colors.textSecondary} />
+            </TouchableOpacity>
+          }
+        />
       
       <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={styles.container} keyboardDismissMode="on-drag" keyboardShouldPersistTaps="handled">
 
@@ -229,71 +217,9 @@ export default function DuaScreen() {
           </TouchableOpacity>
         )}
 
-        {/* Global Search Bar */}
-        <View style={[styles.searchContainer, { backgroundColor: colors.backgroundElement, borderColor: colors.border }]}>
-          <Search size={20} color={colors.textSecondary} style={{ marginRight: 8 }} />
-          <TextInput
-            style={[styles.searchInput, { color: colors.text }]}
-            placeholder={t('duaSettings.searchPlaceholder')}
-            placeholderTextColor={colors.textSecondary}
-            value={searchQuery}
-            onChangeText={setSearchQuery}
-          />
-        </View>
-
-        {searchQuery.length > 0 ? (
-          <View style={styles.list}>
-            {fetchingAll ? (
-              <ActivityIndicator size="large" color={colors.accent} style={{ marginTop: 40 }} />
-            ) : filteredDuas.map(dua => {
-              let translation = i18n.language === 'bn' ? dua.translationBn : dua.translationEn;
-              if (!translation) translation = dua.name;
-
-              return (
-                <View key={dua.id} style={[styles.itemWrapper, { borderColor: colors.border, backgroundColor: colors.glassTint === 'light' ? 'rgba(255,255,255,0.7)' : 'rgba(0,0,0,0.5)' }]}>
-                  <TouchableOpacity
-                    style={styles.item}
-                    activeOpacity={0.7}
-                    onPress={() => {
-                      router.push({
-                        pathname: '/dua-detail',
-                        params: { 
-                          id: dua.id,
-                          categoryName: t('duaSettings.searchPlaceholder'), // Or generic title
-                          arabic: dua.arabic,
-                          latin: dua.latin || '',
-                          translationEn: dua.translationEn,
-                          translationBn: dua.translationBn,
-                          transliterationBn: '',
-                          source: dua.source || '',
-                        }
-                      });
-                    }}
-                  >
-                    <View style={styles.itemContent}>
-                      <Text style={[styles.itemTitle, { color: colors.text }]} numberOfLines={3}>
-                        {translation}
-                      </Text>
-                      {dua.arabic && (
-                        <Text style={[styles.itemArabic, { color: colors.textSecondary }]} numberOfLines={2}>
-                          {dua.arabic}
-                        </Text>
-                      )}
-                    </View>
-                    <ChevronRight size={20} color={colors.textSecondary} />
-                  </TouchableOpacity>
-                </View>
-              );
-            })}
-            {filteredDuas.length === 0 && !fetchingAll && (
-              <Text style={{ color: colors.textSecondary, textAlign: 'center', marginTop: 40, fontFamily: Fonts.outfit }}>
-                No matching duas found.
-              </Text>
-            )}
-          </View>
-        ) : (
-          <>
-            {/* Pinned Section */}
+        {/* Main Content */}
+        <View style={{ flex: 1 }}>
+          {/* Pinned Section */}
             {pinnedCategories.length > 0 && (
               <View style={[styles.section, { paddingLeft: Spacing.four }]}>
                 <Text style={[styles.sectionTitle, { color: colors.textSecondary, marginVertical: Spacing.one }]}>{t('dua.pinned')}</Text>
@@ -336,9 +262,7 @@ export default function DuaScreen() {
             )}
 
         {/* Main Grid Section */}
-        <View style={[styles.section, { padding: Spacing.four }]}>
-
-          
+        <View style={[styles.section, { padding: Spacing.four, paddingTop: 0 }]}>
           <View style={styles.grid}>
             {/* My Duas Tile - Always First */}
             <View style={styles.gridItem}>
@@ -390,8 +314,7 @@ export default function DuaScreen() {
             )}
           </View>
         </View>
-        </>
-      )}
+        </View>
       </ScrollView>
 
       {/* Pin Action Sheet */}
@@ -480,6 +403,7 @@ const styles = StyleSheet.create({
     padding: 0,
   },
   section: {
+    marginBottom: Spacing.four,
   },
   sectionTitle: {
     fontFamily: Fonts.outfit,
@@ -487,6 +411,7 @@ const styles = StyleSheet.create({
     textTransform: 'uppercase',
     letterSpacing: 1.2,
     opacity: 0.6,
+    height: 15,
     marginBottom: Spacing.two,
   },
   pinnedScroll: {

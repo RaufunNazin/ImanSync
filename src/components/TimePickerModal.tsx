@@ -16,7 +16,7 @@ interface TimePickerModalProps {
   title: string;
 }
 
-const RADIUS = 110;
+const RADIUS = 135;
 const PADDING = 25; // Distance of numbers from edge
 const NUMBER_RADIUS = RADIUS - PADDING;
 const CLOCK_DIAMETER = RADIUS * 2;
@@ -51,6 +51,7 @@ export default function TimePickerModal({
   selectedMinuteRef.current = selectedMinute;
 
   const fadeAnim = useRef(new Animated.Value(1)).current;
+  const clockCenterRef = useRef({ x: 0, y: 0 });
 
   const handleModeChange = (newMode: 'hour' | 'minute') => {
     if (newMode === modeRef.current) return;
@@ -100,8 +101,19 @@ export default function TimePickerModal({
     PanResponder.create({
       onStartShouldSetPanResponder: () => true,
       onMoveShouldSetPanResponder: () => true,
-      onPanResponderGrant: (evt) => handleTouch(evt.nativeEvent.locationX, evt.nativeEvent.locationY),
-      onPanResponderMove: (evt) => handleTouch(evt.nativeEvent.locationX, evt.nativeEvent.locationY),
+      onPanResponderGrant: (evt) => {
+        const { pageX, pageY, locationX, locationY } = evt.nativeEvent;
+        clockCenterRef.current = {
+          x: pageX - locationX + RADIUS,
+          y: pageY - locationY + RADIUS,
+        };
+        handleTouchOffset(locationX - RADIUS, locationY - RADIUS);
+      },
+      onPanResponderMove: (evt, gestureState) => {
+        const dx = gestureState.moveX - clockCenterRef.current.x;
+        const dy = gestureState.moveY - clockCenterRef.current.y;
+        handleTouchOffset(dx, dy);
+      },
       onPanResponderRelease: () => {
         if (modeRef.current === 'hour') {
           handleModeChange('minute');
@@ -111,11 +123,7 @@ export default function TimePickerModal({
     })
   ).current;
 
-  // Since PanResponder is on the touch overlay (which spans exactly the clock circle),
-  // center is at (RADIUS, RADIUS).
-  const handleTouch = (x: number, y: number) => {
-    const dx = x - RADIUS;
-    const dy = y - RADIUS;
+  const handleTouchOffset = (dx: number, dy: number) => {
     let angleRad = Math.atan2(dy, dx);
     let deg = angleRad * (180 / Math.PI) + 90;
     if (deg < 0) deg += 360;
@@ -141,10 +149,9 @@ export default function TimePickerModal({
   if (!visible) return null;
 
   // Generate Numbers to render
-  const renderNumbers = () => {
+  const renderNumbers = (isMask: boolean = false) => {
     const elements = [];
-    const count = mode === 'hour' ? 12 : 12; 
-    // for minutes, we only draw 00, 05, 10... etc (which is also 12 items)
+    const count = 12; 
     
     for (let i = 1; i <= count; i++) {
       let val = mode === 'hour' ? i : (i === 12 ? 0 : i * 5);
@@ -158,11 +165,9 @@ export default function TimePickerModal({
       // Localize numerals
       text = formatNumber(parseInt(text), i18n.language).padStart(mode === 'minute' ? 2 : 1, formatNumber(0, i18n.language));
 
-      const isActive = mode === 'hour' ? displayHour === val : selectedMinute % 5 === 0 && selectedMinute === val;
-
       elements.push(
         <View key={i} style={[styles.numberContainer, { left: x - 16, top: y - 16 }]}>
-          <Text style={[styles.numberText, { color: isActive ? '#FFF' : colors.text }]}>
+          <Text style={[styles.numberText, { color: isMask ? '#FFF' : colors.text }]}>
             {text}
           </Text>
         </View>
@@ -170,6 +175,9 @@ export default function TimePickerModal({
     }
     return elements;
   };
+
+  const circleX = RADIUS + Math.cos((currentAngle - 90) * (Math.PI / 180)) * NUMBER_RADIUS - 20;
+  const circleY = RADIUS + Math.sin((currentAngle - 90) * (Math.PI / 180)) * NUMBER_RADIUS - 20;
 
   return (
     <Modal visible={visible} transparent animationType="fade">
@@ -182,13 +190,25 @@ export default function TimePickerModal({
           {/* Header Display */}
           <View style={styles.headerDisplay}>
             <View style={styles.timeGroup}>
-              <TouchableOpacity onPress={() => handleModeChange('hour')}>
+              <TouchableOpacity 
+                style={[
+                  styles.headerTimeBtn,
+                  mode === 'hour' && { backgroundColor: colors.highlight + '33' }
+                ]}
+                onPress={() => handleModeChange('hour')}
+              >
                 <Text style={[styles.timeText, { color: mode === 'hour' ? colors.highlight : colors.textSecondary }]}>
                   {formatNumber(displayHour, i18n.language).padStart(2, formatNumber(0, i18n.language))}
                 </Text>
               </TouchableOpacity>
               <Text style={[styles.timeSeparator, { color: colors.textSecondary }]}>:</Text>
-              <TouchableOpacity onPress={() => handleModeChange('minute')}>
+              <TouchableOpacity 
+                style={[
+                  styles.headerTimeBtn,
+                  mode === 'minute' && { backgroundColor: colors.highlight + '33' }
+                ]}
+                onPress={() => handleModeChange('minute')}
+              >
                 <Text style={[styles.timeText, { color: mode === 'minute' ? colors.highlight : colors.textSecondary }]}>
                   {formatNumber(selectedMinute, i18n.language).padStart(2, formatNumber(0, i18n.language))}
                 </Text>
@@ -214,7 +234,7 @@ export default function TimePickerModal({
           </View>
           
           {/* Radial Clock Face */}
-          <View style={[styles.clockFace, { backgroundColor: colors.backgroundElement }]}>
+          <View style={[styles.clockFace, { backgroundColor: colors.backgroundElement, borderWidth: 1, borderColor: colors.border }]}>
             <Animated.View style={[StyleSheet.absoluteFillObject, { opacity: fadeAnim, justifyContent: 'center', alignItems: 'center' }]}>
               {renderNumbers()}
 
@@ -230,15 +250,20 @@ export default function TimePickerModal({
                 styles.handCircle, 
                 { 
                   backgroundColor: colors.highlight,
-                  left: RADIUS + Math.cos((currentAngle - 90) * (Math.PI / 180)) * NUMBER_RADIUS - 20,
-                  top: RADIUS + Math.sin((currentAngle - 90) * (Math.PI / 180)) * NUMBER_RADIUS - 20,
+                  left: circleX,
+                  top: circleY,
+                  overflow: 'hidden',
                 }
               ]}>
-                {mode === 'minute' && selectedMinute % 5 !== 0 && (
-                  <Text style={styles.minuteDotText}>
-                    {formatNumber(selectedMinute, i18n.language)}
-                  </Text>
-                )}
+                <View style={{
+                  position: 'absolute',
+                  left: -circleX,
+                  top: -circleY,
+                  width: CLOCK_DIAMETER,
+                  height: CLOCK_DIAMETER,
+                }}>
+                  {renderNumbers(true)}
+                </View>
               </View>
 
               {/* Center Dot */}
@@ -297,20 +322,28 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
     alignItems: 'center',
     width: '100%',
-    marginBottom: Spacing.six,
+    marginBottom: Spacing.two,
   },
   timeGroup: {
     flexDirection: 'row',
     alignItems: 'center',
   },
+  headerTimeBtn: {
+    paddingHorizontal: 12,
+    paddingVertical: 2,
+    borderRadius: 14,
+    minWidth: 76,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
   timeText: {
     fontFamily: Fonts.outfit,
-    fontSize: 48,
+    fontSize: 56,
   },
   timeSeparator: {
     fontFamily: Fonts.outfit,
-    fontSize: 48,
-    marginHorizontal: 4,
+    fontSize: 56,
+    marginHorizontal: 2,
     marginTop: -4,
   },
   amPmContainer: {
@@ -352,7 +385,7 @@ const styles = StyleSheet.create({
     height: 32,
     justifyContent: 'center',
     alignItems: 'center',
-    zIndex: 2, // Above hand line, below touch overlay
+    zIndex: 1, // Above hand line, below touch overlay
   },
   numberText: {
     fontFamily: Fonts.outfit,
@@ -371,7 +404,7 @@ const styles = StyleSheet.create({
     height: NUMBER_RADIUS * 2,
     justifyContent: 'center',
     alignItems: 'center',
-    zIndex: 1,
+    zIndex: 0,
   },
   handLine: {
     flex: 1,
@@ -385,14 +418,9 @@ const styles = StyleSheet.create({
     width: 40,
     height: 40,
     borderRadius: 20,
-    zIndex: 0,
+    zIndex: 2,
     justifyContent: 'center',
     alignItems: 'center',
-  },
-  minuteDotText: {
-    fontFamily: Fonts.outfit,
-    fontSize: 14,
-    color: '#FFF',
   },
   footer: {
     flexDirection: 'row',

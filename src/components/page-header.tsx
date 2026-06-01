@@ -7,7 +7,7 @@ import { useThemeStore } from '@/store/themeStore';
 
 interface PageHeaderProps {
   titleEn: string;
-  titleAr: string;
+  titleAr?: string; // Kept for backwards compatibility but not rendered
   /** Show a muted chevron-left that routes back to home */
   showBack?: boolean;
   /** Optional small subtitle shown below the English title (e.g. Hijri date) */
@@ -63,14 +63,8 @@ export default function PageHeader({
         ) : null}
       </View>
 
-      {/* Arabic title right */}
-      {rightElement ? (
-        rightElement
-      ) : titleAr ? (
-        <Text style={[styles.titleAr, { color: colors.textSecondary }]} numberOfLines={1}>
-          {titleAr}
-        </Text>
-      ) : null}
+      {/* Optional right element */}
+      {rightElement ? rightElement : null}
     </View>
   );
 }

@@ -5,9 +5,10 @@ import { formatNumber } from '@/utils/formatNumber';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { BlurView } from 'expo-blur';
 import * as Haptics from 'expo-haptics';
-import { useRouter } from 'expo-router';
-import { Book, BookOpen, Compass, GraduationCap, MapPin, Moon, RotateCcw, Star, Sunset } from 'lucide-react-native';
-import React, { useEffect, useMemo, useRef, useState } from 'react';
+import { LinearGradient } from 'expo-linear-gradient';
+import { useFocusEffect, useRouter } from 'expo-router';
+import { Book, BookOpen, Check, Compass, GraduationCap, MapPin, Moon, RotateCcw, Star, Sunset } from 'lucide-react-native';
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import {
   Image,
@@ -96,6 +97,15 @@ const PRAYER_IMAGES: Record<string, any> = {
   tahajjud: require('../../../assets/images/prayers/tahajjud.png'),
 };
 
+const FARD_PRAYER_IDS = ['fajr', 'dhuhr', 'asr', 'maghrib', 'isha'];
+
+const getLocalYYYYMMDD = (d: Date = new Date()) => {
+  const year = d.getFullYear();
+  const month = String(d.getMonth() + 1).padStart(2, '0');
+  const day = String(d.getDate()).padStart(2, '0');
+  return `${year}-${month}-${day}`;
+};
+
 // ── Component ────────────────────────────────────────────────────────────────
 export default function HomeScreen() {
   const scheme = useThemeStore((s) => s.theme);
@@ -107,9 +117,38 @@ export default function HomeScreen() {
   const [rawTimings, setRawTimings] = useState<Record<string, string>>({});
   const [hijriRaw, setHijriRaw] = useState<{day: string, monthEn: string, monthNumber: number, year: string} | null>(null);
   const [dailyVerse, setDailyVerse] = useState<DailyVerse | null>(null);
+  const [trackerHistory, setTrackerHistory] = useState<Record<string, Record<string, boolean>>>({});
   const prefs = usePreferencesStore();
   const locationCity = prefs.manualCity || prefs.location?.city || 'Dhaka';
   const locationName = getDistrictName(locationCity, i18n.language);
+
+  // Load tracker history
+  useFocusEffect(
+    useCallback(() => {
+      AsyncStorage.getItem('imansync_tracker_history').then(val => {
+        if (val) {
+          try { setTrackerHistory(JSON.parse(val)); } catch (e) {}
+        }
+      });
+    }, [])
+  );
+
+  const todayStr = getLocalYYYYMMDD();
+  const todayTasks = trackerHistory[todayStr] || {};
+
+  const togglePrayerTask = (prayerId: string) => {
+    const currentDayStr = getLocalYYYYMMDD();
+    setTrackerHistory(prev => {
+      const todayData = prev[currentDayStr] || {};
+      const nextToday = { ...todayData, [prayerId]: !todayData[prayerId] };
+      const nextHistory = { ...prev, [currentDayStr]: nextToday };
+      AsyncStorage.setItem('imansync_tracker_history', JSON.stringify(nextHistory));
+      return nextHistory;
+    });
+    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+  };
+
+  const isFardPrayer = (id: string) => FARD_PRAYER_IDS.includes(id);
 
   // Tick every second
   useEffect(() => {
@@ -203,8 +242,8 @@ export default function HomeScreen() {
     useMemo(() => {
       if (fardPrayers.length === 0) {
         return {
-          currentPrayer: { name: t('home.loading'), time: '' },
-          nextPrayer: { name: t('home.loading'), time: '' },
+          currentPrayer: { id: '', name: t('home.loading'), time: '' },
+          nextPrayer: { id: '', name: t('home.loading'), time: '' },
           timeToNextMs: 0,
           prayersWithStatus: [],
           progressPercent: 0,
@@ -226,7 +265,12 @@ export default function HomeScreen() {
 
       // After Isha — current is Isha, next is tomorrow's Fajr
       let curP = currentIdx >= 0 ? fardPrayers[currentIdx] : fardPrayers[fardPrayers.length - 1];
-      const nxtP = nextIdx >= 0 ? fardPrayers[nextIdx] : fardPrayers[0];
+      let nxtP = nextIdx >= 0 ? fardPrayers[nextIdx] : fardPrayers[0];
+
+      let nxtDate =
+        nextIdx >= 0
+          ? nxtP.date
+          : new Date(fardPrayers[0].date.getTime() + 24 * 3600000);
 
       if (curP.id === 'sunrise') {
         curP = { ...curP, id: 'dhuha', name: t('prayerTimes.dhuha') };
@@ -245,15 +289,19 @@ export default function HomeScreen() {
           const tahajjudDate = new Date(maghribDate.getTime() + (nightDuration * 2 / 3));
           
           if (now >= tahajjudDate.getTime()) {
-            curP = { ...curP, id: 'tahajjud', name: t('prayerTimes.tahajjud') };
+            curP = { ...curP, id: 'tahajjud', name: t('prayerTimes.tahajjud'), date: tahajjudDate };
+          } else {
+            nxtP = { 
+              id: 'tahajjud', 
+              name: t('prayerTimes.tahajjud'), 
+              time: formatAMPM(tahajjudDate, i18n.language), 
+              date: tahajjudDate, 
+              status: 'next' 
+            };
+            nxtDate = tahajjudDate;
           }
         }
       }
-
-      const nxtDate =
-        nextIdx >= 0
-          ? nxtP.date
-          : new Date(fardPrayers[0].date.getTime() + 24 * 3600000);
 
       const timeToNextMs = Math.max(0, nxtDate.getTime() - now);
 
@@ -266,7 +314,7 @@ export default function HomeScreen() {
       });
 
       let curStartDate = curP.date.getTime();
-      if (currentIdx === -1) {
+      if (curStartDate > now) {
         curStartDate -= 24 * 3600000;
       }
       const totalDuration = nxtDate.getTime() - curStartDate;
@@ -278,6 +326,7 @@ export default function HomeScreen() {
 
   const countdownStr = useMemo(() => formatCountdown(timeToNextMs), [timeToNextMs]);
   const displayCountdown = formatNumber(countdownStr, i18n.language);
+  const isCurrentPrayerDone = !!todayTasks[currentPrayer?.id];
 
   // Special times: Suhur (Imsak), Iftar (Maghrib), Tahajjud (Lastthird)
   const specialTimes: SpecialTime[] = useMemo(() => {
@@ -385,12 +434,59 @@ export default function HomeScreen() {
     return `${formatNumber(displayDay.toString(), i18n.language)} ${month} ${formatNumber(hijriRaw.year, i18n.language)} ${suffix}`;
   }, [hijriRaw, t, i18n.language, prefs.hijriOffset]);
 
+  const isMakruh = useMemo(() => {
+    if (!rawTimings.Sunrise || !rawTimings.Sunset || !rawTimings.Dhuhr) return false;
+    const n = currentTime.getTime();
+
+    const sunriseDate = parseTime(rawTimings.Sunrise, today);
+    const sunriseEnd = new Date(sunriseDate.getTime() + 15 * 60000);
+    if (n >= sunriseDate.getTime() && n <= sunriseEnd.getTime()) return true;
+
+    const dhuhrDate = parseTime(rawTimings.Dhuhr, today);
+    const zawaalStart = new Date(dhuhrDate.getTime() - 10 * 60000);
+    if (n >= zawaalStart.getTime() && n <= dhuhrDate.getTime()) return true;
+
+    const sunsetDate = parseTime(rawTimings.Sunset, today);
+    const paleStart = new Date(sunsetDate.getTime() - 15 * 60000);
+    if (n >= paleStart.getTime() && n <= sunsetDate.getTime()) return true;
+
+    return false;
+  }, [rawTimings, today, currentTime]);
+
+  const animatedGlowStyle = useAnimatedStyle(() => ({
+    opacity: withTiming(isCurrentPrayerDone ? 1 : 0, { duration: 600 }),
+  }));
+
+  const animatedRedGlowStyle = useAnimatedStyle(() => ({
+    opacity: withTiming((isMakruh && !isCurrentPrayerDone) ? 1 : 0, { duration: 600 }),
+  }));
+
   return (
     <SafeAreaView style={[styles.safeArea, { backgroundColor: colors.background }]}>
       <PageHeader
         titleEn="ImanSync"
-        titleAr={t('home.titleAr')}
         icon={require('../../../assets/images/zoomed-icon.png')}
+        rightElement={
+          <TouchableOpacity
+            activeOpacity={0.7}
+            onPress={() => router.push('/(tabs)/settings?highlight=location')}
+            style={{
+              flexDirection: 'row',
+              alignItems: 'center',
+              backgroundColor: colors.backgroundElement,
+              paddingHorizontal: 10,
+              paddingVertical: 4,
+              borderRadius: 12,
+              borderWidth: 1,
+              borderColor: colors.border,
+            }}
+          >
+            <MapPin size={12} color={colors.textSecondary} style={{ marginRight: 4 }} />
+            <Text style={{ fontFamily: Fonts.outfit, fontSize: 12, color: colors.textSecondary }} numberOfLines={1}>
+              {locationName}
+            </Text>
+          </TouchableOpacity>
+        }
       />
       <ScrollView
         showsVerticalScrollIndicator={false}
@@ -411,66 +507,111 @@ export default function HomeScreen() {
         </View>
 
 
-        {/* ── Current Prayer Card (compact) ────────────────────── */}
+        {/* ── Current Prayer Card ────────────────────── */}
         {prayersWithStatus.length > 0 ? (
-          <View style={[styles.heroCard, { borderColor: colors.border, paddingVertical: 20, paddingHorizontal: 24, height: 130, flexDirection: 'row', backgroundColor: colors.backgroundElement }]}>
-            
-            {/* Left Side: Time & Progress */}
-            <View style={{ flex: 1, justifyContent: 'space-around', paddingVertical: 4 }}>
-              <Text style={{ fontFamily: Fonts.outfit, fontSize: 11, color: colors.textSecondary, textTransform: 'uppercase', letterSpacing: 1.5 }}>
-                {currentPrayer.name}
-              </Text>
-              
-              <View style={{ flexDirection: 'row', alignItems: 'baseline' }}>
-                {displayCountdown.split('').map((char, idx) => (
-                  <Text 
-                    key={idx} 
-                    style={[
-                      styles.heroCountdown, 
-                      { 
-                        color: scheme === 'dark' ? colors.accent : colors.highlight,
-                        fontSize: 34,
-                        width: char === ':' || char === ' ' ? 14 : 22,
-                        textAlign: 'center',
-                        fontWeight: 'bold'
-                      }
-                    ]}
-                  >
-                    {char}
-                  </Text>
-                ))}
+          <TouchableOpacity 
+            activeOpacity={0.85}
+            onPress={() => togglePrayerTask(currentPrayer.id)}
+            style={{ marginBottom: Spacing.four }}
+          >
+            <BlurView
+              intensity={30}
+              tint={colors.glassTint as any}
+              style={[styles.heroCard, { borderColor: colors.border, paddingVertical: 20, paddingHorizontal: 24, overflow: 'hidden', marginBottom: 0 }]}
+            >
+              {/* Animated green glow from top-left when prayer is marked done */}
+              <Animated.View style={[{ position: 'absolute', top: 0, left: 0, width: '70%', height: '100%' }, animatedGlowStyle]}>
+                <LinearGradient
+                  colors={[colors.highlight + '30', colors.highlight + '08', 'transparent']}
+                  start={{ x: 0, y: 0 }}
+                  end={{ x: 1, y: 1 }}
+                  style={{ width: '100%', height: '100%' }}
+                />
+              </Animated.View>
+
+              {/* Animated red glow when it's Makruh time and not done */}
+              <Animated.View style={[{ position: 'absolute', top: 0, left: 0, width: '70%', height: '100%' }, animatedRedGlowStyle]}>
+                <LinearGradient
+                  colors={['#dc604030', '#dc604008', 'transparent']}
+                  start={{ x: 0, y: 0 }}
+                  end={{ x: 1, y: 1 }}
+                  style={{ width: '100%', height: '100%' }}
+                />
+              </Animated.View>
+
+              {/* Tiny text indicator — top right */}
+              <View style={{ position: 'absolute', top: 10, right: 14 }}>
+                <Text style={{ fontFamily: Fonts.outfit, fontSize: 9, color: isCurrentPrayerDone ? colors.highlight : colors.textSecondary, opacity: 0.7 }}>
+                  {isCurrentPrayerDone ? t('home.prayerDone') : t('home.tapToMark')}
+                </Text>
               </View>
 
-              {/* Progress Bar */}
-              <View style={{ width: '100%' }}>
-                <View style={{ height: 4, backgroundColor: colors.border, borderRadius: 2, overflow: 'hidden' }}>
-                  <View style={{ height: '100%', width: `${progressPercent}%`, backgroundColor: colors.highlight, borderRadius: 2 }} />
+              {/* Centered Countdown */}
+              <View style={{ alignItems: 'center', marginBottom: 0 }}>
+                <View style={{ flexDirection: 'row', alignItems: 'baseline' }}>
+                  {displayCountdown.split('').map((char, idx) => (
+                    <Text 
+                      key={idx} 
+                      style={[
+                        styles.heroCountdown, 
+                        { 
+                          color: (isMakruh && !isCurrentPrayerDone) ? '#dc6040' : (scheme === 'dark' ? colors.accent : colors.highlight),
+                          fontSize: 36,
+                          width: char === ':' || char === ' ' ? 14 : 22,
+                          textAlign: 'center',
+                          fontWeight: 'normal'
+                        }
+                      ]}
+                    >
+                      {char}
+                    </Text>
+                  ))}
                 </View>
-                <View style={{ flexDirection: 'row', justifyContent: 'space-between', marginTop: 4 }}>
-                  <Text style={{ fontFamily: Fonts.outfit, fontSize: 10, color: colors.textSecondary }}>
+              </View>
+
+              {/* Current + Next prayer labels above progress bar */}
+              <View style={{ flexDirection: 'row', justifyContent: 'space-between', marginBottom: 6 }}>
+                <View>
+                  <Text style={{ fontFamily: Fonts.outfit, fontSize: 11, color: colors.textSecondary, textTransform: 'uppercase', letterSpacing: 1 }}>
+                    {currentPrayer.name}
+                  </Text>
+                  <Text style={{ fontFamily: Fonts.outfit, fontSize: 10, color: colors.textSecondary, marginTop: 1 }}>
                     {currentPrayer.time}
                   </Text>
-                  <Text style={{ fontFamily: Fonts.outfit, fontSize: 10, color: colors.textSecondary }}>
+                </View>
+                <View style={{ alignItems: 'flex-end' }}>
+                  <Text style={{ fontFamily: Fonts.outfit, fontSize: 11, color: colors.textSecondary, textTransform: 'uppercase', letterSpacing: 1 }}>
+                    {nextPrayer.name}
+                  </Text>
+                  <Text style={{ fontFamily: Fonts.outfit, fontSize: 10, color: colors.textSecondary, marginTop: 1 }}>
                     {nextPrayer.time}
                   </Text>
                 </View>
               </View>
-            </View>
 
-            {/* Right Side: Icon */}
-            <View style={{ width: 55, height: 55, marginLeft: 16, alignSelf: 'center', justifyContent: 'center', alignItems: 'center' }}>
-              <Image 
-                source={PRAYER_IMAGES[currentPrayer.id] || PRAYER_IMAGES['fajr']} 
-                style={{ width: '100%', height: '100%' }} 
-                resizeMode="contain" 
-              />
-            </View>
-          </View>
+              {/* Full-width Dynamic Progress Bar */}
+              <View style={{ width: '100%' }}>
+                <View style={{ height: 4, backgroundColor: colors.border, borderRadius: 2, overflow: 'hidden' }}>
+                  <View style={{ height: '100%', width: `${progressPercent}%`, backgroundColor: progressPercent < 50 ? colors.highlight : progressPercent < 75 ? colors.accent : '#dc6040', borderRadius: 2 }} />
+                </View>
+              </View>
+            </BlurView>
+          </TouchableOpacity>
         ) : (
-          <View style={[styles.heroCard, { borderColor: colors.border, backgroundColor: colors.backgroundElement, borderWidth: 1, borderRadius: 24, padding: 24, height: 120 }]}>
-            <View style={{ flex: 1, flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' }}>
-              <SkeletonBox width={120} height={36} borderRadius={8} color={colors.border} />
-              <SkeletonBox width={100} height={36} borderRadius={8} color={colors.border} />
+          <View style={[styles.heroCard, { borderColor: colors.border, backgroundColor: colors.backgroundElement, borderWidth: 1, paddingVertical: 20, paddingHorizontal: 24, overflow: 'hidden', marginBottom: 0 }]}>
+            <SkeletonBox width={150} height={36} borderRadius={8} color={colors.border} style={{ alignSelf: 'center', marginBottom: 6 }} />
+            <View style={{ flexDirection: 'row', justifyContent: 'space-between', marginBottom: 6 }}>
+              <View>
+                <SkeletonBox width={60} height={12} borderRadius={6} color={colors.border} style={{ marginBottom: 4 }} />
+                <SkeletonBox width={45} height={10} borderRadius={5} color={colors.border} />
+              </View>
+              <View style={{ alignItems: 'flex-end' }}>
+                <SkeletonBox width={60} height={12} borderRadius={6} color={colors.border} style={{ marginBottom: 4 }} />
+                <SkeletonBox width={45} height={10} borderRadius={5} color={colors.border} />
+              </View>
+            </View>
+            <View style={{ width: '100%' }}>
+              <SkeletonBox width={'100%' as any} height={4} borderRadius={2} color={colors.border} />
             </View>
           </View>
         )}
@@ -610,21 +751,17 @@ export default function HomeScreen() {
                     tint={colors.glassTint as any}
                     style={[styles.specialCard, { borderColor: colors.border }]}
                   >
-                    <View style={styles.specialCardInner}>
-                      <View>
-                        <Text style={[styles.specialLabel, { color: colors.text }]}>
-                          {item.label}
-                        </Text>
-                        <Text style={[styles.specialSublabel, { color: colors.textSecondary }]}>
-                          {item.sublabel}
-                        </Text>
-                      </View>
-                      <View style={styles.specialBottom}>
-                        <Text style={[styles.specialTime, { color: colors.highlight }]}>
-                          {formatNumber(item.time, i18n.language)}
-                        </Text>
-                        <item.Icon size={16} color={colors.textSecondary} />
-                      </View>
+                    <View style={[styles.specialCardInner, { alignItems: 'center', justifyContent: 'center', paddingVertical: 16 }]}>
+                      <Text style={{ fontFamily: Fonts.outfit, fontSize: 20, color: colors.accent, marginBottom: 4 }}>
+                        {formatNumber(item.time, i18n.language).split(/( AM| PM)/).map((part, index) => 
+                          (part === ' AM' || part === ' PM') ? 
+                            <Text key={index} style={{ fontSize: 11, fontWeight: '500' }}>{part}</Text> : 
+                            part
+                        )}
+                      </Text>
+                      <Text style={{ fontFamily: Fonts.outfit, fontSize: 10, color: colors.textSecondary, textTransform: 'uppercase', letterSpacing: 1, textAlign: 'center' }}>
+                        {item.label}
+                      </Text>
                     </View>
                   </BlurView>
                 ))}
@@ -635,10 +772,9 @@ export default function HomeScreen() {
               <View style={styles.specialGrid}>
                 {[0,1,2].map(i => (
                   <View key={i} style={[styles.specialCard, { backgroundColor: colors.backgroundElement, borderColor: colors.border, borderWidth: 1, borderRadius: 20 }]}>
-                    <View style={[styles.specialCardInner, { justifyContent: 'space-between', paddingVertical: 14, paddingHorizontal: 14 }]}>
-                      <SkeletonBox width={64} height={14} borderRadius={7} color={colors.border} />
-                      <SkeletonBox width={40} height={10} borderRadius={5} style={{ marginTop: 6 }} color={colors.border} />
-                      <SkeletonBox width={52} height={18} borderRadius={8} style={{ marginTop: 12 }} color={colors.border} />
+                    <View style={[styles.specialCardInner, { alignItems: 'center', justifyContent: 'center', paddingVertical: 16 }]}>
+                      <SkeletonBox width={70} height={20} borderRadius={6} color={colors.border} style={{ marginBottom: 4 }} />
+                      <SkeletonBox width={45} height={10} borderRadius={5} color={colors.border} />
                     </View>
                   </View>
                 ))}
@@ -743,7 +879,7 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
-    marginBottom: Spacing.four,
+    marginBottom: Spacing.two,
   },
   arabicGreeting: {
     fontFamily: Fonts.arabic,
@@ -827,6 +963,7 @@ const styles = StyleSheet.create({
     textTransform: 'uppercase',
     letterSpacing: 1.2,
     opacity: 0.6,
+    height: 15,
   },
   subSectionLabel: {
     fontFamily: Fonts.outfit,
@@ -924,8 +1061,6 @@ const styles = StyleSheet.create({
     borderRadius: 18,
     borderWidth: 1,
     overflow: 'hidden',
-    padding: Spacing.two,
-    minHeight: 100,
   },
   specialCardInner: {
     flex: 1,

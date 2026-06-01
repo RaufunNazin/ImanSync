@@ -33,7 +33,6 @@ export default function QuranScreen() {
   const [loading, setLoading] = useState(true);
   const [lastReadSurah, setLastReadSurah] = useState({ id: '1', name: 'Al-Faatiha', ayah: 1 });
   const [lastReadJuz, setLastReadJuz] = useState({ id: '1', ayah: 1 });
-  const [searchQuery, setSearchQuery] = useState('');
   const [bookmarks, setBookmarks] = useState([]);
   const [showLearnBanner, setShowLearnBanner] = useState(true);
 
@@ -83,33 +82,19 @@ export default function QuranScreen() {
     }, [])
   );
 
-  const filteredSurahs = surahs.filter(s => {
-    const q = searchQuery.toLowerCase();
-    return (
-      s.name.toLowerCase().includes(q) || 
-      s.nameAr.toLowerCase().includes(q) || 
-      String(s.id).includes(q)
-    );
-  });
-
   return (
     <SafeAreaView style={[styles.safeArea, { backgroundColor: colors.background }]}>
       
-      <PageHeader titleEn={t('quran.titleEn')} titleAr={t('quran.titleAr')} />
+      <PageHeader 
+        titleEn={t('quran.titleEn')} 
+        rightElement={
+          <TouchableOpacity onPress={() => router.push('/quran-search' as any)} hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}>
+            <Search size={22} color={colors.textSecondary} />
+          </TouchableOpacity>
+        }
+      />
 
       <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={styles.container} keyboardDismissMode="on-drag" keyboardShouldPersistTaps="handled">
-        
-        {/* Search Bar */}
-        <View style={[styles.searchContainer, { backgroundColor: colors.backgroundElement, borderColor: colors.border }]}>
-          <Search size={20} color={colors.textSecondary} style={{ marginRight: 8 }} />
-          <TextInput
-            style={[styles.searchInput, { color: colors.text }]}
-            placeholder={t('quran.searchPlaceholder')}
-            placeholderTextColor={colors.textSecondary}
-            value={searchQuery}
-            onChangeText={setSearchQuery}
-          />
-        </View>
 
         {/* Word-by-Word Learn Mode CTA */}
         {showLearnBanner && (
@@ -180,7 +165,7 @@ export default function QuranScreen() {
           </View>
         ) : activeTab === 'surah' ? (
           <View style={styles.listContainer}>
-            {filteredSurahs.map((surah) => (
+            {surahs.map((surah) => (
               <BlurView intensity={30} tint={colors.glassTint as any} key={surah.id} style={[styles.surahRowWrapper, { borderColor: colors.border }]}>
                 <TouchableOpacity 
                   style={styles.surahRow} 
@@ -254,7 +239,7 @@ export default function QuranScreen() {
           </View>
         )}
 
-        <View style={{ height: Spacing.six + 20 }} />
+        <View style={{ height: Spacing.six + 40 }} />
       </ScrollView>
 
       {/* Floating Last Read Pill */}
@@ -393,7 +378,7 @@ const styles = StyleSheet.create({
   },
   tabBtn: {
     flex: 1,
-    paddingVertical: Spacing.one,
+    paddingBottom: Spacing.one,
     alignItems: 'center',
   },
   tabText: {

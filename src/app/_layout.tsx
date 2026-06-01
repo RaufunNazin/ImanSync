@@ -1,9 +1,10 @@
 import { DarkTheme, DefaultTheme, ThemeProvider } from '@react-navigation/native';
 import { Stack, SplashScreen } from 'expo-router';
-import React, { useEffect, useMemo, useRef, useState } from 'react';
+import React, { useEffect, useMemo, useRef, useState, useLayoutEffect } from 'react';
 import { StyleSheet, View, Animated, Platform } from 'react-native';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import * as NavigationBar from 'expo-navigation-bar';
+import * as SystemUI from 'expo-system-ui';
 import { Colors } from '@/constants/theme';
 import { SQLiteProvider } from 'expo-sqlite';
 import { migrateDbIfNeeded } from '@/lib/db';
@@ -105,6 +106,9 @@ export default function RootLayout() {
     const applyBars = () => {
       // expo-status-bar imperative — works on Android + iOS
       setStatusBarStyle(isDark ? 'light' : 'dark', true);
+      
+      // Sync the native root view background color to prevent white edge flashing during navigation
+      SystemUI.setBackgroundColorAsync(colors.background).catch(() => {});
 
       if (Platform.OS === 'android') {
         setStatusBarBackgroundColor(colors.background, true);
@@ -133,7 +137,7 @@ export default function RootLayout() {
   const fadeAnim = useRef(new Animated.Value(0)).current;
   const isMounted = useRef(false);
 
-  useEffect(() => {
+  useLayoutEffect(() => {
     if (isMounted.current) {
       fadeAnim.setValue(1);
       Animated.timing(fadeAnim, {
@@ -176,6 +180,8 @@ export default function RootLayout() {
           <View style={[styles.background, { backgroundColor: colors.background }]}>
             <Stack screenOptions={{ headerShown: false, contentStyle: { backgroundColor: 'transparent' } }}>
               <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
+              <Stack.Screen name="quran-search" options={{ animation: 'slide_from_right' }} />
+              <Stack.Screen name="dua-search" options={{ animation: 'slide_from_right' }} />
             </Stack>
             <AudioPlayerBar />
             <SystemAnnouncer />

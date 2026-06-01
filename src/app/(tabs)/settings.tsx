@@ -20,7 +20,7 @@ import { BlurView } from 'expo-blur';
 import * as Location from 'expo-location';
 import { useRouter, useLocalSearchParams } from 'expo-router';
 import * as Updates from 'expo-updates';
-import { AlertCircle, Bell, CheckCircle, ChevronRight, FileText, FolderLock, Globe, Info, MapPin, Moon, RefreshCw, Settings as SettingsIcon, Shield, X } from 'lucide-react-native';
+import { AlertCircle, Bell, BellOff, CalendarDays, Calculator, CheckCircle, ChevronRight, Clock, FileText, FolderLock, Globe, Info, ListTodo, MapPin, Moon, Palette, RefreshCw, Scale, Settings as SettingsIcon, Shield, Sunrise, Sunset, Timer, X } from 'lucide-react-native';
 import React, { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { ActivityIndicator, Alert, Linking, Modal, ScrollView, StyleSheet, Switch, Text, TouchableOpacity, View } from 'react-native';
@@ -128,6 +128,8 @@ export default function SettingsScreen() {
       setTimeout(() => {
         if (params.highlight === 'storage') {
           scrollViewRef.current?.scrollToEnd({ animated: true });
+        } else if (params.highlight === 'location') {
+          scrollViewRef.current?.scrollTo({ y: 250, animated: true });
         }
       }, 400);
 
@@ -284,7 +286,7 @@ export default function SettingsScreen() {
         <Text style={[styles.sectionTitle, { color: colors.textSecondary }]}>{t('settings.preferences')}</Text>
         <View style={[styles.card, { borderColor: colors.border, backgroundColor: colors.backgroundElement }]}>
           <SettingRow icon={Globe} title={t('settings.language')} value={i18n.language === 'bn' ? 'বাংলা' : 'English'} onPress={cycleLanguage} colors={colors} />
-          <SettingRow icon={Moon} title={t('settings.theme')} value={scheme === 'dark'} type="toggle" isLast={true} onPress={toggleDarkMode} colors={colors} />
+          <SettingRow icon={Palette} title={t('settings.theme')} value={scheme === 'dark'} type="toggle" isLast={true} onPress={toggleDarkMode} colors={colors} />
         </View>
 
         <Text style={[styles.sectionTitle, { color: colors.textSecondary, marginTop: Spacing.four }]}>{t('settings.notificationsTitle', { defaultValue: 'Notifications Settings' })}</Text>
@@ -292,14 +294,14 @@ export default function SettingsScreen() {
           <SettingRow icon={Bell} title={t('settings.masterToggle', { defaultValue: 'Master Toggle' })} value={prefs.notificationsEnabled} type="toggle" isLast={!prefs.notificationsEnabled} onPress={toggleNotifications} colors={colors} />
           {prefs.notificationsEnabled && (
             <>
-              <SettingRow icon={Bell} title={t('settings.prayerAlerts', { defaultValue: 'Prayer Alerts' })} value={prefs.prayerAlertsEnabled} type="toggle" onPress={togglePrayerAlerts} colors={colors} />
-              <SettingRow icon={Bell} title={t('settings.dailyReminders', { defaultValue: 'Daily Reminders' })} value={prefs.taskRemindersEnabled} type="toggle" onPress={toggleTaskReminders} colors={colors} />
+              <SettingRow icon={Clock} title={t('settings.prayerAlerts', { defaultValue: 'Prayer Alerts' })} value={prefs.prayerAlertsEnabled} type="toggle" onPress={togglePrayerAlerts} colors={colors} />
+              <SettingRow icon={ListTodo} title={t('settings.dailyReminders', { defaultValue: 'Daily Reminders' })} value={prefs.taskRemindersEnabled} type="toggle" onPress={toggleTaskReminders} colors={colors} />
               <SettingRow
-                icon={Moon}
+                icon={BellOff}
                 title={t('settings.doNotDisturb')}
                 value={prefs.quietHours.enabled}
                 type="toggle"
-                isLast={!prefs.quietHours.enabled}
+                isLast={true}
                 onPress={(v: boolean) => {
                   prefs.setPreferences({ quietHours: { ...prefs.quietHours, enabled: v } });
                   import('../../services/notificationService').then(s => s.scheduleAllNotifications());
@@ -307,31 +309,32 @@ export default function SettingsScreen() {
                 colors={colors}
               />
               {prefs.quietHours.enabled && (
-                <>
-                  <SettingRow
-                    icon={Moon}
-                    title={t('settings.dndFrom')}
-                    value={formatTime12h(prefs.quietHours.startHour, prefs.quietHours.startMinute, i18n.language)}
-                    type="navigate"
-                    onPress={() => {
-                      setPickerType('start');
-                      setPickerVisible(true);
-                    }}
-                    colors={colors}
-                  />
-                  <SettingRow
-                    icon={Moon}
-                    title={t('settings.dndTo')}
-                    value={formatTime12h(prefs.quietHours.endHour, prefs.quietHours.endMinute, i18n.language)}
-                    type="navigate"
-                    isLast={true}
-                    onPress={() => {
-                      setPickerType('end');
-                      setPickerVisible(true);
-                    }}
-                    colors={colors}
-                  />
-                </>
+                <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', paddingBottom: Spacing.three, paddingLeft: 52 }}>
+                  <Text style={[styles.settingTitle, { color: colors.textSecondary, fontSize: 13 }]}>
+                    {t('settings.dndSchedule')}
+                  </Text>
+                  <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6 }}>
+                    <TouchableOpacity 
+                      onPress={() => { setPickerType('start'); setPickerVisible(true); }}
+                      style={{ paddingHorizontal: 8, paddingVertical: 4, borderRadius: 6, backgroundColor: colors.border + '40' }}
+                    >
+                      <Text style={{ fontFamily: Fonts.outfit, fontSize: 13, color: colors.text }}>
+                        {formatTime12h(prefs.quietHours.startHour, prefs.quietHours.startMinute, i18n.language)}
+                      </Text>
+                    </TouchableOpacity>
+                    <Text style={{ fontFamily: Fonts.outfit, fontSize: 12, color: colors.textSecondary }}>
+                      {i18n.language === 'bn' ? 'থেকে' : 'to'}
+                    </Text>
+                    <TouchableOpacity 
+                      onPress={() => { setPickerType('end'); setPickerVisible(true); }}
+                      style={{ paddingHorizontal: 8, paddingVertical: 4, borderRadius: 6, backgroundColor: colors.border + '40' }}
+                    >
+                      <Text style={{ fontFamily: Fonts.outfit, fontSize: 13, color: colors.text }}>
+                        {formatTime12h(prefs.quietHours.endHour, prefs.quietHours.endMinute, i18n.language)}
+                      </Text>
+                    </TouchableOpacity>
+                  </View>
+                </View>
               )}
             </>
           )}
@@ -366,10 +369,11 @@ export default function SettingsScreen() {
               setOptionsModalType('location');
               setOptionsModalVisible(true);
             }}
+            highlight={highlightedRow === 'location'}
             colors={colors}
           />
           <SettingRow
-            icon={SettingsIcon}
+            icon={Calculator}
             title={t('settings.calcMethod')}
             value={t(CALC_METHODS.find(m => m.id === prefs.calcMethod)?.key as any || 'settings.calcMethod_1')}
             onPress={() => {
@@ -379,7 +383,7 @@ export default function SettingsScreen() {
             colors={colors}
           />
           <SettingRow
-            icon={SettingsIcon}
+            icon={Scale}
             title={t('settings.asrMethod', { defaultValue: 'Asr Method (Madhab)' })}
             value={t(MADHABS.find(m => m.id === prefs.madhab)?.key as any || 'settings.madhab_1')}
             onPress={() => {
@@ -389,7 +393,7 @@ export default function SettingsScreen() {
             colors={colors}
           />
           <SettingRow
-            icon={SettingsIcon}
+            icon={CalendarDays}
             title={t('settings.hijriOffset', { defaultValue: 'Hijri Date Adjustment' })}
             value={`${prefs.hijriOffset > 0 ? '+' : ''}${formatNumber(prefs.hijriOffset || 0, i18n.language)} ${t('settings.days', { defaultValue: 'Days' })}`}
             onPress={() => {
@@ -592,6 +596,7 @@ const styles = StyleSheet.create({
     textTransform: 'uppercase',
     letterSpacing: 1.2,
     opacity: 0.6,
+    height: 15,
     marginBottom: Spacing.two,
     marginLeft: 4,
   },

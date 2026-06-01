@@ -444,7 +444,7 @@ const styles = StyleSheet.create({
     borderBottomWidth: StyleSheet.hairlineWidth,
   },
   backBtn: { padding: 2 },
-  title: { fontFamily: Fonts.outfit, fontSize: 17 },
+  title: { fontFamily: Fonts.outfit, fontSize: 14 },
   loaderContainer: { flex: 1, justifyContent: 'center', alignItems: 'center' },
   list: { padding: Spacing.four, paddingTop: 0, gap: Spacing.four },
   
@@ -511,6 +511,7 @@ const styles = StyleSheet.create({
     textTransform: 'uppercase',
     letterSpacing: 1.2,
     opacity: 0.6,
+    height: 15,
     marginBottom: Spacing.two,
   },
   settingRow: {
