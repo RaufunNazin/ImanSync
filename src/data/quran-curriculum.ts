@@ -33,7 +33,7 @@ export const QURAN_CURRICULUM: Chapter[] = [
         type: 'grid',
         titleKey: 'learn.ch1_l1_title',
         items: [
-          { id: 'alif', arabic: 'ا', transliteration: 'Alif', transliterationBn: 'আলিফ', audioUrl: '' },
+          { id: 'alif', arabic: 'ا', transliteration: 'Alif', transliterationBn: 'আলিফ', audioUrl: 'https://cdn.islamic.network/quran/audio/64/ar.alafasy/1.mp3' }, // fallback dummy
           { id: 'baa', arabic: 'ب', transliteration: 'Baa', transliterationBn: 'বা', audioUrl: '' },
           { id: 'taa', arabic: 'ت', transliteration: 'Taa', transliterationBn: 'তা', audioUrl: '' },
           { id: 'thaa', arabic: 'ث', transliteration: 'Thaa', transliterationBn: 'ছা', audioUrl: '' },
@@ -128,6 +128,42 @@ export const QURAN_CURRICULUM: Chapter[] = [
     ]
   },
   {
+    id: 'ch_qalqalah',
+    titleKey: 'learn.ch_qalqalah_title',
+    descKey: 'learn.ch_qalqalah_desc',
+    lessons: [
+      {
+        id: 'ch_qalqalah_l1',
+        type: 'flashcard',
+        titleKey: 'learn.ch_qalqalah_l1_title',
+        items: [
+          { id: 'qal_qaaf', arabic: 'قْ', transliteration: 'Qaaf (Bounce)', transliterationBn: 'ক্বাফ', audioUrl: '' },
+          { id: 'qal_taa', arabic: 'طْ', transliteration: 'Taa (Bounce)', transliterationBn: 'ত্বা', audioUrl: '' },
+          { id: 'qal_baa', arabic: 'بْ', transliteration: 'Baa (Bounce)', transliterationBn: 'বা', audioUrl: '' },
+          { id: 'qal_jeem', arabic: 'جْ', transliteration: 'Jeem (Bounce)', transliterationBn: 'জীম', audioUrl: '' },
+          { id: 'qal_daal', arabic: 'دْ', transliteration: 'Daal (Bounce)', transliterationBn: 'দাল', audioUrl: '' },
+        ]
+      }
+    ]
+  },
+  {
+    id: 'ch_tajweed',
+    titleKey: 'learn.ch_tajweed_title',
+    descKey: 'learn.ch_tajweed_desc',
+    lessons: [
+      {
+        id: 'ch_tajweed_l1',
+        type: 'flashcard',
+        titleKey: 'learn.ch_tajweed_l1_title',
+        items: [
+          { id: 'idgham', arabic: 'إِدْغَام', transliteration: 'Idgham (Merging)', transliterationBn: 'ইদগাম (মিলিয়ে পড়া)', audioUrl: '' },
+          { id: 'ikhfa', arabic: 'إِخْفَاء', transliteration: 'Ikhfa (Hiding)', transliterationBn: 'ইখফা (লুকিয়ে পড়া)', audioUrl: '' },
+          { id: 'ghunnah', arabic: 'غُنَّة', transliteration: 'Ghunnah (Nasal Sound)', transliterationBn: 'গুন্নাহ (নাক দিয়ে শব্দ)', audioUrl: '' },
+        ]
+      }
+    ]
+  },
+  {
     id: 'ch4',
     titleKey: 'learn.ch4_title',
     descKey: 'learn.ch4_desc',
@@ -137,10 +173,10 @@ export const QURAN_CURRICULUM: Chapter[] = [
         type: 'grid',
         titleKey: 'learn.ch4_l1_title',
         items: [
-          { id: 'sukoon_ab', arabic: 'أَبْ', transliteration: 'Ab', transliterationBn: 'আব', audioUrl: '' },
+          { id: 'sukoon_ab', arabic: 'أَبْ', transliteration: 'Ab', transliterationBn: 'আব', audioUrl: 'https://audio.qurancdn.com/wbw/111_1_2.mp3' },
           { id: 'sukoon_um', arabic: 'أُمْ', transliteration: 'Um', transliterationBn: 'উম', audioUrl: '' },
-          { id: 'sukoon_in', arabic: 'إِنْ', transliteration: 'In', transliterationBn: 'ইন', audioUrl: '' },
-          { id: 'sukoon_qul', arabic: 'قُلْ', transliteration: 'Qul', transliterationBn: 'কুল', audioUrl: '' },
+          { id: 'sukoon_in', arabic: 'إِنْ', transliteration: 'In', transliterationBn: 'ইন', audioUrl: 'https://audio.qurancdn.com/wbw/108_1_1.mp3' },
+          { id: 'sukoon_qul', arabic: 'قُلْ', transliteration: 'Qul', transliterationBn: 'কুল', audioUrl: 'https://audio.qurancdn.com/wbw/112_1_1.mp3' },
         ]
       },
       {
@@ -148,9 +184,9 @@ export const QURAN_CURRICULUM: Chapter[] = [
         type: 'grid',
         titleKey: 'learn.ch4_l2_title',
         items: [
-          { id: 'tashdeed_rabbi', arabic: 'رَبِّ', transliteration: 'Rab-bi', transliterationBn: 'রাব্বি', audioUrl: '' },
-          { id: 'tashdeed_summa', arabic: 'ثُمَّ', transliteration: 'Thum-ma', transliterationBn: 'ছুম্মা', audioUrl: '' },
-          { id: 'tashdeed_inna', arabic: 'إِنَّ', transliteration: 'In-na', transliterationBn: 'ইন্না', audioUrl: '' },
+          { id: 'tashdeed_rabbi', arabic: 'رَبِّ', transliteration: 'Rab-bi', transliterationBn: 'রাব্বি', audioUrl: 'https://audio.qurancdn.com/wbw/1_2_2.mp3' },
+          { id: 'tashdeed_summa', arabic: 'ثُمَّ', transliteration: 'Thum-ma', transliterationBn: 'ছুম্মা', audioUrl: 'https://audio.qurancdn.com/wbw/102_4_1.mp3' },
+          { id: 'tashdeed_inna', arabic: 'إِنَّ', transliteration: 'In-na', transliterationBn: 'ইন্না', audioUrl: 'https://audio.qurancdn.com/wbw/108_1_1.mp3' },
         ]
       }
     ]
@@ -173,6 +209,27 @@ export const QURAN_CURRICULUM: Chapter[] = [
         titleKey: 'learn.ch5_l2_title',
         surahId: 112,
         ayahId: 1,
+      }
+    ]
+  },
+  {
+    id: 'ch_surah_prac',
+    titleKey: 'learn.ch_surah_prac_title',
+    descKey: 'learn.ch_surah_prac_desc',
+    lessons: [
+      {
+        id: 'ch_surah_prac_l1',
+        type: 'practice',
+        titleKey: 'learn.ch_surah_prac_l1_title',
+        surahId: 103, // Al-Asr
+        ayahId: 1,
+      },
+      {
+        id: 'ch_surah_prac_l2',
+        type: 'practice',
+        titleKey: 'learn.ch_surah_prac_l2_title',
+        surahId: 103, // Al-Asr
+        ayahId: 2,
       }
     ]
   },
@@ -203,11 +260,11 @@ export const QURAN_CURRICULUM: Chapter[] = [
         type: 'flashcard',
         titleKey: 'learn.ch7_l1_title',
         items: [
-          { id: 'vocab_allah', arabic: 'اللَّه', transliteration: 'Allah (God)', transliterationBn: 'আল্লাহ', audioUrl: '' },
-          { id: 'vocab_rabb', arabic: 'رَبّ', transliteration: 'Lord / Master', transliterationBn: 'রব', audioUrl: '' },
-          { id: 'vocab_rahman', arabic: 'رَحْمَٰن', transliteration: 'Most Merciful', transliterationBn: 'রহমান', audioUrl: '' },
-          { id: 'vocab_raheem', arabic: 'رَحِيم', transliteration: 'Especially Merciful', transliterationBn: 'রহিম', audioUrl: '' },
-          { id: 'vocab_malik', arabic: 'مَالِك', transliteration: 'Master / Owner', transliterationBn: 'মালিক', audioUrl: '' },
+          { id: 'vocab_allah', arabic: 'اللَّه', transliteration: 'Allah (God)', transliterationBn: 'আল্লাহ', audioUrl: 'https://audio.qurancdn.com/wbw/1_1_2.mp3' },
+          { id: 'vocab_rabb', arabic: 'رَبّ', transliteration: 'Lord / Master', transliterationBn: 'রব', audioUrl: 'https://audio.qurancdn.com/wbw/1_2_2.mp3' },
+          { id: 'vocab_rahman', arabic: 'رَحْمَٰن', transliteration: 'Most Merciful', transliterationBn: 'রহমান', audioUrl: 'https://audio.qurancdn.com/wbw/1_1_3.mp3' },
+          { id: 'vocab_raheem', arabic: 'رَحِيم', transliteration: 'Especially Merciful', transliterationBn: 'রহিম', audioUrl: 'https://audio.qurancdn.com/wbw/1_1_4.mp3' },
+          { id: 'vocab_malik', arabic: 'مَالِك', transliteration: 'Master / Owner', transliterationBn: 'মালিক', audioUrl: 'https://audio.qurancdn.com/wbw/1_4_1.mp3' },
         ]
       }
     ]

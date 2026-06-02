@@ -6,6 +6,9 @@ export function useAudioPlayer() {
   const player = useExpoAudioPlayer(null);
 
   async function playAudio(url: string | null | undefined, fallbackText?: string) {
+    // Stop any ongoing TTS before playing new audio
+    Speech.stop();
+
     if (!url) {
       if (fallbackText) {
         Speech.speak(fallbackText, { language: 'ar-SA' });
