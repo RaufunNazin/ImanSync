@@ -4,17 +4,16 @@ import PinSheet from '@/components/pin-sheet';
 import { Colors, Fonts, Spacing } from '@/constants/theme';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useRouter } from 'expo-router';
-import { ChevronRight, FolderLock, Search, X } from 'lucide-react-native';
+import { FolderLock, Search, X } from 'lucide-react-native';
 import React, { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import DuaService, { UnifiedDuaItem } from '@/services/duaService';
-import { ActivityIndicator, Dimensions, ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import DuaService from '@/services/duaService';
+import { Dimensions, ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import AddDuaModal from '@/components/add-dua-modal';
 import { loadMyDuas, saveMyDuas, saveMediaFile, UserDua } from '@/utils/my-duas-storage';
 import { Plus } from 'lucide-react-native';
 
-import { TextInput, GestureHandlerRootView } from 'react-native-gesture-handler';
-import DraggableFlatList, { ScaleDecorator } from 'react-native-draggable-flatlist';
+import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useThemeStore } from '@/store/themeStore';
 import SkeletonBox from '@/components/SkeletonBox';
@@ -34,7 +33,7 @@ const BANNER_DISMISSED_KEY = 'imansync_storage_banner_dismissed';
 export default function DuaScreen() {
   const scheme = useThemeStore((s) => s.theme);
   const colors = Colors[scheme === 'unspecified' ? 'light' : scheme];
-  const { t, i18n } = useTranslation();
+  const { t } = useTranslation();
   const router = useRouter();
 
   const [categories, setCategories] = useState<Category[]>([]);

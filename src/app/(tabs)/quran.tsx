@@ -7,19 +7,13 @@ import { useFocusEffect, useRouter } from 'expo-router';
 import { Bookmark, BookOpen, ChevronRight, GraduationCap, Search, X } from 'lucide-react-native';
 import React, { useCallback, useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { ActivityIndicator, ScrollView, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native';
+import { ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useThemeStore } from '@/store/themeStore';
 import { useAudioStore } from '@/store/audioStore';
 import SkeletonBox from '@/components/SkeletonBox';
 
-interface Surah {
-  id: number;
-  name: string;
-  nameAr: string;
-  verses: number;
-  type: string;
-}
+
 
 export default function QuranScreen() {
   const scheme = useThemeStore((s) => s.theme);

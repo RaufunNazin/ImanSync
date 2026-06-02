@@ -7,20 +7,18 @@ import { BlurView } from 'expo-blur';
 import * as Haptics from 'expo-haptics';
 import { LinearGradient } from 'expo-linear-gradient';
 import { useFocusEffect, useRouter } from 'expo-router';
-import { Book, BookOpen, CalendarDays, Check, Compass, GraduationCap, MapPin, Moon, RotateCcw, Star, Sunset } from 'lucide-react-native';
-import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { Book, BookOpen, CalendarDays, Compass, GraduationCap, MapPin } from 'lucide-react-native';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import {
-  Image,
   ScrollView,
   StyleSheet,
   Text,
   TouchableOpacity,
   View
 } from 'react-native';
-import Animated, { useAnimatedProps, useAnimatedStyle, useSharedValue, withSpring, withTiming } from 'react-native-reanimated';
+import Animated, { useAnimatedStyle, withTiming } from 'react-native-reanimated';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import Svg, { Circle, G } from 'react-native-svg';
 import { useThemeStore } from '@/store/themeStore';
 import { usePreferencesStore } from '@/store/preferencesStore';
 import SkeletonBox from '@/components/SkeletonBox';
@@ -36,9 +34,7 @@ interface PrayerEntry {
 
 interface SpecialTime {
   label: string;
-  sublabel: string;
   time: string;
-  Icon: React.ComponentType<{ size: number; color: string }>;
 }
 
 interface RestrictedTime {
@@ -80,24 +76,10 @@ const formatCountdown = (ms: number): string => {
   return `${String(h).padStart(2, '0')}:${String(m).padStart(2, '0')}:${String(s).padStart(2, '0')}`;
 };
 
-// The three forbidden/restricted prayer windows
-const RESTRICTED_WINDOWS = [
-  { labelKey: 'restrict1', noteKey: 'restrict1Desc' },
-  { labelKey: 'restrict2', noteKey: 'restrict2Desc' },
-  { labelKey: 'restrict3', noteKey: 'restrict3Desc' },
-];
 
-const PRAYER_IMAGES: Record<string, any> = {
-  fajr: require('../../../assets/images/prayers/fajr.png'),
-  dhuha: require('../../../assets/images/prayers/dhuha.png'),
-  dhuhr: require('../../../assets/images/prayers/dhuhr.png'),
-  asr: require('../../../assets/images/prayers/asr.png'),
-  maghrib: require('../../../assets/images/prayers/maghrib.png'),
-  isha: require('../../../assets/images/prayers/isha.png'),
-  tahajjud: require('../../../assets/images/prayers/tahajjud.png'),
-};
 
-const FARD_PRAYER_IDS = ['fajr', 'dhuhr', 'asr', 'maghrib', 'isha'];
+
+
 
 const getLocalYYYYMMDD = (d: Date = new Date()) => {
   const year = d.getFullYear();
@@ -148,7 +130,7 @@ export default function HomeScreen() {
     Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
   };
 
-  const isFardPrayer = (id: string) => FARD_PRAYER_IDS.includes(id);
+
 
   // Tick every second
   useEffect(() => {
@@ -367,21 +349,15 @@ export default function HomeScreen() {
     return [
       {
         label: t('home.suhur'),
-        sublabel: t('home.suhurDesc'),
         time: hideSahri ? '--:--' : formatAMPM(suhurDate, i18n.language),
-        Icon: Moon,
       },
       {
         label: t('home.iftar'),
-        sublabel: t('home.iftarDesc'),
         time: hideIftar ? '--:--' : formatAMPM(iftarDate, i18n.language),
-        Icon: Sunset,
       },
       {
         label: t('home.tahajjud'),
-        sublabel: t('home.tahajjudDesc'),
         time: formatAMPM(tahajjudDate, i18n.language),
-        Icon: Star,
       },
     ];
   }, [rawTimings, today, t, i18n.language, hijriRaw]);

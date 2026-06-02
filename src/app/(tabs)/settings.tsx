@@ -20,7 +20,7 @@ import { BlurView } from 'expo-blur';
 import * as Location from 'expo-location';
 import { useRouter, useLocalSearchParams } from 'expo-router';
 import * as Updates from 'expo-updates';
-import { AlertCircle, Bell, BellOff, CalendarDays, Calculator, CheckCircle, ChevronRight, Clock, FileText, FolderLock, Globe, Info, ListTodo, MapPin, Moon, Palette, RefreshCw, Scale, Settings as SettingsIcon, Shield, Sunrise, Sunset, Timer, X } from 'lucide-react-native';
+import { AlertCircle, Bell, BellOff, CalendarDays, Calculator, CheckCircle, ChevronRight, Clock, FileText, FolderLock, Globe, Info, ListTodo, MapPin, Palette, RefreshCw, Scale, Shield, X } from 'lucide-react-native';
 import React, { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { ActivityIndicator, Alert, Linking, Modal, ScrollView, StyleSheet, Switch, Text, TouchableOpacity, View } from 'react-native';
@@ -253,7 +253,7 @@ export default function SettingsScreen() {
     try {
       if (action === 'enable') {
         // initPermanentStorage opens the SAF picker
-        const currentUri = await getStorageUri();
+        await getStorageUri();
         const result = await initPermanentStorage();
         if (!result.cancelled) {
           // Migrate internal duas to permanent
@@ -264,7 +264,7 @@ export default function SettingsScreen() {
           await AsyncStorage.setItem('imansync_storage_banner_dismissed', 'true');
         }
       } else if (action === 'disable') {
-        const currentUri = await getStorageUri();
+        await getStorageUri();
         await switchToInternalMode();
         setStorageMode('internal');
         // Reset banner dismiss so it re-shows

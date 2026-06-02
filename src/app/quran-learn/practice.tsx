@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
-import { View, Text, StyleSheet, ScrollView, TouchableOpacity, ActivityIndicator, Dimensions } from 'react-native';
+import { View, Text, StyleSheet, ScrollView, TouchableOpacity, ActivityIndicator } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { useLocalSearchParams, useRouter } from 'expo-router';
+import { useLocalSearchParams } from 'expo-router';
 import { Colors, Fonts, Spacing } from '@/constants/theme';
 import PageHeader from '@/components/page-header';
 import { BlurView } from 'expo-blur';
@@ -32,12 +32,12 @@ export default function QuranLearnScreen() {
   const [loading, setLoading] = useState(true);
   const [selectedWord, setSelectedWord] = useState<Word | null>(null);
   
-  const [currentSurahId, setCurrentSurahId] = useState(parseInt(surahId, 10) || 1);
+  const [currentSurahId] = useState(parseInt(surahId, 10) || 1);
   const [currentAyah, setCurrentAyah] = useState(parseInt(ayahId, 10) || 1);
   const [ayahAudioUrl, setAyahAudioUrl] = useState<string | null>(null);
   
-  const { playAudio, isPlaying } = useAudioPlayer();
-  const { t, i18n } = useTranslation();
+  const { playAudio } = useAudioPlayer();
+  const { i18n } = useTranslation();
 
   const fetchAyah = async (sId: number, aId: number) => {
     setLoading(true);

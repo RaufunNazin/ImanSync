@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { ActivityIndicator, ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import { ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Colors, Fonts, Spacing } from '@/constants/theme';
@@ -12,16 +12,7 @@ import SkeletonBox from '@/components/SkeletonBox';
 import DuaService, { UnifiedDuaItem } from '@/services/duaService';
 import { loadMyDuas } from '@/utils/my-duas-storage';
 
-interface DuaItem {
-  id: number;
-  category: number;
-  arabic: string;
-  latin: string;
-  translation: string;
-  notes: string | null;
-  fawaid: string | null;
-  source: string;
-}
+
 
 export default function DuaCategoryScreen() {
   const { id, name, isCustom } = useLocalSearchParams<{ id: string; name: string; isCustom?: string }>();

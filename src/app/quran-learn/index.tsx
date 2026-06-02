@@ -9,7 +9,7 @@ import { useTranslation } from 'react-i18next';
 import { useThemeStore } from '@/store/themeStore';
 import { QURAN_CURRICULUM } from '@/data/quran-curriculum';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import { BookOpen, CheckCircle, ChevronRight, Lock } from 'lucide-react-native';
+import { BookOpen, CheckCircle, ChevronRight } from 'lucide-react-native';
 
 export default function LearnQuranHubScreen() {
   const scheme = useThemeStore((s) => s.theme);
@@ -47,7 +47,7 @@ export default function LearnQuranHubScreen() {
       />
       <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={styles.container}>
         
-        {QURAN_CURRICULUM.map((chapter, chapterIndex) => (
+        {QURAN_CURRICULUM.map((chapter) => (
           <View key={chapter.id} style={styles.chapterSection}>
             <View style={styles.chapterHeader}>
               <Text style={[styles.chapterTitle, { color: colors.text }]}>{t(chapter.titleKey)}</Text>

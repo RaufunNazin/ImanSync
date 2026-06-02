@@ -1,14 +1,14 @@
 import React, { useEffect, useState } from 'react';
-import { ActivityIndicator, Dimensions, Platform, ScrollView, StyleSheet, Text, TouchableOpacity, View, TextInput } from 'react-native';
+import { ActivityIndicator, ScrollView, StyleSheet, Text, TouchableOpacity, View, TextInput } from 'react-native';
 import { useRouter } from 'expo-router';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Colors, Fonts, Spacing } from '@/constants/theme';
 import PageHeader from '@/components/page-header';
 import { useTranslation } from 'react-i18next';
 import { BlurView } from 'expo-blur';
-import { Plus, Trash2, Search, FolderLock, X, AlertTriangle } from 'lucide-react-native';
+import { Search, FolderLock, X, AlertTriangle } from 'lucide-react-native';
 import {
-  loadMyDuas, saveMyDuas, saveMediaFile, UserDua, getMediaUri,
+  loadMyDuas, UserDua,
   getStorageMode, clearRelinkFlag, initPermanentStorage, migrateDuas, getStorageUri,
 } from '@/utils/my-duas-storage';
 import AsyncStorage from '@react-native-async-storage/async-storage';

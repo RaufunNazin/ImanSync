@@ -8,7 +8,7 @@ import * as SystemUI from 'expo-system-ui';
 import { Colors } from '@/constants/theme';
 import { SQLiteProvider } from 'expo-sqlite';
 import { migrateDbIfNeeded } from '@/lib/db';
-import { setupNotificationChannels } from '@/lib/notifications';
+
 import { useFonts } from 'expo-font';
 import { Outfit_400Regular, Outfit_500Medium, Outfit_600SemiBold } from '@expo-google-fonts/outfit';
 import { NotoNaskhArabic_400Regular, NotoNaskhArabic_700Bold } from '@expo-google-fonts/noto-naskh-arabic';

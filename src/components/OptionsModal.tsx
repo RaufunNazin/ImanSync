@@ -9,7 +9,7 @@ import {
   ScrollView,
   TextInput,
 } from 'react-native';
-import { BlurView } from 'expo-blur';
+
 import { Check, Search, X } from 'lucide-react-native';
 import { useTranslation } from 'react-i18next';
 import { Fonts } from '@/constants/theme';

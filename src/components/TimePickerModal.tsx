@@ -109,7 +109,7 @@ export default function TimePickerModal({
         };
         handleTouchOffset(locationX - RADIUS, locationY - RADIUS);
       },
-      onPanResponderMove: (evt, gestureState) => {
+      onPanResponderMove: (_evt, gestureState) => {
         const dx = gestureState.moveX - clockCenterRef.current.x;
         const dy = gestureState.moveY - clockCenterRef.current.y;
         handleTouchOffset(dx, dy);

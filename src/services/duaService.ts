@@ -1,7 +1,7 @@
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import { UserDua, loadCustomCategories, loadMyDuas } from '@/utils/my-duas-storage';
 
-import i18n from '@/i18n';
+
+
 import hisnulEnMappingRaw from '@/data/hisnul_en.json';
 
 // Static mapping for English (to be populated later)

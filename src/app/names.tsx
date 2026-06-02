@@ -1,8 +1,7 @@
 import { Colors, Fonts, Spacing } from '@/constants/theme';
 import PageHeader from '@/components/page-header';
 import { BlurView } from 'expo-blur';
-import { useRouter } from 'expo-router';
-import React, { useEffect, useState } from 'react';
+import React from 'react';
 import { FlatList, StyleSheet, Text, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useTranslation } from 'react-i18next';
@@ -19,7 +18,7 @@ interface NameItem {
 export default function NamesScreen() {
   const scheme = useThemeStore((s) => s.theme);
   const colors = Colors[scheme === 'unspecified' ? 'light' : scheme];
-  const router = useRouter();
+
   const { t, i18n } = useTranslation();
 
   const names: NameItem[] = t('namesList', { returnObjects: true }) as NameItem[];

@@ -25,7 +25,6 @@
         "monochromeImage": "./assets/images/android-icon-monochrome.png"
       },
       "predictiveBackGestureEnabled": false,
-      "enableProguardInRelease": true,
       "permissions": [
         "android.permission.INTERNET",
         "android.permission.READ_EXTERNAL_STORAGE",
@@ -91,7 +90,8 @@
         }
       ],
       "expo-video",
-      "./plugins/withAndroidSound.js"
+      "./plugins/withAndroidSound.js",
+      "./plugins/fixAndroidManifestWarnings.js"
     ],
     "experiments": {
       "typedRoutes": true,

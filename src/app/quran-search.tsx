@@ -2,7 +2,7 @@ import { Colors, Fonts, Spacing } from '@/constants/theme';
 import { formatNumber } from '@/utils/formatNumber';
 import { BlurView } from 'expo-blur';
 import { useRouter } from 'expo-router';
-import { ChevronLeft, Search } from 'lucide-react-native';
+import { ChevronLeft } from 'lucide-react-native';
 import React, { useEffect, useState, useRef } from 'react';
 import { useTranslation } from 'react-i18next';
 import { 
@@ -22,11 +22,9 @@ import { useThemeStore } from '@/store/themeStore';
 import Animated, { 
   FadeIn, 
   FadeOut, 
-  SlideInRight,
   useAnimatedStyle,
   useSharedValue,
-  withTiming,
-  withSpring
+  withTiming
 } from 'react-native-reanimated';
 
 const { width } = Dimensions.get('window');

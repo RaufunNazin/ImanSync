@@ -1,5 +1,5 @@
 import React, { useEffect, useState, useMemo, useRef } from 'react';
-import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Dimensions } from 'react-native';
+import { View, Text, StyleSheet, ScrollView, TouchableOpacity } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { Colors, Fonts, Spacing } from '@/constants/theme';
@@ -11,7 +11,7 @@ import { useAudioPlayer } from '@/hooks/useAudioPlayer';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { Check, ChevronLeft, ChevronRight, Volume2 } from 'lucide-react-native';
 
-const { width } = Dimensions.get('window');
+
 
 export default function LessonPlayerScreen() {
   const { id } = useLocalSearchParams<{ id: string }>();

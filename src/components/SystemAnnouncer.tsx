@@ -9,7 +9,7 @@ import { Bell, RefreshCw, Info, X } from 'lucide-react-native';
 
 // TODO: Replace this URL with your raw GitHub Gist URL or JSON server URL
 const SYSTEM_CONFIG_URL = 'https://raw.githubusercontent.com/RaufunNazin/ImanSync/main/system_config.json';
-const CURRENT_APP_VERSION = '1.0.0'; // Manually bump this when publishing non-OTA updates
+
 
 interface SystemConfig {
   latestVersion: string;

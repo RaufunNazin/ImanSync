@@ -1,7 +1,6 @@
 import React from 'react';
 import { Modal, StyleSheet, Text, TouchableOpacity, TouchableWithoutFeedback, View } from 'react-native';
-import { BlurView } from 'expo-blur';
-import { Colors, Fonts, Spacing } from '@/constants/theme';
+import { Fonts, Spacing } from '@/constants/theme';
 import { useTranslation } from 'react-i18next';
 import { Bookmark, BookmarkMinus } from 'lucide-react-native';
 import * as Haptics from 'expo-haptics';

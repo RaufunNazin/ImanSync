@@ -164,7 +164,7 @@ export async function scheduleAllNotifications() {
   }
 }
 
-async function schedulePrayerDay(timings: any, targetDate: Date, isToday: boolean, quietHours: QuietHours) {
+async function schedulePrayerDay(timings: any, targetDate: Date, _isToday: boolean, quietHours: QuietHours) {
   const prayers = [
     { id: 'fajr', name: i18n.t('prayerTimes.fajr'), time: timings.Fajr },
     { id: 'dhuhr', name: i18n.t('prayerTimes.dhuhr'), time: timings.Dhuhr },

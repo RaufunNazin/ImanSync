@@ -4,7 +4,7 @@ import { formatNumber } from '@/utils/formatNumber';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { BlurView } from 'expo-blur';
 import * as Haptics from 'expo-haptics';
-import { Activity, BookOpen, CheckCircle2, HandCoins, Heart, Moon, RotateCcw, X } from 'lucide-react-native';
+import { Activity, BookOpen, CheckCircle2, HandCoins, Heart, RotateCcw, X } from 'lucide-react-native';
 import { useFocusEffect } from 'expo-router';
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';

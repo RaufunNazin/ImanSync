@@ -43,7 +43,7 @@ interface AudioState {
 }
 
 const RECITER_MALE_1 = 7; // Mishary
-const RECITER_MALE_2 = 1; // AbdulBaset
+
 
 export const useAudioStore = create<AudioState>((set, get) => ({
   sound: null,
@@ -120,7 +120,7 @@ export const useAudioStore = create<AudioState>((set, get) => ({
     }
   },
 
-  playAyah: async (surahId: number, ayahNumber: number, surahName: string, autoPlayNext: boolean) => {
+  playAyah: async (surahId: number, ayahNumber: number, surahName: string, _autoPlayNext: boolean) => {
     const { sound, currentReciterId, _updatePlaybackStatus, audioRequestId, currentSurahId, ayahAudioList } = get();
     
     const reqId = audioRequestId + 1;

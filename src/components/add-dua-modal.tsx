@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { Modal, StyleSheet, Text, TextInput, TouchableOpacity, View, KeyboardAvoidingView, Platform, ScrollView, Image } from 'react-native';
-import { Colors, Fonts, Spacing } from '@/constants/theme';
+import { Fonts, Spacing } from '@/constants/theme';
 import { useTranslation } from 'react-i18next';
 import { X, Image as ImageIcon, Video, Type, Plus } from 'lucide-react-native';
 import * as ImagePicker from 'expo-image-picker';

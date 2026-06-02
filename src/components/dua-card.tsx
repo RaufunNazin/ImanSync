@@ -1,9 +1,9 @@
 import React from 'react';
 import { StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import { BlurView } from 'expo-blur';
-import { Colors, Fonts, Spacing } from '@/constants/theme';
+import { Fonts, Spacing } from '@/constants/theme';
 import { useTranslation } from 'react-i18next';
-import { Bookmark, FolderOpen, Star } from 'lucide-react-native';
+import { Bookmark } from 'lucide-react-native';
 import { formatNumber } from '@/utils/formatNumber';
 
 interface DuaCardProps {
@@ -22,7 +22,7 @@ interface DuaCardProps {
 export default function DuaCard({
   id,
   name,
-  description,
+
   count,
   isPinned,
   isMyDuas,

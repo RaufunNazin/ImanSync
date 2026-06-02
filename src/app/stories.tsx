@@ -15,13 +15,7 @@ export default function StoriesScreen() {
   const router = useRouter();
   const { t } = useTranslation();
 
-  const handleBack = () => {
-    if (router.canGoBack()) {
-      router.back();
-    } else {
-      router.push('/(tabs)/quran');
-    }
-  };
+
 
   return (
     <SafeAreaView style={[styles.safeArea, { backgroundColor: colors.background }]}>

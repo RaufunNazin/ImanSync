@@ -34,7 +34,7 @@ export default function QiblaScreen() {
 
   const [heading, setHeading] = useState(0);
   const [qiblaBearing, setQiblaBearing] = useState(260); // Default approx for Dhaka
-  const [subscription, setSubscription] = useState<any>(null);
+  const [, setSubscription] = useState<any>(null);
 
   useEffect(() => {
     // Load coordinates to calculate exact Qibla direction

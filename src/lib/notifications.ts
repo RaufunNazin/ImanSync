@@ -25,7 +25,7 @@ export async function setupNotificationChannels() {
   */
 }
 
-export async function schedulePrayerNotification(title: string, body: string, date: Date) {
+export async function schedulePrayerNotification(_title: string, _body: string, date: Date) {
   console.log('Mock: Scheduled prayer notification for', date);
   /*
   const trigger = {

@@ -3,7 +3,7 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import { BlurView } from 'expo-blur';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { Bookmark, ChevronLeft, Minus, Plus, Settings2, X, Play, Pause } from 'lucide-react-native';
-import React, { useEffect, useRef, useState, useMemo } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { ActivityIndicator, FlatList, Modal, ScrollView, StyleSheet, Switch, Text, TouchableOpacity, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useTranslation } from 'react-i18next';
@@ -161,9 +161,7 @@ export default function JuzScreen() {
       .finally(() => setLoading(false));
   }, [id, settings.showEnglish, settings.showBangla, settings.showEnglishTranslit]);
 
-  const uniqueSurahsInJuz = useMemo(() => {
-    return Array.from(new Set(ayahs.map(a => a.surahId)));
-  }, [ayahs]);
+
 
   // Scroll to targeted Ayah if provided
   useEffect(() => {

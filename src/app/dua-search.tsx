@@ -1,7 +1,7 @@
 import { Colors, Fonts, Spacing } from '@/constants/theme';
-import { BlurView } from 'expo-blur';
+
 import { useRouter } from 'expo-router';
-import { ChevronLeft, ChevronRight, Search } from 'lucide-react-native';
+import { ChevronLeft, ChevronRight } from 'lucide-react-native';
 import React, { useEffect, useState, useRef } from 'react';
 import { useTranslation } from 'react-i18next';
 import { 
@@ -24,8 +24,7 @@ import Animated, {
   FadeOut, 
   useAnimatedStyle,
   useSharedValue,
-  withTiming,
-  withSpring
+  withTiming
 } from 'react-native-reanimated';
 
 const { width } = Dimensions.get('window');

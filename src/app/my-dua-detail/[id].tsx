@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { View, Text, StyleSheet, ScrollView, ActivityIndicator, Image, TouchableOpacity, Modal } from 'react-native';
-import { Trash2, X } from 'lucide-react-native';
+import { Trash2 } from 'lucide-react-native';
 import { saveMyDuas } from '@/utils/my-duas-storage';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { SafeAreaView } from 'react-native-safe-area-context';

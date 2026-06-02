@@ -9,7 +9,7 @@ const STORAGE_MODE_KEY  = 'imansync_storage_mode';   // 'internal' | 'permanent'
 const RELINK_NEEDED_KEY = 'imansync_storage_relink';  // 'true' | null
 const RESTORED_KEY      = 'imansync_storage_restored'; // 'true' | null  (for one-time toast)
 const FILE_NAME         = 'ImanSync_MyDuas.json';
-const HARDCODED_FOLDER  = 'ImanSync'; // always Downloads/ImanSync/
+
 
 // ─── Types ───────────────────────────────────────────────────────────────────
 export type StorageMode = 'internal' | 'permanent';
@@ -326,7 +326,7 @@ export async function switchToInternalMode(): Promise<UserDua[]> {
 
 // ─── Legacy: kept for compatibility ─────────────────────────────────────────
 /** @deprecated Use initInternalStorage / initPermanentStorage instead */
-export async function initStorage(uri?: string): Promise<UserDua[]> {
+export async function initStorage(_uri?: string): Promise<UserDua[]> {
   return await initInternalStorage();
 }
 

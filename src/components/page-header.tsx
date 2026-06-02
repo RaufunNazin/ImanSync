@@ -22,7 +22,7 @@ interface PageHeaderProps {
 
 export default function PageHeader({
   titleEn,
-  titleAr,
+
   showBack = false,
   subtitle,
   onBack,
