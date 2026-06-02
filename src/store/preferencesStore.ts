@@ -23,6 +23,7 @@ interface PreferencesState {
   } | null;
   hijriOffset: number;
   manualCity: string | null;
+  showCuratedDuas: boolean;
   setPreferences: (partial: Partial<Omit<PreferencesState, 'setPreferences' | 'initialize'>>) => void;
   initialize: () => Promise<void>;
 }
@@ -45,6 +46,7 @@ export const usePreferencesStore = create<PreferencesState>((set, get) => ({
   location: null,
   hijriOffset: 0,
   manualCity: null,
+  showCuratedDuas: false,
   
   setPreferences: (partial) => {
     set(partial);
@@ -59,6 +61,7 @@ export const usePreferencesStore = create<PreferencesState>((set, get) => ({
       location: state.location,
       hijriOffset: state.hijriOffset,
       manualCity: state.manualCity,
+      showCuratedDuas: state.showCuratedDuas,
     };
     AsyncStorage.setItem('imansync_preferences', JSON.stringify(toSave));
   },
@@ -93,6 +96,7 @@ export const usePreferencesStore = create<PreferencesState>((set, get) => ({
             location: state.location,
             hijriOffset: state.hijriOffset,
             manualCity: state.manualCity,
+            showCuratedDuas: state.showCuratedDuas,
           }));
         }
       }

@@ -11,6 +11,7 @@ import { useThemeStore } from '@/store/themeStore';
 import SkeletonBox from '@/components/SkeletonBox';
 import DuaService, { UnifiedDuaItem } from '@/services/duaService';
 import { loadMyDuas } from '@/utils/my-duas-storage';
+import curatedDuasData from '@/data/curated-duas.json';
 
 
 
@@ -26,23 +27,44 @@ export default function DuaCategoryScreen() {
 
   useEffect(() => {
     if (isCustom === 'true') {
-      loadMyDuas()
-        .then((allCustom) => {
-          const categoryDuas = allCustom.filter(d => d.categoryId === id).map(d => ({
-            id: d.id,
-            name: d.title,
-            arabic: d.arabic || '',
-            latin: d.transliteration || '',
-            translationEn: d.translation || '',
-            translationBn: d.translation || '',
-            reference: '',
-            source: 'user' as const,
-            isCustom: true,
-          }));
-          setDuas(categoryDuas);
-        })
-        .catch(console.error)
-        .finally(() => setLoading(false));
+      if (id.startsWith('curated_cat_')) {
+        const categoryKey = id.replace('curated_cat_', '');
+        const categoryData = (curatedDuasData as any[]).find(c => c.id === categoryKey);
+        const duaList = categoryData ? categoryData.duas : [];
+        const formatted = duaList.map((d: any) => ({
+          id: d.id,
+          name: i18n.language === 'bn' ? (d.title_bn || d.title) : (d.title || 'Curated Dua'),
+          arabic: d.arabic || '',
+          latin: d.transliteration_en || '',
+          translationEn: d.translation_en || '',
+          translationBn: d.translation_bn || '',
+          transliterationBn: d.transliteration_bn || '',
+          reference: d.reference || '',
+          source: d.reference || '',
+          isCustom: true,
+          image: d.image || undefined,
+        }));
+        setDuas(formatted);
+        setLoading(false);
+      } else {
+        loadMyDuas()
+          .then((allCustom) => {
+            const categoryDuas = allCustom.filter(d => d.categoryId === id).map(d => ({
+              id: d.id,
+              name: d.titleBn || d.titleEn || d.title || '',
+              arabic: d.arabic || '',
+              latin: d.transliteration || '',
+              translationEn: d.translation || '',
+              translationBn: d.translation || '',
+              reference: '',
+              source: 'user' as const,
+              isCustom: true,
+            }));
+            setDuas(categoryDuas);
+          })
+          .catch(console.error)
+          .finally(() => setLoading(false));
+      }
     } else {
       DuaService.getDuasByCategory(Number(id))
         .then((data) => {
@@ -78,9 +100,8 @@ export default function DuaCategoryScreen() {
         ) : (
           <View style={styles.list}>
             {duas.map((dua) => {
-              // Apply Bangla translation if available and language is bn
-              let translation = i18n.language === 'bn' ? dua.translationBn : dua.translationEn;
-              if (!translation) translation = dua.name;
+              // Use the localized name as the title
+              let title = dua.name;
 
               return (
                 <BlurView
@@ -98,25 +119,22 @@ export default function DuaCategoryScreen() {
                         params: { 
                           id: dua.id,
                           categoryName: name,
+                          duaName: title,
                           arabic: dua.arabic,
                           latin: dua.latin || '',
                           translationEn: dua.translationEn,
                           translationBn: dua.translationBn,
-                          transliterationBn: '',
+                          transliterationBn: (dua as any).transliterationBn || '',
                           source: dua.source || '',
+                          image: (dua as any).image || '',
                         }
                       });
                     }}
                   >
                     <View style={styles.itemContent}>
                       <Text style={[styles.itemTitle, { color: colors.text }]} numberOfLines={3}>
-                        {translation}
+                        {title}
                       </Text>
-                      {!!dua.arabic && (
-                        <Text style={[styles.itemArabic, { color: colors.textSecondary }]} numberOfLines={2}>
-                          {dua.arabic}
-                        </Text>
-                      )}
                     </View>
                     <ChevronRight size={20} color={colors.textSecondary} />
                   </TouchableOpacity>

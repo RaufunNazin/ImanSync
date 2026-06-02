@@ -7,9 +7,11 @@ import { useLocalSearchParams } from 'expo-router';
 import { Bookmark, BookOpen, Minus, Plus, Settings2, X } from 'lucide-react-native';
 import React, { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { Modal, ScrollView, StyleSheet, Text, TouchableOpacity, TouchableWithoutFeedback, View } from 'react-native';
+import { Modal, ScrollView, StyleSheet, Text, TouchableOpacity, TouchableWithoutFeedback, View, Image } from 'react-native';
+import { curatedImageMap } from '@/data/curated-images';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useThemeStore } from '@/store/themeStore';
+import ImageViewerModal from '@/components/ImageViewerModal';
 
 interface DuaSettings {
   showEnTrans: boolean;
@@ -35,30 +37,40 @@ export default function DuaDetailScreen() {
   const params = useLocalSearchParams<{
     id: string;
     categoryName: string;
+    duaName?: string;
     arabic: string;
     latin: string; // English Transliteration
     translationEn: string;
     translationBn: string;
     transliterationBn: string;
     source: string;
+    image?: string;
   }>();
   
   const scheme = useThemeStore((s) => s.theme);
   const colors = Colors[scheme === 'unspecified' ? 'light' : scheme];
   const { t, i18n } = useTranslation();
 
-  const [settings, setSettings] = useState<DuaSettings>(DEFAULT_SETTINGS);
+  const [settings, setSettings] = useState<DuaSettings>(() => ({
+    ...DEFAULT_SETTINGS,
+    showEnTrans: i18n.language === 'en',
+    showBnTrans: i18n.language === 'bn',
+    showEnTranslit: i18n.language === 'en',
+    showBnTranslit: i18n.language === 'bn',
+  }));
   const [settingsVisible, setSettingsVisible] = useState(false);
   const [isBookmarked, setIsBookmarked] = useState(false);
   const [bookmarks, setBookmarks] = useState<any[]>([]);
+  const [imageViewerVisible, setImageViewerVisible] = useState(false);
   
-  const [duaData, setDuaData] = useState<{ arabic: string, translationBn: string, translationEn: string, source: string, latin: string, transliterationBn: string }>({
+  const [duaData, setDuaData] = useState<{ arabic: string, translationBn: string, translationEn: string, source: string, latin: string, transliterationBn: string, image: string }>({
     arabic: params.arabic || '',
     translationBn: params.translationBn || '',
     translationEn: params.translationEn || '',
     source: params.source || '',
     latin: params.latin || '',
-    transliterationBn: params.transliterationBn || ''
+    transliterationBn: params.transliterationBn || '',
+    image: params.image || ''
   });
 
   useEffect(() => {
@@ -196,6 +208,15 @@ export default function DuaDetailScreen() {
     </Modal>
   );
 
+
+  const showArabic = !!duaData.arabic;
+  const showBnTranslit = isBanglaMode && settings.showBnTranslit && !!duaData.transliterationBn;
+  const showEnTranslit = settings.showEnTranslit && !!duaData.latin;
+  const showBnTrans = isBanglaMode && settings.showBnTrans && !!duaData.translationBn;
+  const showEnTrans = settings.showEnTrans && !!duaData.translationEn;
+
+  const hasTextContent = showArabic || showBnTranslit || showEnTranslit || showBnTrans || showEnTrans || !!duaData.source;
+
   return (
     <SafeAreaView style={[styles.safeArea, { backgroundColor: colors.background }]}>
       <PageHeader 
@@ -222,53 +243,87 @@ export default function DuaDetailScreen() {
       
       <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={styles.container}>
         
-        <BlurView intensity={40} tint={colors.glassTint as any} style={[styles.card, { borderColor: colors.border }]}>
-          
-          {!!duaData.arabic && (
-            <View style={styles.section}>
-              <Text style={[styles.arabic, { color: colors.text, fontSize: settings.arabicFontSize, lineHeight: settings.arabicFontSize * 1.6 }]}>{duaData.arabic}</Text>
-            </View>
-          )}
+        {!!params.duaName && (
+          <Text style={[styles.duaTitle, { color: colors.text }]}>{params.duaName}</Text>
+        )}
 
-          {/* Transliterations */}
-          {(settings.showEnTranslit && !!duaData.latin) && (
-            <View style={[styles.section, { borderTopWidth: 1, borderTopColor: colors.border + '55', paddingTop: Spacing.four }]}>
-              <Text style={[styles.languageTag, { color: colors.textSecondary }]}>{t('duaSettings.enTranslit')}</Text>
-              <Text style={[styles.latin, { color: colors.textSecondary, fontSize: settings.translitFontSize, lineHeight: settings.translitFontSize * 1.5 }]}>{duaData.latin}</Text>
-            </View>
-          )}
+        {!!duaData.image && curatedImageMap[duaData.image] && (
+          (() => {
+            const source = curatedImageMap[duaData.image];
+            let ratio = 1;
+            try {
+              const { width, height } = Image.resolveAssetSource(source);
+              if (width && height) ratio = width / height;
+            } catch (e) {}
+            
+            return (
+              <>
+                <TouchableOpacity activeOpacity={0.9} onPress={() => setImageViewerVisible(true)}>
+                  <Image 
+                    source={source} 
+                    style={{ width: '100%', height: undefined, aspectRatio: ratio, borderRadius: 16, marginBottom: Spacing.four }} 
+                    resizeMode="contain" 
+                  />
+                </TouchableOpacity>
+                <ImageViewerModal
+                  visible={imageViewerVisible}
+                  source={source}
+                  onClose={() => setImageViewerVisible(false)}
+                />
+              </>
+            );
+          })()
+        )}
 
-          {(isBanglaMode && settings.showBnTranslit && !!duaData.transliterationBn) && (
-            <View style={[styles.section, { borderTopWidth: 1, borderTopColor: colors.border + '55', paddingTop: Spacing.four }]}>
-              <Text style={[styles.languageTag, { color: colors.textSecondary }]}>{t('duaSettings.bnTranslit')}</Text>
-              <Text style={[styles.latin, { color: colors.textSecondary, fontSize: settings.translitFontSize, lineHeight: settings.translitFontSize * 1.5 }]}>{duaData.transliterationBn}</Text>
-            </View>
-          )}
+        {hasTextContent && (
+          <BlurView intensity={40} tint={colors.glassTint as any} style={[styles.card, { borderColor: colors.border }]}>
 
-          {/* Translations */}
-          {(settings.showEnTrans && !!duaData.translationEn) && (
-            <View style={[styles.section, { borderTopWidth: 1, borderTopColor: colors.border + '55', paddingTop: Spacing.four }]}>
-              <Text style={[styles.languageTag, { color: colors.textSecondary }]}>{t('duaSettings.enTrans')}</Text>
-              <Text style={[styles.translation, { color: colors.text, fontSize: settings.translationFontSize, lineHeight: settings.translationFontSize * 1.5 }]}>{duaData.translationEn}</Text>
-            </View>
-          )}
+            {showArabic && (
+              <View style={styles.section}>
+                <Text style={[styles.arabic, { color: colors.text, fontSize: settings.arabicFontSize, lineHeight: settings.arabicFontSize * 1.6 }]}>{duaData.arabic}</Text>
+              </View>
+            )}
 
-          {(isBanglaMode && settings.showBnTrans && !!duaData.translationBn) && (
-            <View style={[styles.section, { borderTopWidth: 1, borderTopColor: colors.border + '55', paddingTop: Spacing.four }]}>
-              <Text style={[styles.languageTag, { color: colors.textSecondary }]}>{t('duaSettings.bnTrans')}</Text>
-              <Text style={[styles.translation, { color: colors.text, fontSize: settings.translationFontSize, lineHeight: settings.translationFontSize * 1.5 }]}>{duaData.translationBn}</Text>
-            </View>
-          )}
+            {/* Transliterations */}
+            {showBnTranslit && (
+              <View style={[styles.section, { borderTopWidth: showArabic ? 1 : 0, borderTopColor: colors.border + '55', paddingTop: showArabic ? Spacing.four : 0 }]}>
+                <Text style={[styles.languageTag, { color: colors.textSecondary }]}>{t('duaSettings.bnTranslit')}</Text>
+                <Text style={[styles.latin, { color: colors.textSecondary, fontSize: settings.translitFontSize, lineHeight: settings.translitFontSize * 1.5 }]}>{duaData.transliterationBn}</Text>
+              </View>
+            )}
 
-          {/* Source */}
-          {!!duaData.source && (
-            <View style={[styles.sourceBox, { backgroundColor: colors.backgroundElement, borderColor: colors.border }]}>
-              <BookOpen size={16} color={colors.accent} />
-              <Text style={[styles.sourceText, { color: colors.textSecondary }]}>{t('dua.source')}: {duaData.source}</Text>
-            </View>
-          )}
+            {showEnTranslit && (
+              <View style={[styles.section, { borderTopWidth: (showArabic || showBnTranslit) ? 1 : 0, borderTopColor: colors.border + '55', paddingTop: (showArabic || showBnTranslit) ? Spacing.four : 0 }]}>
+                <Text style={[styles.languageTag, { color: colors.textSecondary }]}>{t('duaSettings.enTranslit')}</Text>
+                <Text style={[styles.latin, { color: colors.textSecondary, fontSize: settings.translitFontSize, lineHeight: settings.translitFontSize * 1.5 }]}>{duaData.latin}</Text>
+              </View>
+            )}
 
-        </BlurView>
+            {/* Translations */}
+            {showBnTrans && (
+              <View style={[styles.section, { borderTopWidth: (showArabic || showBnTranslit || showEnTranslit) ? 1 : 0, borderTopColor: colors.border + '55', paddingTop: (showArabic || showBnTranslit || showEnTranslit) ? Spacing.four : 0 }]}>
+                <Text style={[styles.languageTag, { color: colors.textSecondary }]}>{t('duaSettings.bnTrans')}</Text>
+                <Text style={[styles.translation, { color: colors.text, fontSize: settings.translationFontSize, lineHeight: settings.translationFontSize * 1.5 }]}>{duaData.translationBn.replace(/\\n/g, '\n')}</Text>
+              </View>
+            )}
+
+            {showEnTrans && (
+              <View style={[styles.section, { borderTopWidth: (showArabic || showBnTranslit || showEnTranslit || showBnTrans) ? 1 : 0, borderTopColor: colors.border + '55', paddingTop: (showArabic || showBnTranslit || showEnTranslit || showBnTrans) ? Spacing.four : 0 }]}>
+                <Text style={[styles.languageTag, { color: colors.textSecondary }]}>{t('duaSettings.enTrans')}</Text>
+                <Text style={[styles.translation, { color: colors.text, fontSize: settings.translationFontSize, lineHeight: settings.translationFontSize * 1.5 }]}>{duaData.translationEn.replace(/\\n/g, '\n')}</Text>
+              </View>
+            )}
+
+            {/* Source */}
+            {!!duaData.source && (
+              <View style={[styles.sourceBox, { backgroundColor: colors.backgroundElement, borderColor: colors.border }]}>
+                <BookOpen size={16} color={colors.accent} />
+                <Text style={[styles.sourceText, { color: colors.textSecondary }]}>{t('dua.source')}: {duaData.source}</Text>
+              </View>
+            )}
+
+          </BlurView>
+        )}
       </ScrollView>
 
       {renderSettingsModal()}
@@ -297,6 +352,13 @@ const styles = StyleSheet.create({
   container: {
     padding: Spacing.four,
     paddingTop: 0,
+  },
+  duaTitle: {
+    fontFamily: Fonts.outfit,
+    fontSize: 20,
+    marginBottom: Spacing.four,
+    textAlign: 'center',
+    lineHeight: 28,
   },
   card: {
     borderRadius: 24,

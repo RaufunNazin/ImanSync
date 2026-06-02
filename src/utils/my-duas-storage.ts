@@ -16,10 +16,16 @@ export type StorageMode = 'internal' | 'permanent';
 
 export interface UserDua {
   id: string;
-  title: string;
+  title?: string; // deprecated
+  titleBn?: string;
+  titleEn?: string;
   arabic?: string;
   transliteration?: string;
-  translation: string;
+  translation?: string;
+  translationBn?: string;
+  translationEn?: string;
+  transliterationBn?: string;
+  transliterationEn?: string;
   type: 'text' | 'image' | 'video';
   mediaUri?: string;
   categoryId?: string;

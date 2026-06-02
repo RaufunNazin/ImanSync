@@ -10,16 +10,21 @@ interface AddDuaModalProps {
   visible: boolean;
   onClose: () => void;
   onSave: (dua: Omit<UserDua, 'id' | 'createdAt'>) => void;
+  initialData?: UserDua | null;
   colors: any;
 }
 
-export default function AddDuaModal({ visible, onClose, onSave, colors }: AddDuaModalProps) {
-  const { t } = useTranslation();
+export default function AddDuaModal({ visible, onClose, onSave, initialData, colors }: AddDuaModalProps) {
+  const { t, i18n } = useTranslation();
   
-  const [title, setTitle] = useState('');
+  const [titleBn, setTitleBn] = useState('');
+  const [titleEn, setTitleEn] = useState('');
+  const [activeTab, setActiveTab] = useState<'en' | 'bn'>(i18n.language === 'bn' ? 'bn' : 'en');
   const [arabic, setArabic] = useState('');
-  const [transliteration, setTransliteration] = useState('');
-  const [translation, setTranslation] = useState('');
+  const [transliterationBn, setTransliterationBn] = useState('');
+  const [transliterationEn, setTransliterationEn] = useState('');
+  const [translationBn, setTranslationBn] = useState('');
+  const [translationEn, setTranslationEn] = useState('');
   const [mediaType, setMediaType] = useState<'text' | 'image' | 'video'>('text');
   const [mediaUri, setMediaUri] = useState<string | null>(null);
 
@@ -31,16 +36,33 @@ export default function AddDuaModal({ visible, onClose, onSave, colors }: AddDua
   const titleRef = useRef<TextInput>(null);
 
   useEffect(() => {
-    if (visible) {
+    if (visible && initialData) {
+      setTitleBn(initialData.titleBn || initialData.title || '');
+      setTitleEn(initialData.titleEn || initialData.title || '');
+      setArabic(initialData.arabic || '');
+      setTransliterationBn(initialData.transliterationBn || initialData.transliteration || '');
+      setTransliterationEn(initialData.transliterationEn || '');
+      setTranslationBn(initialData.translationBn || initialData.translation || '');
+      setTranslationEn(initialData.translationEn || '');
+      setMediaType(initialData.type);
+      setMediaUri(initialData.mediaUri || null);
+      setSelectedCategoryId(initialData.categoryId || null);
+      loadCustomCategories().then(setCategories);
+    } else if (visible) {
+      reset();
+      setActiveTab(i18n.language === 'bn' ? 'bn' : 'en');
       loadCustomCategories().then(setCategories);
     }
-  }, [visible]);
+  }, [visible, initialData, i18n.language]);
 
   const reset = () => {
-    setTitle('');
+    setTitleBn('');
+    setTitleEn('');
     setArabic('');
-    setTransliteration('');
-    setTranslation('');
+    setTransliterationBn('');
+    setTransliterationEn('');
+    setTranslationBn('');
+    setTranslationEn('');
     setMediaType('text');
     setMediaUri(null);
     setSelectedCategoryId(null);
@@ -97,15 +119,18 @@ export default function AddDuaModal({ visible, onClose, onSave, colors }: AddDua
   };
 
   const handleSave = () => {
-    if (!title) return;
-    if (mediaType === 'text' && !translation && !arabic) return;
+    if (!titleBn.trim() && !titleEn.trim()) return;
+    if (mediaType === 'text' && !translationBn && !translationEn && !arabic) return;
     if (mediaType !== 'text' && !mediaUri) return;
 
     onSave({
-      title,
+      titleBn: titleBn.trim(),
+      titleEn: titleEn.trim(),
       arabic,
-      transliteration,
-      translation,
+      transliterationBn,
+      transliterationEn,
+      translationBn,
+      translationEn,
       type: mediaType,
       mediaUri: mediaUri || undefined,
       categoryId: selectedCategoryId || undefined,
@@ -115,39 +140,67 @@ export default function AddDuaModal({ visible, onClose, onSave, colors }: AddDua
 
   if (!visible) return null;
 
-  const isValid = title.trim() !== '' && 
-    ((mediaType === 'text' && (translation.trim() !== '' || arabic.trim() !== '')) || 
+  const isValid = (titleBn.trim() !== '' || titleEn.trim() !== '') && 
+    ((mediaType === 'text' && (translationBn.trim() !== '' || translationEn.trim() !== '' || arabic.trim() !== '')) || 
      (mediaType !== 'text' && mediaUri));
 
   return (
     <Modal visible={visible} transparent animationType="slide" onRequestClose={handleClose}>
       <KeyboardAvoidingView 
         style={{ flex: 1 }} 
-        behavior="padding"
+        behavior={Platform.OS === 'ios' ? 'padding' : undefined}
       >
         <View style={styles.overlay}>
           <View style={[styles.modal, { backgroundColor: colors.background, borderColor: colors.border }]}>
             <View style={{ width: 40, height: 4, backgroundColor: colors.border, borderRadius: 2, alignSelf: 'center', marginBottom: Spacing.four }} />
             <View style={[styles.header, { borderBottomColor: colors.border }]}>
-              <Text style={[styles.title, { color: colors.text }]}>{t('dua.addDua')}</Text>
+              <Text style={[styles.title, { color: colors.text }]}>{initialData ? t('dua.editDua', {defaultValue: 'Edit Dua'}) : t('dua.addDua')}</Text>
               <TouchableOpacity onPress={handleClose} style={[styles.closeBtn, { backgroundColor: colors.card }]}>
                 <X size={20} color={colors.textSecondary} />
               </TouchableOpacity>
             </View>
 
             <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={styles.content} keyboardShouldPersistTaps="handled" keyboardDismissMode="none">
-              
-              <View style={styles.inputGroup}>
-                <Text style={[styles.label, { color: colors.textSecondary }]}>{t('dua.duaTitle')} *</Text>
-                <TextInput
-                  ref={titleRef}
-                  style={[styles.input, { color: colors.text, backgroundColor: colors.card, borderColor: colors.border }]}
-                  placeholder={t('dua.duaTitle')}
-                  placeholderTextColor={colors.textSecondary + '88'}
-                  value={title}
-                  onChangeText={setTitle}
-                />
+              <View style={[styles.tabContainer, { backgroundColor: colors.card, borderColor: colors.border }]}>
+                <TouchableOpacity
+                  style={[styles.tabBtn, activeTab === 'en' && { backgroundColor: colors.accent }]}
+                  onPress={() => setActiveTab('en')}
+                >
+                  <Text style={[styles.tabText, { color: activeTab === 'en' ? '#FFF' : colors.textSecondary }]}>English</Text>
+                </TouchableOpacity>
+                <TouchableOpacity
+                  style={[styles.tabBtn, activeTab === 'bn' && { backgroundColor: colors.accent }]}
+                  onPress={() => setActiveTab('bn')}
+                >
+                  <Text style={[styles.tabText, { color: activeTab === 'bn' ? '#FFF' : colors.textSecondary }]}>বাংলা</Text>
+                </TouchableOpacity>
               </View>
+
+              {activeTab === 'en' ? (
+                <View style={styles.inputGroup}>
+                  <Text style={[styles.label, { color: colors.textSecondary }]}>{t('dua.duaTitle', {defaultValue: 'Title'})} (English) *</Text>
+                  <TextInput
+                    ref={titleRef}
+                    style={[styles.input, { color: colors.text, backgroundColor: colors.card, borderColor: colors.border }]}
+                    placeholder={t('dua.duaTitle', {defaultValue: 'Title'})}
+                    placeholderTextColor={colors.textSecondary + '88'}
+                    value={titleEn}
+                    onChangeText={setTitleEn}
+                  />
+                </View>
+              ) : (
+                <View style={styles.inputGroup}>
+                  <Text style={[styles.label, { color: colors.textSecondary }]}>{t('dua.duaTitle', {defaultValue: 'Title'})} (বাংলা) *</Text>
+                  <TextInput
+                    ref={titleRef}
+                    style={[styles.input, { color: colors.text, backgroundColor: colors.card, borderColor: colors.border }]}
+                    placeholder={t('dua.duaTitle', {defaultValue: 'Title'})}
+                    placeholderTextColor={colors.textSecondary + '88'}
+                    value={titleBn}
+                    onChangeText={setTitleBn}
+                  />
+                </View>
+              )}
 
               <View style={styles.inputGroup}>
                 <Text style={[styles.label, { color: colors.textSecondary }]}>{t('dua.selectCategory', { defaultValue: 'Select Category' })}</Text>
@@ -240,29 +293,57 @@ export default function AddDuaModal({ visible, onClose, onSave, colors }: AddDua
                     />
                   </View>
 
-                  <View style={styles.inputGroup}>
-                    <Text style={[styles.label, { color: colors.textSecondary }]}>{t('dua.duaTransliteration')}</Text>
-                    <TextInput
-                      style={[styles.input, styles.textArea, { color: colors.text, backgroundColor: colors.card, borderColor: colors.border }]}
-                      placeholder="Bismillah..."
-                      placeholderTextColor={colors.textSecondary + '88'}
-                      value={transliteration}
-                      onChangeText={setTransliteration}
-                      multiline
-                    />
-                  </View>
-
-                  <View style={styles.inputGroup}>
-                    <Text style={[styles.label, { color: colors.textSecondary }]}>{t('dua.duaTranslation')}</Text>
-                    <TextInput
-                      style={[styles.input, styles.textArea, { color: colors.text, backgroundColor: colors.card, borderColor: colors.border }]}
-                      placeholder="In the name of Allah..."
-                      placeholderTextColor={colors.textSecondary + '88'}
-                      value={translation}
-                      onChangeText={setTranslation}
-                      multiline
-                    />
-                  </View>
+                  {activeTab === 'bn' ? (
+                    <>
+                      <View style={styles.inputGroup}>
+                        <Text style={[styles.label, { color: colors.textSecondary }]}>{t('dua.duaTranslationBn', {defaultValue: 'Bangla Translation'})}</Text>
+                        <TextInput
+                          style={[styles.input, styles.textArea, { color: colors.text, backgroundColor: colors.card, borderColor: colors.border }]}
+                          placeholder="বাংলা অনুবাদ..."
+                          placeholderTextColor={colors.textSecondary + '88'}
+                          value={translationBn}
+                          onChangeText={setTranslationBn}
+                          multiline
+                        />
+                      </View>
+                      <View style={styles.inputGroup}>
+                        <Text style={[styles.label, { color: colors.textSecondary }]}>{t('dua.duaTransliterationBn', {defaultValue: 'Bangla Transliteration'})}</Text>
+                        <TextInput
+                          style={[styles.input, styles.textArea, { color: colors.text, backgroundColor: colors.card, borderColor: colors.border }]}
+                          placeholder="বাংলা উচ্চারণ..."
+                          placeholderTextColor={colors.textSecondary + '88'}
+                          value={transliterationBn}
+                          onChangeText={setTransliterationBn}
+                          multiline
+                        />
+                      </View>
+                    </>
+                  ) : (
+                    <>
+                      <View style={styles.inputGroup}>
+                        <Text style={[styles.label, { color: colors.textSecondary }]}>{t('dua.duaTranslationEn', {defaultValue: 'English Translation'})}</Text>
+                        <TextInput
+                          style={[styles.input, styles.textArea, { color: colors.text, backgroundColor: colors.card, borderColor: colors.border }]}
+                          placeholder="English Translation..."
+                          placeholderTextColor={colors.textSecondary + '88'}
+                          value={translationEn}
+                          onChangeText={setTranslationEn}
+                          multiline
+                        />
+                      </View>
+                      <View style={styles.inputGroup}>
+                        <Text style={[styles.label, { color: colors.textSecondary }]}>{t('dua.duaTransliterationEn', {defaultValue: 'English Transliteration'})}</Text>
+                        <TextInput
+                          style={[styles.input, styles.textArea, { color: colors.text, backgroundColor: colors.card, borderColor: colors.border }]}
+                          placeholder="English Transliteration..."
+                          placeholderTextColor={colors.textSecondary + '88'}
+                          value={transliterationEn}
+                          onChangeText={setTransliterationEn}
+                          multiline
+                        />
+                      </View>
+                    </>
+                  )}
                 </>
               )}
 
@@ -357,6 +438,25 @@ const styles = StyleSheet.create({
     borderRadius: 12,
     borderWidth: 1,
     alignItems: 'center',
+  },
+  tabContainer: {
+    flexDirection: 'row',
+    borderRadius: 8,
+    borderWidth: 1,
+    padding: 4,
+    marginBottom: Spacing.four,
+  },
+  tabBtn: {
+    flex: 1,
+    paddingVertical: 10,
+    borderRadius: 6,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  tabText: {
+    fontFamily: Fonts.outfit,
+    fontSize: 14,
+    fontWeight: '600',
   },
   inputGroup: {
     gap: Spacing.two,

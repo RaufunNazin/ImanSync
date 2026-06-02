@@ -18,6 +18,8 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { useThemeStore } from '@/store/themeStore';
 import SkeletonBox from '@/components/SkeletonBox';
 import { getStorageMode, loadCustomCategories } from '@/utils/my-duas-storage';
+import { usePreferencesStore } from '@/store/preferencesStore';
+import curatedDuasData from '@/data/curated-duas.json';
 
 interface Category {
   id: string;
@@ -33,12 +35,13 @@ const BANNER_DISMISSED_KEY = 'imansync_storage_banner_dismissed';
 export default function DuaScreen() {
   const scheme = useThemeStore((s) => s.theme);
   const colors = Colors[scheme === 'unspecified' ? 'light' : scheme];
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
   const router = useRouter();
 
   const [categories, setCategories] = useState<Category[]>([]);
   const [pinnedIds, setPinnedIds] = useState<string[]>([]);
   const [loading, setLoading] = useState(true);
+  const prefs = usePreferencesStore();
 
 
   // Pin Sheet State
@@ -76,14 +79,7 @@ export default function DuaScreen() {
     ])
     .then(([apiCats, customCats, userDuas]) => {
       let cats: Category[] = [];
-      if (apiCats && apiCats.length > 0) {
-        cats = apiCats.map(c => ({
-          id: c.id.toString(),
-          name: c.name,
-          description: '', // Desc can be added later or pulled from i18n
-          count: c.dua_count
-        }));
-      }
+
       if (customCats && customCats.length > 0) {
         const formattedCustoms = customCats.map(c => ({
           id: c.id,
@@ -94,11 +90,35 @@ export default function DuaScreen() {
         }));
         cats = [...cats, ...formattedCustoms];
       }
+
+      if (prefs.showCuratedDuas) {
+        const curatedCats = (curatedDuasData as any[]).map((cat) => {
+          return {
+            id: `curated_cat_${cat.id}`,
+            name: i18n.language === 'bn' ? cat.category_bn : cat.category_en,
+            description: t('dua.customCategoryDesc', { defaultValue: 'Curated Category' }),
+            count: cat.duas.length,
+            isCustom: true
+          };
+        });
+        cats = [...cats, ...curatedCats];
+      }
+
+      if (apiCats && apiCats.length > 0) {
+        const formattedApiCats = apiCats.map(c => ({
+          id: c.id.toString(),
+          name: c.name,
+          description: '', // Desc can be added later or pulled from i18n
+          count: c.dua_count
+        }));
+        cats = [...cats, ...formattedApiCats];
+      }
+
       setCategories(cats);
     })
     .catch((err) => console.error(err))
     .finally(() => setLoading(false));
-  }, []);
+  }, [prefs.showCuratedDuas, i18n.language]);
 
 
 

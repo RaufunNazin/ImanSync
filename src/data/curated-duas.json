@@ -1,0 +1,256 @@
+[
+  {
+    "id": "special",
+    "category_en": "Special Duas",
+    "category_bn": "বিশেষ দোয়া",
+    "duas": [
+      {
+        "id": "dua_1",
+        "title": "Best Dhikr of Arafah",
+        "title_bn": "আরাফার শ্রেষ্ঠ জিকির",
+        "image": "dua_1"
+      },
+      {
+        "id": "dua_2",
+        "title": "Dua for Forgiveness and Mercy",
+        "title_bn": "ক্ষমা ও রহমতের দোয়া",
+        "image": "dua_2"
+      },
+      {
+        "id": "dua_3",
+        "title": "Dua for Salvation from Hellfire",
+        "title_bn": "জাহান্নাম থেকে মুক্তির দোয়া",
+        "image": "dua_3"
+      },
+      {
+        "id": "dua_4",
+        "title": "Dua for Goodness in This World and the Hereafter",
+        "title_bn": "দুনিয়া ও আখিরাতের কল্যাণের দোয়া",
+        "image": "dua_4"
+      },
+      {
+        "id": "dua_5",
+        "title": "Dua for Keeping the Heart on the Right Path",
+        "title_bn": "অন্তর সঠিক পথে রাখার দোয়া",
+        "image": "dua_5"
+      },
+      {
+        "id": "dua_6",
+        "title": "Dua for Increasing Knowledge, Faith, and Status",
+        "title_bn": "জ্ঞান, ঈমান ও মর্যাদা বৃদ্ধির দোয়া",
+        "image": "dua_6"
+      },
+      {
+        "id": "dua_7",
+        "title": "Dua for Mercy and Guidance to the Right Path",
+        "title_bn": "রহমত ও সঠিক পথের দোয়া",
+        "image": "dua_7"
+      },
+      {
+        "id": "dua_8",
+        "title": "Dua for Provision and Goodness",
+        "title_bn": "রিজিক ও কল্যাণের দোয়া",
+        "image": "dua_8"
+      },
+      {
+        "id": "dua_9",
+        "title": "Dua for Making the Family the Comfort of the Eyes",
+        "title_bn": "পরিবারকে চোখের শীতলতা বানানোর দোয়া",
+        "image": "dua_9"
+      },
+      {
+        "id": "dua_10",
+        "title": "Dua for Forgiveness of Oneself, Parents, and Believers",
+        "title_bn": "নিজের, মা-বাবার ও মুমিনদের ক্ষমার দোয়া",
+        "image": "dua_10"
+      },
+      {
+        "id": "dua_11",
+        "title": "Dua for Relief from Debt, Anxiety, and Hardship",
+        "title_bn": "ঋণ, দুশ্চিন্তা ও কষ্ট থেকে মুক্তির দোয়া",
+        "image": "dua_11"
+      },
+      {
+        "id": "dua_12",
+        "title": "Dua for Rectification of All Affairs and Not Being Left to Oneself",
+        "title_bn": "সব কাজের সংশোধন ও নিজের ওপর ছেড়ে না দেওয়ার দোয়া",
+        "image": "dua_12"
+      }
+    ]
+  },
+  {
+    "id": "daily",
+    "category_en": "Daily Duas",
+    "category_bn": "দৈনিক দোয়া",
+    "duas": [
+      {
+        "id": "daily_1",
+        "title": "Dua against the Evil Eye 1",
+        "title_bn": "বদ নজরের দোয়া ১",
+        "arabic": "أَعُوذُ بِكَلِمَاتِ اللَّهِ التَّامَّاتِ مِنْ شَرِّ مَا خَلَقَ",
+        "transliteration_bn": "আউযুবিকালিমাতিল্লাহিত তা-ম্মা-তি মিন শাররি মা খলাক্ব।"
+      },
+      {
+        "id": "daily_2",
+        "title": "Dua against the Evil Eye 2",
+        "title_bn": "বদ নজরের দোয়া ২",
+        "arabic": "بِسْمِ اللَّهِ الَّذِي لَا يَضُرُّ مَعَ اسْمِهِ شَيْءٌ فِي الْأَرْضِ وَلَا فِي السَّمَاءِ وَهُوَ السَّمِيعُ الْعَلِيمُ",
+        "transliteration_bn": "বিসমিল্লাহিল্লাযি লা ইয়াদুররু মায়া'সমিহি শাইয়ুন ফিল আরদি ওয়ালা ফিস সামায়ি ওয়াহুয়াস সামিউ'ল আ'লিম।"
+      },
+      {
+        "id": "daily_3",
+        "title": "Dua against the Evil Eye 3",
+        "title_bn": "বদ নজরের দোয়া ৩",
+        "arabic": "أُعيـذُكُمـا بِكَلِـماتِ اللهِ التّـامَّة، مِنْ كُلِّ شَيْـطانٍ وَهـامَّة، وَمِنْ كُـلِّ عَـيْنٍ لامَّـة",
+        "translation_bn": "আমি তোমার জন্য আল্লাহর কালেমার সাহায্যে আশ্রয় চাচ্ছি সব ধরনের শয়তান, হিংস্র প্রাণী এবং বদনজরের বিপদ থেকে।",
+        "transliteration_bn": "উয়িজুকুমা বিকালিমাতিল্লাহিত তাম্মাতি, মিন কুল্লি শায়ত্বানিও ওয়া হাম্মাতি, ওয়া মিন কুল্লি আইনিন লিআম্মাতি।"
+      },
+      {
+        "id": "daily_4",
+        "title": "Dua for Keeping the Heart Firm",
+        "title_bn": "অন্তর সঠিক রাখার দোয়া",
+        "image": "daily_4"
+      },
+      {
+        "id": "daily_5",
+        "title": "Dua for Seeking Jannah and Refuge from Hellfire",
+        "title_bn": "জান্নাত চাওয়া ও জাহান্নাম থেকে আশ্রয়ের দোয়া",
+        "image": "daily_5"
+      },
+      {
+        "id": "daily_6",
+        "title": "Dua for Forgiveness, Well-being, and Security",
+        "title_bn": "ক্ষমা, সুস্থতা ও নিরাপত্তার দোয়া",
+        "image": "daily_6"
+      },
+      {
+        "id": "daily_7",
+        "title": "Dua for Beneficial Knowledge, Pure Provision, and Accepted Deeds",
+        "title_bn": "উপকারী জ্ঞান, পবিত্র রিজিক ও কবুল আমলের দোয়া",
+        "image": "daily_7"
+      },
+      {
+        "id": "daily_9",
+        "title": "Dua for Protection from Shirk, Hidden Sins, and Wrong Intentions",
+        "title_bn": "শিরক, গোপন গুনাহ ও ভুল নিয়ত থেকে বাঁচার দোয়া",
+        "image": "daily_9"
+      }
+    ]
+  },
+  {
+    "id": "world_afterlife",
+    "category_en": "World - Afterlife",
+    "category_bn": "দুনিয়া - আখেরাত",
+    "duas": [
+      {
+        "id": "dua_for_myself",
+        "title": "Dua for Myself",
+        "title_bn": "নিজের জন্য দোয়া",
+        "translation_bn": "১. নিজের হিদায়াহ ও মৃত্যুর আগ পর্যন্ত তাওহীদের পথে থাকার তাওফিক।\\n\\n২. আজীবন শারীরিক মানসিক সুস্থতা,এমন সুস্থতা যেনো শরীরের ভিতর কোনো রোগই অবশিষ্ট না থাকে। সুকুন।\\n\\n৩. উত্তম, হালাল ও পবিত্র রিযিক্ব।\\n\\n৪.  বাবা মা পরিবারের হিদায়াহ ও তাদের সুস্থতার সাথে নেক লম্বা দীর্ঘ হায়াত।\\n\\n৫. নেককার চক্ষুশীতলকারী জীবনসঙ্গী ও সন্তান। যারা মুসলিম উম্মাহর উপকারে আসবে।\\n\\n৬. নিজের ও পরিবারের জন্য কবর-জাহান্নামের আযাব থেকে পানাহ ।\\n\\n৭. কিয়ামতের দিন পরিবার সহ আল্লাহর আরশের ছায়া\\n৮. হিসাব সহজ হওয়ার জন্য দোয়া\\n৯. ডানহাতে আমলনামা পাওয়া\\n১০. মিযানের পাল্লা নেকি দ্বারা ভারী\\n১১. চোখের পলকে পুলসিরাত পার হওয়া\\n\\n১২. রাসূল ﷺ এর হাতে হাউযে কাওসারের পানি পান\\n১৩. বিনা হিসাবে বিনা আযাবে পরিবারের সাথে জান্নাতুল ফেরদৌস নসীব।\\n\\n১৪. কিয়ামতের দিন রাসূল ﷺ এর সুপারিশ নসীব।\\n১৫. জান্নাতে রাসূল ﷺ এর প্রতিবেশী হওয়ার তাওফিক।\\n\\n১৬. উত্তম সুন্দর শহীদি মৃত্যু, জীবন মৃত্যুর ফিতনা থেকে পানাহ\\n১৭. আল্লাহর সন্তুষ্টির সাথে পবিত্র আত্মা নিয়ে মৃত্যু\\n১৮. সকল মুসলিম উম্মাহর জন্য হিদায়াতের, জান্নাতের দোয়া।\\n\\n১৯. স্বামীর হায়াত ও রোজগারে বারাকাহ\\n২০. অল্প বয়সে বিধবা ও তালাকপ্রাপ্ত হওয়া থেকে পানাহ\\n\\n২১. সময়ে বারাকাহ\\n২২. নেক আমল, ইবাদাত, দোয়াতে বারাকাহ\\n২৩. কবুলযোগ্য ইবাদাত করার তাওফিক পাওয়া\\n২৫. অধিকহারে দান সাদাকা করার তাওফিক পাওয়া\\n\\n২৫. কবুলযোগ্য উমরাহ ও হাজ্জ করার তাওফিক\\n২৬. মাদীনাবাসী হওয়ার তাওফিক\\n২৭. মাদিনাতে ঈমানি হালতে মৃত্যুর তাওফিক\\n\\n২৮. আল্লাহর শোকর গুজার বান্দা হওয়ার তাওফিক\\n২৯. বিপদে উত্তম সবর করার তাওফিক\\n\\n৩০. ইখলাস ও আখলাক্বে বারাকাহ\\n৩১. শির্ক বিদাত মুক্ত জীবন\\n৩২. জবান হেফাজত করার তাওফিক\\n৩৩. গীবত মিথ্যা, পরনিন্দা, হিংসা, অহংকার থেকে বিরত থাকার তাওফিক\\n\\n৩৪. অতিরিক্ত সোশ্যাল মিডিয়ায় আসক্তি হওয়া থেকে পানাহ\\n৩৫. দিনে রাতে কুরআন ও যিকিরের সাথে লেগে থাকার তাওফিক\\n\\n৩৬. সিজদাহ্, সালাম ফিরানোর আগে ও মোনাজাতে কবুলযোগ্য দোয়া করার তাওফিক\\n৩৭. অযথা অহেতুক ঘর থেকে বের হওয়া থেকে পানাহ\\n\\n৩৮. দিনে রাতের সুন্নাহ আমলের তাওফিক\\n৩৯. দ্বীনের জ্ঞান অর্জনে বারাকাহ পাওয়া\\n\\n৪০. বাবা মা ও স্বামী সন্তানের সাথে উত্তম ব্যবহার করার তাওফিক।\\n\\n৪১. মানুষের মুখাপেক্ষী হওয়া থেকে পানাহ। সকল অবস্থায় আল্লাহর মুখাপেক্ষী হওয়ার তাওফিক।\\n\\n৪২. ঋণ থেকে মুক্ত থাকার তাওফিক।\\n\\n৪৩. হালাল রিযিক্বে অনেকবেশি বারাকাহ পাওয়া, হালালে সন্তুষ্ট থাকার তাওফিক। সে সম্পদ বিনাহিসাবে আল্লাহর রাস্তায় দান করার তাওফিক।\\n\\n৪৪. শয়তান ও অতৃপ্ত নফসের ওয়াসওয়াসা থেকে পানাহ\\n\\n৪৫. কবুলযোগ্য ইবাদাতকারী, শুকরিয়া আদায় কারী, যিকর ও তিলাওয়াতকারী, তাকওয়াবান হওয়ার তাকফিক।\\n\\n৪৬. আল্লাহর প্রতি বিনয়ী, আনুগত্যকারী ও বেশি বেশি তওবাকারী হওয়ার তাওফিক।\\n\\n৪৭. যাদের সাথে থাকলে ইমান আমল ইখলাসে আখলাক্বে বারাকাহ আসবে, তাদের সঙ্গ পাওয়ার তাওফিক।\\n\\n৪৮. যাদের সাথে থাকলে ইমান আমল দুর্বল ও নষ্ট।হয়ে যায়, তাদের কাছ থেকে পানাহ।\\n\\n৪৯. আমানত রক্ষা করার তাওফিক। অন্যের সম্মান ও সম্পদ খিয়ানত করা থেকে পানাহ।\\n\\n৫০. আকস্মিক মৃত্যু থেকে পানাহ।\\n\\n৫১. কুরআন সুন্নাহভিত্তিক সঠিক দ্বীন প্রচারের তাওফিক。",
+        "translation_en": "1. Guidance for myself and the ability to remain on the path of Tawheed until death.\\n\\n2. Lifelong physical and mental well-being, such a state of health that no disease remains in the body. Peace and tranquility.\\n\\n3. Good, halal, and pure provision.\\n\\n4. Guidance for my parents and family, along with a long, righteous life with good health.\\n\\n5. A righteous, comforting spouse and children who will be of benefit to the Muslim Ummah.\\n\\n6. Protection for myself and my family from the punishment of the grave and Hellfire.\\n\\n7. The shade of Allah's Throne on the Day of Judgment for myself and my family.\\n8. Dua for an easy reckoning.\\n9. To receive the book of deeds in the right hand.\\n10. For the scale (Mizan) to be heavy with good deeds.\\n11. To cross the Sirat bridge in the blink of an eye.\\n\\n12. To drink the water of Hawd al-Kawthar from the hands of the Prophet ﷺ.\\n13. To enter Jannatul Firdaus with my family without reckoning and without punishment.\\n\\n14. The intercession of the Prophet ﷺ on the Day of Judgment.\\n15. The ability to be the neighbor of the Prophet ﷺ in Jannah.\\n\\n16. A good and beautiful death as a martyr, and protection from the trials of life and death.\\n17. To die with a pure soul while Allah is pleased with me.\\n18. Dua for guidance and Jannah for the entire Muslim Ummah.\\n\\n19. Barakah in my husband's life and earnings.\\n20. Protection from becoming a widow or getting divorced at an early age.\\n\\n21. Barakah in time.\\n22. Barakah in good deeds, worship, and supplications.\\n23. The ability to perform accepted worship.\\n24. The ability to give abundantly in charity.\\n\\n25. The ability to perform accepted Umrah and Hajj.\\n26. The ability to become a resident of Madinah.\\n27. The ability to die in Madinah in a state of faith.\\n\\n28. The ability to be a grateful servant of Allah.\\n29. The ability to have the best of patience during trials.\\n\\n30. Barakah in sincerity (Ikhlas) and character (Akhlaq).\\n31. A life free from Shirk and Bid'ah.\\n32. The ability to guard the tongue.\\n33. The ability to refrain from backbiting, lying, slander, jealousy, and arrogance.\\n\\n34. Protection from addiction to excessive social media.\\n35. The ability to stay engaged with the Quran and Dhikr day and night.\\n\\n36. The ability to make accepted duas in Sujood, before the Salam, and in supplications.\\n37. Protection from leaving the house unnecessarily and pointlessly.\\n\\n38. The ability to practice the Sunnah day and night.\\n39. To receive Barakah in acquiring the knowledge of Deen.\\n\\n40. The ability to treat parents, husband, and children with excellent behavior.\\n\\n41. Protection from depending on people. The ability to rely solely on Allah in all situations.\\n\\n42. The ability to remain free from debt.\\n\\n43. To receive immense Barakah in halal provision, and the ability to be content with the halal. The ability to spend that wealth generously in the path of Allah without counting.\\n\\n44. Protection from the whispers of Shaytan and the unsatisfied self (Nafs).\\n\\n45. The ability to be someone whose worship is accepted, who is grateful, who remembers Allah, who recites the Quran, and who possesses Taqwa.\\n\\n46. The ability to be humble, obedient, and constantly repentant to Allah.\\n\\n47. The ability to have the companionship of those who bring Barakah to faith, deeds, sincerity, and character.\\n\\n48. Protection from the companionship of those who weaken and destroy faith and deeds.\\n\\n49. The ability to protect trusts. Protection from violating the honor and wealth of others.\\n\\n50. Protection from sudden death.\\n\\n51. The ability to preach the correct Deen based on the Quran and Sunnah."
+      },
+      {
+        "id": "istighfar",
+        "title": "Sayyidul Istighfar",
+        "title_bn": "সাইয়্যিদুল ইস্তিগফার",
+        "image": "istighfar"
+      },
+      {
+        "id": "dunia_akhirat",
+        "title": "Dua for This World and the Hereafter",
+        "title_bn": "দুনিয়া ও আখেরাতের দোয়া",
+        "image": "dunia_akhirat"
+      },
+      {
+        "id": "dua_qabool",
+        "title": "Dua for the Acceptance of Supplications",
+        "title_bn": "দোয়া কবুল হওয়ার দোয়া",
+        "image": "dua_qabool"
+      },
+      {
+        "id": "before_salam",
+        "title": "Seeking Refuge from 4 Things Before the Salam in Prayer",
+        "title_bn": "নামাজের সালাম ফিরানোর আগে ৪ জিনিসের জন্য পানাহ চাওয়া",
+        "image": "before_salam"
+      },
+      {
+        "id": "namaji",
+        "title": "Dua to Become Steadfast in Prayer",
+        "title_bn": "নামাজি হওয়ার দোয়া",
+        "image": "namaji"
+      },
+      {
+        "id": "lazyness",
+        "title": "Dua for Relief from Laziness",
+        "title_bn": "অলসতা থেকে মুক্তির দোয়া",
+        "image": "lazyness"
+      },
+      {
+        "id": "intelligence",
+        "title": "Dua to Become Knowledgeable and Intelligent",
+        "title_bn": "জ্ঞানী ও বুদ্ধিমান হওয়ার দোয়া",
+        "image": "intelligence"
+      },
+      {
+        "id": "security",
+        "title": "Dua for Seeking Security in This World and the Hereafter",
+        "title_bn": "দুনিয়া ও আখেরাতের নিরাপত্তা কামনা করার দোয়া",
+        "image": "security"
+      },
+      {
+        "id": "all_problems",
+        "title": "Dua for Protection from All Kinds of Harm",
+        "title_bn": "সব রকমের অনিষ্ঠ থেকে রক্ষার দোয়া",
+        "image": "all_problems"
+      },
+      {
+        "id": "problem",
+        "title": "Dua to Recite When Facing Any Problem",
+        "title_bn": "কোনো সমস্যার সম্মুখীন হলে পড়বে",
+        "image": "problem"
+      },
+      {
+        "id": "wellness",
+        "title": "Dua for Physical Well-being",
+        "title_bn": "শারীরিক সুস্থতার জন্য দোয়া",
+        "image": "wellness"
+      },
+      {
+        "id": "sickness",
+        "title": "Dua to Recite While Sick",
+        "title_bn": "রোগাক্রান্ত অবস্থায় পাঠ করার দোয়া",
+        "image": "sickness"
+      },
+      {
+        "id": "jahannam",
+        "title": "Dua for Protection from Hellfire",
+        "title_bn": "জাহান্নাম থেকে বাচার দোয়া",
+        "image": "jahannam"
+      },
+      {
+        "id": "without_death",
+        "title": "Cure for All Diseases Except Death",
+        "title_bn": "মৃত্যু ছাড়া সব রোগের জন্য শিফা",
+        "image": "without_death"
+      },
+      {
+        "id": "good_death",
+        "title": "Dua for Dying as a Righteous Person",
+        "title_bn": "নেককার হিসাবে মৃত্যুর দো'আ",
+        "image": "good_death"
+      },
+      {
+        "id": "accidental_death",
+        "title": "Dua for Protection from Sudden Death",
+        "title_bn": "আকস্মিক অপমৃত্যু থেকে হেফাজতের দোয়া",
+        "image": "accidental_death"
+      },
+      {
+        "id": "taqbeer",
+        "title": "Takbeer-e-Tashreeq",
+        "title_bn": "তাকবিরে তাশরিক",
+        "image": "taqbeer"
+      }
+    ]
+  }
+]

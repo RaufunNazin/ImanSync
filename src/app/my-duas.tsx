@@ -21,7 +21,7 @@ const RELINK_NEEDED_KEY    = 'imansync_storage_relink';
 export default function MyDuasScreen() {
   const scheme = useThemeStore((s) => s.theme);
   const colors = Colors[scheme === 'unspecified' ? 'light' : scheme];
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
   const router = useRouter();
 
   const [duas, setDuas] = useState<UserDua[]>([]);
@@ -91,9 +91,15 @@ export default function MyDuasScreen() {
     const q = searchQuery.toLowerCase();
     return (
       (dua.title || '').toLowerCase().includes(q) ||
+      (dua.titleBn || '').toLowerCase().includes(q) ||
+      (dua.titleEn || '').toLowerCase().includes(q) ||
       (dua.translation || '').toLowerCase().includes(q) ||
+      (dua.translationBn || '').toLowerCase().includes(q) ||
+      (dua.translationEn || '').toLowerCase().includes(q) ||
       (dua.arabic || '').toLowerCase().includes(q) ||
-      (dua.transliteration || '').toLowerCase().includes(q)
+      (dua.transliteration || '').toLowerCase().includes(q) ||
+      (dua.transliterationBn || '').toLowerCase().includes(q) ||
+      (dua.transliterationEn || '').toLowerCase().includes(q)
     );
   });
 
@@ -174,7 +180,7 @@ export default function MyDuasScreen() {
                       {dua.type === 'video' && <Video size={24} color={colors.accent} />}
                       <View style={{ flex: 1 }}>
                         <Text style={[styles.duaTitle, { color: colors.text }]} numberOfLines={1}>
-                          {dua.title}
+                          {i18n.language === 'bn' ? (dua.titleBn || dua.titleEn || dua.title) : (dua.titleEn || dua.titleBn || dua.title)}
                         </Text>
                         <Text style={{ fontFamily: Fonts.outfit, fontSize: 13, color: colors.textSecondary }}>
                           {dua.type === 'image' ? t('dua.attachmentImage') : dua.type === 'video' ? t('dua.attachmentVideo') : t('dua.attachmentText')}

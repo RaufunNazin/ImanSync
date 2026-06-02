@@ -53,7 +53,12 @@ export default function SurahScreen() {
   const [ayahs, setAyahs] = useState<Ayah[]>([]);
   const [loading, setLoading] = useState(true);
   
-  const [settings, setSettings] = useState<Settings>(DEFAULT_SETTINGS);
+  const [settings, setSettings] = useState<Settings>(() => ({
+    ...DEFAULT_SETTINGS,
+    showBangla: i18n.language === 'bn',
+    showEnglish: i18n.language === 'en',
+    showEnglishTranslit: i18n.language === 'en',
+  }));
   const [modalVisible, setModalVisible] = useState(false);
   const [bookmarkedAyahs, setBookmarkedAyahs] = useState<Record<string, boolean>>({});
 
@@ -411,15 +416,15 @@ export default function SurahScreen() {
                   </Text>
                 )}
 
-                {settings.showEnglish && item.english && (
-                  <Text style={[styles.englishText, { color: colors.textSecondary, fontSize: settings.translationFontSize, lineHeight: settings.translationFontSize * 1.5 }]}>
-                    {item.english}
-                  </Text>
-                )}
-
                 {settings.showBangla && item.bangla && (
                   <Text style={[styles.banglaText, { color: colors.textSecondary, fontSize: settings.translationFontSize, lineHeight: settings.translationFontSize * 1.5 }]}>
                     {item.bangla}
+                  </Text>
+                )}
+
+                {settings.showEnglish && item.english && (
+                  <Text style={[styles.englishText, { color: colors.textSecondary, fontSize: settings.translationFontSize, lineHeight: settings.translationFontSize * 1.5 }]}>
+                    {item.english}
                   </Text>
                 )}
               </View>

@@ -1,5 +1,8 @@
 import PageHeader from '@/components/page-header';
+import SkeletonBox from '@/components/SkeletonBox';
 import { Colors, Fonts, Spacing } from '@/constants/theme';
+import { usePreferencesStore } from '@/store/preferencesStore';
+import { useThemeStore } from '@/store/themeStore';
 import { getDistrictName } from '@/utils/districts';
 import { formatNumber } from '@/utils/formatNumber';
 import AsyncStorage from '@react-native-async-storage/async-storage';
@@ -17,11 +20,8 @@ import {
   TouchableOpacity,
   View
 } from 'react-native';
-import Animated, { useAnimatedStyle, withTiming } from 'react-native-reanimated';
+import Animated, { useAnimatedStyle, withTiming, FadeIn, FadeOut } from 'react-native-reanimated';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { useThemeStore } from '@/store/themeStore';
-import { usePreferencesStore } from '@/store/preferencesStore';
-import SkeletonBox from '@/components/SkeletonBox';
 
 // ── Types ────────────────────────────────────────────────────────────────────
 interface PrayerEntry {
@@ -35,6 +35,7 @@ interface PrayerEntry {
 interface SpecialTime {
   label: string;
   time: string;
+  date: Date | null;
 }
 
 interface RestrictedTime {
@@ -89,6 +90,75 @@ const getLocalYYYYMMDD = (d: Date = new Date()) => {
 };
 
 // ── Component ────────────────────────────────────────────────────────────────
+
+function SpecialTimeCard({ item, colors, i18nLanguage, styles }: { item: SpecialTime, colors: any, i18nLanguage: string, styles: any }) {
+  const [showCountdown, setShowCountdown] = useState(false);
+  const [remainingStr, setRemainingStr] = useState('');
+  
+  useEffect(() => {
+    let interval: NodeJS.Timeout;
+    let timeout: NodeJS.Timeout;
+
+    if (showCountdown && item.date && item.time !== '--:--') {
+      const update = () => {
+        const diff = item.date!.getTime() - Date.now();
+        if (diff <= 0) {
+          setRemainingStr(formatNumber('00h 00m 00s', i18nLanguage));
+        } else {
+          const h = Math.floor(diff / 3600000);
+          const m = Math.floor((diff % 3600000) / 60000);
+          const s = Math.floor((diff % 60000) / 1000);
+          setRemainingStr(formatNumber(`- ${h.toString().padStart(2, '0')}h ${m.toString().padStart(2, '0')}m ${s.toString().padStart(2, '0')}s`, i18nLanguage));
+        }
+      };
+      update();
+      interval = setInterval(update, 1000);
+
+      timeout = setTimeout(() => {
+        setShowCountdown(false);
+      }, 5000);
+    }
+    
+    return () => {
+      if (interval) clearInterval(interval);
+      if (timeout) clearTimeout(timeout);
+    };
+  }, [showCountdown, item.date, item.time, i18nLanguage]);
+
+  return (
+    <TouchableOpacity activeOpacity={0.7} onPress={() => {
+      if (item.date && item.time !== '--:--') {
+        setShowCountdown(true);
+      }
+    }}>
+      <BlurView
+        intensity={30}
+        tint={colors.glassTint as any}
+        style={[styles.specialCard, { borderColor: colors.border }]}
+      >
+        <View style={[styles.specialCardInner, { alignItems: 'center', justifyContent: 'center', paddingVertical: 16 }]}>
+          {showCountdown ? (
+            <Animated.Text entering={FadeIn.duration(300)} exiting={FadeOut.duration(300)} style={{ fontFamily: Fonts.outfit, fontSize: 13, color: colors.highlight, marginBottom: 4, height: 26, verticalAlign: 'middle' }}>
+              {remainingStr}
+            </Animated.Text>
+          ) : (
+            <Animated.Text entering={FadeIn.duration(300)} exiting={FadeOut.duration(300)} style={{ fontFamily: Fonts.outfit, fontSize: 20, color: colors.accent, marginBottom: 4, height: 26, verticalAlign: 'middle' }}>
+              {formatNumber(item.time, i18nLanguage).split(/( AM| PM)/).map((part, index) => 
+                (part === ' AM' || part === ' PM') ? 
+                  <Text key={index} style={{ fontSize: 11, fontWeight: '500' }}>{part}</Text> : 
+                  part
+              )}
+            </Animated.Text>
+          )}
+          <Text style={{ fontFamily: Fonts.outfit, fontSize: 10, color: colors.textSecondary, textTransform: 'uppercase', letterSpacing: 1, textAlign: 'center' }}>
+            {item.label}
+          </Text>
+        </View>
+      </BlurView>
+    </TouchableOpacity>
+  );
+}
+
 export default function HomeScreen() {
   const scheme = useThemeStore((s) => s.theme);
   const colors = Colors[scheme === 'unspecified' ? 'light' : scheme ?? 'light'];
@@ -350,14 +420,17 @@ export default function HomeScreen() {
       {
         label: t('home.suhur'),
         time: hideSahri ? '--:--' : formatAMPM(suhurDate, i18n.language),
+        date: hideSahri ? null : suhurDate,
       },
       {
         label: t('home.iftar'),
         time: hideIftar ? '--:--' : formatAMPM(iftarDate, i18n.language),
+        date: hideIftar ? null : iftarDate,
       },
       {
         label: t('home.tahajjud'),
         time: formatAMPM(tahajjudDate, i18n.language),
+        date: tahajjudDate,
       },
     ];
   }, [rawTimings, today, t, i18n.language, hijriRaw]);
@@ -378,15 +451,15 @@ export default function HomeScreen() {
     return [
       {
         labelKey: 'restrict1',
-        time: `${formatAMPM(sunriseDate, i18n.language)} – ${formatAMPM(sunriseEnd, i18n.language)}`,
+        time: `${formatAMPM(sunriseDate, i18n.language)} - ${formatAMPM(sunriseEnd, i18n.language)}`,
       },
       {
         labelKey: 'restrict2',
-        time: `${formatAMPM(zawaalStart, i18n.language)} – ${formatAMPM(dhuhrDate, i18n.language)}`,
+        time: `${formatAMPM(zawaalStart, i18n.language)} - ${formatAMPM(dhuhrDate, i18n.language)}`,
       },
       {
         labelKey: 'restrict3',
-        time: `${formatAMPM(paleStart, i18n.language)} – ${formatAMPM(sunsetDate, i18n.language)}`,
+        time: `${formatAMPM(paleStart, i18n.language)} - ${formatAMPM(sunsetDate, i18n.language)}`,
       },
     ];
   }, [rawTimings, today, t, i18n.language]);
@@ -498,7 +571,7 @@ export default function HomeScreen() {
               style={[styles.heroCard, { borderColor: colors.border, paddingVertical: 20, paddingHorizontal: 24, overflow: 'hidden', marginBottom: 0 }]}
             >
               {/* Animated green glow from top-left when prayer is marked done */}
-              <Animated.View style={[{ position: 'absolute', top: 0, left: 0, width: '70%', height: '100%' }, animatedGlowStyle]}>
+              <Animated.View style={[{ position: 'absolute', top: 0, left: 0, width: '70%', height: '120%' }, animatedGlowStyle]}>
                 <LinearGradient
                   colors={[colors.highlight + '30', colors.highlight + '08', 'transparent']}
                   start={{ x: 0, y: 0 }}
@@ -508,7 +581,7 @@ export default function HomeScreen() {
               </Animated.View>
 
               {/* Animated red glow when it's Makruh time and not done */}
-              <Animated.View style={[{ position: 'absolute', top: 0, left: 0, width: '70%', height: '100%' }, animatedRedGlowStyle]}>
+              <Animated.View style={[{ position: 'absolute', top: 0, left: 0, width: '70%', height: '120%' }, animatedRedGlowStyle]}>
                 <LinearGradient
                   colors={['#dc604030', '#dc604008', 'transparent']}
                   start={{ x: 0, y: 0 }}
@@ -752,25 +825,7 @@ export default function HomeScreen() {
               <Text style={[styles.subSectionLabelOuter, { color: colors.textSecondary }]}>{t('home.specialTimes')}</Text>
               <View style={styles.specialGrid}>
                 {specialTimes.map((item) => (
-                  <BlurView
-                    key={item.label}
-                    intensity={30}
-                    tint={colors.glassTint as any}
-                    style={[styles.specialCard, { borderColor: colors.border }]}
-                  >
-                    <View style={[styles.specialCardInner, { alignItems: 'center', justifyContent: 'center', paddingVertical: 16 }]}>
-                      <Text style={{ fontFamily: Fonts.outfit, fontSize: 20, color: colors.accent, marginBottom: 4 }}>
-                        {formatNumber(item.time, i18n.language).split(/( AM| PM)/).map((part, index) => 
-                          (part === ' AM' || part === ' PM') ? 
-                            <Text key={index} style={{ fontSize: 11, fontWeight: '500' }}>{part}</Text> : 
-                            part
-                        )}
-                      </Text>
-                      <Text style={{ fontFamily: Fonts.outfit, fontSize: 10, color: colors.textSecondary, textTransform: 'uppercase', letterSpacing: 1, textAlign: 'center' }}>
-                        {item.label}
-                      </Text>
-                    </View>
-                  </BlurView>
+                  <SpecialTimeCard key={item.label} item={item} colors={colors} i18nLanguage={i18n.language} styles={styles} />
                 ))}
               </View>
             </View>

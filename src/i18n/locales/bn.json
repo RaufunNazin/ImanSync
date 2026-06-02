@@ -231,6 +231,8 @@
     "searchPlaceholder": "নাম বা অনুবাদ দিয়ে খুঁজুন..."
   },
   "settings": {
+    "showCuratedDuas": "বিশেষ বাছাইকৃত দোয়া",
+    "showCuratedDuasDesc": "দোয়া ট্যাবে বিশেষ কাস্টম দোয়াগুলো দেখান",
     "titleEn": "সেটিংস",
     "titleAr": "الإعدادات",
     "days": "দিন",

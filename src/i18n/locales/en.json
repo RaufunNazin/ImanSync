@@ -229,6 +229,8 @@
     "searchPlaceholder": "Search by name or translation..."
   },
   "settings": {
+    "showCuratedDuas": "Special Curated Duas",
+    "showCuratedDuasDesc": "Show bundled custom duas in the Dua tab",
     "titleEn": "Settings",
     "titleAr": "الإعدادات",
     "days": "Days",
