@@ -10,6 +10,14 @@ const RELINK_NEEDED_KEY = 'imansync_storage_relink';  // 'true' | null
 const RESTORED_KEY      = 'imansync_storage_restored'; // 'true' | null  (for one-time toast)
 const FILE_NAME         = 'ImanSync_MyDuas.json';
 
+// ─── Caches ──────────────────────────────────────────────────────────────────
+let cachedMyDuas: UserDua[] | null = null;
+let cachedCustomCategories: CustomCategory[] | null = null;
+
+export function clearStorageCache() {
+  cachedMyDuas = null;
+  cachedCustomCategories = null;
+}
 
 // ─── Types ───────────────────────────────────────────────────────────────────
 export type StorageMode = 'internal' | 'permanent';
@@ -74,9 +82,12 @@ export async function initInternalStorage(): Promise<UserDua[]> {
   const fileUri = dir + FILE_NAME;
   const info = await FileSystem.getInfoAsync(fileUri);
   if (info.exists) {
-    return await readJsonFromUri(fileUri);
+    const data = await readJsonFromUri(fileUri);
+    cachedMyDuas = data;
+    return data;
   }
   await FileSystem.writeAsStringAsync(fileUri, '[]');
+  cachedMyDuas = [];
   return [];
 }
 
@@ -116,6 +127,7 @@ export async function initPermanentStorage(): Promise<{ duas: UserDua[]; cancell
         directoryUri, FILE_NAME, 'application/json'
       );
       await FileSystem.writeAsStringAsync(newFileUri, '[]');
+      cachedMyDuas = [];
       return { duas: [], cancelled: false };
     }
   } catch (e) {
@@ -190,6 +202,8 @@ export async function clearRelinkFlag(): Promise<void> {
 
 // ─── Public: load duas ───────────────────────────────────────────────────────
 export async function loadMyDuas(): Promise<UserDua[]> {
+  if (cachedMyDuas) return cachedMyDuas;
+
   const uri = await getStorageUri();
   const mode = await getStorageMode();
   if (!uri) return [];
@@ -198,7 +212,10 @@ export async function loadMyDuas(): Promise<UserDua[]> {
     try {
       const files = await StorageAccessFramework.readDirectoryAsync(uri);
       const fileUri = files.find((f: string) => f.endsWith(FILE_NAME));
-      if (fileUri) return await readJsonFromUri(fileUri);
+      if (fileUri) {
+        cachedMyDuas = await readJsonFromUri(fileUri);
+        return cachedMyDuas;
+      }
     } catch (e) {
       console.warn('Failed to load duas via SAF', e);
       // Permission may have been revoked
@@ -211,7 +228,10 @@ export async function loadMyDuas(): Promise<UserDua[]> {
   try {
     const fileUri = uri + FILE_NAME;
     const info = await FileSystem.getInfoAsync(fileUri);
-    if (info.exists) return await readJsonFromUri(fileUri);
+    if (info.exists) {
+      cachedMyDuas = await readJsonFromUri(fileUri);
+      return cachedMyDuas;
+    }
   } catch (e) {
     console.warn('Failed to load duas via filesystem', e);
   }
@@ -246,6 +266,8 @@ export async function saveMyDuas(duas: UserDua[]): Promise<void> {
     const fileUri = uri + FILE_NAME;
     await FileSystem.writeAsStringAsync(fileUri, content);
   }
+  
+  cachedMyDuas = duas;
 }
 
 // ─── Public: migrate between modes ───────────────────────────────────────────
@@ -389,9 +411,14 @@ export interface CustomCategory {
 const CATEGORIES_KEY = 'imansync_custom_categories';
 
 export async function loadCustomCategories(): Promise<CustomCategory[]> {
+  if (cachedCustomCategories) return cachedCustomCategories;
+  
   try {
     const val = await AsyncStorage.getItem(CATEGORIES_KEY);
-    if (val) return JSON.parse(val);
+    if (val) {
+      cachedCustomCategories = JSON.parse(val);
+      return cachedCustomCategories!;
+    }
   } catch (e) {
     console.error(e);
   }
@@ -400,4 +427,5 @@ export async function loadCustomCategories(): Promise<CustomCategory[]> {
 
 export async function saveCustomCategories(categories: CustomCategory[]): Promise<void> {
   await AsyncStorage.setItem(CATEGORIES_KEY, JSON.stringify(categories));
+  cachedCustomCategories = categories;
 }

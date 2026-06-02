@@ -2,7 +2,7 @@ import { Colors, Fonts, Spacing } from '@/constants/theme';
 import { formatNumber } from '@/utils/formatNumber';
 import { BlurView } from 'expo-blur';
 import { useRouter } from 'expo-router';
-import { ChevronLeft } from 'lucide-react-native';
+import { ChevronLeft, X } from 'lucide-react-native';
 import React, { useEffect, useState, useRef } from 'react';
 import { useTranslation } from 'react-i18next';
 import { 
@@ -114,6 +114,11 @@ export default function QuranSearchScreen() {
             onChangeText={setSearchQuery}
             autoCorrect={false}
           />
+          {searchQuery.length > 0 && (
+            <TouchableOpacity onPress={() => setSearchQuery('')} hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}>
+              <X size={18} color={colors.textSecondary} />
+            </TouchableOpacity>
+          )}
         </Animated.View>
       </Animated.View>
 

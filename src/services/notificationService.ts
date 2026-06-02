@@ -196,8 +196,10 @@ async function schedulePrayerDay(timings: any, targetDate: Date, _isToday: boole
 
       const endTimeFormatted = endTimeStr ? formatAMPM(parseTimeString(endTimeStr, targetDate)) : '';
 
+      const titleKey = current.id === 'isha' ? 'notifications.ishaStartTitle' : 'notifications.prayerStartTitle';
+
       await notifee.createTriggerNotification({
-        title: i18n.t('notifications.prayerStartTitle', { prayer: current.name, endTime: endTimeFormatted }),
+        title: i18n.t(titleKey, { prayer: current.name, endTime: endTimeFormatted }),
         android: { showTimestamp: true, channelId: PRAYERS_CHANNEL, smallIcon: 'notification_icon', color: '#4c956c' , pressAction: { id: 'default' } },
         ios: { sound: 'bird.wav', badgeCount: 1 },
       }, trigger);
@@ -216,7 +218,7 @@ async function schedulePrayerDay(timings: any, targetDate: Date, _isToday: boole
           alarmManager: { allowWhileIdle: true },
         };
         await notifee.createTriggerNotification({
-          title: i18n.t('notifications.prayerEndTitle', { nextPrayer: next.name }),
+          title: i18n.t('notifications.prayerEndTitle', { currentPrayer: current.name }),
           android: { showTimestamp: true, channelId: PRAYERS_CHANNEL, smallIcon: 'notification_icon', color: '#4c956c' , pressAction: { id: 'default' } },
           ios: { sound: 'bird.wav', badgeCount: 1 },
         }, trigger);

@@ -75,7 +75,10 @@
     "tapToMark": "Tap to mark as prayed",
     "prayerDone": "Prayed ✓",
     "dhakaBd": "Dhaka, BD",
-    "loading": "Loading..."
+    "loading": "Loading...",
+    "timeRemaining": "{{hours}} hr\n{{minutes}} min",
+    "timeRemainingMinsOnly": "{{minutes}}\nmin",
+    "timeLeft": "Left"
   },
   "quran": {
     "titleEn": "Al-Quran",
@@ -184,11 +187,17 @@
     "duaArabic": "Arabic Text (Optional)",
     "duaTransliteration": "Transliteration (Optional)",
     "duaTranslation": "Translation / Meaning",
+    "duaTranslationBn": "Bangla Translation",
+    "duaTransliterationBn": "Bangla Transliteration",
+    "duaTranslationEn": "English Translation",
+    "duaTransliterationEn": "English Transliteration",
     "save": "Save Dua",
     "cancel": "Cancel",
     "addText": "Write Dua",
     "addImage": "Add Image",
     "addVideo": "Add Video",
+    "addSuccess": "Dua added successfully!",
+    "addError": "Failed to add dua.",
     "typeText": "Text",
     "typeImage": "Image",
     "typeVideo": "Video",
@@ -222,7 +231,13 @@
     "createCategoryBtn": "Create",
     "attachmentImage": "Image Attachment",
     "attachmentVideo": "Video Attachment",
-    "attachmentText": "Text Dua"
+    "attachmentText": "Text Dua",
+    "renameCategory": "Rename Category",
+    "categoryRenamed": "Category renamed",
+    "categoryRenameError": "Failed to rename category",
+    "deleteCategory": "Delete Category",
+    "deleteCategoryTitle": "Delete Category",
+    "deleteCategoryDesc": "Are you sure you want to delete this category? Associated duas will be moved to My Duas."
   },
   "duaSettings": {
     "title": "Dua Settings",
@@ -944,7 +959,8 @@
   },
   "notifications": {
     "prayerStartTitle": "{{prayer}} - till {{endTime}}",
-    "prayerEndTitle": "Only 15 minutes left until {{nextPrayer}}",
+    "ishaStartTitle": "{{prayer}} - Best to pray before {{endTime}}",
+    "prayerEndTitle": "Only 15 minutes left for {{currentPrayer}}",
     "jumuahTitle": "Jumu'ah Tomorrow",
     "jumuahBody": "Don't forget to recite Surah Al-Kahf tonight or tomorrow!",
     "fastingTitle": "Sunnah Fasting Tomorrow",

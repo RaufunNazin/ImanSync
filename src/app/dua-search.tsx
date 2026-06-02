@@ -1,7 +1,7 @@
 import { Colors, Fonts, Spacing } from '@/constants/theme';
 
 import { useRouter } from 'expo-router';
-import { ChevronLeft, ChevronRight } from 'lucide-react-native';
+import { ChevronLeft, ChevronRight, X } from 'lucide-react-native';
 import React, { useEffect, useState, useRef } from 'react';
 import { useTranslation } from 'react-i18next';
 import { 
@@ -94,6 +94,11 @@ export default function DuaSearchScreen() {
             onChangeText={setSearchQuery}
             autoCorrect={false}
           />
+          {searchQuery.length > 0 && (
+            <TouchableOpacity onPress={() => setSearchQuery('')} hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}>
+              <X size={18} color={colors.textSecondary} />
+            </TouchableOpacity>
+          )}
         </Animated.View>
       </Animated.View>
 

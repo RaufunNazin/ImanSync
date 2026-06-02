@@ -5,6 +5,9 @@ import { useTranslation } from 'react-i18next';
 import { X, Image as ImageIcon, Video, Type, Plus } from 'lucide-react-native';
 import * as ImagePicker from 'expo-image-picker';
 import { UserDua, loadCustomCategories, saveCustomCategories, CustomCategory } from '@/utils/my-duas-storage';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+
+const DRAFT_KEY = 'imansync_dua_draft';
 
 interface AddDuaModalProps {
   visible: boolean;
@@ -49,11 +52,42 @@ export default function AddDuaModal({ visible, onClose, onSave, initialData, col
       setSelectedCategoryId(initialData.categoryId || null);
       loadCustomCategories().then(setCategories);
     } else if (visible) {
-      reset();
+      // Load draft if no initialData
+      AsyncStorage.getItem(DRAFT_KEY).then(draft => {
+        if (draft) {
+          try {
+            const data = JSON.parse(draft);
+            setTitleBn(data.titleBn || '');
+            setTitleEn(data.titleEn || '');
+            setArabic(data.arabic || '');
+            setTransliterationBn(data.transliterationBn || '');
+            setTransliterationEn(data.transliterationEn || '');
+            setTranslationBn(data.translationBn || '');
+            setTranslationEn(data.translationEn || '');
+            setMediaType(data.type || 'text');
+            setMediaUri(data.mediaUri || null);
+            setSelectedCategoryId(data.categoryId || null);
+          } catch (e) {
+            console.error('Failed to parse draft', e);
+          }
+        } else {
+          reset();
+        }
+      });
       setActiveTab(i18n.language === 'bn' ? 'bn' : 'en');
       loadCustomCategories().then(setCategories);
     }
   }, [visible, initialData, i18n.language]);
+
+  // Auto-save draft effect
+  useEffect(() => {
+    if (visible && !initialData) {
+      const draft = {
+        titleBn, titleEn, arabic, transliterationBn, transliterationEn, translationBn, translationEn, type: mediaType, mediaUri, categoryId: selectedCategoryId
+      };
+      AsyncStorage.setItem(DRAFT_KEY, JSON.stringify(draft)).catch(console.error);
+    }
+  }, [titleBn, titleEn, arabic, transliterationBn, transliterationEn, translationBn, translationEn, mediaType, mediaUri, selectedCategoryId, visible, initialData]);
 
   const reset = () => {
     setTitleBn('');
@@ -135,7 +169,9 @@ export default function AddDuaModal({ visible, onClose, onSave, initialData, col
       mediaUri: mediaUri || undefined,
       categoryId: selectedCategoryId || undefined,
     });
-    handleClose();
+    if (!initialData) AsyncStorage.removeItem(DRAFT_KEY);
+    reset(); // Clear state so draft is not immediately overwritten before unmount
+    onClose();
   };
 
   if (!visible) return null;
@@ -148,7 +184,7 @@ export default function AddDuaModal({ visible, onClose, onSave, initialData, col
     <Modal visible={visible} transparent animationType="slide" onRequestClose={handleClose}>
       <KeyboardAvoidingView 
         style={{ flex: 1 }} 
-        behavior={Platform.OS === 'ios' ? 'padding' : undefined}
+        behavior="padding"
       >
         <View style={styles.overlay}>
           <View style={[styles.modal, { backgroundColor: colors.background, borderColor: colors.border }]}>
@@ -213,7 +249,6 @@ export default function AddDuaModal({ visible, onClose, onSave, initialData, col
                       placeholderTextColor={colors.textSecondary + '88'}
                       value={newCategoryName}
                       onChangeText={setNewCategoryName}
-                      autoFocus
                     />
                     <View style={{ flexDirection: 'row', gap: 8, justifyContent: 'flex-end' }}>
                       <TouchableOpacity style={[styles.createBtn, { paddingVertical: 10, backgroundColor: colors.card, borderColor: colors.border, borderWidth: 1 }]} onPress={() => setIsCreatingCategory(false)}>

@@ -91,7 +91,7 @@ const getLocalYYYYMMDD = (d: Date = new Date()) => {
 
 // ── Component ────────────────────────────────────────────────────────────────
 
-function SpecialTimeCard({ item, colors, i18nLanguage, styles }: { item: SpecialTime, colors: any, i18nLanguage: string, styles: any }) {
+function SpecialTimeCard({ item, colors, i18nLanguage, styles, t }: { item: SpecialTime, colors: any, i18nLanguage: string, styles: any, t: any }) {
   const [showCountdown, setShowCountdown] = useState(false);
   const [remainingStr, setRemainingStr] = useState('');
   
@@ -103,12 +103,15 @@ function SpecialTimeCard({ item, colors, i18nLanguage, styles }: { item: Special
       const update = () => {
         const diff = item.date!.getTime() - Date.now();
         if (diff <= 0) {
-          setRemainingStr(formatNumber('00h 00m 00s', i18nLanguage));
+          setRemainingStr(formatNumber(t('home.timeRemainingMinsOnly', { minutes: '00' }), i18nLanguage));
         } else {
           const h = Math.floor(diff / 3600000);
           const m = Math.floor((diff % 3600000) / 60000);
-          const s = Math.floor((diff % 60000) / 1000);
-          setRemainingStr(formatNumber(`- ${h.toString().padStart(2, '0')}h ${m.toString().padStart(2, '0')}m ${s.toString().padStart(2, '0')}s`, i18nLanguage));
+          if (h > 0) {
+            setRemainingStr(formatNumber(t('home.timeRemaining', { hours: h.toString().padStart(2, '0'), minutes: m.toString().padStart(2, '0') }), i18nLanguage));
+          } else {
+            setRemainingStr(formatNumber(t('home.timeRemainingMinsOnly', { minutes: m.toString().padStart(2, '0') }), i18nLanguage));
+          }
         }
       };
       update();
@@ -123,10 +126,10 @@ function SpecialTimeCard({ item, colors, i18nLanguage, styles }: { item: Special
       if (interval) clearInterval(interval);
       if (timeout) clearTimeout(timeout);
     };
-  }, [showCountdown, item.date, item.time, i18nLanguage]);
+  }, [showCountdown, item.date?.getTime(), item.time, i18nLanguage, t]);
 
   return (
-    <TouchableOpacity activeOpacity={0.7} onPress={() => {
+    <TouchableOpacity style={{ flex: 1 }} activeOpacity={0.7} onPress={() => {
       if (item.date && item.time !== '--:--') {
         setShowCountdown(true);
       }
@@ -137,21 +140,23 @@ function SpecialTimeCard({ item, colors, i18nLanguage, styles }: { item: Special
         style={[styles.specialCard, { borderColor: colors.border }]}
       >
         <View style={[styles.specialCardInner, { alignItems: 'center', justifyContent: 'center', paddingVertical: 16 }]}>
-          {showCountdown ? (
-            <Animated.Text entering={FadeIn.duration(300)} exiting={FadeOut.duration(300)} style={{ fontFamily: Fonts.outfit, fontSize: 13, color: colors.highlight, marginBottom: 4, height: 26, verticalAlign: 'middle' }}>
-              {remainingStr}
-            </Animated.Text>
-          ) : (
-            <Animated.Text entering={FadeIn.duration(300)} exiting={FadeOut.duration(300)} style={{ fontFamily: Fonts.outfit, fontSize: 20, color: colors.accent, marginBottom: 4, height: 26, verticalAlign: 'middle' }}>
-              {formatNumber(item.time, i18nLanguage).split(/( AM| PM)/).map((part, index) => 
-                (part === ' AM' || part === ' PM') ? 
-                  <Text key={index} style={{ fontSize: 11, fontWeight: '500' }}>{part}</Text> : 
-                  part
-              )}
-            </Animated.Text>
-          )}
+          <View style={{ height: 42, width: '100%', justifyContent: 'center', alignItems: 'center', marginBottom: 4 }}>
+            {showCountdown ? (
+              <Animated.Text key="countdown" entering={FadeIn.duration(300)} exiting={FadeOut.duration(300)} style={{ position: 'absolute', fontFamily: Fonts.outfit, fontSize: 16, lineHeight: 20, color: colors.highlight, textAlign: 'center' }}>
+                {remainingStr}
+              </Animated.Text>
+            ) : (
+              <Animated.Text key="time" entering={FadeIn.duration(300)} exiting={FadeOut.duration(300)} style={{ position: 'absolute', fontFamily: Fonts.outfit, fontSize: 20, color: colors.accent, textAlign: 'center' }}>
+                {formatNumber(item.time, i18nLanguage).split(/( AM| PM)/).map((part, index) => 
+                  (part === ' AM' || part === ' PM') ? 
+                    <Text key={index} style={{ fontSize: 11, fontWeight: '500' }}>{part}</Text> : 
+                    part
+                )}
+              </Animated.Text>
+            )}
+          </View>
           <Text style={{ fontFamily: Fonts.outfit, fontSize: 10, color: colors.textSecondary, textTransform: 'uppercase', letterSpacing: 1, textAlign: 'center' }}>
-            {item.label}
+            {showCountdown ? t('home.timeLeft') : item.label}
           </Text>
         </View>
       </BlurView>
@@ -384,15 +389,37 @@ export default function HomeScreen() {
   const specialTimes: SpecialTime[] = useMemo(() => {
     if (!rawTimings.Fajr || !rawTimings.Maghrib) return [];
     
-    // Calculate Suhur: 1 min before Fajr
+    const now = currentTime.getTime();
     const fajrDate = parseTime(rawTimings.Fajr, today);
-    const suhurDate = new Date(fajrDate.getTime() - 1 * 60000);
-    
-    // Calculate Tahajjud (Last third of the night): Maghrib to tomorrow's Fajr
     const maghribDate = parseTime(rawTimings.Maghrib, today);
-    const tomorrowFajr = new Date(fajrDate.getTime() + 24 * 3600000);
-    const nightDuration = tomorrowFajr.getTime() - maghribDate.getTime();
-    const tahajjudDate = new Date(maghribDate.getTime() + (nightDuration * 2 / 3));
+
+    // Calculate Suhur: 1 min before Fajr
+    const todaySuhurDate = new Date(fajrDate.getTime() - 1 * 60000);
+    let suhurDate = todaySuhurDate;
+    if (now > suhurDate.getTime()) {
+      suhurDate = new Date(suhurDate.getTime() + 24 * 3600000);
+    }
+    
+    // Add 1 minute padding to Iftar (Maghrib + 1)
+    let iftarDate = new Date(maghribDate.getTime() + 1 * 60000);
+    if (now > iftarDate.getTime()) {
+      iftarDate = new Date(iftarDate.getTime() + 24 * 3600000);
+    }
+
+    // Calculate Tahajjud (Last third of the night)
+    let relevantMaghrib: Date;
+    let relevantFajr: Date;
+    
+    if (now < fajrDate.getTime()) {
+      relevantMaghrib = new Date(maghribDate.getTime() - 24 * 3600000);
+      relevantFajr = fajrDate;
+    } else {
+      relevantMaghrib = maghribDate;
+      relevantFajr = new Date(fajrDate.getTime() + 24 * 3600000);
+    }
+    
+    const nightDuration = relevantFajr.getTime() - relevantMaghrib.getTime();
+    const tahajjudDate = new Date(relevantMaghrib.getTime() + (nightDuration * 2 / 3));
 
     let hideSahri = false;
     let hideIftar = false;
@@ -408,13 +435,10 @@ export default function HomeScreen() {
         hideIftar = true; // Eid day: show sahri (for next day/custom fasting), hide iftar
       }
       
-      if (isDayBeforeEid && new Date().getTime() > suhurDate.getTime()) {
+      if (isDayBeforeEid && now > todaySuhurDate.getTime()) {
         hideSahri = true; // Day before Eid: hide sahri ONLY AFTER the morning fast has started
       }
     }
-    
-    // Add 1 minute padding to Iftar (Maghrib + 1)
-    const iftarDate = new Date(maghribDate.getTime() + 1 * 60000);
 
     return [
       {
@@ -433,7 +457,7 @@ export default function HomeScreen() {
         date: tahajjudDate,
       },
     ];
-  }, [rawTimings, today, t, i18n.language, hijriRaw]);
+  }, [rawTimings, today, t, i18n.language, hijriRaw, currentTime]);
 
   // Restricted times
   const restrictedTimes: RestrictedTime[] = useMemo(() => {
@@ -825,7 +849,7 @@ export default function HomeScreen() {
               <Text style={[styles.subSectionLabelOuter, { color: colors.textSecondary }]}>{t('home.specialTimes')}</Text>
               <View style={styles.specialGrid}>
                 {specialTimes.map((item) => (
-                  <SpecialTimeCard key={item.label} item={item} colors={colors} i18nLanguage={i18n.language} styles={styles} />
+                  <SpecialTimeCard key={item.label} item={item} colors={colors} i18nLanguage={i18n.language} styles={styles} t={t} />
                 ))}
               </View>
             </View>

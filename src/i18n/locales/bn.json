@@ -75,7 +75,10 @@
     "tapToMark": "ট্যাপ করে পড়া মার্ক করুন",
     "prayerDone": "পড়া হয়েছে ✓",
     "dhakaBd": "ঢাকা, বাংলাদেশ",
-    "loading": "লোড হচ্ছে..."
+    "loading": "লোড হচ্ছে...",
+    "timeRemaining": "{{hours}} ঘণ্টা\n{{minutes}} মিনিট",
+    "timeRemainingMinsOnly": "{{minutes}}\nমিনিট",
+    "timeLeft": "বাকি"
   },
   "quran": {
     "titleEn": "আল-কুরআন",
@@ -186,11 +189,17 @@
     "duaArabic": "আরবি টেক্সট (ঐচ্ছিক)",
     "duaTransliteration": "উচ্চারণ (ঐচ্ছিক)",
     "duaTranslation": "অনুবাদ / অর্থ",
+    "duaTranslationBn": "বাংলা অনুবাদ",
+    "duaTransliterationBn": "বাংলা উচ্চারণ",
+    "duaTranslationEn": "ইংরেজি অনুবাদ",
+    "duaTransliterationEn": "ইংরেজি উচ্চারণ",
     "save": "দোয়া সেভ করুন",
     "cancel": "ক্যান্সেল",
     "addText": "দোয়া লিখুন",
     "addImage": "ছবি যোগ করুন",
     "addVideo": "ভিডিও যোগ করুন",
+    "addSuccess": "দোয়া সফলভাবে সেভ হয়েছে!",
+    "addError": "দোয়া সেভ করতে সমস্যা হয়েছে।",
     "typeText": "টেক্সট",
     "typeImage": "ছবি",
     "typeVideo": "ভিডিও",
@@ -224,7 +233,13 @@
     "createCategoryBtn": "ক্রিয়েট করুন",
     "attachmentImage": "ছবি অ্যাটাচ হয়েছে",
     "attachmentVideo": "ভিডিও অ্যাটাচ হয়েছে",
-    "attachmentText": "টেক্সট দোয়া"
+    "attachmentText": "টেক্সট দোয়া",
+    "renameCategory": "নাম পরিবর্তন",
+    "categoryRenamed": "ক্যাটাগরির নাম পরিবর্তন করা হয়েছে",
+    "categoryRenameError": "নাম পরিবর্তন করতে সমস্যা হয়েছে",
+    "deleteCategory": "ক্যাটাগরি ডিলিট করুন",
+    "deleteCategoryTitle": "ক্যাটাগরি ডিলিট করুন",
+    "deleteCategoryDesc": "এই ক্যাটাগরিটি ডিলিট করতে চান? এর দোয়াগুলো 'আমার দোয়া' তে চলে যাবে।"
   },
   "duaSettings": {
     "title": "দোয়ার সেটিংস",
@@ -1062,7 +1077,8 @@
   },
   "notifications": {
     "prayerStartTitle": "{{prayer}} - {{endTime}} পর্যন্ত",
-    "prayerEndTitle": "{{nextPrayer}} এর আর মাত্র ১৫ মিনিট বাকি",
+    "ishaStartTitle": "{{prayer}} - {{endTime}} এর মধ্যে পড়া উত্তম",
+    "prayerEndTitle": "{{currentPrayer}} এর আর মাত্র ১৫ মিনিট বাকি",
     "jumuahTitle": "আগামীকাল জুম্মা",
     "jumuahBody": "আজ রাতে বা আগামীকাল সূরা কাহাফ তিলাওয়াত করুন!",
     "fastingTitle": "আগামীকাল সুন্নাহ রোজা",

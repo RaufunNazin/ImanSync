@@ -4,13 +4,13 @@ import {
   View,
   StyleSheet,
   TouchableOpacity,
-  ScrollView,
   Dimensions,
-  Image,
   ImageSourcePropType,
   StatusBar,
 } from 'react-native';
 import { X } from 'lucide-react-native';
+import ZoomableImage from './ZoomableImage';
+import { GestureHandlerRootView } from 'react-native-gesture-handler';
 
 interface ImageViewerModalProps {
   visible: boolean;
@@ -31,21 +31,9 @@ export default function ImageViewerModal({ visible, source, onClose }: ImageView
         </TouchableOpacity>
 
         {/* Zoomable image */}
-        <ScrollView
-          contentContainerStyle={styles.scrollContent}
-          maximumZoomScale={5}
-          minimumZoomScale={1}
-          showsHorizontalScrollIndicator={false}
-          showsVerticalScrollIndicator={false}
-          bouncesZoom
-          centerContent
-        >
-          <Image
-            source={source}
-            style={styles.image}
-            resizeMode="contain"
-          />
-        </ScrollView>
+        <GestureHandlerRootView style={styles.scrollContent}>
+          <ZoomableImage source={source} />
+        </GestureHandlerRootView>
       </View>
     </Modal>
   );

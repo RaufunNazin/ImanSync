@@ -3,21 +3,22 @@ import PageHeader from '@/components/page-header';
 import PinSheet from '@/components/pin-sheet';
 import { Colors, Fonts, Spacing } from '@/constants/theme';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import { useRouter } from 'expo-router';
-import { FolderLock, Search, X } from 'lucide-react-native';
-import React, { useEffect, useState } from 'react';
+import { useFocusEffect, useRouter } from 'expo-router';
+import { FolderLock, Search, X, CheckCircle2, AlertCircle, Plus } from 'lucide-react-native';
+import Animated, { FadeInDown, FadeOutDown } from 'react-native-reanimated';
+import React, { useEffect, useState, useCallback } from 'react';
 import { useTranslation } from 'react-i18next';
 import DuaService from '@/services/duaService';
 import { Dimensions, ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import AddDuaModal from '@/components/add-dua-modal';
 import { loadMyDuas, saveMyDuas, saveMediaFile, UserDua } from '@/utils/my-duas-storage';
-import { Plus } from 'lucide-react-native';
+
 
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useThemeStore } from '@/store/themeStore';
 import SkeletonBox from '@/components/SkeletonBox';
-import { getStorageMode, loadCustomCategories } from '@/utils/my-duas-storage';
+import { getStorageMode, loadCustomCategories, saveCustomCategories } from '@/utils/my-duas-storage';
 import { usePreferencesStore } from '@/store/preferencesStore';
 import curatedDuasData from '@/data/curated-duas.json';
 
@@ -51,27 +52,17 @@ export default function DuaScreen() {
   // Permanent storage suggestion banner
   const [showSuggestBanner, setShowSuggestBanner] = useState(false);
   const [modalVisible, setModalVisible] = useState(false);
+  const [toast, setToast] = useState<{message: string, type: 'success' | 'error'} | null>(null);
+
+  const showToast = (message: string, type: 'success' | 'error') => {
+    setToast({ message, type });
+    setTimeout(() => {
+      setToast(null);
+    }, 3000);
+  };
 
 
-  useEffect(() => {
-    // Load pins
-    AsyncStorage.getItem(PIN_STORAGE_KEY).then((val) => {
-      if (val) {
-        try {
-          setPinnedIds(JSON.parse(val));
-        } catch (e) {
-          console.error('Failed to parse pinned duas', e);
-          setPinnedIds([]);
-        }
-      }
-    });
-
-    // Check storage mode for banner
-    Promise.all([getStorageMode(), AsyncStorage.getItem(BANNER_DISMISSED_KEY)]).then(([mode, dismissed]) => {
-      if (mode === 'internal' && dismissed !== 'true') setShowSuggestBanner(true);
-    });
-
-    // Fetch categories
+  const loadScreenData = () => {
     Promise.all([
       DuaService.getCategories(),
       loadCustomCategories(),
@@ -86,7 +77,8 @@ export default function DuaScreen() {
           name: c.name,
           description: t('dua.customCategoryDesc', { defaultValue: 'My Custom Category' }),
           count: userDuas.filter(d => d.categoryId === c.id).length,
-          isCustom: true
+          isCustom: true,
+          isUserCreated: true
         }));
         cats = [...cats, ...formattedCustoms];
       }
@@ -118,9 +110,40 @@ export default function DuaScreen() {
     })
     .catch((err) => console.error(err))
     .finally(() => setLoading(false));
-  }, [prefs.showCuratedDuas, i18n.language]);
+  };
 
+  useEffect(() => {
+    // Load pins
+    AsyncStorage.getItem(PIN_STORAGE_KEY).then((val) => {
+      if (val) {
+        try {
+          setPinnedIds(JSON.parse(val));
+        } catch (e) {
+          console.error('Failed to parse pinned duas', e);
+          setPinnedIds([]);
+        }
+      }
+    });
+  }, []);
 
+  const checkStorageState = async () => {
+    try {
+      const mode = await getStorageMode();
+      const dismissed = await AsyncStorage.getItem(BANNER_DISMISSED_KEY);
+      if (mode === 'internal' && dismissed !== 'true') {
+        setShowSuggestBanner(true);
+      }
+    } catch (error) {
+      console.log('Error checking storage state:', error);
+    }
+  };
+
+  useFocusEffect(
+    useCallback(() => {
+      loadScreenData();
+      checkStorageState();
+    }, [prefs.showCuratedDuas])
+  );
 
   const togglePin = async () => {
     if (!selectedCategory) return;
@@ -194,9 +217,60 @@ export default function DuaScreen() {
       const duas = await loadMyDuas();
       const updated = [newDua, ...duas];
       await saveMyDuas(updated);
-      // Optional: Navigate to My Duas or show a toast
+      loadScreenData(); // Reload categories to show the new count or newly created category
+      showToast(t('dua.addSuccess'), 'success');
     } catch (e) {
       console.error('Failed to add dua', e);
+      showToast(t('dua.addError'), 'error');
+    }
+  };
+
+  const handleDeleteCategory = async (categoryId: string) => {
+    try {
+      // 1. Remove category from storage
+      const customCats = await loadCustomCategories();
+      const updatedCats = customCats.filter(c => c.id !== categoryId);
+      await saveCustomCategories(updatedCats);
+
+      // 2. Move associated Duas to "My Duas" (remove categoryId)
+      const userDuas = await loadMyDuas();
+      const updatedDuas = userDuas.map(d => {
+        if (d.categoryId === categoryId) {
+          const { categoryId: _, ...rest } = d; // Remove categoryId
+          return rest as UserDua;
+        }
+        return d;
+      });
+      await saveMyDuas(updatedDuas);
+
+      // 3. Remove from pinned if pinned
+      if (pinnedIds.includes(categoryId)) {
+        const newPins = pinnedIds.filter(id => id !== categoryId);
+        setPinnedIds(newPins);
+        await AsyncStorage.setItem(PIN_STORAGE_KEY, JSON.stringify(newPins));
+      }
+
+      // 4. Reload screen
+      loadScreenData();
+      showToast(t('dua.categoryDeleted', { defaultValue: 'Category deleted' }), 'success');
+    } catch (e) {
+      console.error('Failed to delete category', e);
+      showToast(t('dua.categoryDeleteError', { defaultValue: 'Failed to delete category' }), 'error');
+    }
+  };
+
+  const handleRenameCategory = async (categoryId: string, newName: string) => {
+    try {
+      const customCats = await loadCustomCategories();
+      const updatedCats = customCats.map(c => 
+        c.id === categoryId ? { ...c, name: newName } : c
+      );
+      await saveCustomCategories(updatedCats);
+      loadScreenData();
+      showToast(t('dua.categoryRenamed', { defaultValue: 'Category renamed' }), 'success');
+    } catch (e) {
+      console.error('Failed to rename category', e);
+      showToast(t('dua.categoryRenameError', { defaultValue: 'Failed to rename category' }), 'error');
     }
   };
 
@@ -336,17 +410,21 @@ export default function DuaScreen() {
         </View>
       </ScrollView>
 
-      {/* Pin Action Sheet */}
-      {selectedCategory && (
-        <PinSheet
-          visible={pinSheetVisible}
-          categoryName={getCategoryName(selectedCategory)}
-          isPinned={pinnedIds.includes(selectedCategory.id)}
-          onClose={() => setPinSheetVisible(false)}
-          onTogglePin={togglePin}
-          colors={colors}
-        />
-      )}
+        {/* Pin Action Sheet */}
+        {selectedCategory && (
+          <PinSheet
+            visible={pinSheetVisible}
+            title={getCategoryName(selectedCategory)}
+            isPinned={pinnedIds.includes(selectedCategory.id)}
+            onClose={() => setPinSheetVisible(false)}
+            onTogglePin={togglePin}
+            colors={colors}
+            isUserCreated={(selectedCategory as any).isUserCreated}
+            onDelete={() => handleDeleteCategory(selectedCategory.id)}
+            showRename={(selectedCategory as any).isUserCreated}
+            onRename={(newName) => handleRenameCategory(selectedCategory.id, newName)}
+          />
+        )}
       </SafeAreaView>
     
       <TouchableOpacity
@@ -362,6 +440,36 @@ export default function DuaScreen() {
         onSave={handleAddDua}
         colors={colors}
       />
+
+      {toast && (
+        <Animated.View 
+          entering={FadeInDown.duration(300)} 
+          exiting={FadeOutDown.duration(300)}
+          style={{
+            position: 'absolute',
+            bottom: 100,
+            alignSelf: 'center',
+            backgroundColor: toast.type === 'success' ? colors.highlight : '#EF4444',
+            paddingHorizontal: 20,
+            paddingVertical: 12,
+            borderRadius: 24,
+            zIndex: 100,
+            elevation: 10,
+            shadowColor: '#000',
+            shadowOffset: { width: 0, height: 4 },
+            shadowOpacity: 0.15,
+            shadowRadius: 12,
+            flexDirection: 'row',
+            alignItems: 'center',
+            gap: 8
+          }}
+        >
+          {toast.type === 'success' ? <CheckCircle2 size={18} color="#FFF" /> : <AlertCircle size={18} color="#FFF" />}
+          <Text style={{ fontFamily: Fonts.outfit, fontSize: 14, color: '#FFF', fontWeight: '500' }}>
+            {toast.message}
+          </Text>
+        </Animated.View>
+      )}
 
     </GestureHandlerRootView>
   );
