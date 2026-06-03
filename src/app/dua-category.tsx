@@ -14,7 +14,7 @@ import { loadMyDuas, saveMyDuas, saveMediaFile, UserDua } from '@/utils/my-duas-
 import curatedDuasData from '@/data/curated-duas.json';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import AddDuaModal from '@/components/add-dua-modal';
-import { Bookmark, Plus, FolderOpen } from 'lucide-react-native';
+import { Bookmark, Plus, FolderOpen, Search } from 'lucide-react-native';
 import PinSheet from '@/components/pin-sheet';
 
 const PINNED_DUAS_KEY = 'imansync_pinned_duas';
@@ -207,7 +207,16 @@ export default function DuaCategoryScreen() {
 
   return (
     <SafeAreaView style={[styles.safeArea, { backgroundColor: colors.background }]}>
-      <PageHeader titleEn={name} titleAr={t('dua.titleAr')} showBack />
+      <PageHeader 
+        titleEn={name} 
+        titleAr={t('dua.titleAr')} 
+        showBack 
+        rightElement={
+          <TouchableOpacity onPress={() => router.push({ pathname: '/dua-search', params: { categoryId: id, isCustom: isCustom || 'false', categoryName: name } })} hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}>
+            <Search size={22} color={colors.textSecondary} />
+          </TouchableOpacity>
+        }
+      />
       
       {loading ? (
         <View style={[styles.list, { marginTop: 8, paddingHorizontal: Spacing.four }]}>

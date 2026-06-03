@@ -17,7 +17,6 @@ export default function DuaBookmarksScreen() {
   const { t } = useTranslation();
 
   const [bookmarks, setBookmarks] = useState<any[]>([]);
-  const [searchQuery, setSearchQuery] = useState('');
 
   useFocusEffect(
     useCallback(() => {
@@ -34,33 +33,24 @@ export default function DuaBookmarksScreen() {
     }, [])
   );
 
-  const filteredBookmarks = bookmarks.filter(dua => {
-    if (!searchQuery) return true;
-    const q = searchQuery.toLowerCase();
-    const titleEn = (dua.translationEn || '').toLowerCase();
-    const titleBn = (dua.translationBn || '').toLowerCase();
-    const arabic = (dua.arabic || '').toLowerCase();
-    return titleEn.includes(q) || titleBn.includes(q) || arabic.includes(q);
-  });
 
   return (
     <SafeAreaView style={[styles.safeArea, { backgroundColor: colors.background }]}>
-      <PageHeader titleEn={t('dua.bookmarks', { defaultValue: 'Bookmarks' })} titleAr="" showBack />
+      <PageHeader 
+        titleEn={t('dua.bookmarks', { defaultValue: 'Bookmarks' })} 
+        titleAr="" 
+        showBack 
+        rightElement={
+          <TouchableOpacity onPress={() => router.push('/dua-search?categoryId=bookmarks' as any)} hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}>
+            <Search size={22} color={colors.textSecondary} />
+          </TouchableOpacity>
+        }
+      />
       
       <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={styles.container} keyboardDismissMode="on-drag" keyboardShouldPersistTaps="handled">
-        <View style={[styles.searchContainer, { backgroundColor: colors.backgroundElement, borderColor: colors.border }]}>
-          <Search size={20} color={colors.textSecondary} style={{ marginRight: 8 }} />
-          <TextInput
-            style={[styles.searchInput, { color: colors.text }]}
-            placeholder={t('duaSettings.searchPlaceholder', { defaultValue: 'Search by name, translation...' })}
-            placeholderTextColor={colors.textSecondary}
-            value={searchQuery}
-            onChangeText={setSearchQuery}
-          />
-        </View>
 
         <View style={styles.list}>
-          {filteredBookmarks.map((dua, index) => {
+          {bookmarks.map((dua, index) => {
             // we stored the params object directly which has translationEn, translationBn etc.
             // we can render it exactly as it was.
             // However, to keep it simple, we just use the english translation as title

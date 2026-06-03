@@ -1,7 +1,10 @@
 import { Colors, Fonts, Spacing } from '@/constants/theme';
 
-import { useRouter } from 'expo-router';
+import { useRouter, useLocalSearchParams } from 'expo-router';
 import { ChevronLeft, ChevronRight, X } from 'lucide-react-native';
+import { loadMyDuas } from '@/utils/my-duas-storage';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import curatedDuasData from '@/data/curated-duas.json';
 import React, { useEffect, useState, useRef } from 'react';
 import { useTranslation } from 'react-i18next';
 import { 
@@ -33,6 +36,7 @@ export default function DuaSearchScreen() {
   const scheme = useThemeStore((s) => s.theme);
   const colors = Colors[scheme === 'unspecified' ? 'light' : scheme];
   const router = useRouter();
+  const { categoryId, isCustom, categoryName } = useLocalSearchParams<{ categoryId?: string, isCustom?: string, categoryName?: string }>();
   const { t, i18n } = useTranslation();
   
   const [searchQuery, setSearchQuery] = useState('');
@@ -54,18 +58,143 @@ export default function DuaSearchScreen() {
 
   useEffect(() => {
     if (searchQuery.length > 0) {
-      const delayDebounceFn = setTimeout(() => {
+      const delayDebounceFn = setTimeout(async () => {
         setFetchingAll(true);
-        DuaService.searchHybrid(searchQuery)
-          .then(results => setSearchResults(results))
-          .catch(err => console.error("Error searching duas:", err))
-          .finally(() => setFetchingAll(false));
+        try {
+          const q = searchQuery.toLowerCase();
+          let results: UnifiedDuaItem[] = [];
+
+          if (categoryId === 'bookmarks') {
+            const val = await AsyncStorage.getItem('imansync_dua_bookmarks');
+            if (val) {
+              const bms = JSON.parse(val);
+              results = bms.filter((dua: any) => {
+                const titleEn = (dua.translationEn || '').toLowerCase();
+                const titleBn = (dua.translationBn || '').toLowerCase();
+                const arabic = (dua.arabic || '').toLowerCase();
+                return titleEn.includes(q) || titleBn.includes(q) || arabic.includes(q);
+              });
+            }
+          } else if (categoryId === 'my_duas') {
+            const allDuas = await loadMyDuas();
+            const uncategorized = allDuas.filter(d => !d.categoryId);
+            const mapped: UnifiedDuaItem[] = uncategorized.map(d => ({
+              id: d.id,
+              name: d.titleBn || d.titleEn || d.title || '',
+              arabic: d.arabic || '',
+              latin: d.transliteration || '',
+              translationEn: d.translation || '',
+              translationBn: d.translation || '',
+              reference: '',
+              source: 'user',
+              isCustom: true,
+            }));
+            results = mapped.filter(dua => 
+              (dua.name || '').toLowerCase().includes(q) ||
+              (dua.translationEn || '').toLowerCase().includes(q) ||
+              (dua.translationBn || '').toLowerCase().includes(q) ||
+              (dua.arabic || '').toLowerCase().includes(q)
+            );
+          } else if (isCustom === 'true' && categoryId?.startsWith('curated_cat_')) {
+            const catKey = categoryId.replace('curated_cat_', '');
+            const catData = (curatedDuasData as any[]).find(c => c.id === catKey);
+            const duaList = catData ? catData.duas : [];
+            const formatted: UnifiedDuaItem[] = duaList.map((d: any) => ({
+              id: d.id,
+              name: i18n.language === 'bn' ? (d.title_bn || d.title) : (d.title || 'Curated Dua'),
+              arabic: d.arabic || '',
+              latin: d.transliteration_en || '',
+              translationEn: d.translation_en || '',
+              translationBn: d.translation_bn || '',
+              reference: d.reference || '',
+              source: 'user',
+              isCustom: true,
+            }));
+            results = formatted.filter(dua => 
+              (dua.name || '').toLowerCase().includes(q) ||
+              (dua.translationEn || '').toLowerCase().includes(q) ||
+              (dua.translationBn || '').toLowerCase().includes(q) ||
+              (dua.arabic || '').toLowerCase().includes(q)
+            );
+          } else if (isCustom === 'true') {
+            const allDuas = await loadMyDuas();
+            const categoryDuas = allDuas.filter(d => d.categoryId === categoryId);
+            const mapped: UnifiedDuaItem[] = categoryDuas.map(d => ({
+              id: d.id,
+              name: d.titleBn || d.titleEn || d.title || '',
+              arabic: d.arabic || '',
+              latin: d.transliteration || '',
+              translationEn: d.translation || '',
+              translationBn: d.translation || '',
+              reference: '',
+              source: 'user',
+              isCustom: true,
+            }));
+            results = mapped.filter(dua => 
+              (dua.name || '').toLowerCase().includes(q) ||
+              (dua.translationEn || '').toLowerCase().includes(q) ||
+              (dua.translationBn || '').toLowerCase().includes(q) ||
+              (dua.arabic || '').toLowerCase().includes(q)
+            );
+          } else if (categoryId) {
+            const apiDuas = await DuaService.getDuasByCategory(Number(categoryId));
+            results = apiDuas.filter(dua => 
+              (dua.name || '').toLowerCase().includes(q) ||
+              (dua.translationEn || '').toLowerCase().includes(q) ||
+              (dua.translationBn || '').toLowerCase().includes(q) ||
+              (dua.arabic || '').toLowerCase().includes(q)
+            );
+          } else {
+            const apiResults = await DuaService.searchHybrid(searchQuery);
+            
+            const allDuas = await loadMyDuas();
+            const mappedCustom: UnifiedDuaItem[] = allDuas.map(d => ({
+              id: d.id,
+              name: d.titleBn || d.titleEn || d.title || '',
+              arabic: d.arabic || '',
+              latin: d.transliteration || '',
+              translationEn: d.translation || '',
+              translationBn: d.translation || '',
+              reference: '',
+              source: 'user',
+              isCustom: true,
+            }));
+            
+            let bmsMapped: UnifiedDuaItem[] = [];
+            const val = await AsyncStorage.getItem('imansync_dua_bookmarks');
+            if (val) {
+               try { bmsMapped = JSON.parse(val); } catch(e) {}
+            }
+            
+            const customAndBms = [...mappedCustom, ...bmsMapped];
+            const uniqueMap = new Map<string, UnifiedDuaItem>();
+            customAndBms.forEach(item => uniqueMap.set(item.id.toString(), item));
+            
+            const localFiltered = Array.from(uniqueMap.values()).filter(dua => 
+              (dua.name || '').toLowerCase().includes(q) ||
+              (dua.translationEn || '').toLowerCase().includes(q) ||
+              (dua.translationBn || '').toLowerCase().includes(q) ||
+              (dua.arabic || '').toLowerCase().includes(q)
+            );
+            
+            results = [...localFiltered, ...apiResults];
+            const finalMap = new Map<string, UnifiedDuaItem>();
+            results.forEach(item => finalMap.set(item.id.toString(), item));
+            results = Array.from(finalMap.values());
+          }
+
+          setSearchResults(results);
+        } catch (err) {
+          console.error("Error searching duas:", err);
+        } finally {
+          setFetchingAll(false);
+        }
       }, 500);
       return () => clearTimeout(delayDebounceFn);
     } else {
       setSearchResults([]);
     }
-  }, [searchQuery]);
+  }, [searchQuery, categoryId, isCustom]);
 
   const animatedSearchStyle = useAnimatedStyle(() => {
     return {
@@ -88,7 +217,12 @@ export default function DuaSearchScreen() {
           <TextInput
             ref={inputRef}
             style={[styles.searchInput, { color: colors.text }]}
-            placeholder={t('duaSettings.searchPlaceholder', { defaultValue: 'Search Duas' })}
+            placeholder={
+              categoryId === 'my_duas' ? t('duaSettings.searchMyDuas', { defaultValue: 'Search My Duas' }) :
+              categoryId === 'bookmarks' ? t('duaSettings.searchBookmarks', { defaultValue: 'Search Bookmarks' }) :
+              categoryName ? t('duaSettings.searchCategory', { defaultValue: `Search in ${categoryName}` }) :
+              t('duaSettings.searchPlaceholder', { defaultValue: 'Search Duas' })
+            }
             placeholderTextColor={colors.textSecondary}
             value={searchQuery}
             onChangeText={setSearchQuery}

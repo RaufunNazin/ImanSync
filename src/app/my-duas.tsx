@@ -30,7 +30,6 @@ export default function MyDuasScreen() {
 
   const [duas, setDuas] = useState<UserDua[]>([]);
   const [loading, setLoading] = useState(true);
-  const [searchQuery, setSearchQuery] = useState('');
 
   // Banner states
   const [showSuggestBanner, setShowSuggestBanner] = useState(false);
@@ -130,24 +129,6 @@ export default function MyDuasScreen() {
 
   const uncategorizedDuas = duas.filter(d => !d.categoryId);
 
-  const filteredDuas = uncategorizedDuas.filter(dua => {
-    if (!searchQuery) return true;
-    const q = searchQuery.toLowerCase();
-    return (
-      (dua.title || '').toLowerCase().includes(q) ||
-      (dua.titleBn || '').toLowerCase().includes(q) ||
-      (dua.titleEn || '').toLowerCase().includes(q) ||
-      (dua.translation || '').toLowerCase().includes(q) ||
-      (dua.translationBn || '').toLowerCase().includes(q) ||
-      (dua.translationEn || '').toLowerCase().includes(q) ||
-      (dua.arabic || '').toLowerCase().includes(q) ||
-      (dua.transliteration || '').toLowerCase().includes(q) ||
-      (dua.transliterationBn || '').toLowerCase().includes(q) ||
-      (dua.transliterationEn || '').toLowerCase().includes(q)
-    );
-  });
-
-
 
   const renderHeader = () => (
     <View>
@@ -185,27 +166,10 @@ export default function MyDuasScreen() {
           </View>
         )}
 
-        {/* ── Search ────────────────────────────────────────────────────── */}
-        <View style={[styles.searchContainer, { backgroundColor: colors.backgroundElement, borderColor: colors.border }]}>
-          <Search size={20} color={colors.textSecondary} style={{ marginRight: 8 }} />
-          <TextInput
-            style={[styles.searchInput, { color: colors.text, flex: 1 }]}
-            placeholder={t('duaSettings.searchPlaceholder', { defaultValue: 'Search by name, translation...' })}
-            placeholderTextColor={colors.textSecondary}
-            value={searchQuery}
-            onChangeText={setSearchQuery}
-          />
-          {searchQuery.length > 0 && (
-            <TouchableOpacity onPress={() => setSearchQuery('')} hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}>
-              <X size={18} color={colors.textSecondary} />
-            </TouchableOpacity>
-          )}
-        </View>
-
     </View>
   );
 
-  const sortedDuas = [...filteredDuas].sort((a, b) => {
+  const sortedDuas = [...uncategorizedDuas].sort((a, b) => {
     const aPinned = pinnedDuaIds.includes(a.id.toString()) ? 1 : 0;
     const bPinned = pinnedDuaIds.includes(b.id.toString()) ? 1 : 0;
     return bPinned - aPinned;
@@ -253,17 +217,6 @@ export default function MyDuasScreen() {
   const renderEmpty = () => {
     if (loading) return null;
     
-    if (searchQuery.length > 0) {
-      return (
-        <View style={{ alignItems: 'center', marginTop: 80 }}>
-          <Search size={48} color={colors.textSecondary} style={{ marginBottom: 16, opacity: 0.5 }} />
-          <Text style={{ color: colors.textSecondary, textAlign: 'center', fontFamily: Fonts.outfit, fontSize: 16 }}>
-            {t('dua.noResults', { defaultValue: `No results found for "${searchQuery}"` })}
-          </Text>
-        </View>
-      );
-    }
-    
     return (
       <View style={{ alignItems: 'center', marginTop: 80 }}>
         <FolderOpen size={48} color={colors.textSecondary} style={{ marginBottom: 16, opacity: 0.5 }} />
@@ -285,7 +238,16 @@ export default function MyDuasScreen() {
 
   return (
     <SafeAreaView style={[styles.safeArea, { backgroundColor: colors.background }]}>
-      <PageHeader titleEn={t('dua.myDuas')} titleAr="" showBack />
+      <PageHeader 
+        titleEn={t('dua.myDuas')} 
+        titleAr="" 
+        showBack 
+        rightElement={
+          <TouchableOpacity onPress={() => router.push('/dua-search?categoryId=my_duas' as any)} hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}>
+            <Search size={22} color={colors.textSecondary} />
+          </TouchableOpacity>
+        }
+      />
       {loading ? (
         <View style={{ flex: 1 }}>
           {renderHeader()}

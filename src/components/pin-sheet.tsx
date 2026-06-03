@@ -35,12 +35,14 @@ export default function PinSheet({
 }: PinSheetProps) {
   const { t } = useTranslation();
   const [isRenaming, setIsRenaming] = useState(false);
+  const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [newName, setNewName] = useState(title);
   const inputRef = useRef<TextInput>(null);
 
   useEffect(() => {
     if (visible) {
       setIsRenaming(false);
+      setShowDeleteModal(false);
       setNewName(title);
     }
   }, [visible, title]);
@@ -111,21 +113,7 @@ export default function PinSheet({
                         try {
                           Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
                         } catch (e) {}
-                        Alert.alert(
-                          isDua ? t('dua.deleteDuaTitle', { defaultValue: 'Delete Dua' }) : t('dua.deleteCategoryTitle', { defaultValue: 'Delete Category' }),
-                          isDua ? t('dua.deleteDuaDesc', { defaultValue: 'Are you sure you want to delete this dua?' }) : t('dua.deleteCategoryDesc', { defaultValue: 'Are you sure you want to delete this category? Associated duas will be moved to My Duas.' }),
-                          [
-                            { text: t('dua.cancel', { defaultValue: 'Cancel' }), style: 'cancel' },
-                            { 
-                              text: t('dua.delete', { defaultValue: 'Delete' }), 
-                              style: 'destructive',
-                              onPress: () => {
-                                if (onDelete) onDelete();
-                                onClose();
-                              }
-                            }
-                          ]
-                        );
+                        setShowDeleteModal(true);
                       }}
                     >
                       <View style={[styles.iconBox, { backgroundColor: '#EF444422' }]}>
@@ -171,6 +159,31 @@ export default function PinSheet({
             </View>
           </TouchableOpacity>
         </KeyboardAvoidingView>
+
+        <Modal visible={showDeleteModal} transparent animationType="fade" onRequestClose={() => setShowDeleteModal(false)}>
+          <View style={{ flex: 1, backgroundColor: 'rgba(0,0,0,0.6)', justifyContent: 'center', alignItems: 'center', padding: 24 }}>
+            <View style={{ width: '100%', backgroundColor: colors.background, borderRadius: 24, padding: 24, borderWidth: 1, borderColor: colors.border }}>
+              <Text style={{ fontFamily: Fonts.outfit, fontSize: 20, color: colors.text, marginBottom: 12 }}>
+                {isDua ? t('dua.deleteDuaTitle', { defaultValue: 'Delete Dua' }) : t('dua.deleteCategoryTitle', { defaultValue: 'Delete Category' })}
+              </Text>
+              <Text style={{ fontFamily: Fonts.outfit, fontSize: 16, color: colors.textSecondary, marginBottom: 24, lineHeight: 24 }}>
+                {isDua ? t('dua.deleteDuaDesc', { defaultValue: 'Are you sure you want to delete this dua?' }) : t('dua.deleteCategoryDesc', { defaultValue: 'Are you sure you want to delete this category? Associated duas will be moved to My Duas.' })}
+              </Text>
+              <View style={{ flexDirection: 'row', gap: 12 }}>
+                <TouchableOpacity style={{ flex: 1, padding: 16, borderRadius: 12, backgroundColor: colors.backgroundElement, alignItems: 'center' }} onPress={() => setShowDeleteModal(false)}>
+                  <Text style={{ fontFamily: Fonts.outfit, color: colors.text }}>{t('dua.cancel', { defaultValue: 'Cancel' })}</Text>
+                </TouchableOpacity>
+                <TouchableOpacity style={{ flex: 1, padding: 16, borderRadius: 12, backgroundColor: '#EF4444', alignItems: 'center' }} onPress={() => {
+                  if (onDelete) onDelete();
+                  setShowDeleteModal(false);
+                  onClose();
+                }}>
+                  <Text style={{ fontFamily: Fonts.outfit, color: '#FFF' }}>{t('dua.delete', { defaultValue: 'Delete' })}</Text>
+                </TouchableOpacity>
+              </View>
+            </View>
+          </View>
+        </Modal>
       </TouchableOpacity>
     </Modal>
   );

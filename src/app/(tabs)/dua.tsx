@@ -42,6 +42,8 @@ export default function DuaScreen() {
   const [categories, setCategories] = useState<Category[]>([]);
   const [pinnedIds, setPinnedIds] = useState<string[]>([]);
   const [loading, setLoading] = useState(true);
+  const [myDuasCount, setMyDuasCount] = useState(0);
+  const [bookmarksCount, setBookmarksCount] = useState(0);
   const prefs = usePreferencesStore();
 
 
@@ -66,9 +68,18 @@ export default function DuaScreen() {
     Promise.all([
       DuaService.getCategories(),
       loadCustomCategories(),
-      loadMyDuas()
+      loadMyDuas(),
+      AsyncStorage.getItem('imansync_dua_bookmarks')
     ])
-    .then(([apiCats, customCats, userDuas]) => {
+    .then(([apiCats, customCats, userDuas, bookmarksStr]) => {
+      const uncategorizedCount = userDuas.filter((d: any) => !d.categoryId).length;
+      setMyDuasCount(uncategorizedCount);
+      let bCount = 0;
+      if (bookmarksStr) {
+        try { bCount = JSON.parse(bookmarksStr).length; } catch (e) {}
+      }
+      setBookmarksCount(bCount);
+
       let cats: Category[] = [];
 
       if (customCats && customCats.length > 0) {
@@ -363,6 +374,7 @@ export default function DuaScreen() {
                 id="my_duas"
                 name={t('dua.myDuas')}
                 description={t('dua.myDuasDesc')}
+                count={myDuasCount}
                 isMyDuas={true}
                 colors={colors}
                 onPress={handleMyDuasPress}
@@ -375,6 +387,7 @@ export default function DuaScreen() {
                 id="bookmarks"
                 name={t('dua.bookmarks')}
                 description={t('dua.bookmarksDesc')}
+                count={bookmarksCount}
                 colors={colors}
                 onPress={handleBookmarksPress}
               />
