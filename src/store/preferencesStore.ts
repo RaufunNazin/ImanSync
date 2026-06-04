@@ -11,7 +11,8 @@ export interface QuietHours {
 
 interface PreferencesState {
   notificationsEnabled: boolean;
-  prayerAlertsEnabled: boolean;
+  prayerStartAlerts: boolean;
+  prayerEndAlerts: boolean;
   taskRemindersEnabled: boolean;
   quietHours: QuietHours;
   calcMethod: number;
@@ -38,7 +39,8 @@ export const defaultQuietHours: QuietHours = {
 
 export const usePreferencesStore = create<PreferencesState>((set, get) => ({
   notificationsEnabled: true,
-  prayerAlertsEnabled: true,
+  prayerStartAlerts: true,
+  prayerEndAlerts: true,
   taskRemindersEnabled: true,
   quietHours: defaultQuietHours,
   calcMethod: 1, // Default to Karachi (UIS)
@@ -53,7 +55,8 @@ export const usePreferencesStore = create<PreferencesState>((set, get) => ({
     const state = get();
     const toSave = {
       notificationsEnabled: state.notificationsEnabled,
-      prayerAlertsEnabled: state.prayerAlertsEnabled,
+      prayerStartAlerts: state.prayerStartAlerts,
+      prayerEndAlerts: state.prayerEndAlerts,
       taskRemindersEnabled: state.taskRemindersEnabled,
       quietHours: state.quietHours,
       calcMethod: state.calcMethod,
@@ -71,6 +74,12 @@ export const usePreferencesStore = create<PreferencesState>((set, get) => ({
       const val = await AsyncStorage.getItem('imansync_preferences');
       if (val) {
         const parsed = JSON.parse(val);
+        // Migration: map old prayerAlertsEnabled to the new keys if they are missing
+        if (parsed.prayerAlertsEnabled !== undefined && parsed.prayerStartAlerts === undefined) {
+          parsed.prayerStartAlerts = parsed.prayerAlertsEnabled;
+          parsed.prayerEndAlerts = parsed.prayerAlertsEnabled;
+          delete parsed.prayerAlertsEnabled;
+        }
         set({ ...parsed });
       } else {
         // Migration from old separate AsyncStorage keys
@@ -88,7 +97,8 @@ export const usePreferencesStore = create<PreferencesState>((set, get) => ({
           const state = get();
           AsyncStorage.setItem('imansync_preferences', JSON.stringify({
             notificationsEnabled: state.notificationsEnabled,
-            prayerAlertsEnabled: state.prayerAlertsEnabled,
+            prayerStartAlerts: state.prayerStartAlerts,
+            prayerEndAlerts: state.prayerEndAlerts,
             taskRemindersEnabled: state.taskRemindersEnabled,
             quietHours: state.quietHours,
             calcMethod: state.calcMethod,

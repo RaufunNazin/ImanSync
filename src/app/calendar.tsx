@@ -263,7 +263,7 @@ export default function CalendarScreen() {
             
             {/* Grid Cells Skeleton */}
             <View style={{ flexDirection: 'row', flexWrap: 'wrap', marginBottom: Spacing.four }}>
-              {Array.from({length: 35}).map((_, i) => (
+              {Array.from({length: 42}).map((_, i) => (
                 <View key={i} style={styles.gridCell}>
                   <SkeletonBox width={28} height={20} borderRadius={6} color={colors.border} style={{ marginBottom: 4 }} />
                   <SkeletonBox width={16} height={10} borderRadius={4} color={colors.border} />
@@ -273,12 +273,24 @@ export default function CalendarScreen() {
 
             {/* Details Skeletons */}
             <View style={styles.detailsContainer}>
-              <View style={[styles.infoCard, { borderColor: colors.border, backgroundColor: colors.backgroundElement, height: 70 }]} />
-              <View style={styles.timesRow}>
-                <View style={[styles.infoCard, styles.timeBoxHalf, { borderColor: colors.border, backgroundColor: colors.backgroundElement, height: 70, marginRight: 4, marginLeft: 0 }]} />
-                <View style={[styles.infoCard, styles.timeBoxHalf, { borderColor: colors.border, backgroundColor: colors.backgroundElement, height: 70, marginLeft: 4, marginRight: 0 }]} />
+              <View style={[styles.infoCard, { borderColor: colors.border, backgroundColor: colors.backgroundElement }]}>
+                <SkeletonBox width={180} height={20} borderRadius={10} color={colors.border} style={{ marginBottom: 6 }} />
+                <SkeletonBox width={120} height={14} borderRadius={7} color={colors.border} />
               </View>
-              <View style={[styles.infoCard, { borderColor: colors.border, backgroundColor: colors.backgroundElement, height: 80, marginBottom: 0 }]} />
+              <View style={styles.timesRow}>
+                <View style={[styles.infoCard, styles.timeBoxHalf, { borderColor: colors.border, backgroundColor: colors.backgroundElement, marginRight: 4, marginLeft: 0 }]}>
+                  <SkeletonBox width={80} height={12} borderRadius={6} color={colors.border} style={{ marginBottom: 8 }} />
+                  <SkeletonBox width={60} height={22} borderRadius={11} color={colors.border} />
+                </View>
+                <View style={[styles.infoCard, styles.timeBoxHalf, { borderColor: colors.border, backgroundColor: colors.backgroundElement, marginLeft: 4, marginRight: 0 }]}>
+                  <SkeletonBox width={80} height={12} borderRadius={6} color={colors.border} style={{ marginBottom: 8 }} />
+                  <SkeletonBox width={60} height={22} borderRadius={11} color={colors.border} />
+                </View>
+              </View>
+              <View style={[styles.infoCard, { borderColor: colors.border, backgroundColor: colors.backgroundElement, marginBottom: 0 }]}>
+                <SkeletonBox width={60} height={12} borderRadius={6} color={colors.border} style={{ marginBottom: 8 }} />
+                <SkeletonBox width={140} height={16} borderRadius={8} color={colors.border} />
+              </View>
             </View>
           </View>
         ) : (

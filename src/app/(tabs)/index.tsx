@@ -595,7 +595,7 @@ export default function HomeScreen() {
               style={[styles.heroCard, { borderColor: colors.border, paddingVertical: 20, paddingHorizontal: 24, overflow: 'hidden', marginBottom: 0 }]}
             >
               {/* Animated green glow from top-left when prayer is marked done */}
-              <Animated.View style={[{ position: 'absolute', top: 0, left: 0, width: '70%', height: '120%' }, animatedGlowStyle]}>
+              <Animated.View style={[{ position: 'absolute', top: 0, left: 0, right: 0, bottom: 0 }, animatedGlowStyle]}>
                 <LinearGradient
                   colors={[colors.highlight + '30', colors.highlight + '08', 'transparent']}
                   start={{ x: 0, y: 0 }}
@@ -605,7 +605,7 @@ export default function HomeScreen() {
               </Animated.View>
 
               {/* Animated red glow when it's Makruh time and not done */}
-              <Animated.View style={[{ position: 'absolute', top: 0, left: 0, width: '70%', height: '120%' }, animatedRedGlowStyle]}>
+              <Animated.View style={[{ position: 'absolute', top: 0, left: 0, right: 0, bottom: 0 }, animatedRedGlowStyle]}>
                 <LinearGradient
                   colors={['#dc604030', '#dc604008', 'transparent']}
                   start={{ x: 0, y: 0 }}

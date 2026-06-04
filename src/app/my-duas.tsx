@@ -1,5 +1,5 @@
 import React, { useEffect, useState, useRef } from 'react';
-import { ActivityIndicator, StyleSheet, Text, TouchableOpacity, View, TextInput, Animated } from 'react-native';
+import { ActivityIndicator, StyleSheet, Text, TouchableOpacity, View, Animated } from 'react-native';
 import { useRouter } from 'expo-router';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Colors, Fonts, Spacing } from '@/constants/theme';

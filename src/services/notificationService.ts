@@ -2,9 +2,10 @@ import i18n from '@/i18n';
 import notifee, { AndroidImportance, TimestampTrigger, TriggerType } from '@notifee/react-native';
 import { QuietHours, usePreferencesStore } from '../store/preferencesStore';
 
-const PRAYERS_CHANNEL = 'prayers_channel_v3';
-const EVENTS_CHANNEL = 'events_channel_v3';
-const TASKS_CHANNEL = 'tasks_channel_v3';
+const PRAYERS_START_CHANNEL = 'prayers_start_channel_v4';
+const PRAYERS_END_CHANNEL = 'prayers_end_channel_v4';
+const EVENTS_CHANNEL = 'events_channel_v4';
+const TASKS_CHANNEL = 'tasks_channel_v4';
 
 // Check if a day is Eid al-Fitr or Eid al-Adha/Tashreeq days (fasting is forbidden)
 function isForbiddenFastingDay(hijriDay: number, hijriMonth: number): boolean {
@@ -75,24 +76,28 @@ export async function setupChannels() {
   await notifee.requestPermission();
   
   await notifee.createChannel({
-    id: PRAYERS_CHANNEL,
-    name: 'Prayer Alerts',
+    id: PRAYERS_START_CHANNEL,
+    name: 'Prayer Start Alerts',
     importance: AndroidImportance.HIGH,
     sound: 'bird',
+  });
+
+  await notifee.createChannel({
+    id: PRAYERS_END_CHANNEL,
+    name: 'Prayer End Alerts',
+    importance: AndroidImportance.DEFAULT,
   });
 
   await notifee.createChannel({
     id: EVENTS_CHANNEL,
     name: 'Islamic Events',
     importance: AndroidImportance.DEFAULT,
-    sound: 'bird',
   });
 
   await notifee.createChannel({
     id: TASKS_CHANNEL,
     name: 'Task Reminders',
     importance: AndroidImportance.DEFAULT,
-    sound: 'bird',
   });
 }
 
@@ -146,8 +151,8 @@ export async function scheduleAllNotifications() {
         const targetDate = new Date(year, month - 1, dayNum);
         
         // 1. Prayer Alerts
-        if (state.prayerAlertsEnabled) {
-          await schedulePrayerDay(dayData.timings, targetDate, i === 0, state.quietHours);
+        if (state.prayerStartAlerts || state.prayerEndAlerts) {
+          await schedulePrayerDay(dayData.timings, targetDate, i === 0, state.quietHours, state.prayerStartAlerts, state.prayerEndAlerts);
         }
 
         // 2. Events (Jumu'ah, White Days, etc)
@@ -164,7 +169,7 @@ export async function scheduleAllNotifications() {
   }
 }
 
-async function schedulePrayerDay(timings: any, targetDate: Date, _isToday: boolean, quietHours: QuietHours) {
+async function schedulePrayerDay(timings: any, targetDate: Date, _isToday: boolean, quietHours: QuietHours, startAlerts: boolean, endAlerts: boolean) {
   const prayers = [
     { id: 'fajr', name: i18n.t('prayerTimes.fajr'), time: timings.Fajr },
     { id: 'dhuhr', name: i18n.t('prayerTimes.dhuhr'), time: timings.Dhuhr },
@@ -180,7 +185,7 @@ async function schedulePrayerDay(timings: any, targetDate: Date, _isToday: boole
     const prayerTime = parseTimeString(current.time, targetDate);
     
     // Start notification
-    if (prayerTime.getTime() > now.getTime() && !isQuietHour(prayerTime, quietHours)) {
+    if (startAlerts && prayerTime.getTime() > now.getTime() && !isQuietHour(prayerTime, quietHours)) {
       const trigger: TimestampTrigger = {
         type: TriggerType.TIMESTAMP,
         timestamp: prayerTime.getTime(),
@@ -197,16 +202,18 @@ async function schedulePrayerDay(timings: any, targetDate: Date, _isToday: boole
       const endTimeFormatted = endTimeStr ? formatAMPM(parseTimeString(endTimeStr, targetDate)) : '';
 
       const titleKey = current.id === 'isha' ? 'notifications.ishaStartTitle' : 'notifications.prayerStartTitle';
+      const bodyKey = current.id === 'isha' ? 'notifications.ishaStartBody' : 'notifications.prayerStartBody';
 
       await notifee.createTriggerNotification({
-        title: i18n.t(titleKey, { prayer: current.name, endTime: endTimeFormatted }),
-        android: { showTimestamp: true, channelId: PRAYERS_CHANNEL, smallIcon: 'notification_icon', color: '#4c956c' , pressAction: { id: 'default' } },
+        title: i18n.t(titleKey, { prayer: current.name }),
+        body: i18n.t(bodyKey, { endTime: endTimeFormatted }),
+        android: { showTimestamp: true, channelId: PRAYERS_START_CHANNEL, smallIcon: 'notification_icon', color: '#4c956c' , pressAction: { id: 'default' } },
         ios: { sound: 'bird.wav', badgeCount: 1 },
       }, trigger);
     }
 
     // Ending Warning (15 mins before NEXT prayer, except Isha and Fajr)
-    if (i < prayers.length - 1 && current.id !== 'fajr' && current.id !== 'isha') {
+    if (endAlerts && i < prayers.length - 1 && current.id !== 'fajr' && current.id !== 'isha') {
       const next = prayers[i + 1];
       const nextTime = parseTimeString(next.time, targetDate);
       const warningTime = new Date(nextTime.getTime() - 15 * 60000);
@@ -219,8 +226,8 @@ async function schedulePrayerDay(timings: any, targetDate: Date, _isToday: boole
         };
         await notifee.createTriggerNotification({
           title: i18n.t('notifications.prayerEndTitle', { currentPrayer: current.name }),
-          android: { showTimestamp: true, channelId: PRAYERS_CHANNEL, smallIcon: 'notification_icon', color: '#4c956c' , pressAction: { id: 'default' } },
-          ios: { sound: 'bird.wav', badgeCount: 1 },
+          android: { showTimestamp: true, channelId: PRAYERS_END_CHANNEL, smallIcon: 'notification_icon', color: '#4c956c' , pressAction: { id: 'default' } },
+          ios: { sound: 'default', badgeCount: 1 },
         }, trigger);
       }
     }
@@ -243,7 +250,7 @@ async function scheduleEventsDay(dayData: any, targetDate: Date, quietHours: Qui
         title: i18n.t('notifications.jumuahTitle'),
         body: i18n.t('notifications.jumuahBody'),
         android: { showTimestamp: true, channelId: EVENTS_CHANNEL, smallIcon: 'notification_icon', color: '#4c956c' , pressAction: { id: 'default' } },
-        ios: { sound: 'bird.wav', badgeCount: 1 },
+        ios: { sound: 'default', badgeCount: 1 },
       }, { type: TriggerType.TIMESTAMP, timestamp: triggerDate.getTime(), alarmManager: { allowWhileIdle: true } });
     }
   }
@@ -280,7 +287,7 @@ async function scheduleEventsDay(dayData: any, targetDate: Date, quietHours: Qui
         title: i18n.t('notifications.sahriReminderTitle', { defaultValue: 'Sahri Reminder' }),
         body: i18n.t('notifications.sahriReminderBody', { time: formatAMPM(sahriTime), defaultValue: 'Sahri ends exactly at ' + formatAMPM(sahriTime) }),
         android: { showTimestamp: true, channelId: EVENTS_CHANNEL, smallIcon: 'notification_icon', color: '#4c956c', pressAction: { id: 'default' } },
-        ios: { sound: 'bird.wav', badgeCount: 1 },
+        ios: { sound: 'default', badgeCount: 1 },
       }, { type: TriggerType.TIMESTAMP, timestamp: sahriTrigger.getTime(), alarmManager: { allowWhileIdle: true } });
     }
     
@@ -291,7 +298,7 @@ async function scheduleEventsDay(dayData: any, targetDate: Date, quietHours: Qui
         title: i18n.t('notifications.iftarReminderTitle', { defaultValue: 'Iftar Reminder' }),
         body: i18n.t('notifications.iftarReminderBody', { time: formatAMPM(iftarTime), defaultValue: 'Iftar starts exactly at ' + formatAMPM(iftarTime) }),
         android: { showTimestamp: true, channelId: EVENTS_CHANNEL, smallIcon: 'notification_icon', color: '#4c956c', pressAction: { id: 'default' } },
-        ios: { sound: 'bird.wav', badgeCount: 1 },
+        ios: { sound: 'default', badgeCount: 1 },
       }, { type: TriggerType.TIMESTAMP, timestamp: iftarTrigger.getTime(), alarmManager: { allowWhileIdle: true } });
     }
   }
@@ -306,7 +313,7 @@ async function scheduleEventsDay(dayData: any, targetDate: Date, quietHours: Qui
         title: i18n.t('notifications.fastingTitle'),
         body: i18n.t('notifications.fastingBody', { day: dayOfWeek === 1 ? 'Monday' : 'Thursday' }),
         android: { showTimestamp: true, channelId: EVENTS_CHANNEL, smallIcon: 'notification_icon', color: '#4c956c' , pressAction: { id: 'default' } },
-        ios: { sound: 'bird.wav', badgeCount: 1 },
+        ios: { sound: 'default', badgeCount: 1 },
       }, { type: TriggerType.TIMESTAMP, timestamp: triggerDate.getTime(), alarmManager: { allowWhileIdle: true } });
     }
   }
@@ -321,7 +328,7 @@ async function scheduleEventsDay(dayData: any, targetDate: Date, quietHours: Qui
         title: i18n.t('notifications.whiteDaysTitle'),
         body: i18n.t('notifications.whiteDaysBody', { day: hijriDay }),
         android: { showTimestamp: true, channelId: EVENTS_CHANNEL, smallIcon: 'notification_icon', color: '#4c956c' , pressAction: { id: 'default' } },
-        ios: { sound: 'bird.wav', badgeCount: 1 },
+        ios: { sound: 'default', badgeCount: 1 },
       }, { type: TriggerType.TIMESTAMP, timestamp: triggerDate.getTime(), alarmManager: { allowWhileIdle: true } });
     }
   }
@@ -337,7 +344,7 @@ async function scheduleEventsDay(dayData: any, targetDate: Date, quietHours: Qui
           title: i18n.t('notifications.yaseenTitle'),
           body: i18n.t('notifications.yaseenBody'),
           android: { showTimestamp: true, channelId: EVENTS_CHANNEL, smallIcon: 'notification_icon', color: '#4c956c' , pressAction: { id: 'default' } },
-          ios: { sound: 'bird.wav', badgeCount: 1 },
+          ios: { sound: 'default', badgeCount: 1 },
         }, { type: TriggerType.TIMESTAMP, timestamp: triggerDate.getTime(), alarmManager: { allowWhileIdle: true } });
       }
     }
@@ -400,6 +407,7 @@ async function scheduleTaskDay(targetDate: Date, qh: QuietHours) {
       title: i18n.t(task.title),
       body: i18n.t(task.body),
       android: { showTimestamp: true, channelId: TASKS_CHANNEL, smallIcon: 'notification_icon', color: '#4c956c' , pressAction: { id: 'default' } },
+      ios: { sound: 'default', badgeCount: 1 },
     }, { type: TriggerType.TIMESTAMP, timestamp: triggerDate.getTime(), alarmManager: { allowWhileIdle: true } });
   }
 }

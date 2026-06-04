@@ -156,8 +156,13 @@ export default function SettingsScreen() {
     }
   };
 
-  const togglePrayerAlerts = (enabled: boolean) => {
-    prefs.setPreferences({ prayerAlertsEnabled: enabled });
+  const togglePrayerStartAlerts = (enabled: boolean) => {
+    prefs.setPreferences({ prayerStartAlerts: enabled });
+    import('../../services/notificationService').then(s => s.scheduleAllNotifications());
+  };
+
+  const togglePrayerEndAlerts = (enabled: boolean) => {
+    prefs.setPreferences({ prayerEndAlerts: enabled });
     import('../../services/notificationService').then(s => s.scheduleAllNotifications());
   };
 
@@ -295,7 +300,8 @@ export default function SettingsScreen() {
           <SettingRow icon={Bell} title={t('settings.masterToggle', { defaultValue: 'Master Toggle' })} value={prefs.notificationsEnabled} type="toggle" isLast={!prefs.notificationsEnabled} onPress={toggleNotifications} colors={colors} />
           {prefs.notificationsEnabled && (
             <>
-              <SettingRow icon={Clock} title={t('settings.prayerAlerts', { defaultValue: 'Prayer Alerts' })} value={prefs.prayerAlertsEnabled} type="toggle" onPress={togglePrayerAlerts} colors={colors} />
+              <SettingRow icon={Clock} title={t('settings.prayerStartAlerts', { defaultValue: 'Prayer Start Alerts' })} value={prefs.prayerStartAlerts} type="toggle" onPress={togglePrayerStartAlerts} colors={colors} />
+              <SettingRow icon={Clock} title={t('settings.prayerEndAlerts', { defaultValue: 'Prayer End Alerts' })} value={prefs.prayerEndAlerts} type="toggle" onPress={togglePrayerEndAlerts} colors={colors} />
               <SettingRow icon={ListTodo} title={t('settings.dailyReminders', { defaultValue: 'Daily Reminders' })} value={prefs.taskRemindersEnabled} type="toggle" onPress={toggleTaskReminders} colors={colors} />
               <SettingRow
                 icon={BellOff}

@@ -3,8 +3,11 @@ import { Modal, StyleSheet, Text, TouchableOpacity, View, TextInput, KeyboardAvo
 import { Fonts, Spacing } from '@/constants/theme';
 import { useTranslation } from 'react-i18next';
 import { Bookmark, BookmarkMinus, Trash2, Edit3 } from 'lucide-react-native';
-import * as Haptics from 'expo-haptics';
-import { Alert } from 'react-native';
+
+
+
+import ActionSheet, { ActionOption } from './ActionSheet';
+import ConfirmModal from './ConfirmModal';
 
 interface PinSheetProps {
   visible: boolean;
@@ -55,77 +58,69 @@ export default function PinSheet({
 
   if (!visible) return null;
 
+  const actionOptions: ActionOption[] = [
+    {
+      id: 'pin',
+      icon: isPinned ? <BookmarkMinus size={20} color={colors.accent} /> : <Bookmark size={20} color={colors.accent} />,
+      label: isPinned ? t('dua.unpin') : t('dua.pin'),
+      iconBgColor: colors.accent + '22',
+      onPress: onTogglePin,
+    }
+  ];
+
+  if (showRename) {
+    actionOptions.push({
+      id: 'rename',
+      icon: <Edit3 size={20} color={colors.textSecondary} />,
+      label: t('dua.renameCategory', { defaultValue: 'Rename' }),
+      iconBgColor: colors.textSecondary + '22',
+      onPress: () => setIsRenaming(true),
+    });
+  }
+
+  if (isUserCreated) {
+    actionOptions.push({
+      id: 'delete',
+      icon: <Trash2 size={20} color="#EF4444" />,
+      label: isDua ? t('dua.deleteDua', { defaultValue: 'Delete Dua' }) : t('dua.deleteCategory', { defaultValue: 'Delete Category' }),
+      iconBgColor: '#EF444422',
+      labelColor: '#EF4444',
+      onPress: () => setShowDeleteModal(true),
+    });
+  }
+
   return (
-    <Modal visible={visible} transparent animationType="fade" onRequestClose={onClose}>
-      <TouchableOpacity activeOpacity={1} style={styles.overlay} onPress={onClose}>
-        <KeyboardAvoidingView behavior="padding" style={{ width: '100%' }}>
-          <TouchableOpacity activeOpacity={1} onPress={(e) => e.stopPropagation()}>
-            <View style={[styles.sheet, { backgroundColor: colors.background, borderColor: colors.border }]}>
-              <View style={[styles.handle, { backgroundColor: colors.border }]} />
-              
-              {!isRenaming ? (
-                <>
-                  <Text style={[styles.title, { color: colors.text }]}>{title}</Text>
-              
-                <TouchableOpacity
-                  style={[styles.actionBtn, { backgroundColor: colors.card }]}
-                  activeOpacity={0.8}
-                  onPress={() => {
-                    try {
-                      Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
-                    } catch (e) {}
-                    onTogglePin();
-                    onClose();
-                  }}
-                >
-                <View style={[styles.iconBox, { backgroundColor: colors.accent + '22' }]}>
-                  {isPinned ? (
-                    <BookmarkMinus size={20} color={colors.accent} />
-                  ) : (
-                    <Bookmark size={20} color={colors.accent} />
-                  )}
-                </View>
-                <Text style={[styles.actionText, { color: colors.text }]}>
-                  {isPinned ? t('dua.unpin') : t('dua.pin')}
-                </Text>
-              </TouchableOpacity>
+    <>
+      <ActionSheet
+        visible={visible && !isRenaming && !showDeleteModal}
+        title={title}
+        options={actionOptions}
+        onClose={onClose}
+        colors={colors}
+      />
+      
+      <ConfirmModal
+        visible={showDeleteModal}
+        title={isDua ? t('dua.deleteDuaTitle', { defaultValue: 'Delete Dua' }) : t('dua.deleteCategoryTitle', { defaultValue: 'Delete Category' })}
+        message={isDua ? t('dua.deleteDuaDesc', { defaultValue: 'Are you sure you want to delete this dua?' }) : t('dua.deleteCategoryDesc', { defaultValue: 'Are you sure you want to delete this category? Associated duas will be moved to My Duas.' })}
+        confirmText={t('dua.delete', { defaultValue: 'Delete' })}
+        cancelText={t('dua.cancel', { defaultValue: 'Cancel' })}
+        onConfirm={() => {
+          if (onDelete) onDelete();
+          setShowDeleteModal(false);
+          onClose();
+        }}
+        onCancel={() => setShowDeleteModal(false)}
+        colors={colors}
+      />
 
-                  {showRename && (
-                    <TouchableOpacity
-                      style={[styles.actionBtn, { backgroundColor: colors.card, marginTop: Spacing.three }]}
-                      activeOpacity={0.8}
-                      onPress={() => setIsRenaming(true)}
-                    >
-                      <View style={[styles.iconBox, { backgroundColor: colors.textSecondary + '22' }]}>
-                        <Edit3 size={20} color={colors.textSecondary} />
-                      </View>
-                      <Text style={[styles.actionText, { color: colors.text }]}>
-                        {t('dua.renameCategory', { defaultValue: 'Rename' })}
-                      </Text>
-                    </TouchableOpacity>
-                  )}
-
-                  {isUserCreated && (
-                    <TouchableOpacity
-                      style={[styles.actionBtn, { backgroundColor: colors.card, marginTop: Spacing.three }]}
-                      activeOpacity={0.8}
-                      onPress={() => {
-                        try {
-                          Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
-                        } catch (e) {}
-                        setShowDeleteModal(true);
-                      }}
-                    >
-                      <View style={[styles.iconBox, { backgroundColor: '#EF444422' }]}>
-                        <Trash2 size={20} color="#EF4444" />
-                      </View>
-                      <Text style={[styles.actionText, { color: '#EF4444' }]}>
-                        {isDua ? t('dua.deleteDua', { defaultValue: 'Delete Dua' }) : t('dua.deleteCategory', { defaultValue: 'Delete Category' })}
-                      </Text>
-                    </TouchableOpacity>
-                  )}
-                </>
-              ) : (
+      {isRenaming && (
+        <Modal visible={visible && isRenaming} transparent animationType="fade" onRequestClose={() => setIsRenaming(false)}>
+          <TouchableOpacity activeOpacity={1} style={styles.overlay} onPress={() => setIsRenaming(false)}>
+          <KeyboardAvoidingView behavior="padding" style={{ width: '100%' }}>
+            <TouchableOpacity activeOpacity={1} onPress={(e) => e.stopPropagation()}>
+              <View style={[styles.sheet, { backgroundColor: colors.background, borderColor: colors.border }]}>
+                <View style={[styles.handle, { backgroundColor: colors.border }]} />
                 <View>
                   <Text style={[styles.title, { color: colors.text }]}>{t('dua.renameCategory', { defaultValue: 'Rename' })}</Text>
                   <TextInput
@@ -155,37 +150,13 @@ export default function PinSheet({
                     </TouchableOpacity>
                   </View>
                 </View>
-              )}
-            </View>
-          </TouchableOpacity>
-        </KeyboardAvoidingView>
-
-        <Modal visible={showDeleteModal} transparent animationType="fade" onRequestClose={() => setShowDeleteModal(false)}>
-          <View style={{ flex: 1, backgroundColor: 'rgba(0,0,0,0.6)', justifyContent: 'center', alignItems: 'center', padding: 24 }}>
-            <View style={{ width: '100%', backgroundColor: colors.background, borderRadius: 24, padding: 24, borderWidth: 1, borderColor: colors.border }}>
-              <Text style={{ fontFamily: Fonts.outfit, fontSize: 20, color: colors.text, marginBottom: 12 }}>
-                {isDua ? t('dua.deleteDuaTitle', { defaultValue: 'Delete Dua' }) : t('dua.deleteCategoryTitle', { defaultValue: 'Delete Category' })}
-              </Text>
-              <Text style={{ fontFamily: Fonts.outfit, fontSize: 16, color: colors.textSecondary, marginBottom: 24, lineHeight: 24 }}>
-                {isDua ? t('dua.deleteDuaDesc', { defaultValue: 'Are you sure you want to delete this dua?' }) : t('dua.deleteCategoryDesc', { defaultValue: 'Are you sure you want to delete this category? Associated duas will be moved to My Duas.' })}
-              </Text>
-              <View style={{ flexDirection: 'row', gap: 12 }}>
-                <TouchableOpacity style={{ flex: 1, padding: 16, borderRadius: 12, backgroundColor: colors.backgroundElement, alignItems: 'center' }} onPress={() => setShowDeleteModal(false)}>
-                  <Text style={{ fontFamily: Fonts.outfit, color: colors.text }}>{t('dua.cancel', { defaultValue: 'Cancel' })}</Text>
-                </TouchableOpacity>
-                <TouchableOpacity style={{ flex: 1, padding: 16, borderRadius: 12, backgroundColor: '#EF4444', alignItems: 'center' }} onPress={() => {
-                  if (onDelete) onDelete();
-                  setShowDeleteModal(false);
-                  onClose();
-                }}>
-                  <Text style={{ fontFamily: Fonts.outfit, color: '#FFF' }}>{t('dua.delete', { defaultValue: 'Delete' })}</Text>
-                </TouchableOpacity>
               </View>
-            </View>
-          </View>
+            </TouchableOpacity>
+          </KeyboardAvoidingView>
+        </TouchableOpacity>
         </Modal>
-      </TouchableOpacity>
-    </Modal>
+      )}
+    </>
   );
 }
 

@@ -52,6 +52,7 @@ export interface UnifiedDuaItem {
   isCustom?: boolean;
   categoryId?: number | string;
   wordByWord?: HisnulWord[];
+  transliterationBn?: string;
 }
 
 class DuaService {
