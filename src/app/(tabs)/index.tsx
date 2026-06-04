@@ -139,6 +139,12 @@ function SpecialTimeCard({ item, colors, i18nLanguage, styles, t }: { item: Spec
         tint={colors.glassTint as any}
         style={[styles.specialCard, { borderColor: colors.border }]}
       >
+        {/* Subtle tap cue */}
+        {!showCountdown && item.date && item.time !== '--:--' && (
+          <View style={{ position: 'absolute', top: 6, right: 7, opacity: 0.3 }}>
+            <Text style={{ fontFamily: Fonts.outfit, fontSize: 8, color: colors.textSecondary }}>⏱</Text>
+          </View>
+        )}
         <View style={[styles.specialCardInner, { alignItems: 'center', justifyContent: 'center', paddingVertical: 16 }]}>
           <View style={{ height: 42, width: '100%', justifyContent: 'center', alignItems: 'center', marginBottom: 4 }}>
             {showCountdown ? (
@@ -199,7 +205,7 @@ export default function HomeScreen() {
       const todayData = prev[currentDayStr] || {};
       const nextToday = { ...todayData, [prayerId]: !todayData[prayerId] };
       const nextHistory = { ...prev, [currentDayStr]: nextToday };
-      AsyncStorage.setItem('imansync_tracker_history', JSON.stringify(nextHistory));
+      AsyncStorage.setItem('imansync_tracker_history', JSON.stringify(nextHistory)).catch(console.error);
       return nextHistory;
     });
     Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
@@ -577,7 +583,7 @@ export default function HomeScreen() {
               </Text>
             </TouchableOpacity>
           ) : (
-            <SkeletonBox width={180} height={14} borderRadius={7} style={{ marginTop: 4 }} color={colors.border} />
+            <SkeletonBox width={180} height={14} borderRadius={7} color={colors.border} />
           )}
         </View>
 
@@ -674,15 +680,15 @@ export default function HomeScreen() {
           </TouchableOpacity>
         ) : (
           <View style={[styles.heroCard, { borderColor: colors.border, backgroundColor: colors.backgroundElement, borderWidth: 1, paddingVertical: 20, paddingHorizontal: 24, overflow: 'hidden', marginBottom: 0 }]}>
-            <SkeletonBox width={150} height={36} borderRadius={8} color={colors.border} style={{ alignSelf: 'center', marginBottom: 6 }} />
-            <View style={{ flexDirection: 'row', justifyContent: 'space-between', marginBottom: 6 }}>
+            <SkeletonBox width={150} height={32} borderRadius={8} color={colors.border} style={{ alignSelf: 'center', marginBottom: 2 }} />
+            <View style={{ flexDirection: 'row', justifyContent: 'space-between', marginBottom: Spacing.four }}>
               <View>
-                <SkeletonBox width={60} height={12} borderRadius={6} color={colors.border} style={{ marginBottom: 4 }} />
-                <SkeletonBox width={45} height={10} borderRadius={5} color={colors.border} />
+                <SkeletonBox width={60} height={12} borderRadius={6} color={colors.border} style={{ marginBottom: 2 }} />
+                <SkeletonBox width={45} height={14} borderRadius={5} color={colors.border} style={{ marginTop: 2 }} />
               </View>
               <View style={{ alignItems: 'flex-end' }}>
-                <SkeletonBox width={60} height={12} borderRadius={6} color={colors.border} style={{ marginBottom: 4 }} />
-                <SkeletonBox width={45} height={10} borderRadius={5} color={colors.border} />
+                <SkeletonBox width={60} height={12} borderRadius={6} color={colors.border} style={{ marginBottom: 2 }} />
+                <SkeletonBox width={45} height={14} borderRadius={5} color={colors.border} style={{ marginTop: 2 }} />
               </View>
             </View>
             <View style={{ width: '100%' }}>
@@ -931,13 +937,13 @@ export default function HomeScreen() {
           </View>
         ) : (
           <View>
-            <SkeletonBox width={160} height={18} borderRadius={8} style={{ marginBottom: 12 }} color={colors.border} />
-            <View style={[styles.inspirationCard, { backgroundColor: colors.backgroundElement, borderColor: colors.border, borderWidth: 1, borderRadius: 24, padding: 28 }]}>
+            <SkeletonBox width={160} height={15} borderRadius={8} style={{ marginBottom: 12 }} color={colors.border} />
+            <View style={[styles.inspirationCard, { backgroundColor: colors.backgroundElement, borderColor: colors.border, borderWidth: 1, borderRadius: 24, paddingHorizontal: Spacing.four, paddingVertical: Spacing.six }]}>
               <View style={{ alignItems: 'center', gap: 12 }}>
                 <SkeletonBox width={40} height={40} borderRadius={20} color={colors.border} />
-                <SkeletonBox width={200} height={18} borderRadius={8} color={colors.border} />
-                <SkeletonBox width={260} height={18} borderRadius={8} color={colors.border} />
-                <SkeletonBox width={180} height={18} borderRadius={8} color={colors.border} />
+                <SkeletonBox width={200} height={24} borderRadius={8} color={colors.border} />
+                <SkeletonBox width={260} height={24} borderRadius={8} color={colors.border} />
+                <SkeletonBox width={180} height={24} borderRadius={8} color={colors.border} />
                 <SkeletonBox width={240} height={14} borderRadius={7} color={colors.border} style={{ marginTop: 4 }} />
                 <SkeletonBox width={200} height={14} borderRadius={7} color={colors.border} />
                 <SkeletonBox width={120} height={12} borderRadius={6} color={colors.border} style={{ marginTop: 4 }} />

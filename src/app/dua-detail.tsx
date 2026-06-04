@@ -126,7 +126,7 @@ export default function DuaDetailScreen() {
   const updateSetting = (key: keyof DuaSettings, val: any) => {
     setSettings(prev => {
       const next = { ...prev, [key]: val };
-      AsyncStorage.setItem('imansync_dua_settings', JSON.stringify(next));
+      AsyncStorage.setItem('imansync_dua_settings', JSON.stringify(next)).catch(console.error);
       return next;
     });
   };

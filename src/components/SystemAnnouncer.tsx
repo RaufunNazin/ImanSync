@@ -7,7 +7,6 @@ import { Colors, Fonts, Spacing } from '@/constants/theme';
 import { useThemeStore } from '@/store/themeStore';
 import { Bell, RefreshCw, Info, X } from 'lucide-react-native';
 
-// TODO: Replace this URL with your raw GitHub Gist URL or JSON server URL
 const SYSTEM_CONFIG_URL = 'https://raw.githubusercontent.com/RaufunNazin/ImanSync/main/system_config.json';
 
 

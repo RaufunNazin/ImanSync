@@ -37,7 +37,7 @@ export default function QuranLearnScreen() {
   const [ayahAudioUrl, setAyahAudioUrl] = useState<string | null>(null);
   
   const { playAudio } = useAudioPlayer();
-  const { i18n } = useTranslation();
+  const { t, i18n } = useTranslation();
 
   const fetchAyah = async (sId: number, aId: number) => {
     setLoading(true);
@@ -188,7 +188,7 @@ export default function QuranLearnScreen() {
       <View style={[styles.footerNav, { borderTopColor: colors.border, backgroundColor: colors.background }]}>
         <TouchableOpacity style={styles.navBtn} onPress={goPrev} disabled={currentAyah === 1}>
           <ChevronLeft size={24} color={currentAyah === 1 ? colors.border : colors.text} />
-          <Text style={[styles.navBtnText, { color: currentAyah === 1 ? colors.border : colors.text }]}>Prev</Text>
+          <Text style={[styles.navBtnText, { color: currentAyah === 1 ? colors.border : colors.text }]}>{t('learn.prev')}</Text>
         </TouchableOpacity>
         
         <Text style={[styles.navCenter, { color: colors.textSecondary }]}>
@@ -196,7 +196,7 @@ export default function QuranLearnScreen() {
         </Text>
         
         <TouchableOpacity style={styles.navBtn} onPress={goNext}>
-          <Text style={[styles.navBtnText, { color: colors.text }]}>Next</Text>
+          <Text style={[styles.navBtnText, { color: colors.text }]}>{t('learn.next')}</Text>
           <ChevronRight size={24} color={colors.text} />
         </TouchableOpacity>
       </View>

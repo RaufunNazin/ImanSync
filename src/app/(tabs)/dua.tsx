@@ -6,10 +6,10 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useFocusEffect, useRouter } from 'expo-router';
 import { FolderLock, Search, X, CheckCircle2, AlertCircle, Plus } from 'lucide-react-native';
 import Animated, { FadeInDown, FadeOutDown } from 'react-native-reanimated';
-import React, { useEffect, useState, useCallback } from 'react';
+import React, { useEffect, useState, useCallback, useRef } from 'react';
 import { useTranslation } from 'react-i18next';
 import DuaService from '@/services/duaService';
-import { Dimensions, ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import { Dimensions, StyleSheet, Text, TouchableOpacity, View, Animated as RNAnimated, ScrollView } from 'react-native';
 import AddDuaModal from '@/components/add-dua-modal';
 import { loadMyDuas, saveMyDuas, saveMediaFile, UserDua } from '@/utils/my-duas-storage';
 
@@ -45,6 +45,14 @@ export default function DuaScreen() {
   const [myDuasCount, setMyDuasCount] = useState(0);
   const [bookmarksCount, setBookmarksCount] = useState(0);
   const prefs = usePreferencesStore();
+
+  const scrollY = useRef(new RNAnimated.Value(0)).current;
+  const clampedScrollY = RNAnimated.diffClamp(scrollY, 0, 100);
+  const fabTranslateY = clampedScrollY.interpolate({
+    inputRange: [0, 100],
+    outputRange: [0, 100],
+    extrapolate: 'clamp',
+  });
 
 
   // Pin Sheet State
@@ -302,7 +310,17 @@ export default function DuaScreen() {
           }
         />
       
-      <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={styles.container} keyboardDismissMode="on-drag" keyboardShouldPersistTaps="handled">
+      <RNAnimated.ScrollView 
+        showsVerticalScrollIndicator={false} 
+        contentContainerStyle={styles.container}
+        onScroll={RNAnimated.event(
+          [{ nativeEvent: { contentOffset: { y: scrollY } } }],
+          { useNativeDriver: true }
+        )}
+        scrollEventThrottle={16}
+        keyboardDismissMode="on-drag" 
+        keyboardShouldPersistTaps="handled"
+      >
 
         {/* Permanent Storage Suggestion Banner */}
         {showSuggestBanner && (
@@ -396,9 +414,11 @@ export default function DuaScreen() {
             {loading ? (
               [...Array(4)].map((_, i) => (
                 <View key={i} style={[styles.gridItem]}>
-                  <View style={[{ height: 90, borderRadius: 16, borderWidth: 1, borderColor: colors.border, backgroundColor: colors.backgroundElement, padding: 16, justifyContent: 'space-between' }]}>
-                    <SkeletonBox width={110} height={16} borderRadius={8} color={colors.border} />
-                    <SkeletonBox width={70} height={11} borderRadius={5} color={colors.border} />
+                  <View style={[{ minHeight: 70, borderRadius: 20, borderWidth: 1, borderColor: colors.border, backgroundColor: colors.backgroundElement, padding: 8, paddingVertical: 8, alignItems: 'center', justifyContent: 'center' }]}>
+                    <View style={{ alignItems: 'center', justifyContent: 'center', gap: 2, paddingHorizontal: 8 }}>
+                      <SkeletonBox width={110} height={16} borderRadius={8} color={colors.border} />
+                      <SkeletonBox width={70} height={12} borderRadius={6} color={colors.border} />
+                    </View>
                   </View>
                 </View>
               ))
@@ -421,7 +441,7 @@ export default function DuaScreen() {
           </View>
         </View>
         </View>
-      </ScrollView>
+      </RNAnimated.ScrollView>
 
         {/* Pin Action Sheet */}
         {selectedCategory && (
@@ -440,16 +460,21 @@ export default function DuaScreen() {
         )}
       </SafeAreaView>
     
-      <TouchableOpacity
-        style={[styles.fab, { backgroundColor: colors.accent }]}
-        onPress={() => setModalVisible(true)}
-      >
-        <Plus size={24} color="#FFF" />
-      </TouchableOpacity>
+      <RNAnimated.View style={[styles.fab, { transform: [{ translateY: fabTranslateY }] }]}>
+        <TouchableOpacity
+          style={[StyleSheet.absoluteFill, { backgroundColor: colors.accent, borderRadius: 28, justifyContent: 'center', alignItems: 'center' }]}
+          onPress={() => setModalVisible(true)}
+        >
+          <Plus size={24} color="#FFF" />
+        </TouchableOpacity>
+      </RNAnimated.View>
 
       <AddDuaModal
         visible={modalVisible}
-        onClose={() => setModalVisible(false)}
+        onClose={() => {
+          setModalVisible(false);
+          loadScreenData();
+        }}
         onSave={handleAddDua}
         colors={colors}
       />
@@ -543,7 +568,7 @@ const styles = StyleSheet.create({
     padding: 0,
   },
   section: {
-    marginBottom: Spacing.four,
+    marginBottom: 0,
   },
   sectionTitle: {
     fontFamily: Fonts.outfit,

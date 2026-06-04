@@ -225,7 +225,7 @@ export default function LessonPlayerScreen() {
               }}
             >
               <Volume2 size={48} color={colors.highlight} />
-              <Text style={[styles.tapToListen, { color: colors.highlight }]}>Tap to Listen</Text>
+              <Text style={[styles.tapToListen, { color: colors.highlight }]}>{t('learn.tapToListen')}</Text>
             </TouchableOpacity>
 
             <View style={styles.quizOptions}>
@@ -270,7 +270,7 @@ export default function LessonPlayerScreen() {
             }}
           >
             <Check size={20} color={colors.background} />
-            <Text style={[styles.completeBtnText, { color: colors.background }]}>Continue</Text>
+            <Text style={[styles.completeBtnText, { color: colors.background }]}>{t('learn.continue')}</Text>
           </TouchableOpacity>
         </View>
       )}
@@ -311,13 +311,13 @@ const styles = StyleSheet.create({
     fontFamily: Fonts.arabic,
     fontSize: 40,
     includeFontPadding: false,
-    marginBottom: 10, // give some space above transliteration
+    lineHeight: 50,
+    marginTop: -10,
   },
   translitText: {
-    position: 'absolute',
-    bottom: 10,
     fontFamily: Fonts.outfit,
     fontSize: 14,
+    marginTop: 4,
   },
   // Sequential Styles (Flashcards & Quiz)
   sequentialContainer: {

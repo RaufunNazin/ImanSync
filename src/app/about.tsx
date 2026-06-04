@@ -31,7 +31,7 @@ export default function AboutScreen() {
             />
           </View>
           
-          <Text style={[styles.appName, { color: colors.text }]}>ImanSync</Text>
+          <Text style={[styles.appName, { color: colors.text }]}>{t('home.titleEn')}</Text>
           
           <View style={[styles.versionBadge, { backgroundColor: colors.accent + '20' }]}>
             <Text style={[styles.versionText, { color: colors.accent }]}>
@@ -58,7 +58,7 @@ export default function AboutScreen() {
           onPress={() => Linking.openURL('https://github.com/RaufunNazin/ImanSync.git')}
         >
           <FontAwesome name="github" size={20} color={colors.text} />
-          <Text style={[styles.sourceBtnText, { color: colors.text }]}>View Source Code</Text>
+          <Text style={[styles.sourceBtnText, { color: colors.text }]}>{t('settings.viewSource')}</Text>
         </TouchableOpacity>
 
         <View style={styles.brandingSection}>

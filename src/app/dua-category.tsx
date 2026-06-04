@@ -222,18 +222,14 @@ export default function DuaCategoryScreen() {
       {loading ? (
         <View style={[styles.list, { marginTop: 8, paddingHorizontal: Spacing.four }]}>
           {[...Array(5)].map((_, i) => (
-            <View key={i} style={[styles.itemWrapper, { backgroundColor: colors.backgroundElement, borderColor: colors.border }]}>
+            <BlurView key={i} intensity={40} tint={colors.glassTint as any} style={[styles.itemWrapper, { borderColor: colors.border }]}>
               <View style={[styles.item]}>
                 <View style={[styles.itemContent]}>
-                  <SkeletonBox width={'85%' as any} height={16} borderRadius={8} color={colors.border} />
-                  <SkeletonBox width={'60%' as any} height={13} borderRadius={6} color={colors.border} />
-                  <View style={{ gap: 8, alignItems: 'flex-end', marginTop: 8 }}>
-                    <SkeletonBox width={'75%' as any} height={18} borderRadius={8} color={colors.border} />
-                    <SkeletonBox width={'50%' as any} height={18} borderRadius={8} color={colors.border} />
-                  </View>
+                  <SkeletonBox width={`${50 + (i % 3) * 15}%` as any} height={16} borderRadius={4} color={colors.border} />
                 </View>
+                <ChevronRight size={20} color={colors.border} />
               </View>
-            </View>
+            </BlurView>
           ))}
         </View>
       ) : (

@@ -257,11 +257,12 @@ export default function MyDuasScreen() {
                 <View style={styles.duaHeader}>
                   <View style={styles.duaTitleContainer}>
                     <SkeletonBox width={24} height={24} borderRadius={4} color={colors.border} />
-                    <View style={{ flex: 1, gap: 6 }}>
-                      <SkeletonBox width={'70%' as any} height={16} borderRadius={6} color={colors.border} />
-                      <SkeletonBox width={'40%' as any} height={12} borderRadius={4} color={colors.border} />
+                    <View style={{ flex: 1 }}>
+                      <SkeletonBox width={'70%' as any} height={16} borderRadius={6} color={colors.border} style={{ marginBottom: 4 }} />
+                      <SkeletonBox width={'40%' as any} height={13} borderRadius={4} color={colors.border} />
                     </View>
                   </View>
+                  <ChevronRight size={20} color={colors.border} />
                 </View>
               </View>
             ))}

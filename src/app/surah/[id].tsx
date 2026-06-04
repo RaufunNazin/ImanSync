@@ -121,7 +121,7 @@ export default function SurahScreen() {
   const updateSetting = (key: keyof Settings, val: any) => {
     setSettings(prev => {
       const next = { ...prev, [key]: val };
-      AsyncStorage.setItem('imansync_quran_settings', JSON.stringify(next));
+      AsyncStorage.setItem('imansync_quran_settings', JSON.stringify(next)).catch(console.error);
       return next;
     });
   };

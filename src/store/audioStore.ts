@@ -27,8 +27,10 @@ interface AudioState {
   
   juzAyahs: JuzAyah[];
   currentJuzAyahIndex: number | null;
+  hideGlobalBanner: boolean;
 
   // Actions
+  setHideGlobalBanner: (hide: boolean) => void;
   setReciter: (id: number) => Promise<void>;
   playSurah: (surahId: number, surahName: string, autoPlay?: boolean) => Promise<void>;
   playAyah: (surahId: number, ayahNumber: number, surahName: string, autoPlayNext: boolean) => Promise<void>;
@@ -63,6 +65,9 @@ export const useAudioStore = create<AudioState>((set, get) => ({
   
   juzAyahs: [],
   currentJuzAyahIndex: null,
+  hideGlobalBanner: false,
+
+  setHideGlobalBanner: (hide: boolean) => set({ hideGlobalBanner: hide }),
 
   setReciter: async (id: number) => {
     set({ currentReciterId: id, ayahAudioList: [] });

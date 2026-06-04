@@ -72,12 +72,12 @@ function SettingRow({ icon: Icon, title, value, type = 'navigate', onPress, isLa
         <View style={[styles.iconBox, { backgroundColor: 'rgba(255,255,255,0.1)' }]}>
           <Icon size={20} color={colors.highlight} />
         </View>
-        <Text style={[styles.settingTitle, { color: colors.text }]} numberOfLines={2}>{title}</Text>
+        <Text style={[styles.settingTitle, { color: colors.text }]}>{title}</Text>
       </View>
 
       {type === 'navigate' ? (
         <View style={{ flexDirection: 'row', alignItems: 'center', flex: value ? 1 : undefined, flexShrink: 1, justifyContent: 'flex-end', paddingLeft: value ? 10 : 0 }}>
-          {!!value && <Text style={[styles.settingValue, { color: colors.textSecondary }]} numberOfLines={2}>{value}</Text>}
+          {!!value && <Text style={[styles.settingValue, { color: colors.textSecondary }]}>{value}</Text>}
           <ChevronRight size={20} color={colors.textSecondary} />
         </View>
       ) : type === 'toggle' ? (

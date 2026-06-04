@@ -46,7 +46,7 @@ export default function JuzScreen() {
   const router = useRouter();
   const { t, i18n } = useTranslation();
 
-  const { playJuzAyahs, pause, resume, isPlaying, isLoading: isAudioLoading, playbackMode, currentReciterId, setReciter, currentSurahId, juzAyahs: storeJuzAyahs } = useAudioStore();
+  const { playJuzAyahs, pause, resume, isPlaying, isLoading: isAudioLoading, playbackMode, currentReciterId, setReciter, currentSurahId, juzAyahs: storeJuzAyahs, setHideGlobalBanner } = useAudioStore();
 
   const [ayahs, setAyahs] = useState<Ayah[]>([]);
   const [loading, setLoading] = useState(true);
@@ -62,6 +62,22 @@ export default function JuzScreen() {
 
   const flatListRef = useRef<FlatList>(null);
   const isInitialScrollDone = useRef(false);
+  const scrollY = useRef(0);
+
+  // Clean up global banner state on unmount
+  useEffect(() => {
+    return () => setHideGlobalBanner(false);
+  }, []);
+
+  const handleScroll = (e: any) => {
+    const currentY = e.nativeEvent.contentOffset.y;
+    if (currentY > scrollY.current + 10 && currentY > 50) {
+      setHideGlobalBanner(true);
+    } else if (currentY < scrollY.current - 10) {
+      setHideGlobalBanner(false);
+    }
+    scrollY.current = currentY;
+  };
 
   // Load Settings and Bookmarks
   useEffect(() => {
@@ -120,7 +136,7 @@ export default function JuzScreen() {
   const updateSetting = (key: keyof Settings, val: any) => {
     setSettings(prev => {
       const next = { ...prev, [key]: val };
-      AsyncStorage.setItem('imansync_quran_settings', JSON.stringify(next));
+      AsyncStorage.setItem('imansync_quran_settings', JSON.stringify(next)).catch(console.error);
       return next;
     });
   };
@@ -185,11 +201,10 @@ export default function JuzScreen() {
   const onViewableItemsChanged = useRef(({ viewableItems }: any) => {
     if (viewableItems.length > 0) {
       const topItem = viewableItems[0].item;
-      // In Juz, we save the `numberInSurah` and use it to jump back. Note that multiple surahs can have the same ayah number in a Juz, 
-      // but for simplicity we findIndex of the first match which is generally fine unless the juz boundary cuts mid-ayah.
       if (topItem && topItem.numberInSurah) {
         AsyncStorage.setItem('last_read_juz', JSON.stringify({
           id,
+          name: `Juz ${id}`,
           ayah: topItem.numberInSurah
         })).catch(e => console.log(e));
       }
@@ -352,6 +367,8 @@ export default function JuzScreen() {
           viewabilityConfig={viewabilityConfig}
           onViewableItemsChanged={onViewableItemsChanged}
           onScrollToIndexFailed={onScrollToIndexFailed}
+          onScroll={handleScroll}
+          scrollEventThrottle={16}
           renderItem={({ item }) => (
             <BlurView intensity={30} tint={colors.glassTint as any} style={styles.ayahCardWrapper}>
               <View style={styles.ayahCard}>

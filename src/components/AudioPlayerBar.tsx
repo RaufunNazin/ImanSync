@@ -1,5 +1,5 @@
-import React from 'react';
-import { View, Text, StyleSheet, TouchableOpacity, ActivityIndicator } from 'react-native';
+import React, { useEffect, useRef, useState } from 'react';
+import { View, Text, StyleSheet, TouchableOpacity, ActivityIndicator, Animated } from 'react-native';
 import { useAudioStore } from '@/store/audioStore';
 import { Play, Pause, X, SkipForward } from 'lucide-react-native';
 import { Colors, Fonts, Spacing } from '@/constants/theme';
@@ -7,17 +7,68 @@ import { Platform } from 'react-native';
 import { useTranslation } from 'react-i18next';
 import { formatNumber } from '@/utils/formatNumber';
 import { useThemeStore } from '@/store/themeStore';
+import { useSegments } from 'expo-router';
 
 export default function AudioPlayerBar() {
-  const { currentSurahId, currentSurahName, isPlaying, isLoading, pause, resume, stop, playNext, playlist, playbackMode, currentAyahNumber, juzAyahs, currentJuzAyahIndex } = useAudioStore();
+  const { currentSurahId, currentSurahName, isPlaying, isLoading, pause, resume, stop, playNext, playlist, playbackMode, currentAyahNumber, juzAyahs, currentJuzAyahIndex, hideGlobalBanner } = useAudioStore();
   const scheme = useThemeStore((s) => s.theme);
   const colors = Colors[scheme === 'unspecified' ? 'light' : scheme];
   const { t, i18n } = useTranslation();
+  const segments = useSegments() as string[];
 
-  if (!currentSurahId) return null;
+  const translateY = useRef(new Animated.Value(0)).current;
+  const opacity = useRef(new Animated.Value(1)).current;
+  const [visible, setVisible] = useState(false);
+  const [closing, setClosing] = useState(false);
+
+  const isQuranRoute = segments.includes('quran') || segments.includes('surah') || segments.includes('juz') || segments.includes('quran-learn') || segments.includes('quran-search');
+  const shouldShow = !!currentSurahId && isQuranRoute;
+
+  // Animate in when audio starts, animate out when it stops
+  useEffect(() => {
+    if (shouldShow && !closing) {
+      setVisible(true);
+      Animated.parallel([
+        Animated.timing(translateY, { toValue: 0, duration: 300, useNativeDriver: true }),
+        Animated.timing(opacity, { toValue: 1, duration: 300, useNativeDriver: true }),
+      ]).start();
+    } else if (!shouldShow && !closing) {
+      // Audio stopped externally (e.g. track ended)
+      Animated.parallel([
+        Animated.timing(translateY, { toValue: 150, duration: 300, useNativeDriver: true }),
+        Animated.timing(opacity, { toValue: 0, duration: 300, useNativeDriver: true }),
+      ]).start(() => setVisible(false));
+    }
+  }, [shouldShow, closing]);
+
+  // Handle hide-on-scroll
+  useEffect(() => {
+    if (!closing && shouldShow) {
+      Animated.spring(translateY, {
+        toValue: hideGlobalBanner ? 150 : 0,
+        useNativeDriver: true,
+        tension: 50,
+        friction: 8,
+      }).start();
+    }
+  }, [hideGlobalBanner]);
+
+  const handleClose = () => {
+    setClosing(true);
+    Animated.parallel([
+      Animated.timing(translateY, { toValue: 150, duration: 300, useNativeDriver: true }),
+      Animated.timing(opacity, { toValue: 0, duration: 300, useNativeDriver: true }),
+    ]).start(() => {
+      stop();
+      setClosing(false);
+      setVisible(false);
+    });
+  };
+
+  if (!visible && !shouldShow) return null;
 
   return (
-    <View style={styles.container}>
+    <Animated.View style={[styles.container, { transform: [{ translateY }], opacity }]}>
       <View style={[styles.card, { backgroundColor: colors.background, borderColor: colors.accent }]}>
         <View style={styles.info}>
           <Text style={[styles.title, { color: colors.text }]} numberOfLines={1}>
@@ -55,12 +106,12 @@ export default function AudioPlayerBar() {
             </TouchableOpacity>
           )}
 
-          <TouchableOpacity style={styles.btn} onPress={stop}>
+          <TouchableOpacity style={styles.btn} onPress={handleClose}>
             <X size={24} color={colors.textSecondary} />
           </TouchableOpacity>
         </View>
       </View>
-    </View>
+    </Animated.View>
   );
 }
 

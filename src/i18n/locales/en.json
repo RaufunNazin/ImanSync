@@ -41,7 +41,14 @@
     "ch8_desc": "Test your knowledge of the letters",
     "ch8_l1_title": "Lesson 1: Listening Test",
     "start": "Start Lesson",
-    "completed": "Completed"
+    "completed": "Completed",
+    "ch5_l3_title": "Lesson 3: Al-Falaq",
+    "ch5_l4_title": "Lesson 4: An-Nas",
+    "ch_surah_prac_l3_title": "Lesson 3: Surah Al-Asr (Ayah 3)",
+    "prev": "Prev",
+    "next": "Next",
+    "continue": "Continue",
+    "tapToListen": "Tap to Listen"
   },
   "home": {
     "titleEn": "ImanSync",
@@ -110,7 +117,9 @@
     "bnTrans": "Bangla Translation",
     "translit": "Transliteration",
     "enTranslit": "English Transliteration",
-    "autoPlayNextAyah": "Auto-play Next Ayah"
+    "bnTranslit": "Bangla Transliteration",
+    "autoPlayNextAyah": "Auto-play Next Ayah",
+    "reciter": "Audio Reciter"
   },
   "tracker": {
     "titleEn": "Daily Tracker",
@@ -204,6 +213,8 @@
     "completed": "Completed!",
     "tap": "Tap to count",
     "reset": "Reset",
+    "retry": "Retry",
+    "prev": "Prev",
     "tasbeehCounter": "Tasbeeh Counter",
     "cycleGoal": "Cycle: {{cycle}}/3 • Goal: {{goal}}",
     "bookmarks": "Bookmarks",
@@ -243,7 +254,10 @@
     "categoryRenameError": "Failed to rename category",
     "deleteCategory": "Delete Category",
     "deleteCategoryTitle": "Delete Category",
-    "deleteCategoryDesc": "Are you sure you want to delete this category? Associated duas will be moved to My Duas."
+    "deleteCategoryDesc": "Are you sure you want to delete this category? Associated duas will be moved to My Duas.",
+    "customCategoryDesc": "My Custom Category",
+    "categoryDeleted": "Category deleted",
+    "categoryDeleteError": "Failed to delete category"
   },
   "duaSettings": {
     "title": "Dua Settings",
@@ -257,9 +271,12 @@
     "translit": "Transliteration",
     "enTranslit": "English Transliteration",
     "bnTranslit": "Bangla Transliteration",
-    "searchPlaceholder": "Search by name or translation..."
+    "searchPlaceholder": "Search by name or translation...",
+    "searchMyDuas": "Search My Duas",
+    "searchBookmarks": "Search Bookmarks"
   },
   "settings": {
+    "viewSource": "View Source Code",
     "showCuratedDuas": "Special Curated Duas",
     "showCuratedDuasDesc": "Show bundled custom duas in the Dua tab",
     "titleEn": "Settings",
@@ -962,7 +979,8 @@
     "gotIt": "Got It"
   },
   "surah": {
-    "verses": "{{count}} Verses"
+    "verses": "{{count}} Verses",
+    "ayah": "Ayah"
   },
   "notifications": {
     "prayerStartTitle": "{{prayer}}",
@@ -1068,5 +1086,7 @@
     "thu": "Thu",
     "fri": "Fri",
     "sat": "Sat"
-  }
+  },
+  "search": "Search...",
+  "noResults": "No results found"
 }

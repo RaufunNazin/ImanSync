@@ -14,7 +14,7 @@ export const useThemeStore = create<ThemeState>((set) => ({
     set({ theme });
     // Only persist the preference — do NOT call Appearance.setColorScheme()
     // On Android production, that API triggers an Activity recreation (app restart/crash)
-    AsyncStorage.setItem('imansync_dark_mode', String(theme === 'dark'));
+    AsyncStorage.setItem('imansync_dark_mode', String(theme === 'dark')).catch(console.error);
   },
   initialize: async () => {
     try {

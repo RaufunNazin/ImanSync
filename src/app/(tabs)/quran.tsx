@@ -5,9 +5,9 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import { BlurView } from 'expo-blur';
 import { useFocusEffect, useRouter } from 'expo-router';
 import { Bookmark, BookOpen, ChevronRight, GraduationCap, Search, X } from 'lucide-react-native';
-import React, { useCallback, useEffect, useState } from 'react';
+import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import { StyleSheet, Text, TouchableOpacity, View, Animated } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useThemeStore } from '@/store/themeStore';
 import { useAudioStore } from '@/store/audioStore';
@@ -20,7 +20,7 @@ export default function QuranScreen() {
   const colors = Colors[scheme === 'unspecified' ? 'light' : scheme];
   const router = useRouter();
   const { t, i18n } = useTranslation();
-  const { currentSurahId } = useAudioStore();
+  const { currentSurahId, setHideGlobalBanner } = useAudioStore();
   
   const [activeTab, setActiveTab] = useState('surah');
   const [surahs, setSurahs] = useState<any[]>([]);
@@ -29,6 +29,30 @@ export default function QuranScreen() {
   const [lastReadJuz, setLastReadJuz] = useState({ id: '1', ayah: 1 });
   const [bookmarks, setBookmarks] = useState([]);
   const [showLearnBanner, setShowLearnBanner] = useState(true);
+
+  const scrollY = React.useRef(new Animated.Value(0)).current;
+  const clampedScrollY = Animated.diffClamp(scrollY, 0, 100);
+  const bannerTranslateY = clampedScrollY.interpolate({
+    inputRange: [0, 100],
+    outputRange: [0, 150],
+    extrapolate: 'clamp',
+  });
+
+  // Sync audio bar hide/show with scroll
+  const lastScrollYRef = useRef(0);
+  useEffect(() => {
+    const listenerId = scrollY.addListener(({ value }) => {
+      const isScrollingDown = value > lastScrollYRef.current && value > 50;
+      lastScrollYRef.current = value;
+      if (currentSurahId) {
+        setHideGlobalBanner(isScrollingDown);
+      }
+    });
+    return () => {
+      scrollY.removeListener(listenerId);
+      setHideGlobalBanner(false);
+    };
+  }, [currentSurahId]);
 
   useEffect(() => {
     fetch('https://api.alquran.cloud/v1/surah')
@@ -88,7 +112,17 @@ export default function QuranScreen() {
         }
       />
 
-      <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={styles.container} keyboardDismissMode="on-drag" keyboardShouldPersistTaps="handled">
+      <Animated.ScrollView 
+        showsVerticalScrollIndicator={false} 
+        contentContainerStyle={styles.container} 
+        keyboardDismissMode="on-drag" 
+        keyboardShouldPersistTaps="handled"
+        onScroll={Animated.event(
+          [{ nativeEvent: { contentOffset: { y: scrollY } } }],
+          { useNativeDriver: true }
+        )}
+        scrollEventThrottle={16}
+      >
 
         {/* Word-by-Word Learn Mode CTA */}
         {showLearnBanner && (
@@ -107,7 +141,7 @@ export default function QuranScreen() {
               style={{ position: 'absolute', top: 8, right: 8, padding: 4 }}
               onPress={() => {
                 setShowLearnBanner(false);
-                AsyncStorage.setItem('imansync_hide_learn_banner', 'true');
+                AsyncStorage.setItem('imansync_hide_learn_banner', 'true').catch(console.error);
               }}
               hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
             >
@@ -148,8 +182,8 @@ export default function QuranScreen() {
                   <View style={styles.surahLeft}>
                     <SkeletonBox width={28} height={28} borderRadius={8} color={colors.border} />
                     <View style={{ flex: 1, gap: 6 }}>
-                      <SkeletonBox width={110} height={14} borderRadius={7} color={colors.border} />
-                      <SkeletonBox width={70} height={11} borderRadius={5} color={colors.border} />
+                      <SkeletonBox width={110} height={15} borderRadius={7} color={colors.border} />
+                      <SkeletonBox width={70} height={12} borderRadius={6} color={colors.border} />
                     </View>
                   </View>
                   <SkeletonBox width={56} height={20} borderRadius={8} color={colors.border} />
@@ -232,13 +266,11 @@ export default function QuranScreen() {
             )}
           </View>
         )}
-
-        <View style={{ height: Spacing.six + 40 }} />
-      </ScrollView>
+      </Animated.ScrollView>
 
       {/* Floating Last Read Pill */}
       {activeTab !== 'bookmarks' && (
-        <View style={[styles.floatingHintContainer, currentSurahId ? { bottom: Spacing.two + 20 + 85 } : {}]}>
+        <Animated.View style={[styles.floatingHintContainer, currentSurahId ? { bottom: Spacing.two + 20 + 70 } : {}, { transform: [{ translateY: bannerTranslateY }] }]}>
           <View style={[styles.floatingHintCard, { borderColor: colors.accent, backgroundColor: colors.background }]}>
             <TouchableOpacity 
               style={styles.floatingHintTouch}
@@ -261,7 +293,7 @@ export default function QuranScreen() {
               <ChevronRight size={18} color={colors.textSecondary} />
             </TouchableOpacity>
           </View>
-        </View>
+        </Animated.View>
       )}
     </SafeAreaView>
   );

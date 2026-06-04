@@ -136,7 +136,7 @@ export default function MyDuaDetailScreen() {
   const updateSetting = (key: keyof DuaSettings, val: any) => {
     setSettings(prev => {
       const next = { ...prev, [key]: val };
-      AsyncStorage.setItem('imansync_dua_settings', JSON.stringify(next));
+      AsyncStorage.setItem('imansync_dua_settings', JSON.stringify(next)).catch(console.error);
       return next;
     });
   };
@@ -366,8 +366,14 @@ export default function MyDuaDetailScreen() {
         message={t('dua.deleteDuaDesc', { defaultValue: 'Are you sure you want to delete this dua?' })}
         confirmText={t('dua.delete', { defaultValue: 'Delete' })}
         cancelText={t('dua.cancel', { defaultValue: 'Cancel' })}
-        onConfirm={handleDelete}
-        onCancel={() => setShowDeleteModal(false)}
+        onConfirm={() => {
+          handleDelete();
+          setShowOptionsSheet(false);
+        }}
+        onCancel={() => {
+          setShowDeleteModal(false);
+          setShowOptionsSheet(false);
+        }}
         colors={colors}
       />
 
@@ -382,10 +388,8 @@ export default function MyDuaDetailScreen() {
             icon: <Edit2 size={20} color={colors.textSecondary} />,
             label: t('dua.editDua', { defaultValue: 'Edit Dua' }),
             iconBgColor: colors.textSecondary + '22',
-            onPress: () => {
-              setShowOptionsSheet(false);
-              setShowEditModal(true);
-            }
+            onPress: () => setShowEditModal(true),
+            closeOnPress: false,
           },
           {
             id: 'delete',
@@ -393,18 +397,22 @@ export default function MyDuaDetailScreen() {
             label: t('dua.deleteDua', { defaultValue: 'Delete Dua' }),
             iconBgColor: '#EF444422',
             labelColor: '#EF4444',
-            onPress: () => {
-              setShowOptionsSheet(false);
-              setShowDeleteModal(true);
-            }
+            onPress: () => setShowDeleteModal(true),
+            closeOnPress: false,
           }
         ]}
       />
 
       <AddDuaModal
         visible={showEditModal}
-        onClose={() => setShowEditModal(false)}
-        onSave={handleUpdate}
+        onClose={() => {
+          setShowEditModal(false);
+          setShowOptionsSheet(false);
+        }}
+        onSave={(data) => {
+          handleUpdate(data);
+          setShowOptionsSheet(false);
+        }}
         initialData={dua}
         colors={colors}
       />

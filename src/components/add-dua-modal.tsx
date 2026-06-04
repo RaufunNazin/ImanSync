@@ -202,13 +202,13 @@ export default function AddDuaModal({ visible, onClose, onSave, initialData, col
                   style={[styles.tabBtn, activeTab === 'en' && { backgroundColor: colors.accent }]}
                   onPress={() => setActiveTab('en')}
                 >
-                  <Text style={[styles.tabText, { color: activeTab === 'en' ? '#FFF' : colors.textSecondary }]}>English</Text>
+                  <Text style={[styles.tabText, { color: activeTab === 'en' ? '#FFF' : colors.textSecondary }]}>{t('quranSettings.enTrans', { defaultValue: 'English' })}</Text>
                 </TouchableOpacity>
                 <TouchableOpacity
                   style={[styles.tabBtn, activeTab === 'bn' && { backgroundColor: colors.accent }]}
                   onPress={() => setActiveTab('bn')}
                 >
-                  <Text style={[styles.tabText, { color: activeTab === 'bn' ? '#FFF' : colors.textSecondary }]}>বাংলা</Text>
+                  <Text style={[styles.tabText, { color: activeTab === 'bn' ? '#FFF' : colors.textSecondary }]}>{t('quranSettings.bnTrans', { defaultValue: 'Bangla' })}</Text>
                 </TouchableOpacity>
               </View>
 

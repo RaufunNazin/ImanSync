@@ -3,11 +3,12 @@ import { Colors, Fonts, Spacing } from '@/constants/theme';
 import { useThemeStore } from '@/store/themeStore';
 import { formatNumber } from '@/utils/formatNumber';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import { Magnetometer } from 'expo-sensors';
+import * as Location from 'expo-location';
 import React, { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { Animated, StyleSheet, Text, View } from 'react-native';
+import { StyleSheet, Text, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
+import Animated, { useSharedValue, useAnimatedStyle, withTiming, Easing } from 'react-native-reanimated';
 
 // Kaaba Coordinates
 const KAABA_LAT = 21.4225;
@@ -32,9 +33,10 @@ export default function QiblaScreen() {
   const colors = Colors[scheme === 'unspecified' ? 'light' : scheme];
   const { t, i18n } = useTranslation();
 
-  const [heading, setHeading] = useState(0);
+  const [headingState, setHeadingState] = useState(0);
   const [qiblaBearing, setQiblaBearing] = useState(260); // Default approx for Dhaka
-  const [, setSubscription] = useState<any>(null);
+  
+  const heading = useSharedValue(0);
 
   useEffect(() => {
     // Load coordinates to calculate exact Qibla direction
@@ -52,33 +54,58 @@ export default function QiblaScreen() {
       }
     });
 
-    Magnetometer.setUpdateInterval(100);
-    const sub = Magnetometer.addListener(result => {
-      let { x, y } = result;
-      let angle = Math.atan2(y, x) * (180 / Math.PI);
-      
-      angle = angle - 90;
-      if (angle < 0) {
-        angle = angle + 360;
+    let sub: Location.LocationSubscription | null = null;
+
+    (async () => {
+      let { status } = await Location.requestForegroundPermissionsAsync();
+      if (status !== 'granted') {
+        return;
       }
-      setHeading(angle);
-    });
-    setSubscription(sub);
-    return () => sub && sub.remove();
+      sub = await Location.watchHeadingAsync((result) => {
+        let magHeading = result.magHeading;
+        if (magHeading < 0) magHeading += 360;
+        
+        // Fix the 360 -> 0 wrap around for reanimated
+        let currentHeading = heading.value;
+        let diff = magHeading - (currentHeading % 360);
+        if (diff > 180) diff -= 360;
+        if (diff < -180) diff += 360;
+        
+        let targetHeading = currentHeading + diff;
+        
+        heading.value = withTiming(targetHeading, { 
+          duration: 300,
+          easing: Easing.out(Easing.ease) 
+        });
+        
+        // Keep a state copy just for the text updates
+        setHeadingState(magHeading);
+      });
+    })();
+
+    return () => {
+      if (sub) sub.remove();
+    };
   }, []);
 
-  const rotation = qiblaBearing - heading;
+  const animatedDialStyle = useAnimatedStyle(() => {
+    return {
+      transform: [{ rotate: `${-heading.value}deg` }]
+    };
+  });
+
+  const rotation = qiblaBearing - headingState;
   
-  let diff = (rotation + 360) % 360;
-  if (diff > 180) diff -= 360;
+  let diffText = (rotation + 360) % 360;
+  if (diffText > 180) diffText -= 360;
   
   let turnText = '';
-  if (Math.abs(diff) <= 2) {
+  if (Math.abs(diffText) <= 2) {
     turnText = t('qibla.facingQibla');
-  } else if (diff > 0) {
-    turnText = t('qibla.turnRight', { degrees: formatNumber(Math.round(diff), i18n.language) });
+  } else if (diffText > 0) {
+    turnText = t('qibla.turnRight', { degrees: formatNumber(Math.round(diffText), i18n.language) });
   } else {
-    turnText = t('qibla.turnLeft', { degrees: formatNumber(Math.round(Math.abs(diff)), i18n.language) });
+    turnText = t('qibla.turnLeft', { degrees: formatNumber(Math.round(Math.abs(diffText)), i18n.language) });
   }
 
   return (
@@ -88,7 +115,7 @@ export default function QiblaScreen() {
       <View style={styles.container}>
         <View style={styles.compassWrapper}>
           {/* The Compass Dial that rotates based on phone's heading */}
-          <Animated.View style={[styles.compassDial, { transform: [{ rotate: `${-heading}deg` }] }]}>
+          <Animated.View style={[styles.compassDial, animatedDialStyle]}>
             
             {/* Tick Marks for Degrees */}
             {[...Array(72)].map((_, i) => {
@@ -147,7 +174,7 @@ export default function QiblaScreen() {
           </View>
         </View>
 
-        <Text style={[styles.description, { color: Math.abs(diff) <= 2 ? colors.accent : colors.text }]}>
+        <Text style={[styles.description, { color: Math.abs(diffText) <= 2 ? colors.accent : colors.text }]}>
           {turnText}
         </Text>
       </View>

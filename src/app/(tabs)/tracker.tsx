@@ -139,7 +139,7 @@ export default function TrackerScreen() {
               try {
                 const parsed = JSON.parse(oldVal);
                 setHistory({ [todayStr]: parsed });
-                AsyncStorage.setItem('imansync_tracker_history', JSON.stringify({ [todayStr]: parsed }));
+                AsyncStorage.setItem('imansync_tracker_history', JSON.stringify({ [todayStr]: parsed })).catch(console.error);
               } catch (e) {
                 console.error('Corrupted legacy tracker data, ignoring', e);
               }
@@ -159,7 +159,7 @@ export default function TrackerScreen() {
 
       const nextToday = { ...todayData, [id]: !todayData[id] };
       const nextHistory = { ...prev, [currentDayStr]: nextToday };
-      AsyncStorage.setItem('imansync_tracker_history', JSON.stringify(nextHistory));
+      AsyncStorage.setItem('imansync_tracker_history', JSON.stringify(nextHistory)).catch(console.error);
 
       const newCompletedCount = DAILY_TASKS.filter(t => nextToday[t.id]).length;
 
@@ -344,7 +344,7 @@ export default function TrackerScreen() {
             <View style={[styles.progressCard, { borderColor: colors.border, backgroundColor: colors.backgroundElement }]}>
               <View style={styles.progressHeader}>
                 <View style={{ flex: 1, gap: 10 }}>
-                  <SkeletonBox width={140} height={20} borderRadius={8} color={colors.border} />
+                  <SkeletonBox width={140} height={22} borderRadius={11} color={colors.border} />
                   <SkeletonBox width={180} height={14} borderRadius={7} color={colors.border} />
                 </View>
                 <SkeletonBox width={64} height={64} borderRadius={32} color={colors.border} />
@@ -359,7 +359,8 @@ export default function TrackerScreen() {
                   <View key={i} style={[styles.taskCardWrapper]}>
                     <View style={[styles.taskCardBlur, { backgroundColor: colors.backgroundElement, borderColor: colors.border, borderWidth: 1 }]}>
                       <View style={[styles.taskCard]}>
-                        <SkeletonBox width={60} height={12} borderRadius={6} color={colors.border} />
+                        <SkeletonBox width={60} height={14} borderRadius={7} color={colors.border} style={{ marginBottom: 16 }} />
+                        <View style={[styles.taskCardIcon, { backgroundColor: colors.border, opacity: 0.5 }]} />
                       </View>
                     </View>
                   </View>

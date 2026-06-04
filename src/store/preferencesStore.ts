@@ -66,7 +66,7 @@ export const usePreferencesStore = create<PreferencesState>((set, get) => ({
       manualCity: state.manualCity,
       showCuratedDuas: state.showCuratedDuas,
     };
-    AsyncStorage.setItem('imansync_preferences', JSON.stringify(toSave));
+    AsyncStorage.setItem('imansync_preferences', JSON.stringify(toSave)).catch(console.error);
   },
   
   initialize: async () => {
@@ -107,7 +107,7 @@ export const usePreferencesStore = create<PreferencesState>((set, get) => ({
             hijriOffset: state.hijriOffset,
             manualCity: state.manualCity,
             showCuratedDuas: state.showCuratedDuas,
-          }));
+          })).catch(console.error);
         }
       }
     } catch (e) {

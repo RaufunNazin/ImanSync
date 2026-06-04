@@ -75,6 +75,7 @@ export default function PinSheet({
       label: t('dua.renameCategory', { defaultValue: 'Rename' }),
       iconBgColor: colors.textSecondary + '22',
       onPress: () => setIsRenaming(true),
+      closeOnPress: false,
     });
   }
 
@@ -86,6 +87,7 @@ export default function PinSheet({
       iconBgColor: '#EF444422',
       labelColor: '#EF4444',
       onPress: () => setShowDeleteModal(true),
+      closeOnPress: false,
     });
   }
 
@@ -110,7 +112,10 @@ export default function PinSheet({
           setShowDeleteModal(false);
           onClose();
         }}
-        onCancel={() => setShowDeleteModal(false)}
+        onCancel={() => {
+          setShowDeleteModal(false);
+          onClose();
+        }}
         colors={colors}
       />
 
@@ -133,7 +138,10 @@ export default function PinSheet({
                   <View style={{ flexDirection: 'row', gap: Spacing.three, marginTop: Spacing.four }}>
                     <TouchableOpacity
                       style={[styles.btn, { backgroundColor: colors.card, flex: 1 }]}
-                      onPress={() => setIsRenaming(false)}
+                      onPress={() => {
+                        setIsRenaming(false);
+                        onClose();
+                      }}
                     >
                       <Text style={[styles.btnText, { color: colors.text }]}>{t('dua.cancel', { defaultValue: 'Cancel' })}</Text>
                     </TouchableOpacity>

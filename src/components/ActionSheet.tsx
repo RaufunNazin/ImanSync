@@ -10,6 +10,7 @@ export interface ActionOption {
   onPress: () => void;
   iconBgColor?: string;
   labelColor?: string;
+  closeOnPress?: boolean;
 }
 
 interface ActionSheetProps {
@@ -49,7 +50,9 @@ export default function ActionSheet({
                       Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
                     } catch (e) {}
                     opt.onPress();
-                    onClose();
+                    if (opt.closeOnPress !== false) {
+                      onClose();
+                    }
                   }}
                 >
                   <View style={[styles.iconBox, { backgroundColor: opt.iconBgColor || colors.textSecondary + '22' }]}>

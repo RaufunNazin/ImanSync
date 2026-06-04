@@ -41,7 +41,14 @@
     "ch8_desc": "আরবি হরফ কতটুকু শিখেছেন, পরীক্ষা করুন",
     "ch8_l1_title": "পাঠ ১: লিসেনিং টেস্ট",
     "start": "পাঠ শুরু করুন",
-    "completed": "কমপ্লিট"
+    "completed": "কমপ্লিট",
+    "ch5_l3_title": "পাঠ ৩: আল-ফালাক্ব",
+    "ch5_l4_title": "পাঠ ৪: আন-নাস",
+    "ch_surah_prac_l3_title": "পাঠ ৩: সূরা আল-আসর (আয়াত ৩)",
+    "prev": "আগের",
+    "next": "পরের",
+    "continue": "চালিয়ে যান",
+    "tapToListen": "শুনতে ট্যাপ করুন"
   },
   "home": {
     "titleEn": "ইমান সিঙ্ক",
@@ -111,7 +118,7 @@
     "translit": "উচ্চারণসমূহ",
     "enTranslit": "ইংরেজি উচ্চারণ",
     "bnTranslit": "বাংলা উচ্চারণ",
-    "reciter": "ক্বারী",
+    "reciter": "অডিও তিলাওয়াতকারী",
     "autoPlayNextAyah": "পরের আয়াত অটো-প্লে"
   },
   "tracker": {
@@ -245,7 +252,10 @@
     "categoryRenameError": "নাম পরিবর্তন করতে সমস্যা হয়েছে",
     "deleteCategory": "ক্যাটাগরি ডিলিট করুন",
     "deleteCategoryTitle": "ক্যাটাগরি ডিলিট করুন",
-    "deleteCategoryDesc": "এই ক্যাটাগরিটি ডিলিট করতে চান? এর দোয়াগুলো 'আমার দোয়া' তে চলে যাবে।"
+    "deleteCategoryDesc": "এই ক্যাটাগরিটি ডিলিট করতে চান? এর দোয়াগুলো 'আমার দোয়া' তে চলে যাবে।",
+    "customCategoryDesc": "আমার কাস্টম ক্যাটাগরি",
+    "categoryDeleted": "ক্যাটাগরি ডিলিট করা হয়েছে",
+    "categoryDeleteError": "ক্যাটাগরি ডিলিট করতে ব্যর্থ হয়েছে"
   },
   "duaSettings": {
     "title": "দোয়ার সেটিংস",
@@ -259,9 +269,12 @@
     "translit": "উচ্চারণ",
     "enTranslit": "ইংরেজি উচ্চারণ",
     "bnTranslit": "বাংলা উচ্চারণ",
-    "searchPlaceholder": "নাম বা অনুবাদ দিয়ে খুঁজুন..."
+    "searchPlaceholder": "নাম বা অনুবাদ দিয়ে খুঁজুন...",
+    "searchMyDuas": "আমার দোয়া খুঁজুন",
+    "searchBookmarks": "বুকমার্ক করা দোয়া খুঁজুন"
   },
   "settings": {
+    "viewSource": "সোর্স কোড দেখুন",
     "showCuratedDuas": "বিশেষ বাছাইকৃত দোয়া",
     "showCuratedDuasDesc": "দোয়া ট্যাবে বিশেষ কাস্টম দোয়াগুলো দেখান",
     "titleEn": "সেটিংস",
@@ -290,7 +303,7 @@
     "footerSubtitle": "শুধুই আল্লাহর সন্তুষ্টির জন্য",
     "notificationsTitle": "নোটিফিকেশন সেটিংস",
     "masterToggle": "মাস্টার সুইচ",
-    "prayerStartAlerts": "নামাজের এলার্ট",
+    "prayerStartAlerts": "নামাজ শুরুর এলার্ট",
     "prayerEndAlerts": "নামাজ শেষের এলার্ট",
     "dailyReminders": "দৈনিক রিমাইন্ডার",
     "doNotDisturb": "ডু নট ডিস্টার্ব",
@@ -955,7 +968,8 @@
     }
   ],
   "surah": {
-    "verses": "{{count}} আয়াত"
+    "verses": "{{count}} আয়াত",
+    "ayah": "আয়াত"
   },
   "surahNames": {
     "1": "আল-ফাতিহা",
@@ -1186,5 +1200,7 @@
     "thu": "বৃহস্পতি",
     "fri": "শুক্র",
     "sat": "শনি"
-  }
+  },
+  "search": "খুঁজুন...",
+  "noResults": "কোন ফলাফল পাওয়া যায়নি"
 }
