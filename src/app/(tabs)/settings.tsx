@@ -111,7 +111,7 @@ export default function SettingsScreen() {
   const [pickerType, setPickerType] = useState<'start' | 'end'>('start');
 
   const [optionsModalVisible, setOptionsModalVisible] = useState(false);
-  const [optionsModalType, setOptionsModalType] = useState<'calc' | 'madhab' | 'hijri' | 'location' | null>(null);
+  const [optionsModalType, setOptionsModalType] = useState<'calc' | 'madhab' | 'hijri' | 'bangla' | 'location' | null>(null);
 
   const [updateModal, setUpdateModal] = useState<{ visible: boolean; title: string; message: string; type: 'loading' | 'success' | 'error' } | null>(null);
 
@@ -407,9 +407,31 @@ export default function SettingsScreen() {
               setOptionsModalType('hijri');
               setOptionsModalVisible(true);
             }}
-            isLast={true}
+            isLast={!prefs.showBanglaCalendar}
             colors={colors}
           />
+          <SettingRow
+            icon={CalendarDays}
+            title={t('settings.showBanglaCalendar', { defaultValue: 'Show Bangla Calendar' })}
+            value={prefs.showBanglaCalendar}
+            type="toggle"
+            isLast={!prefs.showBanglaCalendar}
+            onPress={(val) => prefs.setPreferences({ showBanglaCalendar: val as boolean })}
+            colors={colors}
+          />
+          {prefs.showBanglaCalendar && (
+            <SettingRow
+              icon={CalendarDays}
+              title={t('settings.banglaOffset', { defaultValue: 'Bangla Date Adjustment' })}
+              value={`${prefs.banglaOffset > 0 ? '+' : ''}${formatNumber(prefs.banglaOffset || 0, i18n.language)} ${t('settings.days', { defaultValue: 'Days' })}`}
+              onPress={() => {
+                setOptionsModalType('bangla');
+                setOptionsModalVisible(true);
+              }}
+              isLast={true}
+              colors={colors}
+            />
+          )}
         </View>
 
         <Text style={[styles.sectionTitle, { color: colors.textSecondary, marginTop: Spacing.four }]}>{t('settings.system')}</Text>
@@ -462,18 +484,20 @@ export default function SettingsScreen() {
             optionsModalType === 'calc' ? t('settings.calcMethod') :
             optionsModalType === 'madhab' ? t('settings.asrMethod') :
             optionsModalType === 'hijri' ? t('settings.hijriOffset') :
+            optionsModalType === 'bangla' ? t('settings.banglaOffset', { defaultValue: 'Bangla Offset' }) :
             t('settings.location')
           }
           options={
             optionsModalType === 'calc' ? CALC_METHODS.map(m => ({ id: m.id, name: t(m.key as any) })) :
             optionsModalType === 'madhab' ? MADHABS.map(m => ({ id: m.id, name: t(m.key as any) })) :
-            optionsModalType === 'hijri' ? [-2, -1, 0, 1, 2].map(n => ({ id: n, name: `${n > 0 ? '+' : ''}${formatNumber(n, i18n.language)} ${t('settings.days', { defaultValue: 'Days' })}` })) :
+            optionsModalType === 'hijri' || optionsModalType === 'bangla' ? [-2, -1, 0, 1, 2].map(n => ({ id: n, name: `${n > 0 ? '+' : ''}${formatNumber(n, i18n.language)} ${t('settings.days', { defaultValue: 'Days' })}` })) :
             [{ id: 'auto', name: t('settings.autoGPS', { defaultValue: 'Auto (GPS)' }) }, ...Object.keys(districtMapBn).sort().map(k => ({ id: k, name: getDistrictName(k, i18n.language) }))]
           }
           selectedValue={
             optionsModalType === 'calc' ? prefs.calcMethod :
             optionsModalType === 'madhab' ? prefs.madhab :
             optionsModalType === 'hijri' ? prefs.hijriOffset :
+            optionsModalType === 'bangla' ? prefs.banglaOffset :
             (prefs.manualCity || 'auto')
           }
           enableSearch={optionsModalType === 'location'}
@@ -481,6 +505,7 @@ export default function SettingsScreen() {
             if (optionsModalType === 'calc') prefs.setPreferences({ calcMethod: val as number });
             else if (optionsModalType === 'madhab') prefs.setPreferences({ madhab: val as number });
             else if (optionsModalType === 'hijri') prefs.setPreferences({ hijriOffset: val as number });
+            else if (optionsModalType === 'bangla') prefs.setPreferences({ banglaOffset: val as number });
             else if (optionsModalType === 'location') {
               if (val === 'auto') {
                 prefs.setPreferences({ manualCity: null });

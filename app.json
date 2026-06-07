@@ -91,7 +91,8 @@
       ],
       "expo-video",
       "./plugins/withAndroidSound.js",
-      "./plugins/fixAndroidManifestWarnings.js"
+      "./plugins/fixAndroidManifestWarnings.js",
+      "expo-sharing"
     ],
     "experiments": {
       "typedRoutes": true,

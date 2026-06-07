@@ -4,8 +4,8 @@ import { formatNumber } from '@/utils/formatNumber';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { BlurView } from 'expo-blur';
 import * as Haptics from 'expo-haptics';
-import { Activity, BookOpen, CheckCircle2, HandCoins, Heart, RotateCcw, X } from 'lucide-react-native';
-import { useFocusEffect } from 'expo-router';
+import { Activity, BookOpen, CheckCircle2, HandCoins, Heart, RotateCcw, X, History } from 'lucide-react-native';
+import { useFocusEffect, useRouter } from 'expo-router';
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { ScrollView, StyleSheet, Text, TouchableOpacity, View, AppState, Modal, Dimensions } from 'react-native';
@@ -103,6 +103,7 @@ export default function TrackerScreen() {
   const scheme = useThemeStore((s) => s.theme);
   const colors = Colors[scheme === 'unspecified' ? 'light' : scheme];
   const { t, i18n } = useTranslation();
+  const router = useRouter();
 
   const [activeTab, setActiveTab] = useState<'Daily' | 'Weekly' | 'Monthly'>('Daily');
   const [history, setHistory] = useState<Record<string, Record<string, boolean>>>({});
@@ -410,6 +411,27 @@ export default function TrackerScreen() {
                 {getEncouragementMsg(displayPercentage)}
               </Text>
             </BlurView>
+
+            {/* Qada Tracker Button */}
+            <TouchableOpacity 
+              activeOpacity={0.8}
+              onPress={() => router.push('/qada-tracker' as any)}
+              style={{ marginBottom: Spacing.four }}
+            >
+              <BlurView intensity={30} tint={colors.glassTint as any} style={{ borderRadius: 20, padding: Spacing.four, flexDirection: 'row', alignItems: 'center', borderColor: colors.border, borderWidth: 1 }}>
+                <View style={{ width: 44, height: 44, borderRadius: 22, backgroundColor: colors.highlight + '22', alignItems: 'center', justifyContent: 'center' }}>
+                  <History size={22} color={colors.highlight} />
+                </View>
+                <View style={{ flex: 1, marginLeft: Spacing.three }}>
+                  <Text style={{ fontFamily: Fonts.outfit, fontSize: 16, color: colors.text, fontWeight: '600' }}>
+                    {t('tracker.qadaTitle', { defaultValue: 'Missed Prayers (Qada)' })}
+                  </Text>
+                  <Text style={{ fontFamily: Fonts.outfit, fontSize: 13, color: colors.textSecondary, marginTop: 2 }}>
+                    {t('tracker.qadaDesc', { defaultValue: 'Track and make up your missed prayers and fasts.' })}
+                  </Text>
+                </View>
+              </BlurView>
+            </TouchableOpacity>
 
             {activeTab === 'Daily' && renderDaily()}
             {activeTab === 'Weekly' && renderRealChart(7, t('tracker.weekly'), weeklyData)}

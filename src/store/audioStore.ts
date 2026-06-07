@@ -2,6 +2,7 @@ import { create } from 'zustand';
 import { createAudioPlayer, AudioPlayer } from 'expo-audio';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { Platform } from 'react-native';
+import { useDownloadStore } from './downloadStore';
 
 export interface JuzAyah {
   surahId: number;
@@ -97,18 +98,28 @@ export const useAudioStore = create<AudioState>((set, get) => ({
     }
 
     try {
-      const res = await fetch(`https://api.quran.com/api/v4/chapter_recitations/${currentReciterId}/${surahId}`);
-      const json = await res.json();
-      
-      if (get().audioRequestId !== reqId) return;
+      let finalUrl = "";
+      const localUri = useDownloadStore.getState().getDownloadedUri(currentReciterId, surahId);
 
-      if (json.audio_file && json.audio_file.audio_url) {
-        let url = json.audio_file.audio_url;
-        if (url.startsWith('//')) {
-          url = `https:${url}`;
-        }
+      if (localUri) {
+        finalUrl = localUri;
+      } else {
+        const res = await fetch(`https://api.quran.com/api/v4/chapter_recitations/${currentReciterId}/${surahId}`);
+        const json = await res.json();
         
-        const newSound = createAudioPlayer(url);
+        if (get().audioRequestId !== reqId) return;
+
+        if (json.audio_file && json.audio_file.audio_url) {
+          let url = json.audio_file.audio_url;
+          if (url.startsWith('//')) {
+            url = `https:${url}`;
+          }
+          finalUrl = url;
+        }
+      }
+
+      if (finalUrl) {
+        const newSound = createAudioPlayer(finalUrl);
         newSound.addListener('playbackStatusUpdate', _updatePlaybackStatus);
         
         if (autoPlay) {
@@ -249,11 +260,11 @@ export const useAudioStore = create<AudioState>((set, get) => ({
   },
 
   stop: async () => {
-    const { sound, _updatePlaybackStatus } = get();
+    const { sound, _updatePlaybackStatus, audioRequestId } = get();
     if (sound) {
       sound.pause();
       sound.removeListener('playbackStatusUpdate', _updatePlaybackStatus);
-      set({ sound: null, isPlaying: false, currentSurahId: null, currentSurahName: null, currentAyahNumber: null, playlist: [], juzAyahs: [], currentJuzAyahIndex: null, positionMillis: 0, durationMillis: 0 });
+      set({ sound: null, isPlaying: false, currentSurahId: null, currentSurahName: null, currentAyahNumber: null, playlist: [], juzAyahs: [], currentJuzAyahIndex: null, positionMillis: 0, durationMillis: 0, audioRequestId: audioRequestId + 1 });
     }
   },
 
@@ -286,7 +297,9 @@ export const useAudioStore = create<AudioState>((set, get) => ({
       });
 
       if (status.didJustFinish && !get().isLoading) {
+        const reqId = get().audioRequestId;
         setTimeout(() => {
+          if (get().audioRequestId !== reqId) return;
           const { playbackMode, currentSurahId, currentAyahNumber, ayahAudioList, juzAyahs, currentJuzAyahIndex } = get();
           
           if (playbackMode === 'juz' && currentJuzAyahIndex !== null) {

@@ -1,0 +1,202 @@
+[
+  {
+    "id": 1,
+    "question": "Which Prophet is mentioned most by name in the Quran?",
+    "options": [
+      "Prophet Muhammad (PBUH)",
+      "Prophet Musa (AS)",
+      "Prophet Isa (AS)",
+      "Prophet Ibrahim (AS)"
+    ],
+    "correctIndex": 1,
+    "explanation": "Prophet Musa (AS) is mentioned by name 136 times in the Quran.",
+    "question_bn": "কুরআনে কোন নবীর নাম সবচেয়ে বেশি উল্লেখ করা হয়েছে?",
+    "options_bn": [
+      "নবী মুহাম্মদ (সা.)",
+      "নবী মুসা (আ.)",
+      "নবী ঈসা (আ.)",
+      "নবী ইব্রাহিম (আ.)"
+    ],
+    "explanation_bn": "নবী মুসা (আ.) এর নাম কুরআনে ১৩৬ বার উল্লেখ করা হয়েছে।"
+  },
+  {
+    "id": 2,
+    "question": "Which Surah does not begin with Bismillah?",
+    "options": [
+      "Surah Al-Baqarah",
+      "Surah At-Tawbah",
+      "Surah Al-Fatiha",
+      "Surah Yaseen"
+    ],
+    "correctIndex": 1,
+    "explanation": "Surah At-Tawbah is the only Surah in the Quran that does not begin with Bismillah.",
+    "question_bn": "কোন সূরাটি বিসমিল্লাহ দিয়ে শুরু হয় না?",
+    "options_bn": [
+      "সূরা বাকারা",
+      "সূরা তাওবা",
+      "সূরা ফাতিহা",
+      "সূরা ইয়াসিন"
+    ],
+    "explanation_bn": "সূরা তাওবা হলো কুরআনের একমাত্র সূরা যা বিসমিল্লাহ দিয়ে শুরু হয় না।"
+  },
+  {
+    "id": 3,
+    "question": "What is the longest Surah in the Quran?",
+    "options": [
+      "Surah Al-Kahf",
+      "Surah Al-Imran",
+      "Surah Al-Baqarah",
+      "Surah An-Nisa"
+    ],
+    "correctIndex": 2,
+    "explanation": "Surah Al-Baqarah is the longest Surah with 286 verses.",
+    "question_bn": "কুরআনের সবচেয়ে দীর্ঘ সূরা কোনটি?",
+    "options_bn": [
+      "সূরা কাহফ",
+      "সূরা আলে-ইমরান",
+      "সূরা বাকারা",
+      "সূরা নিসা"
+    ],
+    "explanation_bn": "সূরা বাকারা হলো ২৮৬ আয়াত বিশিষ্ট দীর্ঘতম সূরা।"
+  },
+  {
+    "id": 4,
+    "question": "Who was the first person to accept Islam after the Prophet Muhammad (PBUH)?",
+    "options": [
+      "Abu Bakr (RA)",
+      "Ali (RA)",
+      "Khadijah (RA)",
+      "Zayd ibn Harithah (RA)"
+    ],
+    "correctIndex": 2,
+    "explanation": "His wife Khadijah (RA) was the very first person to accept Islam.",
+    "question_bn": "নবী মুহাম্মদ (সা.) এর পর সর্বপ্রথম কে ইসলাম গ্রহণ করেন?",
+    "options_bn": [
+      "আবু বকর (রা.)",
+      "আলী (রা.)",
+      "খাদিজা (রা.)",
+      "জায়েদ ইবনে হারিথা (রা.)"
+    ],
+    "explanation_bn": "তাঁর স্ত্রী খাদিজা (রা.) সর্বপ্রথম ইসলাম গ্রহণ করেছিলেন।"
+  },
+  {
+    "id": 5,
+    "question": "How many years did it take for the entire Quran to be revealed?",
+    "options": [
+      "10 years",
+      "23 years",
+      "30 years",
+      "40 years"
+    ],
+    "correctIndex": 1,
+    "explanation": "The Quran was revealed over a period of approximately 23 years.",
+    "question_bn": "সম্পূর্ণ কুরআন নাযিল হতে কত বছর সময় লেগেছিল?",
+    "options_bn": [
+      "১০ বছর",
+      "২৩ বছর",
+      "৩০ বছর",
+      "৪০ বছর"
+    ],
+    "explanation_bn": "কুরআন নাযিল হতে আনুমানিক ২৩ বছর সময় লেগেছিল।"
+  },
+  {
+    "id": 6,
+    "question": "In which month was the Quran first revealed?",
+    "options": [
+      "Muharram",
+      "Rajab",
+      "Ramadan",
+      "Dhul-Hijjah"
+    ],
+    "correctIndex": 2,
+    "explanation": "The Quran was first revealed during the month of Ramadan on Laylat al-Qadr.",
+    "question_bn": "কুরআন প্রথম কোন মাসে অবতীর্ণ হয়?",
+    "options_bn": [
+      "মুহররম",
+      "রজব",
+      "রমজান",
+      "জিলহজ"
+    ],
+    "explanation_bn": "কদর রাতে রমজান মাসে কুরআন প্রথম অবতীর্ণ হয়।"
+  },
+  {
+    "id": 7,
+    "question": "What is the name of the angel who brought revelations to the Prophet (PBUH)?",
+    "options": [
+      "Mika'il",
+      "Israfil",
+      "Izra'il",
+      "Jibril (Gabriel)"
+    ],
+    "correctIndex": 3,
+    "explanation": "Angel Jibril (AS) is the angel of revelation.",
+    "question_bn": "নবীর কাছে ওহী নিয়ে আসতেন কোন ফেরেশতা?",
+    "options_bn": [
+      "মিকাইল",
+      "ইসরাফিল",
+      "আজরাইল",
+      "জিবরাইল (আ.)"
+    ],
+    "explanation_bn": "জিবরাইল (আ.) ছিলেন ওহী বহনের ফেরেশতা।"
+  },
+  {
+    "id": 8,
+    "question": "Which Prophet was swallowed by a whale?",
+    "options": [
+      "Prophet Yunus (AS)",
+      "Prophet Nuh (AS)",
+      "Prophet Yusuf (AS)",
+      "Prophet Ayyub (AS)"
+    ],
+    "correctIndex": 0,
+    "explanation": "Prophet Yunus (AS) was swallowed by a giant fish/whale.",
+    "question_bn": "কোন নবীকে তিমি মাছ গিলে ফেলেছিল?",
+    "options_bn": [
+      "নবী ইউনুস (আ.)",
+      "নবী নূহ (আ.)",
+      "নবী ইউসুফ (আ.)",
+      "নবী আইয়ুব (আ.)"
+    ],
+    "explanation_bn": "নবী ইউনুস (আ.) কে একটি বিশাল মাছ/তিমি গিলে ফেলেছিল।"
+  },
+  {
+    "id": 9,
+    "question": "What is the shortest Surah in the Quran?",
+    "options": [
+      "Surah Al-Ikhlas",
+      "Surah Al-Kawthar",
+      "Surah Al-Asr",
+      "Surah An-Nas"
+    ],
+    "correctIndex": 1,
+    "explanation": "Surah Al-Kawthar is the shortest Surah, consisting of only 3 verses.",
+    "question_bn": "কুরআনের সবচেয়ে ছোট সূরা কোনটি?",
+    "options_bn": [
+      "সূরা ইখলাস",
+      "সূরা কাউসার",
+      "সূরা আসর",
+      "সূরা নাস"
+    ],
+    "explanation_bn": "সূরা কাউসার হলো সবচেয়ে ছোট সূরা, এতে মাত্র ৩টি আয়াত রয়েছে।"
+  },
+  {
+    "id": 10,
+    "question": "What is the first month of the Islamic calendar?",
+    "options": [
+      "Ramadan",
+      "Safar",
+      "Muharram",
+      "Shawwal"
+    ],
+    "correctIndex": 2,
+    "explanation": "Muharram is the first month of the Islamic lunar calendar.",
+    "question_bn": "ইসলামী ক্যালেন্ডারের প্রথম মাস কোনটি?",
+    "options_bn": [
+      "রমজান",
+      "সফর",
+      "মুহররম",
+      "শাওয়াল"
+    ],
+    "explanation_bn": "মুহররম হলো ইসলামী চন্দ্র ক্যালেন্ডারের প্রথম মাস।"
+  }
+]

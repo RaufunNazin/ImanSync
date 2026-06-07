@@ -85,7 +85,9 @@
     "loading": "লোড হচ্ছে...",
     "timeRemaining": "{{hours}} ঘণ্টা\n{{minutes}} মিনিট",
     "timeRemainingMinsOnly": "{{minutes}}\nমিনিট",
-    "timeLeft": "বাকি"
+    "timeLeft": "বাকি",
+    "hadithOfTheDay": "আজকের হাদিস",
+    "trivia": "ইসলামিক কুইজ"
   },
   "quran": {
     "titleEn": "আল-কুরআন",
@@ -101,7 +103,11 @@
     "Meccan": "মক্কায় অবতীর্ণ",
     "Medinan": "মদীনায় অবতীর্ণ",
     "nowPlaying": "এখন চলছে",
-    "playingJuz": "আরও {{count}}টি বাকি"
+    "playingJuz": "আরও {{count}}টি বাকি",
+    "dailyGoal": "দৈনিক পাঠের লক্ষ্য",
+    "streak": "দিনের ধারা (Streak)",
+    "pages": "পৃষ্ঠা",
+    "goalMet": "লক্ষ্য অর্জিত!"
   },
   "quranSettings": {
     "title": "রিডিং সেটিংস",
@@ -159,7 +165,13 @@
     "chartMsg_60": "আপনার গড় {{avg}}%। চালিয়ে যান, আরও ভালো হবে!",
     "chartMsg_80": "মাশাআল্লাহ! আপনার গড় {{avg}}%",
     "chartMsg_99": "চমৎকার {{avg}}% গড়! প্রায় নিখুঁত ধারাবাহিকতা।",
-    "chartMsg_100": "নিখুঁত ধারাবাহিকতা! আল্লাহ আপনার প্রচেষ্টা কবুল করুন।"
+    "chartMsg_100": "নিখুঁত ধারাবাহিকতা! আল্লাহ আপনার প্রচেষ্টা কবুল করুন।",
+    "qadaTitle": "কাযা নামাজ",
+    "qadaDesc": "আপনার ছুটে যাওয়া নামাজ এবং রোজা ট্র্যাক করুন এবং আদায় করুন।",
+    "totalMissed": "মোট ছুটে যাওয়া নামাজ",
+    "prayers": "নামাজসমূহ",
+    "fasting": "রোজা",
+    "missedFasts": "ছুটে যাওয়া রোজা"
   },
   "dua": {
     "titleEn": "দোয়া ও জিকির",
@@ -205,8 +217,8 @@
     "addText": "দোয়া লিখুন",
     "addImage": "ছবি যোগ করুন",
     "addVideo": "ভিডিও যোগ করুন",
-    "addSuccess": "দোয়া সফলভাবে সেভ হয়েছে!",
-    "addError": "দোয়া সেভ করতে সমস্যা হয়েছে।",
+    "addSuccess": "দোয়া সফলভাবে যোগ করা হয়েছে",
+    "addError": "দোয়া যোগ করতে ব্যর্থ",
     "typeText": "টেক্সট",
     "typeImage": "ছবি",
     "typeVideo": "ভিডিও",
@@ -253,9 +265,14 @@
     "deleteCategory": "ক্যাটাগরি ডিলিট করুন",
     "deleteCategoryTitle": "ক্যাটাগরি ডিলিট করুন",
     "deleteCategoryDesc": "এই ক্যাটাগরিটি ডিলিট করতে চান? এর দোয়াগুলো 'আমার দোয়া' তে চলে যাবে।",
-    "customCategoryDesc": "আমার কাস্টম ক্যাটাগরি",
+    "customCategoryDesc": "কাস্টম ক্যাটাগরি",
     "categoryDeleted": "ক্যাটাগরি ডিলিট করা হয়েছে",
-    "categoryDeleteError": "ক্যাটাগরি ডিলিট করতে ব্যর্থ হয়েছে"
+    "categoryDeleteError": "ক্যাটাগরি ডিলিট করতে ব্যর্থ হয়েছে",
+    "createFolder": "নতুন ফোল্ডার তৈরি করুন",
+    "folderName": "ফোল্ডারের নাম",
+    "moveToFolder": "ফোল্ডারে সরান",
+    "noFolder": "কোন ফোল্ডার নেই",
+    "savedItems": "সংরক্ষিত দোয়া"
   },
   "duaSettings": {
     "title": "দোয়ার সেটিংস",
@@ -1202,5 +1219,17 @@
     "sat": "শনি"
   },
   "search": "খুঁজুন...",
-  "noResults": "কোন ফলাফল পাওয়া যায়নি"
+  "noResults": "কোন ফলাফল পাওয়া যায়নি",
+  "trivia": {
+    "title": "ইসলামিক কুইজ",
+    "quizCompleted": "কুইজ সম্পন্ন হয়েছে!",
+    "perfectScore": "দুর্দান্ত! চমৎকার জ্ঞান! মাশাআল্লাহ!",
+    "goodScore": "ভালো করেছেন! শিখতে থাকুন!",
+    "lowScore": "আরও শেখার একটি দুর্দান্ত সুযোগ!",
+    "playAgain": "আবার খেলুন",
+    "questionOf": "প্রশ্ন {{total}} এর মধ্যে {{current}}",
+    "score": "স্কোর: {{score}}",
+    "finish": "শেষ করুন",
+    "nextQuestion": "পরবর্তী প্রশ্ন"
+  }
 }

@@ -85,7 +85,9 @@
     "loading": "Loading...",
     "timeRemaining": "{{hours}} hr\n{{minutes}} min",
     "timeRemainingMinsOnly": "{{minutes}}\nmin",
-    "timeLeft": "Left"
+    "timeLeft": "Left",
+    "hadithOfTheDay": "Hadith of the Day",
+    "trivia": "Islamic Trivia"
   },
   "quran": {
     "titleEn": "Al-Quran",
@@ -101,7 +103,11 @@
     "Meccan": "Meccan",
     "Medinan": "Medinan",
     "nowPlaying": "Now playing",
-    "playingJuz": "Up Next ({{count}} remaining)"
+    "playingJuz": "Up Next ({{count}} remaining)",
+    "dailyGoal": "Daily Reading Goal",
+    "streak": "Day Streak",
+    "pages": "Pages",
+    "goalMet": "Goal Met!"
   },
   "quranSettings": {
     "title": "Reading Preferences",
@@ -159,7 +165,13 @@
     "chartMsg_60": "You're keeping a steady pace of {{avg}}%. Let's push for more!",
     "chartMsg_80": "A solid {{avg}}% average! You're doing great.",
     "chartMsg_99": "An excellent {{avg}}% average! Almost perfect consistency.",
-    "chartMsg_100": "Flawless consistency! May Allah accept your efforts."
+    "chartMsg_100": "Flawless consistency! May Allah accept your efforts.",
+    "qadaTitle": "Missed Prayers (Qada)",
+    "qadaDesc": "Track and make up your missed prayers and fasts.",
+    "totalMissed": "Total Missed Prayers",
+    "prayers": "Prayers",
+    "fasting": "Fasting",
+    "missedFasts": "Missed Fasts"
   },
   "dua": {
     "titleEn": "Dua & Zikr",
@@ -205,8 +217,8 @@
     "addText": "Write Dua",
     "addImage": "Add Image",
     "addVideo": "Add Video",
-    "addSuccess": "Dua added successfully!",
-    "addError": "Failed to add dua.",
+    "addSuccess": "Dua added successfully",
+    "addError": "Failed to add dua",
     "typeText": "Text",
     "typeImage": "Image",
     "typeVideo": "Video",
@@ -255,9 +267,14 @@
     "deleteCategory": "Delete Category",
     "deleteCategoryTitle": "Delete Category",
     "deleteCategoryDesc": "Are you sure you want to delete this category? Associated duas will be moved to My Duas.",
-    "customCategoryDesc": "My Custom Category",
+    "customCategoryDesc": "Custom Category",
     "categoryDeleted": "Category deleted",
-    "categoryDeleteError": "Failed to delete category"
+    "categoryDeleteError": "Failed to delete category",
+    "createFolder": "Create New Folder",
+    "folderName": "Folder Name",
+    "moveToFolder": "Move to Folder",
+    "noFolder": "No Folder",
+    "savedItems": "saved items"
   },
   "duaSettings": {
     "title": "Dua Settings",
@@ -1088,5 +1105,17 @@
     "sat": "Sat"
   },
   "search": "Search...",
-  "noResults": "No results found"
+  "noResults": "No results found",
+  "trivia": {
+    "title": "Islamic Trivia",
+    "quizCompleted": "Quiz Completed!",
+    "perfectScore": "Perfect! Excellent knowledge! MashaAllah!",
+    "goodScore": "Good job! Keep learning!",
+    "lowScore": "A great opportunity to learn more!",
+    "playAgain": "Play Again",
+    "questionOf": "Question {{current}} of {{total}}",
+    "score": "Score: {{score}}",
+    "finish": "Finish",
+    "nextQuestion": "Next Question"
+  }
 }

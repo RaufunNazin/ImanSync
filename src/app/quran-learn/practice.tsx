@@ -35,6 +35,7 @@ export default function QuranLearnScreen() {
   const [currentSurahId] = useState(parseInt(surahId, 10) || 1);
   const [currentAyah, setCurrentAyah] = useState(parseInt(ayahId, 10) || 1);
   const [ayahAudioUrl, setAyahAudioUrl] = useState<string | null>(null);
+  const [maxAyahs, setMaxAyahs] = useState<number | null>(null);
   
   const { playAudio } = useAudioPlayer();
   const { t, i18n } = useTranslation();
@@ -64,6 +65,17 @@ export default function QuranLearnScreen() {
     fetchAyah(currentSurahId, currentAyah);
   }, [currentSurahId, currentAyah, i18n.language]);
 
+  useEffect(() => {
+    fetch(`https://api.quran.com/api/v4/chapters/${currentSurahId}`)
+      .then(res => res.json())
+      .then(json => {
+        if (json.chapter && json.chapter.verses_count) {
+          setMaxAyahs(json.chapter.verses_count);
+        }
+      })
+      .catch(err => console.error("Error fetching chapter info:", err));
+  }, [currentSurahId]);
+
   const handleWordPress = (word: Word) => {
     setSelectedWord(word);
     let audioUrl = null;
@@ -76,6 +88,7 @@ export default function QuranLearnScreen() {
   };
 
   const goNext = () => {
+    if (maxAyahs !== null && currentAyah >= maxAyahs) return;
     setCurrentAyah(prev => prev + 1);
   };
 
@@ -195,9 +208,9 @@ export default function QuranLearnScreen() {
           Ayah {currentAyah}
         </Text>
         
-        <TouchableOpacity style={styles.navBtn} onPress={goNext}>
-          <Text style={[styles.navBtnText, { color: colors.text }]}>{t('learn.next')}</Text>
-          <ChevronRight size={24} color={colors.text} />
+        <TouchableOpacity style={styles.navBtn} onPress={goNext} disabled={maxAyahs !== null && currentAyah >= maxAyahs}>
+          <Text style={[styles.navBtnText, { color: (maxAyahs !== null && currentAyah >= maxAyahs) ? colors.border : colors.text }]}>{t('learn.next')}</Text>
+          <ChevronRight size={24} color={(maxAyahs !== null && currentAyah >= maxAyahs) ? colors.border : colors.text} />
         </TouchableOpacity>
       </View>
 

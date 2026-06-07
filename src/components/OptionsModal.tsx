@@ -28,6 +28,7 @@ interface OptionsModalProps {
   onSelect: (id: string | number) => void;
   colors: any;
   enableSearch?: boolean;
+  customContent?: React.ReactNode;
 }
 
 export default function OptionsModal({
@@ -39,6 +40,7 @@ export default function OptionsModal({
   onSelect,
   colors,
   enableSearch = false,
+  customContent,
 }: OptionsModalProps) {
   const { t } = useTranslation();
   const [searchQuery, setSearchQuery] = useState('');
@@ -91,8 +93,11 @@ export default function OptionsModal({
               )}
 
               {/* Options List */}
-              <ScrollView style={styles.list} contentContainerStyle={styles.listContent}>
-                {filteredOptions.length === 0 ? (
+              {customContent ? (
+                customContent
+              ) : (
+                <ScrollView style={styles.list} contentContainerStyle={styles.listContent}>
+                  {filteredOptions.length === 0 ? (
                   <Text style={[styles.emptyText, { color: colors.textSecondary }]}>
                     {t('noResults', { defaultValue: 'No results found' })}
                   </Text>
@@ -126,6 +131,7 @@ export default function OptionsModal({
                   })
                 )}
               </ScrollView>
+              )}
             </View>
           </TouchableWithoutFeedback>
         </View>

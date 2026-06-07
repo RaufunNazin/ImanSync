@@ -23,6 +23,8 @@ interface PreferencesState {
     city: string;
   } | null;
   hijriOffset: number;
+  showBanglaCalendar: boolean;
+  banglaOffset: number;
   manualCity: string | null;
   showCuratedDuas: boolean;
   setPreferences: (partial: Partial<Omit<PreferencesState, 'setPreferences' | 'initialize'>>) => void;
@@ -47,6 +49,8 @@ export const usePreferencesStore = create<PreferencesState>((set, get) => ({
   madhab: 1, // Default to Hanafi
   location: null,
   hijriOffset: 0,
+  showBanglaCalendar: false,
+  banglaOffset: 0,
   manualCity: null,
   showCuratedDuas: false,
   
@@ -63,6 +67,8 @@ export const usePreferencesStore = create<PreferencesState>((set, get) => ({
       madhab: state.madhab,
       location: state.location,
       hijriOffset: state.hijriOffset,
+      showBanglaCalendar: state.showBanglaCalendar,
+      banglaOffset: state.banglaOffset,
       manualCity: state.manualCity,
       showCuratedDuas: state.showCuratedDuas,
     };
@@ -105,6 +111,8 @@ export const usePreferencesStore = create<PreferencesState>((set, get) => ({
             madhab: state.madhab,
             location: state.location,
             hijriOffset: state.hijriOffset,
+            showBanglaCalendar: state.showBanglaCalendar,
+            banglaOffset: state.banglaOffset,
             manualCity: state.manualCity,
             showCuratedDuas: state.showCuratedDuas,
           })).catch(console.error);

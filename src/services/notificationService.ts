@@ -139,16 +139,44 @@ export async function scheduleAllNotifications() {
     if (json.data && Array.isArray(json.data)) {
       const today = now.getDate();
       
-      // We will schedule for the next 7 days in the current month
-      const daysToSchedule = json.data.filter((d: any) => {
+      // We will schedule for the next 7 days
+      let daysToSchedule = json.data.filter((d: any) => {
         const dayNum = parseInt(d.date.gregorian.day, 10);
         return dayNum >= today && dayNum < today + 7;
       });
 
+      // If less than 7 days left in the month, fetch the next month's data
+      if (daysToSchedule.length < 7) {
+        let nextMonth = month + 1;
+        let nextYear = year;
+        if (nextMonth > 12) {
+          nextMonth = 1;
+          nextYear++;
+        }
+        
+        let nextUrl = isCityBased 
+          ? `https://api.aladhan.com/v1/calendarByCity/${nextYear}/${nextMonth}?city=${city}&country=${country}&method=${method}&school=${madhab}&adj=${adj}`
+          : `https://api.aladhan.com/v1/calendar/${nextYear}/${nextMonth}?latitude=${lat}&longitude=${lon}&method=${method}&school=${madhab}&adj=${adj}`;
+          
+        try {
+          const nextRes = await fetch(nextUrl);
+          const nextJson = await nextRes.json();
+          if (nextJson.data && Array.isArray(nextJson.data)) {
+            const needed = 7 - daysToSchedule.length;
+            const extraDays = nextJson.data.slice(0, needed);
+            daysToSchedule = [...daysToSchedule, ...extraDays];
+          }
+        } catch (nextErr) {
+          console.error('Failed to fetch next month data for notifications', nextErr);
+        }
+      }
+
       for (let i = 0; i < daysToSchedule.length; i++) {
         const dayData = daysToSchedule[i];
         const dayNum = parseInt(dayData.date.gregorian.day, 10);
-        const targetDate = new Date(year, month - 1, dayNum);
+        const monthNum = parseInt(dayData.date.gregorian.month.number, 10);
+        const yearNum = parseInt(dayData.date.gregorian.year, 10);
+        const targetDate = new Date(yearNum, monthNum - 1, dayNum);
         
         // 1. Prayer Alerts
         if (state.prayerStartAlerts || state.prayerEndAlerts) {

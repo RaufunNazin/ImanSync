@@ -2,7 +2,7 @@ import { Colors, Fonts, Spacing } from '@/constants/theme';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { BlurView } from 'expo-blur';
 import { useLocalSearchParams, useRouter } from 'expo-router';
-import { Bookmark, ChevronLeft, Minus, Plus, Settings2, X, Play, Pause } from 'lucide-react-native';
+import { Bookmark, ChevronLeft, Minus, Plus, Settings2, X, Play, Pause, DownloadCloud, CheckCircle, Loader2 } from 'lucide-react-native';
 import React, { useEffect, useRef, useState } from 'react';
 import { ActivityIndicator, FlatList, Modal, ScrollView, StyleSheet, Switch, Text, TouchableOpacity, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
@@ -10,6 +10,7 @@ import { useTranslation } from 'react-i18next';
 import { formatNumber } from '@/utils/formatNumber';
 import { useAudioStore } from '@/store/audioStore';
 import { useThemeStore } from '@/store/themeStore';
+import { useDownloadStore } from '@/store/downloadStore';
 
 interface Ayah {
   numberInSurah: number;
@@ -47,6 +48,7 @@ export default function SurahScreen() {
   const { t, i18n } = useTranslation();
   
   const { playSurah, playAyah, pause, resume, isPlaying, currentSurahId, currentAyahNumber, playbackMode, currentReciterId, setReciter, isLoading: isAudioLoading } = useAudioStore();
+  const downloadStore = useDownloadStore();
 
   const [surahName, setSurahName] = useState('Loading...');
   const surahNameRef = useRef('Loading...');
@@ -351,6 +353,32 @@ export default function SurahScreen() {
               <Pause size={20} color={colors.highlight} fill={colors.highlight} />
             ) : (
               <Play size={20} color={colors.highlight} fill={colors.highlight} />
+            )}
+          </TouchableOpacity>
+          <TouchableOpacity 
+            onPress={() => {
+              const reciterId = currentReciterId;
+              const surahId = Number(id);
+              const key = `${reciterId}_${surahId}`;
+              const isDownloaded = downloadStore.downloadedFiles[key];
+              const progress = downloadStore.downloadProgress[key];
+              
+              if (isDownloaded) {
+                downloadStore.deleteSurah(reciterId, surahId);
+              } else if (progress === undefined) {
+                downloadStore.downloadSurah(reciterId, surahId);
+              }
+            }}
+            style={styles.backBtn}
+          >
+            {downloadStore.downloadedFiles[`${currentReciterId}_${id}`] ? (
+              <CheckCircle size={20} color={colors.highlight} />
+            ) : downloadStore.downloadProgress[`${currentReciterId}_${id}`] !== undefined ? (
+              <View style={{ position: 'relative', alignItems: 'center', justifyContent: 'center' }}>
+                <Loader2 size={20} color={colors.accent} style={{ transform: [{ rotate: `${downloadStore.downloadProgress[`${currentReciterId}_${id}`]}deg` }] }} />
+              </View>
+            ) : (
+              <DownloadCloud size={20} color={colors.textSecondary} opacity={0.6} />
             )}
           </TouchableOpacity>
           <TouchableOpacity onPress={() => setModalVisible(true)} style={styles.backBtn}>

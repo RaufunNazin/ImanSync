@@ -24,6 +24,34 @@ export default function AudioPlayerBar() {
   const isQuranRoute = segments.includes('quran') || segments.includes('surah') || segments.includes('juz') || segments.includes('quran-learn') || segments.includes('quran-search');
   const shouldShow = !!currentSurahId && isQuranRoute;
 
+  const cachedData = useRef({
+    id: currentSurahId,
+    name: currentSurahName,
+    isPlaying: isPlaying,
+    mode: playbackMode,
+    index: currentJuzAyahIndex,
+    ayah: currentAyahNumber,
+    juzQueueLength: juzAyahs.length,
+    playlistLength: playlist.length,
+    isLoading: isLoading,
+  });
+
+  if (shouldShow) {
+    cachedData.current = {
+      id: currentSurahId,
+      name: currentSurahName,
+      isPlaying: isPlaying,
+      mode: playbackMode,
+      index: currentJuzAyahIndex,
+      ayah: currentAyahNumber,
+      juzQueueLength: juzAyahs.length,
+      playlistLength: playlist.length,
+      isLoading: isLoading,
+    };
+  }
+
+  const data = cachedData.current;
+
   // Animate in when audio starts, animate out when it stops
   useEffect(() => {
     if (shouldShow && !closing) {
@@ -72,25 +100,25 @@ export default function AudioPlayerBar() {
       <View style={[styles.card, { backgroundColor: colors.background, borderColor: colors.accent }]}>
         <View style={styles.info}>
           <Text style={[styles.title, { color: colors.text }]} numberOfLines={1}>
-            {t('surahNames.' + currentSurahId, { defaultValue: currentSurahName || ('Surah ' + currentSurahId) })}
+            {t('surahNames.' + data.id, { defaultValue: data.name || ('Surah ' + data.id) })}
           </Text>
           <Text style={[styles.subtitle, { color: colors.textSecondary }]} numberOfLines={1}>
-            {playbackMode === 'juz' && juzAyahs.length > 0 && currentJuzAyahIndex !== null
-              ? t('quran.playingJuz', { defaultValue: `Queue (${formatNumber(juzAyahs.length - currentJuzAyahIndex - 1, i18n.language)} remaining)`, count: formatNumber(juzAyahs.length - currentJuzAyahIndex - 1, i18n.language) })
-              : playlist.length > 0 
-                ? t('quran.playingJuz', { defaultValue: `Queue (${formatNumber(playlist.length, i18n.language)} remaining)`, count: formatNumber(playlist.length, i18n.language) }) 
-                : playbackMode === 'ayah' && currentAyahNumber 
-                  ? `${t('surah.ayah', { defaultValue: 'Ayah' })} ${formatNumber(currentAyahNumber, i18n.language)}`
+            {data.mode === 'juz' && data.juzQueueLength > 0 && data.index !== null
+              ? t('quran.playingJuz', { defaultValue: `Queue (${formatNumber(data.juzQueueLength - data.index - 1, i18n.language)} remaining)`, count: formatNumber(data.juzQueueLength - data.index - 1, i18n.language) })
+              : data.playlistLength > 0 
+                ? t('quran.playingJuz', { defaultValue: `Queue (${formatNumber(data.playlistLength, i18n.language)} remaining)`, count: formatNumber(data.playlistLength, i18n.language) }) 
+                : data.mode === 'ayah' && data.ayah 
+                  ? `${t('surah.ayah', { defaultValue: 'Ayah' })} ${formatNumber(data.ayah, i18n.language)}`
                   : t('quran.nowPlaying', { defaultValue: 'Now Playing'})}
           </Text>
         </View>
 
         <View style={styles.controls}>
-          {isLoading ? (
+          {data.isLoading ? (
             <View style={styles.btn}>
               <ActivityIndicator size="small" color={colors.highlight} />
             </View>
-          ) : isPlaying ? (
+          ) : data.isPlaying ? (
             <TouchableOpacity style={styles.btn} onPress={pause}>
               <Pause size={24} color={colors.highlight} fill={colors.highlight} />
             </TouchableOpacity>
@@ -100,7 +128,7 @@ export default function AudioPlayerBar() {
             </TouchableOpacity>
           )}
 
-          {playlist.length > 0 && (
+          {data.playlistLength > 0 && (
             <TouchableOpacity style={styles.btn} onPress={playNext}>
               <SkipForward size={24} color={colors.text} />
             </TouchableOpacity>

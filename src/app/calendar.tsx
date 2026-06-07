@@ -10,6 +10,8 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { formatNumber } from '@/utils/formatNumber';
 import OptionsModal from '@/components/OptionsModal';
 import SkeletonBox from '@/components/SkeletonBox';
+import { getBanglaDate } from '@/utils/banglaCalendar';
+import { Switch } from 'react-native';
 
 export default function CalendarScreen() {
   const { t, i18n } = useTranslation();
@@ -22,8 +24,10 @@ export default function CalendarScreen() {
   const [loading, setLoading] = useState(true);
   const [selectedDate, setSelectedDate] = useState<string | null>(null);
   const [optionsModalVisible, setOptionsModalVisible] = useState(false);
+  const requestRef = React.useRef(0);
 
   const fetchCalendar = async (year: number, month: number) => {
+    const currentReq = ++requestRef.current;
     setLoading(true);
     try {
       let isCityBased = !!prefs.manualCity || !prefs.location;
@@ -39,13 +43,17 @@ export default function CalendarScreen() {
 
       const res = await fetch(url);
       const json = await res.json();
+      if (currentReq !== requestRef.current) return;
       if (json.data) {
         setCalendarData(json.data);
       }
     } catch (e) {
+      if (currentReq !== requestRef.current) return;
       console.error('Calendar fetch error', e);
     } finally {
-      setLoading(false);
+      if (currentReq === requestRef.current) {
+        setLoading(false);
+      }
     }
   };
 
@@ -125,6 +133,11 @@ export default function CalendarScreen() {
       const adjustedHijri = getAdjustedHijriDate(idx, prefs.hijriOffset || 0);
       const hasEvents = adjustedHijri.holidays && adjustedHijri.holidays.length > 0;
 
+      const bDate = getBanglaDate(
+        new Date(currentDate.getFullYear(), currentDate.getMonth(), parseInt(dayData.date.gregorian.day, 10)),
+        prefs.banglaOffset || 0
+      );
+
       cells.push(
         <TouchableOpacity
           key={`day-${idx}`}
@@ -141,14 +154,27 @@ export default function CalendarScreen() {
           <Text style={[styles.gregorianText, { color: isSelected ? colors.highlight : colors.text }]}>
             {formatNumber(parseInt(dayData.date.gregorian.day).toString(), i18n.language)}
           </Text>
-          <Text style={[styles.hijriText, { color: isSelected ? colors.accent : colors.textSecondary }]}>
-            {formatNumber(parseInt(adjustedHijri.day).toString(), i18n.language)}
-          </Text>
+
+          {prefs.showBanglaCalendar ? (
+            <View style={{ flexDirection: 'row', justifyContent: 'space-between', width: '100%', paddingHorizontal: 4, marginTop: 2 }}>
+              <Text style={[styles.hijriText, { color: isSelected ? colors.accent : colors.textSecondary, marginTop: 0, marginBottom: 0 }]}>
+                {formatNumber(parseInt(adjustedHijri.day).toString(), i18n.language)}
+              </Text>
+              <Text style={[styles.hijriText, { color: isSelected ? colors.accent : colors.textSecondary, marginTop: 0, marginBottom: 0 }]}>
+                {formatNumber(bDate.day.toString(), i18n.language)}
+              </Text>
+            </View>
+          ) : (
+            <Text style={[styles.hijriText, { color: isSelected ? colors.accent : colors.textSecondary }]}>
+              {formatNumber(parseInt(adjustedHijri.day).toString(), i18n.language)}
+            </Text>
+          )}
+
           {hasEvents && !isSelected && (
-            <View style={{ position: 'absolute', bottom: 4, width: 4, height: 4, borderRadius: 2, backgroundColor: colors.accent }} />
+            <View style={{ position: 'absolute', bottom: prefs.showBanglaCalendar ? 2 : 4, width: 4, height: 4, borderRadius: 2, backgroundColor: colors.accent }} />
           )}
           {hasEvents && isSelected && (
-            <View style={{ position: 'absolute', bottom: 4, width: 4, height: 4, borderRadius: 2, backgroundColor: colors.highlight }} />
+            <View style={{ position: 'absolute', bottom: prefs.showBanglaCalendar ? 2 : 4, width: 4, height: 4, borderRadius: 2, backgroundColor: colors.highlight }} />
           )}
         </TouchableOpacity>
       );
@@ -229,7 +255,7 @@ export default function CalendarScreen() {
             }}
           >
             <Text style={{ fontFamily: Fonts.outfit, fontSize: 12, color: colors.textSecondary }}>
-              {t('settings.hijriOffset', { defaultValue: 'Hijri Offset' })}: {prefs.hijriOffset > 0 ? '+' : ''}{formatNumber(prefs.hijriOffset || 0, i18n.language)}
+              {t('settings.adjustments', { defaultValue: 'Adjustments' })}
             </Text>
           </TouchableOpacity>
         }
@@ -312,6 +338,12 @@ export default function CalendarScreen() {
                 }
               }
 
+              const parts = selectedDayData.date.gregorian.date.split('-');
+              const bDate = getBanglaDate(
+                new Date(parseInt(parts[2]), parseInt(parts[1]) - 1, parseInt(parts[0])),
+                prefs.banglaOffset || 0
+              );
+
               return (
               <View style={styles.detailsContainer}>
                 {/* Date Card */}
@@ -321,6 +353,7 @@ export default function CalendarScreen() {
                   </Text>
                   <Text style={[styles.detailDateSub, { color: colors.textSecondary }]}>
                     {formatGregorianDate(selectedDayData.date.gregorian.date)}
+                    {prefs.showBanglaCalendar && ` • ${formatNumber(bDate.day.toString(), i18n.language)} ${bDate.monthName} ${formatNumber(bDate.year.toString(), i18n.language)}`}
                   </Text>
                 </View>
 
@@ -361,14 +394,61 @@ export default function CalendarScreen() {
       <OptionsModal
         visible={optionsModalVisible}
         onClose={() => setOptionsModalVisible(false)}
-        title={t('settings.hijriOffset', { defaultValue: 'Hijri Offset' })}
-        options={[-2, -1, 0, 1, 2].map(val => ({
-          name: `${val > 0 ? '+' : ''}${formatNumber(val, i18n.language)} ${t('settings.days', { defaultValue: 'Days' })}`,
-          id: val
-        }))}
-        selectedValue={prefs.hijriOffset}
-        onSelect={(val) => prefs.setPreferences({ hijriOffset: val as number })}
+        title={t('settings.adjustments', { defaultValue: 'Adjustments' })}
+        options={[]}
+        selectedValue={null}
+        onSelect={() => {}}
         colors={colors}
+        customContent={
+          <View style={{ gap: Spacing.four }}>
+            <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' }}>
+              <Text style={{ fontFamily: Fonts.outfit, fontSize: 16, color: colors.text }}>
+                {t('settings.showBanglaCalendar', { defaultValue: 'Show Bangla Calendar' })}
+              </Text>
+              <Switch 
+                value={prefs.showBanglaCalendar} 
+                onValueChange={(val) => prefs.setPreferences({ showBanglaCalendar: val })} 
+                trackColor={{ true: colors.accent }}
+              />
+            </View>
+
+            <View style={{ gap: Spacing.one }}>
+              <Text style={{ fontFamily: Fonts.outfit, fontSize: 14, color: colors.textSecondary }}>
+                {t('settings.hijriOffset', { defaultValue: 'Hijri Offset' })}: {prefs.hijriOffset > 0 ? '+' : ''}{prefs.hijriOffset}
+              </Text>
+              <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 8 }}>
+                {[-2, -1, 0, 1, 2].map(val => (
+                  <TouchableOpacity 
+                    key={`h-${val}`} 
+                    onPress={() => prefs.setPreferences({ hijriOffset: val })}
+                    style={{ padding: 8, paddingHorizontal: 12, borderRadius: 8, backgroundColor: prefs.hijriOffset === val ? colors.highlight : colors.backgroundElement, borderWidth: 1, borderColor: colors.border }}
+                  >
+                    <Text style={{ fontFamily: Fonts.outfit, color: prefs.hijriOffset === val ? '#FFF' : colors.text }}>{val > 0 ? '+' : ''}{val}</Text>
+                  </TouchableOpacity>
+                ))}
+              </View>
+            </View>
+
+            {prefs.showBanglaCalendar && (
+              <View style={{ gap: Spacing.one }}>
+                <Text style={{ fontFamily: Fonts.outfit, fontSize: 14, color: colors.textSecondary }}>
+                  {t('settings.banglaOffset', { defaultValue: 'Bangla Offset' })}: {prefs.banglaOffset > 0 ? '+' : ''}{prefs.banglaOffset}
+                </Text>
+                <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 8 }}>
+                  {[-2, -1, 0, 1, 2].map(val => (
+                    <TouchableOpacity 
+                      key={`b-${val}`} 
+                      onPress={() => prefs.setPreferences({ banglaOffset: val })}
+                      style={{ padding: 8, paddingHorizontal: 12, borderRadius: 8, backgroundColor: prefs.banglaOffset === val ? colors.highlight : colors.backgroundElement, borderWidth: 1, borderColor: colors.border }}
+                    >
+                      <Text style={{ fontFamily: Fonts.outfit, color: prefs.banglaOffset === val ? '#FFF' : colors.text }}>{val > 0 ? '+' : ''}{val}</Text>
+                    </TouchableOpacity>
+                  ))}
+                </View>
+              </View>
+            )}
+          </View>
+        }
       />
     </SafeAreaView>
   );

@@ -3,7 +3,7 @@ import { Colors, Fonts, Spacing } from '@/constants/theme';
 import { useThemeStore } from '@/store/themeStore';
 import { formatNumber } from '@/utils/formatNumber';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import * as Location from 'expo-location';
+import { Accelerometer, Magnetometer } from 'expo-sensors';
 import React, { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { StyleSheet, Text, View } from 'react-native';
@@ -54,37 +54,93 @@ export default function QiblaScreen() {
       }
     });
 
-    let sub: Location.LocationSubscription | null = null;
+    let magSub: any = null;
+    let accSub: any = null;
+    let lastUpdate = 0;
+
+    const LPF = 0.1;
+    let smoothedM = { x: 0, y: 0, z: 0 };
+    let smoothedA = { x: 0, y: 0, z: 1 };
+    let hasInitialM = false;
+    let hasInitialA = false;
 
     (async () => {
-      let { status } = await Location.requestForegroundPermissionsAsync();
-      if (status !== 'granted') {
-        return;
-      }
-      sub = await Location.watchHeadingAsync((result) => {
-        let magHeading = result.magHeading;
-        if (magHeading < 0) magHeading += 360;
-        
-        // Fix the 360 -> 0 wrap around for reanimated
-        let currentHeading = heading.value;
-        let diff = magHeading - (currentHeading % 360);
-        if (diff > 180) diff -= 360;
-        if (diff < -180) diff += 360;
-        
-        let targetHeading = currentHeading + diff;
-        
-        heading.value = withTiming(targetHeading, { 
-          duration: 300,
-          easing: Easing.out(Easing.ease) 
-        });
-        
-        // Keep a state copy just for the text updates
-        setHeadingState(magHeading);
+      Magnetometer.setUpdateInterval(50);
+      Accelerometer.setUpdateInterval(50);
+
+      accSub = Accelerometer.addListener(result => {
+        if (!hasInitialA) {
+          smoothedA = result;
+          hasInitialA = true;
+        } else {
+          smoothedA.x = smoothedA.x + LPF * (result.x - smoothedA.x);
+          smoothedA.y = smoothedA.y + LPF * (result.y - smoothedA.y);
+          smoothedA.z = smoothedA.z + LPF * (result.z - smoothedA.z);
+        }
+      });
+
+      magSub = Magnetometer.addListener(result => {
+        if (!hasInitialM) {
+          smoothedM = result;
+          hasInitialM = true;
+        } else {
+          smoothedM.x = smoothedM.x + LPF * (result.x - smoothedM.x);
+          smoothedM.y = smoothedM.y + LPF * (result.y - smoothedM.y);
+          smoothedM.z = smoothedM.z + LPF * (result.z - smoothedM.z);
+        }
+
+        if (hasInitialA && hasInitialM) {
+          const A = smoothedA;
+          const M = smoothedM;
+
+          // Normalize A
+          const normA = Math.sqrt(A.x * A.x + A.y * A.y + A.z * A.z);
+          const ax = A.x / normA, ay = A.y / normA, az = A.z / normA;
+
+          // Normalize M
+          const normM = Math.sqrt(M.x * M.x + M.y * M.y + M.z * M.z);
+          const mx = M.x / normM, my = M.y / normM, mz = M.z / normM;
+
+          // E = M x A
+          let Ex = my * az - mz * ay;
+          let Ey = mz * ax - mx * az;
+          let Ez = mx * ay - my * ax;
+          const normE = Math.sqrt(Ex * Ex + Ey * Ey + Ez * Ez);
+          Ex /= normE; Ey /= normE; Ez /= normE;
+
+          // N = A x E
+          let Ny = az * Ex - ax * Ez;
+
+          let newHeading = Math.atan2(Ey, Ny) * (180 / Math.PI);
+          if (newHeading < 0) newHeading += 360;
+
+          // Fix the 360 -> 0 wrap around for reanimated
+          let currentHeading = heading.value;
+          let diff = newHeading - (currentHeading % 360);
+          diff = diff % 360; // handle negative modulo
+          if (diff > 180) diff -= 360;
+          if (diff < -180) diff += 360;
+          
+          let targetHeading = currentHeading + diff;
+          
+          heading.value = withTiming(targetHeading, { 
+            duration: 100,
+            easing: Easing.linear 
+          });
+          
+          // Throttle React state updates to ~200ms
+          const now = Date.now();
+          if (now - lastUpdate > 200) {
+            setHeadingState(newHeading);
+            lastUpdate = now;
+          }
+        }
       });
     })();
 
     return () => {
-      if (sub) sub.remove();
+      if (magSub) magSub.remove();
+      if (accSub) accSub.remove();
     };
   }, []);
 

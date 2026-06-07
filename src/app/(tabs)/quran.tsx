@@ -4,14 +4,20 @@ import { formatNumber } from '@/utils/formatNumber';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { BlurView } from 'expo-blur';
 import { useFocusEffect, useRouter } from 'expo-router';
-import { Bookmark, BookOpen, ChevronRight, GraduationCap, Search, X } from 'lucide-react-native';
+import { Bookmark, Search, Target, Flame, DownloadCloud, CheckCircle, Loader2, Minus, Plus, GraduationCap, ChevronRight, X, BookOpen } from 'lucide-react-native';
 import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { StyleSheet, Text, TouchableOpacity, View, Animated } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useThemeStore } from '@/store/themeStore';
 import { useAudioStore } from '@/store/audioStore';
+import { useReadingStore } from '@/store/readingStore';
+import { useDownloadStore } from '@/store/downloadStore';
 import SkeletonBox from '@/components/SkeletonBox';
+import Reanimated, { FadeInDown, FadeOutDown } from 'react-native-reanimated';
+import ConfettiCannon from 'react-native-confetti-cannon';
+import { getLocalYYYYMMDD } from '@/utils/dateUtils';
+import * as Haptics from 'expo-haptics';
 
 
 
@@ -20,39 +26,132 @@ export default function QuranScreen() {
   const colors = Colors[scheme === 'unspecified' ? 'light' : scheme];
   const router = useRouter();
   const { t, i18n } = useTranslation();
-  const { currentSurahId, setHideGlobalBanner } = useAudioStore();
+  const audioStore = useAudioStore();
+  const downloadStore = useDownloadStore();
+  const readingStore = useReadingStore();
+  const today = getLocalYYYYMMDD();
+  const pagesReadToday = readingStore.historyLog[today] || 0;
+  const isGoalMet = pagesReadToday >= readingStore.dailyGoalPages;
   
-  const [activeTab, setActiveTab] = useState('surah');
+  const [activeTab, setActiveTab] = useState<'surah' | 'juz' | 'bookmarks'>('surah');
   const [surahs, setSurahs] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [lastReadSurah, setLastReadSurah] = useState({ id: '1', name: 'Al-Faatiha', ayah: 1 });
   const [lastReadJuz, setLastReadJuz] = useState({ id: '1', ayah: 1 });
   const [bookmarks, setBookmarks] = useState([]);
   const [showLearnBanner, setShowLearnBanner] = useState(true);
+  const [toast, setToast] = useState<{message: string} | null>(null);
+  const toastTimeoutRef = React.useRef<NodeJS.Timeout | null>(null);
+
+  useEffect(() => {
+    return () => {
+      if (toastTimeoutRef.current) {
+        clearTimeout(toastTimeoutRef.current);
+      }
+    };
+  }, []);
+
+  const showToast = (message: string) => {
+    setToast({ message });
+    if (toastTimeoutRef.current) clearTimeout(toastTimeoutRef.current);
+    toastTimeoutRef.current = setTimeout(() => {
+        setToast(null);
+        audioStore.setHideGlobalBanner(false);
+    }, 3000);
+  };
+
+  useEffect(() => {
+    downloadStore.initialize();
+  }, []);
+
+  const toggleSurahBookmark = async (surah: any) => {
+    try {
+      const stored = await AsyncStorage.getItem('imansync_quran_bookmarks');
+      let currentBookmarks = stored ? JSON.parse(stored) : [];
+      
+      const existsIndex = currentBookmarks.findIndex((b: any) => b.type === 'surah' && b.surahId === surah.id);
+      if (existsIndex >= 0) {
+        currentBookmarks.splice(existsIndex, 1);
+        showToast(t('quran.surahBookmarkRemoved', { defaultValue: 'Surah bookmark removed' }));
+      } else {
+        currentBookmarks.push({
+          type: 'surah',
+          surahId: surah.id,
+          surahName: surah.name,
+          surahNameAr: surah.nameAr,
+          verses: surah.verses,
+          revelationType: surah.type,
+        });
+        showToast(t('quran.surahBookmarked', { defaultValue: 'Surah bookmarked' }));
+      }
+      setBookmarks(currentBookmarks);
+      await AsyncStorage.setItem('imansync_quran_bookmarks', JSON.stringify(currentBookmarks));
+    } catch (e) {
+      console.error(e);
+    }
+  };
+
+  const toggleJuzBookmark = async (juzId: number) => {
+    try {
+      const stored = await AsyncStorage.getItem('imansync_quran_bookmarks');
+      let currentBookmarks = stored ? JSON.parse(stored) : [];
+      
+      const existsIndex = currentBookmarks.findIndex((b: any) => b.type === 'juz' && b.juzId === juzId);
+      if (existsIndex >= 0) {
+        currentBookmarks.splice(existsIndex, 1);
+        showToast(t('quran.juzBookmarkRemoved', { defaultValue: 'Juz bookmark removed' }));
+      } else {
+        currentBookmarks.push({
+          type: 'juz',
+          juzId: juzId,
+        });
+        showToast(t('quran.juzBookmarked', { defaultValue: 'Juz bookmarked' }));
+      }
+      setBookmarks(currentBookmarks);
+      await AsyncStorage.setItem('imansync_quran_bookmarks', JSON.stringify(currentBookmarks));
+    } catch (e) {
+      console.error(e);
+    }
+  };
+
+  const isSurahBookmarked = (id: number) => bookmarks.some((b: any) => b.type === 'surah' && b.surahId === id);
+  const isJuzBookmarked = (id: number) => bookmarks.some((b: any) => b.type === 'juz' && b.juzId === id);
 
   const scrollY = React.useRef(new Animated.Value(0)).current;
-  const clampedScrollY = Animated.diffClamp(scrollY, 0, 100);
-  const bannerTranslateY = clampedScrollY.interpolate({
+  const scrollOffset = useRef(0);
+  const audioOffset = scrollY.interpolate({ inputRange: [0, 100], outputRange: [0, audioStore.currentSurahId ? -70 : 0], extrapolate: 'clamp' });
+
+  useEffect(() => {
+    if (audioStore.currentSurahId) {
+      Animated.timing(scrollY, {
+        toValue: 0,
+        duration: 300,
+        useNativeDriver: true
+      }).start();
+    }
+  }, [audioStore.currentSurahId]);
+
+  const bannerTranslateY = scrollY.interpolate({
     inputRange: [0, 100],
     outputRange: [0, 150],
     extrapolate: 'clamp',
   });
 
   // Sync audio bar hide/show with scroll
-  const lastScrollYRef = useRef(0);
   useEffect(() => {
-    const listenerId = scrollY.addListener(({ value }) => {
-      const isScrollingDown = value > lastScrollYRef.current && value > 50;
-      lastScrollYRef.current = value;
-      if (currentSurahId) {
-        setHideGlobalBanner(isScrollingDown);
+    const listenerId = scrollY.addListener((event) => {
+      let currentOffset = event.value;
+      let direction = currentOffset > 0 && currentOffset > scrollOffset.current ? 'down' : 'up';
+      const isScrollingDown = direction === 'down';
+      
+      if (audioStore.currentSurahId) {
+        audioStore.setHideGlobalBanner(isScrollingDown);
       }
+      scrollOffset.current = currentOffset;
     });
-    return () => {
-      scrollY.removeListener(listenerId);
-      setHideGlobalBanner(false);
-    };
-  }, [currentSurahId]);
+
+    return () => scrollY.removeListener(listenerId);
+  }, [audioStore.currentSurahId]);
 
   useEffect(() => {
     fetch('https://api.alquran.cloud/v1/surah')
@@ -71,6 +170,10 @@ export default function QuranScreen() {
       })
       .catch(err => console.error("Error fetching surahs:", err))
       .finally(() => setLoading(false));
+  }, []);
+
+  useEffect(() => {
+    readingStore.initialize();
   }, []);
 
   useFocusEffect(
@@ -123,6 +226,67 @@ export default function QuranScreen() {
         )}
         scrollEventThrottle={16}
       >
+        {isGoalMet && pagesReadToday === readingStore.dailyGoalPages && (
+           <View pointerEvents="none" style={StyleSheet.absoluteFill}>
+             <ConfettiCannon count={50} origin={{x: -10, y: 0}} fallSpeed={2500} fadeOut autoStart />
+           </View>
+        )}
+
+        {/* Daily Reading Goal Banner */}
+        <View style={{ backgroundColor: colors.backgroundElement, borderRadius: 16, padding: Spacing.four, marginBottom: Spacing.four, borderWidth: 1, borderColor: colors.border, zIndex: 10 }}>
+          <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: Spacing.three }}>
+            <View style={{ flexDirection: 'row', alignItems: 'center', gap: Spacing.two }}>
+              <Target size={18} color={isGoalMet ? colors.highlight : colors.accent} />
+              <Text style={{ fontFamily: Fonts.outfit, fontSize: 16, color: colors.text, fontWeight: '600' }}>
+                {t('quran.dailyGoal', { defaultValue: 'Daily Reading Goal' })}
+              </Text>
+            </View>
+            <View style={{ flexDirection: 'row', alignItems: 'center', gap: Spacing.one }}>
+              <Flame size={16} color={readingStore.currentStreak > 0 ? '#ff9800' : colors.textSecondary} />
+              <Text style={{ fontFamily: Fonts.outfit, fontSize: 14, color: readingStore.currentStreak > 0 ? '#ff9800' : colors.textSecondary, fontWeight: '600' }}>
+                {formatNumber(readingStore.currentStreak, i18n.language)} {t('quran.streak', { defaultValue: 'Day Streak' })}
+              </Text>
+            </View>
+          </View>
+          
+          <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' }}>
+            <View style={{ flex: 1, marginRight: Spacing.four }}>
+              <View style={{ flexDirection: 'row', justifyContent: 'space-between', marginBottom: 6 }}>
+                <Text style={{ fontFamily: Fonts.outfit, fontSize: 13, color: colors.textSecondary }}>
+                  {formatNumber(pagesReadToday, i18n.language)} / {formatNumber(readingStore.dailyGoalPages, i18n.language)} {t('quran.pages', { defaultValue: 'Pages' })}
+                </Text>
+                {isGoalMet && (
+                  <Text style={{ fontFamily: Fonts.outfit, fontSize: 13, color: colors.highlight, fontWeight: '600' }}>
+                    {t('quran.goalMet', { defaultValue: 'Goal Met!' })}
+                  </Text>
+                )}
+              </View>
+              <View style={{ height: 6, backgroundColor: colors.border, borderRadius: 3, overflow: 'hidden' }}>
+                <View style={{ height: '100%', width: `${Math.min(100, (pagesReadToday / readingStore.dailyGoalPages) * 100)}%`, backgroundColor: isGoalMet ? colors.highlight : colors.accent, borderRadius: 3 }} />
+              </View>
+            </View>
+
+            <View style={{ flexDirection: 'row', gap: Spacing.two }}>
+              <TouchableOpacity 
+                style={{ width: 36, height: 36, borderRadius: 18, backgroundColor: colors.border, alignItems: 'center', justifyContent: 'center' }}
+                onPress={() => {
+                  if (pagesReadToday > 0) readingStore.addPagesRead(-1);
+                }}
+              >
+                <Minus size={16} color={colors.text} />
+              </TouchableOpacity>
+              <TouchableOpacity 
+                style={{ width: 36, height: 36, borderRadius: 18, backgroundColor: isGoalMet ? colors.highlight + '22' : colors.accent + '22', alignItems: 'center', justifyContent: 'center', borderWidth: 1, borderColor: isGoalMet ? colors.highlight : colors.accent }}
+                onPress={() => {
+                  readingStore.addPagesRead(1);
+                  Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+                }}
+              >
+                <Plus size={16} color={isGoalMet ? colors.highlight : colors.accent} />
+              </TouchableOpacity>
+            </View>
+          </View>
+        </View>
 
         {/* Word-by-Word Learn Mode CTA */}
         {showLearnBanner && (
@@ -199,6 +363,7 @@ export default function QuranScreen() {
                   style={styles.surahRow} 
                   activeOpacity={0.7}
                   onPress={() => router.push(`/surah/${surah.id}`)}
+                  onLongPress={() => toggleSurahBookmark(surah)}
                 >
                   <View style={styles.surahLeft}>
                     <View style={[styles.numberBox, { borderColor: colors.border, borderWidth: 1 }]}>
@@ -212,7 +377,39 @@ export default function QuranScreen() {
                     </View>
                   </View>
                   
-                  <Text style={[styles.surahNameAr, { color: scheme === 'dark' ? colors.accent : colors.highlight }]}>{surah.nameAr}</Text>
+                  <View style={{ flexDirection: 'row', alignItems: 'center', gap: Spacing.three }}>
+                    <TouchableOpacity 
+                      onPress={() => {
+                        const reciterId = audioStore.currentReciterId;
+                        const key = `${reciterId}_${surah.id}`;
+                        const isDownloaded = downloadStore.downloadedFiles[key];
+                        const progress = downloadStore.downloadProgress[key];
+                        
+                        if (isDownloaded) {
+                          downloadStore.deleteSurah(reciterId, surah.id);
+                        } else if (progress === undefined) {
+                          downloadStore.downloadSurah(reciterId, surah.id);
+                        }
+                      }}
+                      hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
+                    >
+                      {downloadStore.downloadedFiles[`${audioStore.currentReciterId}_${surah.id}`] ? (
+                        <CheckCircle size={18} color={colors.highlight} />
+                      ) : downloadStore.downloadProgress[`${audioStore.currentReciterId}_${surah.id}`] !== undefined ? (
+                        <View style={{ position: 'relative', alignItems: 'center', justifyContent: 'center' }}>
+                          <Loader2 size={18} color={colors.accent} style={{ transform: [{ rotate: `${downloadStore.downloadProgress[`${audioStore.currentReciterId}_${surah.id}`]}deg` }] }} />
+                          <Text style={{ position: 'absolute', fontSize: 8, color: colors.textSecondary }}>{formatNumber(Math.round(downloadStore.downloadProgress[`${audioStore.currentReciterId}_${surah.id}`]), i18n.language)}</Text>
+                        </View>
+                      ) : (
+                        <DownloadCloud size={18} color={colors.textSecondary} opacity={0.6} />
+                      )}
+                    </TouchableOpacity>
+
+                    {isSurahBookmarked(surah.id) && (
+                      <Bookmark size={14} color={colors.accent} fill={colors.accent} />
+                    )}
+                    <Text style={[styles.surahNameAr, { color: scheme === 'dark' ? colors.accent : colors.highlight }]}>{surah.nameAr}</Text>
+                  </View>
                 </TouchableOpacity>
               </BlurView>
             ))}
@@ -224,7 +421,13 @@ export default function QuranScreen() {
                 <TouchableOpacity 
                   style={styles.juzCard}
                   onPress={() => router.push(`/juz/${i + 1}`)}
+                  onLongPress={() => toggleJuzBookmark(i + 1)}
                 >
+                  {isJuzBookmarked(i + 1) && (
+                    <View style={{ position: 'absolute', top: 8, right: 8 }}>
+                      <Bookmark size={12} color={colors.accent} fill={colors.accent} />
+                    </View>
+                  )}
                   <Text style={[styles.juzText, { color: colors.text }]}>{t('quran.juz', { id: formatNumber(i + 1, i18n.language) })}</Text>
                 </TouchableOpacity>
               </BlurView>
@@ -238,31 +441,126 @@ export default function QuranScreen() {
                 <Text style={[styles.emptyText, { color: colors.textSecondary }]}>{t('quran.noBookmarks')}</Text>
               </View>
             ) : (
-              bookmarks.map((b: any, i: number) => (
-                <BlurView intensity={30} tint={colors.glassTint as any} key={i} style={[styles.surahRowWrapper, { borderColor: colors.border }]}>
-                  <TouchableOpacity 
-                    style={[styles.surahRow, { paddingVertical: Spacing.four }]} 
-                    activeOpacity={0.7}
-                    onPress={() => router.push(`/surah/${b.surahId}?ayah=${b.numberInSurah}`)}
-                  >
-                    <View style={{ flex: 1 }}>
-                      <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6, marginBottom: 8 }}>
-                        <Bookmark size={16} color={colors.accent} fill={colors.accent} />
-                        <Text style={[styles.surahNameEn, { color: colors.text, fontSize: 16 }]}>{t('surahNames.' + b.surahId, { defaultValue: b.surahName })}</Text>
-                        <View style={[styles.numberBox, { width: 24, height: 24, borderRadius: 12, borderColor: colors.border, borderWidth: 1 }]}>
-                          <Text style={[styles.numberText, { color: colors.textSecondary, fontSize: 10 }]}>{formatNumber(b.numberInSurah, i18n.language)}</Text>
-                        </View>
-                      </View>
-                      <Text style={[styles.surahNameAr, { color: colors.text, fontSize: 20, textAlign: 'right', marginBottom: 4 }]} numberOfLines={1}>
-                        {b.arabic}
-                      </Text>
-                      <Text style={[styles.surahMeta, { color: colors.textSecondary }]} numberOfLines={2}>
-                        {b.translation}
-                      </Text>
+              <View>
+                {/* Surahs Section */}
+                {bookmarks.some((b: any) => b.type === 'surah') && (
+                  <View style={{ marginBottom: Spacing.four }}>
+                    <Text style={[styles.sectionTitle, { color: colors.textSecondary, marginBottom: Spacing.three, paddingHorizontal: Spacing.one }]}>{t('quran.bookmarkedSurahs', { defaultValue: 'Bookmarked Surahs' })}</Text>
+                    <View style={styles.listContainer}>
+                      {bookmarks.filter((b: any) => b.type === 'surah').map((surah: any, i: number) => (
+                        <BlurView intensity={30} tint={colors.glassTint as any} key={`surah-${i}`} style={[styles.surahRowWrapper, { borderColor: colors.border }]}>
+                          <TouchableOpacity 
+                            style={styles.surahRow} 
+                            activeOpacity={0.7}
+                            onPress={() => router.push(`/surah/${surah.surahId}`)}
+                            onLongPress={() => toggleSurahBookmark({ id: surah.surahId })}
+                          >
+                            <View style={styles.surahLeft}>
+                              <View style={[styles.numberBox, { borderColor: colors.border, borderWidth: 1 }]}>
+                                <Text style={[styles.numberText, { color: colors.textSecondary }]}>{formatNumber(surah.surahId, i18n.language)}</Text>
+                              </View>
+                              <View style={{ flex: 1 }}>
+                                <Text style={[styles.surahNameEn, { color: colors.text }]}>{t('surahNames.' + surah.surahId, { defaultValue: surah.surahName })}</Text>
+                                <Text style={[styles.surahMeta, { color: colors.textSecondary }]}>
+                                  {t('quran.' + surah.revelationType, { defaultValue: surah.revelationType })} • {t('surah.verses', { count: formatNumber(surah.verses, i18n.language) })}
+                                </Text>
+                              </View>
+                            </View>
+                            <View style={{ flexDirection: 'row', alignItems: 'center', gap: Spacing.three }}>
+                              <TouchableOpacity 
+                                onPress={() => {
+                                  const reciterId = audioStore.currentReciterId;
+                                  const key = `${reciterId}_${surah.surahId}`;
+                                  const isDownloaded = downloadStore.downloadedFiles[key];
+                                  const progress = downloadStore.downloadProgress[key];
+                                  
+                                  if (isDownloaded) {
+                                    downloadStore.deleteSurah(reciterId, surah.surahId);
+                                  } else if (progress === undefined) {
+                                    downloadStore.downloadSurah(reciterId, surah.surahId);
+                                  }
+                                }}
+                                hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
+                              >
+                                {downloadStore.downloadedFiles[`${audioStore.currentReciterId}_${surah.surahId}`] ? (
+                                  <CheckCircle size={18} color={colors.highlight} />
+                                ) : downloadStore.downloadProgress[`${audioStore.currentReciterId}_${surah.surahId}`] !== undefined ? (
+                                  <View style={{ position: 'relative', alignItems: 'center', justifyContent: 'center' }}>
+                                    <Loader2 size={18} color={colors.accent} style={{ transform: [{ rotate: `${downloadStore.downloadProgress[`${audioStore.currentReciterId}_${surah.surahId}`]}deg` }] }} />
+                                    <Text style={{ position: 'absolute', fontSize: 8, color: colors.textSecondary }}>{formatNumber(Math.round(downloadStore.downloadProgress[`${audioStore.currentReciterId}_${surah.surahId}`]), i18n.language)}</Text>
+                                  </View>
+                                ) : (
+                                  <DownloadCloud size={18} color={colors.textSecondary} opacity={0.6} />
+                                )}
+                              </TouchableOpacity>
+
+                              <Bookmark size={14} color={colors.accent} fill={colors.accent} />
+                              <Text style={[styles.surahNameAr, { color: scheme === 'dark' ? colors.accent : colors.highlight }]}>{surah.surahNameAr}</Text>
+                            </View>
+                          </TouchableOpacity>
+                        </BlurView>
+                      ))}
                     </View>
-                  </TouchableOpacity>
-                </BlurView>
-              ))
+                  </View>
+                )}
+
+                {/* Juz Section */}
+                {bookmarks.some((b: any) => b.type === 'juz') && (
+                  <View style={{ marginBottom: Spacing.four }}>
+                    <Text style={[styles.sectionTitle, { color: colors.textSecondary, marginBottom: Spacing.three, paddingHorizontal: Spacing.one }]}>{t('quran.bookmarkedJuz', { defaultValue: 'Bookmarked Juz' })}</Text>
+                    <View style={styles.gridContainer}>
+                      {bookmarks.filter((b: any) => b.type === 'juz').map((juz: any, i: number) => (
+                        <BlurView key={`juz-${i}`} intensity={30} tint={colors.glassTint as any} style={[styles.juzCardWrapper, { borderColor: colors.border }]}>
+                          <TouchableOpacity 
+                            style={styles.juzCard}
+                            onPress={() => router.push(`/juz/${juz.juzId}`)}
+                            onLongPress={() => toggleJuzBookmark(juz.juzId)}
+                          >
+                            <View style={{ position: 'absolute', top: 8, right: 8 }}>
+                              <Bookmark size={12} color={colors.accent} fill={colors.accent} />
+                            </View>
+                            <Text style={[styles.juzText, { color: colors.text }]}>{t('quran.juz', { id: formatNumber(juz.juzId, i18n.language) })}</Text>
+                          </TouchableOpacity>
+                        </BlurView>
+                      ))}
+                    </View>
+                  </View>
+                )}
+
+                {/* Ayahs Section */}
+                {bookmarks.some((b: any) => !b.type || b.type === 'ayah') && (
+                  <View style={{ marginBottom: Spacing.four }}>
+                    <Text style={[styles.sectionTitle, { color: colors.textSecondary, marginBottom: Spacing.three, paddingHorizontal: Spacing.one }]}>{t('quran.bookmarkedAyahs', { defaultValue: 'Bookmarked Ayahs' })}</Text>
+                    <View style={styles.listContainer}>
+                      {bookmarks.filter((b: any) => !b.type || b.type === 'ayah').map((b: any, i: number) => (
+                        <BlurView intensity={30} tint={colors.glassTint as any} key={`ayah-${i}`} style={[styles.surahRowWrapper, { borderColor: colors.border }]}>
+                          <TouchableOpacity 
+                            style={[styles.surahRow, { paddingVertical: Spacing.four }]} 
+                            activeOpacity={0.7}
+                            onPress={() => router.push(`/surah/${b.surahId}?ayah=${b.numberInSurah}`)}
+                          >
+                            <View style={{ flex: 1 }}>
+                              <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6, marginBottom: 8 }}>
+                                <Bookmark size={16} color={colors.accent} fill={colors.accent} />
+                                <Text style={[styles.surahNameEn, { color: colors.text, fontSize: 16 }]}>{t('surahNames.' + b.surahId, { defaultValue: b.surahName })}</Text>
+                                <View style={[styles.numberBox, { width: 24, height: 24, borderRadius: 12, borderColor: colors.border, borderWidth: 1 }]}>
+                                  <Text style={[styles.numberText, { color: colors.textSecondary, fontSize: 10 }]}>{formatNumber(b.numberInSurah, i18n.language)}</Text>
+                                </View>
+                              </View>
+                              <Text style={[styles.surahNameAr, { color: colors.text, fontSize: 20, textAlign: 'right', marginBottom: 4 }]} numberOfLines={1}>
+                                {b.arabic}
+                              </Text>
+                              <Text style={[styles.surahMeta, { color: colors.textSecondary }]} numberOfLines={2}>
+                                {b.translation}
+                              </Text>
+                            </View>
+                          </TouchableOpacity>
+                        </BlurView>
+                      ))}
+                    </View>
+                  </View>
+                )}
+              </View>
             )}
           </View>
         )}
@@ -270,7 +568,10 @@ export default function QuranScreen() {
 
       {/* Floating Last Read Pill */}
       {activeTab !== 'bookmarks' && (
-        <Animated.View style={[styles.floatingHintContainer, currentSurahId ? { bottom: Spacing.two + 20 + 70 } : {}, { transform: [{ translateY: bannerTranslateY }] }]}>
+        <Animated.View style={[
+          styles.floatingHintContainer, 
+          { transform: [{ translateY: bannerTranslateY }, { translateY: audioOffset }] }
+        ]}>
           <View style={[styles.floatingHintCard, { borderColor: colors.accent, backgroundColor: colors.background }]}>
             <TouchableOpacity 
               style={styles.floatingHintTouch}
@@ -294,6 +595,36 @@ export default function QuranScreen() {
             </TouchableOpacity>
           </View>
         </Animated.View>
+      )}
+
+      {toast && (
+        <Reanimated.View 
+          entering={FadeInDown.duration(300)} 
+          exiting={FadeOutDown.duration(300)}
+          style={{
+            position: 'absolute',
+            bottom: 100,
+            alignSelf: 'center',
+            backgroundColor: colors.highlight,
+            paddingHorizontal: 20,
+            paddingVertical: 12,
+            borderRadius: 24,
+            zIndex: 100,
+            elevation: 10,
+            shadowColor: '#000',
+            shadowOffset: { width: 0, height: 4 },
+            shadowOpacity: 0.15,
+            shadowRadius: 12,
+            flexDirection: 'row',
+            alignItems: 'center',
+            gap: 8
+          }}
+        >
+          <CheckCircle size={18} color="#FFF" />
+          <Text style={{ fontFamily: Fonts.outfit, fontSize: 14, color: '#FFF', fontWeight: '500' }}>
+            {toast.message}
+          </Text>
+        </Reanimated.View>
       )}
     </SafeAreaView>
   );
@@ -490,5 +821,12 @@ const styles = StyleSheet.create({
     fontFamily: Fonts.outfit,
     fontSize: 16,
     marginTop: Spacing.three,
+  },
+  sectionTitle: {
+    fontFamily: Fonts.outfit,
+    fontSize: 12,
+    textTransform: 'uppercase',
+    letterSpacing: 1.2,
+    opacity: 0.6,
   }
 });

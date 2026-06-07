@@ -5,13 +5,14 @@ import { usePreferencesStore } from '@/store/preferencesStore';
 import { useThemeStore } from '@/store/themeStore';
 import { getDistrictName } from '@/utils/districts';
 import { formatNumber } from '@/utils/formatNumber';
+import { getLocalYYYYMMDD } from '@/utils/dateUtils';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { BlurView } from 'expo-blur';
 import * as Haptics from 'expo-haptics';
 import { LinearGradient } from 'expo-linear-gradient';
 import { useFocusEffect, useRouter } from 'expo-router';
-import { Book, BookOpen, CalendarDays, Compass, GraduationCap, MapPin } from 'lucide-react-native';
-import React, { useCallback, useEffect, useMemo, useState } from 'react';
+import { Book, BookOpen, CalendarDays, Compass, GraduationCap, MapPin, Share2, Brain } from 'lucide-react-native';
+import React, { useCallback, useEffect, useMemo, useState, useRef } from 'react';
 import { useTranslation } from 'react-i18next';
 import {
   ScrollView,
@@ -22,6 +23,9 @@ import {
 } from 'react-native';
 import Animated, { useAnimatedStyle, withTiming, FadeIn, FadeOut } from 'react-native-reanimated';
 import { SafeAreaView } from 'react-native-safe-area-context';
+import dailyHadith from '@/data/dailyHadith.json';
+import ViewShot from 'react-native-view-shot';
+import * as Sharing from 'expo-sharing';
 
 // ── Types ────────────────────────────────────────────────────────────────────
 interface PrayerEntry {
@@ -79,15 +83,6 @@ const formatCountdown = (ms: number): string => {
 
 
 
-
-
-
-const getLocalYYYYMMDD = (d: Date = new Date()) => {
-  const year = d.getFullYear();
-  const month = String(d.getMonth() + 1).padStart(2, '0');
-  const day = String(d.getDate()).padStart(2, '0');
-  return `${year}-${month}-${day}`;
-};
 
 // ── Component ────────────────────────────────────────────────────────────────
 
@@ -184,6 +179,29 @@ export default function HomeScreen() {
   const prefs = usePreferencesStore();
   const locationCity = prefs.manualCity || prefs.location?.city || 'Dhaka';
   const locationName = getDistrictName(locationCity, i18n.language);
+
+  const hadithIndex = useMemo(() => {
+    const todayStr = getLocalYYYYMMDD();
+    let hash = 0;
+    for (let i = 0; i < todayStr.length; i++) {
+      hash = todayStr.charCodeAt(i) + ((hash << 5) - hash);
+    }
+    return Math.abs(hash) % dailyHadith.length;
+  }, []);
+  const todayHadith = dailyHadith[hadithIndex];
+  
+  const hadithRef = useRef(null);
+
+  const shareHadith = async () => {
+    try {
+      if (hadithRef.current) {
+        const uri = await (hadithRef.current as any).capture();
+        await Sharing.shareAsync(uri, { dialogTitle: 'Share Hadith' });
+      }
+    } catch (error) {
+      console.error(error);
+    }
+  };
 
   // Load tracker history
   useFocusEffect(
@@ -744,6 +762,17 @@ export default function HomeScreen() {
                 <Text style={[styles.actionText, { color: colors.text }]}>{t('calendar.titleEn', { defaultValue: 'Islamic Calendar' })}</Text>
               </BlurView>
             </TouchableOpacity>
+
+            <TouchableOpacity 
+              activeOpacity={0.7}
+              style={[styles.actionItemCard, { borderColor: colors.border }]} 
+              onPress={() => router.push('/trivia' as any)}
+            >
+              <BlurView intensity={40} tint={colors.glassTint as any} style={styles.actionItemBlur}>
+                <Brain size={20} color={colors.accent} />
+                <Text style={[styles.actionText, { color: colors.text }]}>{t('home.trivia', { defaultValue: 'Islamic Trivia' })}</Text>
+              </BlurView>
+            </TouchableOpacity>
           </View>
         </View>
 
@@ -951,6 +980,34 @@ export default function HomeScreen() {
             </View>
           </View>
         )}
+
+        {/* ── Hadith of the Day ─────────────────────────────────── */}
+        <View style={{ marginTop: Spacing.four, marginBottom: Spacing.six }}>
+          <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: Spacing.two }}>
+            <Text style={[styles.sectionTitle, { color: colors.textSecondary, marginBottom: 0 }]}>
+              {t('home.hadithOfTheDay', { defaultValue: 'Hadith of the Day' })}
+            </Text>
+            <TouchableOpacity onPress={shareHadith} style={{ padding: 4 }}>
+              <Share2 size={18} color={colors.textSecondary} />
+            </TouchableOpacity>
+          </View>
+          <ViewShot ref={hadithRef} options={{ format: 'png', quality: 1 }}>
+            <BlurView intensity={20} tint={colors.glassTint as any} style={[styles.inspirationCard, { borderColor: colors.border, padding: Spacing.six, backgroundColor: colors.backgroundElement }]}>
+              <View style={{ alignItems: 'center' }}>
+                <Text style={{ fontFamily: Fonts.outfit, fontSize: 16, color: colors.text, textAlign: 'center', fontStyle: 'italic', marginBottom: Spacing.four, lineHeight: 24 }}>
+                  "{todayHadith.text}"
+                </Text>
+                <Text style={{ fontFamily: Fonts.outfit, fontSize: 13, color: colors.highlight, fontWeight: '600', marginBottom: 2 }}>
+                  {todayHadith.narrator}
+                </Text>
+                <Text style={{ fontFamily: Fonts.outfit, fontSize: 11, color: colors.textSecondary }}>
+                  {todayHadith.reference}
+                </Text>
+              </View>
+            </BlurView>
+          </ViewShot>
+        </View>
+
       </ScrollView>
     </SafeAreaView>
   );
