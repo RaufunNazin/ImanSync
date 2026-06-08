@@ -143,16 +143,16 @@ export default function QiblaScreen() {
 
             {/* Markers */}
             <View style={[styles.markerContainer, { transform: [{ rotate: '0deg' }, { translateY: -100 }] }]}>
-              <Text style={[styles.markerText, { color: colors.textSecondary }]}>N</Text>
+              <Text style={[styles.markerText, { color: colors.textSecondary }]}>{t('qibla.north', { defaultValue: 'N' })}</Text>
             </View>
             <View style={[styles.markerContainer, { transform: [{ rotate: '90deg' }, { translateY: -100 }] }]}>
-              <Text style={[styles.markerText, { color: colors.textSecondary }]}>E</Text>
+              <Text style={[styles.markerText, { color: colors.textSecondary }]}>{t('qibla.east', { defaultValue: 'E' })}</Text>
             </View>
             <View style={[styles.markerContainer, { transform: [{ rotate: '180deg' }, { translateY: -100 }] }]}>
-              <Text style={[styles.markerText, { color: colors.textSecondary }]}>S</Text>
+              <Text style={[styles.markerText, { color: colors.textSecondary }]}>{t('qibla.south', { defaultValue: 'S' })}</Text>
             </View>
             <View style={[styles.markerContainer, { transform: [{ rotate: '270deg' }, { translateY: -100 }] }]}>
-              <Text style={[styles.markerText, { color: colors.textSecondary }]}>W</Text>
+              <Text style={[styles.markerText, { color: colors.textSecondary }]}>{t('qibla.west', { defaultValue: 'W' })}</Text>
             </View>
 
             {/* Qibla Fixed Indicator on the Dial */}

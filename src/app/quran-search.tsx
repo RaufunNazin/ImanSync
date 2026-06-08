@@ -1,6 +1,6 @@
+import ThemeCard from '@/components/ThemeCard';
 import { Fonts, Spacing, useThemeColors } from '@/constants/theme';
 import { formatNumber } from '@/utils/formatNumber';
-import { BlurView } from 'expo-blur';
 import { useRouter } from 'expo-router';
 import { ChevronLeft, X } from 'lucide-react-native';
 import React, { useEffect, useState, useRef } from 'react';
@@ -131,12 +131,12 @@ export default function QuranSearchScreen() {
             <View style={styles.listContainer}>
               {searchQuery.length > 0 && filteredSurahs.length === 0 ? (
                  <Text style={[styles.emptyText, { color: colors.textSecondary }]}>
-                   No results found for "{searchQuery}"
+                   {t('search.noMatchingQuran', { query: searchQuery })}
                  </Text>
               ) : (
                 filteredSurahs.map((surah) => (
                   <Animated.View entering={FadeIn.duration(300)} key={surah.id}>
-                    <BlurView intensity={30} tint={colors.glassTint as any} style={[styles.surahRowWrapper, { borderColor: colors.border }]}>
+                    <ThemeCard intensity={30}  style={[styles.surahRowWrapper, { borderColor: colors.border }]}>
                       <TouchableOpacity 
                         style={styles.surahRow} 
                         activeOpacity={0.7}
@@ -156,7 +156,7 @@ export default function QuranSearchScreen() {
                         
                         <Text style={[styles.surahNameAr, { color: scheme === 'dark' ? colors.accent : colors.highlight }]}>{surah.nameAr}</Text>
                       </TouchableOpacity>
-                    </BlurView>
+                    </ThemeCard>
                   </Animated.View>
                 ))
               )}

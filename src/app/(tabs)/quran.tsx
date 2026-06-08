@@ -1,8 +1,8 @@
+import ThemeCard from '@/components/ThemeCard';
 import PageHeader from '@/components/page-header';
 import { Fonts, Spacing, useThemeColors } from '@/constants/theme';
 import { formatNumber } from '@/utils/formatNumber';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import { BlurView } from 'expo-blur';
 import { useFocusEffect, useRouter } from 'expo-router';
 import { Bookmark, Search, Target, DownloadCloud, CheckCircle, Loader2, GraduationCap, ChevronRight, X, BookOpen } from 'lucide-react-native';
 import React, { useCallback, useEffect, useRef, useState } from 'react';
@@ -313,27 +313,30 @@ export default function QuranScreen() {
         </View>
 
         {/* Tab Content */}
-        {loading && activeTab === 'surah' ? (
-          <View style={[styles.listContainer]}>
-            {[...Array(8)].map((_, i) => (
-              <View key={i} style={[styles.surahRowWrapper, { borderColor: colors.border, backgroundColor: colors.backgroundElement }]}>
-                <View style={[styles.surahRow]}>
-                  <View style={styles.surahLeft}>
-                    <SkeletonBox width={28} height={28} borderRadius={8} color={colors.border} />
-                    <View style={{ flex: 1, gap: 6 }}>
-                      <SkeletonBox width={110} height={15} borderRadius={7} color={colors.border} />
-                      <SkeletonBox width={70} height={12} borderRadius={6} color={colors.border} />
+        {activeTab === 'surah' ? (
+          <>
+          {loading && (
+            <View style={[styles.listContainer]}>
+              {[...Array(8)].map((_, i) => (
+                <ThemeCard key={i} style={[styles.surahRowWrapper, { borderColor: colors.border }]}>
+                  <View style={[styles.surahRow]}>
+                    <View style={styles.surahLeft}>
+                      <SkeletonBox width={28} height={28} borderRadius={8} color={colors.border} loaded={false} />
+                      <View style={{ flex: 1, gap: 6 }}>
+                        <SkeletonBox width={110} height={15} borderRadius={7} color={colors.border} loaded={false} />
+                        <SkeletonBox width={70} height={12} borderRadius={6} color={colors.border} loaded={false} />
+                      </View>
                     </View>
+                    <SkeletonBox width={56} height={20} borderRadius={8} color={colors.border} loaded={false} />
                   </View>
-                  <SkeletonBox width={56} height={20} borderRadius={8} color={colors.border} />
-                </View>
-              </View>
-            ))}
-          </View>
-        ) : activeTab === 'surah' ? (
+                </ThemeCard>
+              ))}
+            </View>
+          )}
+          {!loading && (
           <View style={styles.listContainer}>
             {surahs.map((surah) => (
-              <BlurView intensity={30} tint={colors.glassTint as any} key={surah.id} style={[styles.surahRowWrapper, { borderColor: colors.border }]}>
+              <ThemeCard intensity={30}  key={surah.id} style={[styles.surahRowWrapper, { borderColor: colors.border }]}>
                 <TouchableOpacity 
                   style={styles.surahRow} 
                   activeOpacity={0.7}
@@ -386,13 +389,14 @@ export default function QuranScreen() {
                     <Text style={[styles.surahNameAr, { color: scheme === 'dark' ? colors.accent : colors.highlight }]}>{surah.nameAr}</Text>
                   </View>
                 </TouchableOpacity>
-              </BlurView>
+              </ThemeCard>
             ))}
-          </View>
+          </View>          )}
+          </>
         ) : activeTab === 'juz' ? (
           <View style={styles.gridContainer}>
             {Array.from({ length: 30 }).map((_, i) => (
-              <BlurView key={i} intensity={30} tint={colors.glassTint as any} style={[styles.juzCardWrapper, { borderColor: colors.border }]}>
+              <ThemeCard key={i} intensity={30}  style={[styles.juzCardWrapper, { borderColor: colors.border }]}>
                 <TouchableOpacity 
                   style={styles.juzCard}
                   onPress={() => router.push(`/juz/${i + 1}`)}
@@ -405,7 +409,7 @@ export default function QuranScreen() {
                   )}
                   <Text style={[styles.juzText, { color: colors.text }]}>{t('quran.juz', { id: formatNumber(i + 1, i18n.language) })}</Text>
                 </TouchableOpacity>
-              </BlurView>
+              </ThemeCard>
             ))}
           </View>
         ) : (
@@ -423,7 +427,7 @@ export default function QuranScreen() {
                     <Text style={[styles.sectionTitle, { color: colors.textSecondary, marginBottom: Spacing.three, paddingHorizontal: Spacing.one }]}>{t('quran.bookmarkedSurahs', { defaultValue: 'Bookmarked Surahs' })}</Text>
                     <View style={styles.listContainer}>
                       {bookmarks.filter((b: any) => b.type === 'surah').map((surah: any, i: number) => (
-                        <BlurView intensity={30} tint={colors.glassTint as any} key={`surah-${i}`} style={[styles.surahRowWrapper, { borderColor: colors.border }]}>
+                        <ThemeCard intensity={30}  key={`surah-${i}`} style={[styles.surahRowWrapper, { borderColor: colors.border }]}>
                           <TouchableOpacity 
                             style={styles.surahRow} 
                             activeOpacity={0.7}
@@ -473,7 +477,7 @@ export default function QuranScreen() {
                               <Text style={[styles.surahNameAr, { color: scheme === 'dark' ? colors.accent : colors.highlight }]}>{surah.surahNameAr}</Text>
                             </View>
                           </TouchableOpacity>
-                        </BlurView>
+                        </ThemeCard>
                       ))}
                     </View>
                   </View>
@@ -485,7 +489,7 @@ export default function QuranScreen() {
                     <Text style={[styles.sectionTitle, { color: colors.textSecondary, marginBottom: Spacing.three, paddingHorizontal: Spacing.one }]}>{t('quran.bookmarkedJuz', { defaultValue: 'Bookmarked Juz' })}</Text>
                     <View style={styles.gridContainer}>
                       {bookmarks.filter((b: any) => b.type === 'juz').map((juz: any, i: number) => (
-                        <BlurView key={`juz-${i}`} intensity={30} tint={colors.glassTint as any} style={[styles.juzCardWrapper, { borderColor: colors.border }]}>
+                        <ThemeCard key={`juz-${i}`} intensity={30}  style={[styles.juzCardWrapper, { borderColor: colors.border }]}>
                           <TouchableOpacity 
                             style={styles.juzCard}
                             onPress={() => router.push(`/juz/${juz.juzId}`)}
@@ -496,7 +500,7 @@ export default function QuranScreen() {
                             </View>
                             <Text style={[styles.juzText, { color: colors.text }]}>{t('quran.juz', { id: formatNumber(juz.juzId, i18n.language) })}</Text>
                           </TouchableOpacity>
-                        </BlurView>
+                        </ThemeCard>
                       ))}
                     </View>
                   </View>
@@ -508,7 +512,7 @@ export default function QuranScreen() {
                     <Text style={[styles.sectionTitle, { color: colors.textSecondary, marginBottom: Spacing.three, paddingHorizontal: Spacing.one }]}>{t('quran.bookmarkedAyahs', { defaultValue: 'Bookmarked Ayahs' })}</Text>
                     <View style={styles.listContainer}>
                       {bookmarks.filter((b: any) => !b.type || b.type === 'ayah').map((b: any, i: number) => (
-                        <BlurView intensity={30} tint={colors.glassTint as any} key={`ayah-${i}`} style={[styles.surahRowWrapper, { borderColor: colors.border }]}>
+                        <ThemeCard intensity={30}  key={`ayah-${i}`} style={[styles.surahRowWrapper, { borderColor: colors.border }]}>
                           <TouchableOpacity 
                             style={[styles.surahRow, { paddingVertical: Spacing.four }]} 
                             activeOpacity={0.7}
@@ -530,7 +534,7 @@ export default function QuranScreen() {
                               </Text>
                             </View>
                           </TouchableOpacity>
-                        </BlurView>
+                        </ThemeCard>
                       ))}
                     </View>
                   </View>

@@ -1,7 +1,7 @@
+import ThemeCard from '@/components/ThemeCard';
 import PageHeader from '@/components/page-header';
 import { Fonts, Spacing, useThemeColors, useThemeStyles } from '@/constants/theme';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import { BlurView } from 'expo-blur';
 import * as Haptics from 'expo-haptics';
 import { useLocalSearchParams } from 'expo-router';
 import { Bookmark, BookOpen, Minus, Plus, Settings2, X } from 'lucide-react-native';
@@ -274,7 +274,7 @@ export default function DuaDetailScreen() {
         )}
 
         {hasTextContent && (
-          <BlurView intensity={40} tint={colors.glassTint as any} style={[styles.card, themeStyles.cardShadow, { borderColor: colors.border }]}>
+          <ThemeCard intensity={40}  style={[styles.card, themeStyles.cardShadow, { borderColor: colors.border }]}>
 
             {showArabic && (
               <View style={styles.section}>
@@ -320,7 +320,7 @@ export default function DuaDetailScreen() {
               </View>
             )}
 
-          </BlurView>
+          </ThemeCard>
         )}
       </ScrollView>
 

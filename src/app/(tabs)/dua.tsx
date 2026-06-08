@@ -17,6 +17,7 @@ import { loadMyDuas, saveMyDuas, saveMediaFile, UserDua } from '@/utils/my-duas-
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import SkeletonBox from '@/components/SkeletonBox';
+import ThemeCard from '@/components/ThemeCard';
 import { getStorageMode, loadCustomCategories, saveCustomCategories } from '@/utils/my-duas-storage';
 import { usePreferencesStore } from '@/store/preferencesStore';
 import curatedDuasData from '@/data/curated-duas.json';
@@ -409,33 +410,32 @@ export default function DuaScreen() {
               />
             </View>
 
-            {loading ? (
-              [...Array(4)].map((_, i) => (
-                <View key={i} style={[styles.gridItem]}>
-                  <View style={[{ minHeight: 70, borderRadius: 20, borderWidth: 1, borderColor: colors.border, backgroundColor: colors.backgroundElement, padding: Spacing.two, paddingVertical: Spacing.two, alignItems: 'center', justifyContent: 'center' }]}>
-                    <View style={{ alignItems: 'center', justifyContent: 'center', gap: 2, paddingHorizontal: 8 }}>
-                      <SkeletonBox width={110} height={16} borderRadius={8} color={colors.border} />
-                      <SkeletonBox width={70} height={12} borderRadius={6} color={colors.border} />
-                    </View>
+            {loading
+              ? [...Array(4)].map((_, i) => (
+                  <View key={i} style={[styles.gridItem]}>
+                    <ThemeCard style={{ minHeight: 70, borderRadius: 20, padding: Spacing.two, paddingVertical: Spacing.two, alignItems: 'center', justifyContent: 'center' }}>
+                      <View style={{ alignItems: 'center', justifyContent: 'center', gap: 2, paddingHorizontal: 8 }}>
+                        <SkeletonBox width={110} height={16} borderRadius={8} color={colors.border} loaded={false} />
+                        <SkeletonBox width={70} height={12} borderRadius={6} color={colors.border} loaded={false} />
+                      </View>
+                    </ThemeCard>
                   </View>
-                </View>
-              ))
-            ) : (
-              unpinnedCategories.map(cat => (
-                <View key={cat.id} style={styles.gridItem}>
-                  <DuaCard
-                    id={cat.id}
-                    name={getCategoryName(cat)}
-                    description={getCategoryDesc(cat)}
-                    count={cat.count}
-                    isCustom={cat.isCustom}
-                    colors={colors}
-                    onPress={() => handleCategoryPress(cat)}
-                    onLongPress={() => openPinSheet(cat)}
-                  />
-                </View>
-              ))
-            )}
+                ))
+              : unpinnedCategories.map(cat => (
+                  <View key={cat.id} style={styles.gridItem}>
+                    <DuaCard
+                      id={cat.id}
+                      name={getCategoryName(cat)}
+                      description={getCategoryDesc(cat)}
+                      count={cat.count}
+                      isCustom={cat.isCustom}
+                      colors={colors}
+                      onPress={() => handleCategoryPress(cat)}
+                      onLongPress={() => openPinSheet(cat)}
+                    />
+                  </View>
+                ))
+            }
           </View>
         </View>
         </View>

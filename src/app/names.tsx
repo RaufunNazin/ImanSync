@@ -1,6 +1,6 @@
+import ThemeCard from '@/components/ThemeCard';
 import { Fonts, Spacing, useThemeColors, useThemeStyles } from '@/constants/theme';
 import PageHeader from '@/components/page-header';
-import { BlurView } from 'expo-blur';
 import React from 'react';
 import { FlatList, StyleSheet, Text, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
@@ -31,7 +31,7 @@ export default function NamesScreen() {
         keyExtractor={item => item.id}
         contentContainerStyle={styles.list}
         renderItem={({ item }) => (
-          <BlurView intensity={40} tint={colors.glassTint as any} style={[styles.cardWrapper, { borderColor: colors.border }]}>
+          <ThemeCard intensity={40}  style={[styles.cardWrapper, { borderColor: colors.border }]}>
             <View style={[styles.card, themeStyles.cardShadow]}>
               <View style={[styles.numberBox, { backgroundColor: 'rgba(255,255,255,0.05)', borderColor: colors.border, borderWidth: 1 }]}>
                 <Text style={[styles.numberText, { color: colors.textSecondary }]}>{formatNumber(item.id, i18n.language)}</Text>
@@ -42,7 +42,7 @@ export default function NamesScreen() {
               </View>
               <Text style={[styles.arabicText, { color: colors.accent }]}>{item.arabic}</Text>
             </View>
-          </BlurView>
+          </ThemeCard>
         )}
       />
     </SafeAreaView>

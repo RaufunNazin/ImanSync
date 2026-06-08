@@ -1,7 +1,8 @@
+import ThemeCard from '@/components/ThemeCard';
 import OptionsModal from '@/components/OptionsModal';
 import PageHeader from '@/components/page-header';
 import TimePickerModal from '@/components/TimePickerModal';
-import { Fonts, Spacing, useThemeColors, useThemeStyles } from '@/constants/theme';
+import { Fonts, Spacing, useThemeColors } from '@/constants/theme';
 import { setLanguage } from '@/i18n';
 import { usePreferencesStore } from '@/store/preferencesStore';
 import { useThemeStore } from '@/store/themeStore';
@@ -16,14 +17,14 @@ import {
   switchToInternalMode,
 } from '@/utils/my-duas-storage';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import { BlurView } from 'expo-blur';
+
 import * as Location from 'expo-location';
 import { useRouter, useLocalSearchParams } from 'expo-router';
 import * as Updates from 'expo-updates';
-import { AlertCircle, Bell, BellOff, BookOpen, CalendarDays, Calculator, CheckCircle, ChevronRight, Clock, FileText, FolderLock, Globe, Info, ListTodo, MapPin, Palette, Droplet, RefreshCw, Scale, Shield, X, Maximize } from 'lucide-react-native';
+import { AlertCircle, Bell, BellOff, BookOpen, CalendarDays, Calculator, CheckCircle, Clock, FileText, FolderLock, Globe, Info, ListTodo, MapPin, Palette, RefreshCw, Scale, Shield, X} from 'lucide-react-native';
 import React, { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { ActivityIndicator, Alert, Linking, Modal, ScrollView, StyleSheet, Switch, Text, TouchableOpacity, View } from 'react-native';
+import { ActivityIndicator, Alert, Linking, Modal, ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 const CALC_METHODS = [
@@ -37,88 +38,22 @@ const MADHABS = [
   { id: 1, key: 'settings.madhab_1' }
 ];
 
-// ─── SettingRow MUST live OUTSIDE the screen component ───────────────────────
-// If it's defined inside, React sees a brand-new component type on every render,
-// unmounts all rows, and remounts them — causing the visible hang/freeze.
-interface SettingRowProps {
-  icon: React.ComponentType<{ size: number; color: string }>;
-  title: string;
-  value?: any;
-  type?: 'navigate' | 'toggle' | 'loading';
-  onPress?: (val?: any) => void;
-  isLast?: boolean;
-  highlight?: boolean;
-  colors: any;
-}
-
-function SettingRow({ icon: Icon, title, value, type = 'navigate', onPress, isLast, highlight, colors }: SettingRowProps) {
-  return (
-    <TouchableOpacity
-      style={[
-        styles.settingRow,
-        !isLast && { borderBottomWidth: StyleSheet.hairlineWidth, borderBottomColor: colors.border },
-        highlight && { backgroundColor: colors.highlight + '20', borderRadius: 12, paddingHorizontal: Spacing.three, marginHorizontal: -Spacing.three }
-      ]}
-      activeOpacity={type === 'navigate' ? 0.7 : 0.9}
-      onPress={() => {
-        if (type === 'toggle') {
-          if (onPress) onPress(!value);
-        } else if (onPress) {
-          onPress();
-        }
-      }}
-    >
-      <View style={styles.settingLeft}>
-        <View style={[styles.iconBox, { backgroundColor: 'rgba(255,255,255,0.1)' }]}>
-          <Icon size={20} color={colors.highlight} />
-        </View>
-        <Text style={[styles.settingTitle, { color: colors.text }]}>{title}</Text>
-      </View>
-
-      {type === 'navigate' ? (
-        <View style={{ flexDirection: 'row', alignItems: 'center', flex: value ? 1 : undefined, flexShrink: 1, justifyContent: 'flex-end', paddingLeft: value ? 10 : 0 }}>
-          {!!value && <Text style={[styles.settingValue, { color: colors.textSecondary }]}>{value}</Text>}
-          <ChevronRight size={20} color={colors.textSecondary} />
-        </View>
-      ) : type === 'toggle' ? (
-        <Switch
-          value={!!value}
-          onValueChange={(val) => {
-            if (onPress) onPress(val);
-          }}
-          trackColor={{ false: colors.border, true: colors.highlight }}
-          thumbColor={value ? '#FFFFFF' : '#f4f3f4'}
-        />
-      ) : type === 'loading' ? (
-        <ActivityIndicator size="small" color={colors.highlight} />
-      ) : null}
-    </TouchableOpacity>
-  );
-}
-// ─────────────────────────────────────────────────────────────────────────────
-
+import SettingRow from '@/components/SettingRow';
 export default function SettingsScreen() {
   const scheme = useThemeStore((s) => s.theme);
   const setTheme = useThemeStore((s) => s.setTheme);
-  const isMonoColor = useThemeStore((s) => s.isMonoColor);
-  const setMonoColor = useThemeStore((s) => s.setMonoColor);
-  const isBorderless = useThemeStore((s) => s.isBorderless);
-  const setBorderless = useThemeStore((s) => s.setBorderless);
-  const colors = useThemeColors();
-  const themeStyles = useThemeStyles();
-  const { t, i18n } = useTranslation();
+          const colors = useThemeColors();
+    const { t, i18n } = useTranslation();
   const router = useRouter();
 
   const [fetchingLoc, setFetchingLoc] = useState(false);
   const [checkingUpdate, setCheckingUpdate] = useState(false);
-  const [appearanceModalVisible, setAppearanceModalVisible] = useState(false);
-  const [calendarModalVisible, setCalendarModalVisible] = useState(false);
-
+    
   const [pickerVisible, setPickerVisible] = useState(false);
   const [pickerType, setPickerType] = useState<'start' | 'end'>('start');
 
   const [optionsModalVisible, setOptionsModalVisible] = useState(false);
-  const [optionsModalType, setOptionsModalType] = useState<'calc' | 'madhab' | 'hijri' | 'bangla' | 'location' | null>(null);
+  const [optionsModalType, setOptionsModalType] = useState<'calc' | 'madhab' | 'hijri' | 'bangla' | 'location' | 'appearance' | 'calendar' | null>(null);
 
   const [updateModal, setUpdateModal] = useState<{ visible: boolean; title: string; message: string; type: 'loading' | 'success' | 'error' } | null>(null);
 
@@ -207,7 +142,7 @@ export default function SettingsScreen() {
     try {
       let { status } = await Location.requestForegroundPermissionsAsync();
       if (status !== 'granted') {
-        Alert.alert('Permission Denied', 'Please enable location permissions to fetch prayer times for your area.');
+        Alert.alert(t('common.permissionDenied'), t('settings.locationPermissionMsg'));
         setFetchingLoc(false);
         return;
       }
@@ -224,7 +159,7 @@ export default function SettingsScreen() {
       import('../../services/notificationService').then(s => s.scheduleAllNotifications());
     } catch (e) {
       console.log('Error fetching location', e);
-      Alert.alert('Error', 'Could not fetch location.');
+      Alert.alert(t('common.error'), t('settings.locationFetchError'));
     } finally {
       setFetchingLoc(false);
     }
@@ -301,15 +236,50 @@ export default function SettingsScreen() {
       <ScrollView ref={scrollViewRef} showsVerticalScrollIndicator={false} contentContainerStyle={styles.container}>
 
         <Text style={[styles.sectionTitle, { color: colors.textSecondary }]}>{t('settings.preferences')}</Text>
-        <View style={[styles.card, themeStyles.cardShadow, { borderColor: colors.border, backgroundColor: colors.backgroundElement }]}>
+        <ThemeCard style={[styles.card]}>
           <SettingRow icon={Globe} title={t('settings.language')} value={i18n.language === 'bn' ? 'বাংলা' : 'English'} onPress={cycleLanguage} colors={colors} />
           <SettingRow icon={Palette} title={t('settings.theme')} value={scheme === 'dark'} type="toggle" onPress={toggleDarkMode} colors={colors} />
-          <SettingRow icon={Palette} title={t('settings.uiAdjustments', { defaultValue: 'UI Adjustments' })} onPress={() => setAppearanceModalVisible(true)} colors={colors} />
-          <SettingRow icon={BookOpen} title={t('settings.showCuratedDuas')} value={prefs.showCuratedDuas} type="toggle" isLast={true} onPress={(v) => prefs.setPreferences({ showCuratedDuas: v })} colors={colors} />
-        </View>
+                    <SettingRow icon={BookOpen} title={t('settings.showCuratedDuas')} value={prefs.showCuratedDuas} type="toggle" isLast={true} onPress={(v) => prefs.setPreferences({ showCuratedDuas: v })} colors={colors} />
+        </ThemeCard>
+
+        <Text style={[styles.sectionTitle, { color: colors.textSecondary, marginTop: Spacing.four }]}>{t('settings.calendarSettings', { defaultValue: 'Calendar Settings' })}</Text>
+        <ThemeCard style={[styles.card]}>
+          <SettingRow
+            icon={CalendarDays}
+            title={t('settings.hijriOffset', { defaultValue: 'Hijri Date Adjustment' })}
+            value={`${prefs.hijriOffset > 0 ? '+' : ''}${formatNumber(prefs.hijriOffset || 0, i18n.language)} ${t('settings.days', { defaultValue: 'Days' })}`}
+            onPress={() => {
+              setOptionsModalType('hijri');
+              setOptionsModalVisible(true);
+            }}
+            colors={colors}
+          />
+          <SettingRow
+            icon={CalendarDays}
+            title={t('settings.showBanglaCalendar', { defaultValue: 'Show Bangla Calendar' })}
+            value={prefs.showBanglaCalendar}
+            type="toggle"
+            isLast={!prefs.showBanglaCalendar}
+            onPress={(val) => prefs.setPreferences({ showBanglaCalendar: val })}
+            colors={colors}
+          />
+          {prefs.showBanglaCalendar && (
+            <SettingRow
+              icon={CalendarDays}
+              title={t('settings.banglaOffset', { defaultValue: 'Bangla Date Adjustment' })}
+              value={`${prefs.banglaOffset > 0 ? '+' : ''}${formatNumber(prefs.banglaOffset || 0, i18n.language)} ${t('settings.days', { defaultValue: 'Days' })}`}
+              onPress={() => {
+                setOptionsModalType('bangla');
+                setOptionsModalVisible(true);
+              }}
+              isLast={true}
+              colors={colors}
+            />
+          )}
+        </ThemeCard>
 
         <Text style={[styles.sectionTitle, { color: colors.textSecondary, marginTop: Spacing.four }]}>{t('settings.notificationsTitle', { defaultValue: 'Notifications Settings' })}</Text>
-        <View style={[styles.card, themeStyles.cardShadow, { borderColor: colors.border, backgroundColor: colors.backgroundElement }]}>
+        <ThemeCard style={[styles.card]}>
           <SettingRow icon={Bell} title={t('settings.masterToggle', { defaultValue: 'Master Toggle' })} value={prefs.notificationsEnabled} type="toggle" isLast={!prefs.notificationsEnabled} onPress={toggleNotifications} colors={colors} />
           {prefs.notificationsEnabled && (
             <>
@@ -358,7 +328,7 @@ export default function SettingsScreen() {
               )}
             </>
           )}
-        </View>
+        </ThemeCard>
 
         <TimePickerModal
           visible={pickerVisible}
@@ -379,7 +349,7 @@ export default function SettingsScreen() {
         />
 
         <Text style={[styles.sectionTitle, { color: colors.textSecondary, marginTop: Spacing.four }]}>{t('settings.locationCalc')}</Text>
-        <View style={[styles.card, themeStyles.cardShadow, { borderColor: colors.border, backgroundColor: colors.backgroundElement }]}>
+        <ThemeCard style={[styles.card]}>
           <SettingRow
             icon={MapPin}
             title={t('settings.location')}
@@ -412,17 +382,10 @@ export default function SettingsScreen() {
             }}
             colors={colors}
           />
-          <SettingRow
-            icon={CalendarDays}
-            title={t('settings.calendarSettings', { defaultValue: 'Calendar Settings' })}
-            onPress={() => setCalendarModalVisible(true)}
-            isLast={true}
-            colors={colors}
-          />
-        </View>
+          </ThemeCard>
 
         <Text style={[styles.sectionTitle, { color: colors.textSecondary, marginTop: Spacing.four }]}>{t('settings.system')}</Text>
-        <View style={[styles.card, themeStyles.cardShadow, { borderColor: colors.border, backgroundColor: colors.backgroundElement }]}>
+        <ThemeCard style={[styles.card]}>
           <SettingRow
             icon={FolderLock}
             title={t('settings.permanentStorage')}
@@ -459,94 +422,10 @@ export default function SettingsScreen() {
             isLast={true} 
             colors={colors} 
           />
-        </View>
+        </ThemeCard>
       </ScrollView>
 
       
-      {/* Appearance Modal */}
-      {appearanceModalVisible && (
-        <Modal visible={true} transparent animationType="fade">
-          <View style={StyleSheet.absoluteFill}>
-            <BlurView intensity={30} tint={scheme === 'dark' ? 'dark' : 'light'} style={StyleSheet.absoluteFill} />
-            <TouchableOpacity style={StyleSheet.absoluteFill} activeOpacity={1} onPress={() => setAppearanceModalVisible(false)} />
-            <View style={[updateStyles.overlay, { justifyContent: 'flex-end', paddingBottom: Spacing.six }]}>
-              <View style={[styles.card, themeStyles.cardShadow, { backgroundColor: colors.backgroundElement, borderColor: colors.border, width: '100%', padding: 0 }]}>
-                <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', padding: Spacing.four, borderBottomWidth: 1, borderBottomColor: colors.border }}>
-                  <Text style={[styles.sectionTitle, { color: colors.text, marginTop: 0 }]}>{t('settings.uiAdjustments', { defaultValue: 'UI Adjustments' })}</Text>
-                  <TouchableOpacity onPress={() => setAppearanceModalVisible(false)}>
-                    <X size={24} color={colors.textSecondary} />
-                  </TouchableOpacity>
-                </View>
-                <View style={{ padding: Spacing.four }}>
-                  <SettingRow icon={Droplet} title={t('settings.monoColor', { defaultValue: 'Mono Color' })} value={isMonoColor} type="toggle" onPress={setMonoColor} colors={colors} />
-                  <SettingRow icon={Maximize} title={t('settings.borderlessUI', { defaultValue: 'Borderless UI' })} value={isBorderless} type="toggle" isLast={true} onPress={setBorderless} colors={colors} />
-                </View>
-              </View>
-            </View>
-          </View>
-        </Modal>
-      )}
-
-      {/* Calendar Modal */}
-      {calendarModalVisible && (
-        <Modal visible={true} transparent animationType="fade">
-          <View style={StyleSheet.absoluteFill}>
-            <BlurView intensity={30} tint={scheme === 'dark' ? 'dark' : 'light'} style={StyleSheet.absoluteFill} />
-            <TouchableOpacity style={StyleSheet.absoluteFill} activeOpacity={1} onPress={() => setCalendarModalVisible(false)} />
-            <View style={[updateStyles.overlay, { justifyContent: 'flex-end', paddingBottom: Spacing.six }]}>
-              <View style={[styles.card, themeStyles.cardShadow, { backgroundColor: colors.backgroundElement, borderColor: colors.border, width: '100%', padding: 0 }]}>
-                <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', padding: Spacing.four, borderBottomWidth: 1, borderBottomColor: colors.border }}>
-                  <Text style={[styles.sectionTitle, { color: colors.text, marginTop: 0 }]}>{t('settings.calendarSettings', { defaultValue: 'Calendar Settings' })}</Text>
-                  <TouchableOpacity onPress={() => setCalendarModalVisible(false)}>
-                    <X size={24} color={colors.textSecondary} />
-                  </TouchableOpacity>
-                </View>
-                <View style={{ padding: Spacing.four }}>
-                  <SettingRow
-                    icon={CalendarDays}
-                    title={t('settings.hijriOffset', { defaultValue: 'Hijri Date Adjustment' })}
-                    value={`${prefs.hijriOffset > 0 ? '+' : ''}${formatNumber(prefs.hijriOffset || 0, i18n.language)} ${t('settings.days', { defaultValue: 'Days' })}`}
-                    onPress={() => {
-                      setCalendarModalVisible(false);
-                      setTimeout(() => {
-                        setOptionsModalType('hijri');
-                        setOptionsModalVisible(true);
-                      }, 300);
-                    }}
-                    colors={colors}
-                  />
-                  <SettingRow
-                    icon={CalendarDays}
-                    title={t('settings.showBanglaCalendar', { defaultValue: 'Show Bangla Calendar' })}
-                    value={prefs.showBanglaCalendar}
-                    type="toggle"
-                    isLast={!prefs.showBanglaCalendar}
-                    onPress={(val) => prefs.setPreferences({ showBanglaCalendar: val })}
-                    colors={colors}
-                  />
-                  {prefs.showBanglaCalendar && (
-                    <SettingRow
-                      icon={CalendarDays}
-                      title={t('settings.banglaOffset', { defaultValue: 'Bangla Date Adjustment' })}
-                      value={`${prefs.banglaOffset > 0 ? '+' : ''}${formatNumber(prefs.banglaOffset || 0, i18n.language)} ${t('settings.days', { defaultValue: 'Days' })}`}
-                      onPress={() => {
-                        setCalendarModalVisible(false);
-                        setTimeout(() => {
-                          setOptionsModalType('bangla');
-                          setOptionsModalVisible(true);
-                        }, 300);
-                      }}
-                      isLast={true}
-                      colors={colors}
-                    />
-                  )}
-                </View>
-              </View>
-            </View>
-          </View>
-        </Modal>
-      )}
-
       {/* Options Modal */}
       {optionsModalType && (
         <OptionsModal
@@ -557,11 +436,13 @@ export default function SettingsScreen() {
             optionsModalType === 'madhab' ? t('settings.asrMethod') :
             optionsModalType === 'hijri' ? t('settings.hijriOffset') :
             optionsModalType === 'bangla' ? t('settings.banglaOffset', { defaultValue: 'Bangla Offset' }) :
+            
             t('settings.location')
           }
           options={
             optionsModalType === 'calc' ? CALC_METHODS.map(m => ({ id: m.id, name: t(m.key as any) })) :
             optionsModalType === 'madhab' ? MADHABS.map(m => ({ id: m.id, name: t(m.key as any) })) :
+            optionsModalType === 'appearance'  ? [] :
             optionsModalType === 'hijri' || optionsModalType === 'bangla' ? [-2, -1, 0, 1, 2].map(n => ({ id: n, name: `${n > 0 ? '+' : ''}${formatNumber(n, i18n.language)} ${t('settings.days', { defaultValue: 'Days' })}` })) :
             [{ id: 'auto', name: t('settings.autoGPS', { defaultValue: 'Auto (GPS)' }) }, ...Object.keys(districtMapBn).sort().map(k => ({ id: k, name: getDistrictName(k, i18n.language) }))]
           }
@@ -589,6 +470,9 @@ export default function SettingsScreen() {
             import('../../services/notificationService').then(s => s.scheduleAllNotifications());
           }}
           colors={colors}
+          customContent={
+            undefined
+          }
         />
       )}
 
@@ -596,7 +480,7 @@ export default function SettingsScreen() {
       {updateModal && (
         <Modal visible={updateModal.visible} transparent animationType="fade">
           <View style={StyleSheet.absoluteFill}>
-            <BlurView intensity={30} tint="dark" style={StyleSheet.absoluteFill} />
+            <View   style={StyleSheet.absoluteFill} />
             <View style={updateStyles.overlay}>
               <View style={[updateStyles.card, { backgroundColor: colors.background, borderColor: colors.border }]}>
                 {updateModal.type !== 'loading' && (
@@ -633,7 +517,7 @@ export default function SettingsScreen() {
       {storageConfirmModal && (
         <Modal visible={true} transparent animationType="fade">
           <View style={StyleSheet.absoluteFill}>
-            <BlurView intensity={30} tint="dark" style={StyleSheet.absoluteFill} />
+            <View   style={StyleSheet.absoluteFill} />
             <View style={updateStyles.overlay}>
               <View style={[updateStyles.card, { backgroundColor: colors.background, borderColor: colors.border }]}>
                 <TouchableOpacity

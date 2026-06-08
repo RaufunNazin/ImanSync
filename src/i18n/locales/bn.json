@@ -126,7 +126,12 @@
     "targetPages": "প্রতিদিন {{count}} পৃষ্ঠা",
     "todayProgress": "আজকের অগ্রগতি",
     "trackerTitle": "পড়ার ট্র্যাকার",
-    "writeNote": "আজ যা শিখেছেন বা অনুভব করেছেন তা লিখুন..."
+    "writeNote": "আজ যা শিখেছেন বা অনুভব করেছেন তা লিখুন...",
+    "reciters": {
+      "mishary": "মিশারি রশিদ আল-আফাসি",
+      "abdulBaset": "আব্দুল বাসেত আব্দুল সামাদ",
+      "sudais": "আব্দুর রহমান আস-সুদাইস"
+    }
   },
   "quranSettings": {
     "title": "রিডিং সেটিংস",
@@ -310,7 +315,8 @@
     "bnTranslit": "বাংলা উচ্চারণ",
     "searchPlaceholder": "নাম বা অনুবাদ দিয়ে খুঁজুন...",
     "searchMyDuas": "আমার দোয়া খুঁজুন",
-    "searchBookmarks": "বুকমার্ক করা দোয়া খুঁজুন"
+    "searchBookmarks": "বুকমার্ক করা দোয়া খুঁজুন",
+    "searchCategory": "ক্যাটাগরি খুঁজুন..."
   },
   "settings": {
     "viewSource": "সোর্স কোড দেখুন",
@@ -371,7 +377,20 @@
     "permanentStorageConfirmEnable": "এনাবল করে মুভ করুন",
     "permanentStorageConfirmDisable": "বন্ধ করুন ও কপি করুন",
     "storageChangeFailed": "স্টোরেজ মোড চেঞ্জ করা যায়নি। আবার ট্রাই করুন।",
-    "error": "এরর"
+    "error": "এরর",
+    "calendarSettings": "ক্যালেন্ডার সেটিংস",
+    "showBanglaCalendar": "বাংলা ক্যালেন্ডার দেখান",
+    "banglaOffset": "বাংলা তারিখ অ্যাডজাস্ট",
+    "devMode": "ডেভেলপার মোড",
+    "checkingUpdates": "আপডেটের জন্য চেক করা হচ্ছে...",
+    "pleaseWait": "অনুগ্রহ করে অপেক্ষা করুন",
+    "upToDate": "অ্যাপটি আপ-টু-ডেট আছে",
+    "downloadingUpdate": "আপডেট ডাউনলোড হচ্ছে...",
+    "restartingApp": "অ্যাপ রিস্টার্ট হচ্ছে...",
+    "devModeUpdateMsg": "ডেভেলপার মোডে আপডেট করা যাবে না",
+    "adjustments": "অ্যাডজাস্টমেন্ট",
+    "locationPermissionMsg": "আপনার এলাকার নামাজের সময় জানতে অনুগ্রহ করে লোকেশন পারমিশন দিন।",
+    "locationFetchError": "লোকেশন জানা যায়নি।"
   },
   "names": {
     "titleEn": "আল্লাহর ৯৯ নাম",
@@ -382,12 +401,15 @@
     "titleAr": "اتجاه القبلة",
     "pointing": "কাবার দিকে পয়েন্ট করছে",
     "align": "ফোনটি ফ্ল্যাট করে ধরুন",
-    "north": "উ",
+    "north": "উঃ",
     "currentHeading": "এখনকার দিক",
     "qiblaDirection": "কিবলার দিক",
     "turnRight": "{{degrees}}° ডানে ঘুরুন",
     "turnLeft": "{{degrees}}° বামে ঘুরুন",
-    "facingQibla": "আপনি কিবলার দিকে মুখ করে আছেন!"
+    "facingQibla": "আপনি কিবলার দিকে মুখ করে আছেন!",
+    "east": "পূঃ",
+    "south": "দঃ",
+    "west": "পঃ"
   },
   "stories": {
     "titleEn": "সূরার প্রেক্ষাপট",
@@ -1240,7 +1262,10 @@
     "fri": "শুক্র",
     "sat": "শনি"
   },
-  "search": "খুঁজুন...",
+  "search": {
+    "noMatchingDuas": "\"{{query}}\" এর জন্য কোনো দোয়া পাওয়া যায়নি",
+    "noMatchingQuran": "\"{{query}}\" এর জন্য কোনো ফলাফল পাওয়া যায়নি"
+  },
   "noResults": "কোন ফলাফল পাওয়া যায়নি",
   "trivia": {
     "title": "ইসলামিক কুইজ",
@@ -1256,6 +1281,20 @@
   },
   "common": {
     "less": "কম",
-    "more": "বেশি"
-  }
+    "more": "বেশি",
+    "cancel": "বাতিল",
+    "create": "তৈরি করুন",
+    "done": "সম্পন্ন",
+    "edit": "সম্পাদনা করুন",
+    "error": "ত্রুটি",
+    "permissionDenied": "অনুমতি দেওয়া হয়নি"
+  },
+  "myDuas": {
+    "arabicPlaceholder": "بِسْمِ اللَّهِ...",
+    "bnTranslationPlaceholder": "বাংলা অনুবাদ...",
+    "bnTransliterationPlaceholder": "বাংলা উচ্চারণ...",
+    "enTranslationPlaceholder": "ইংরেজি অনুবাদ...",
+    "enTransliterationPlaceholder": "ইংরেজি উচ্চারণ..."
+  },
+  "searchLabel": "খুঁজুন..."
 }

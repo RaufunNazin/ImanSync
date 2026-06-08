@@ -1,10 +1,10 @@
+import ThemeCard from '@/components/ThemeCard';
 import React, { useEffect, useState } from 'react';
 import { View, Text, StyleSheet, ScrollView, TouchableOpacity, ActivityIndicator } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useLocalSearchParams } from 'expo-router';
 import { Fonts, Spacing, useThemeColors } from '@/constants/theme';
 import PageHeader from '@/components/page-header';
-import { BlurView } from 'expo-blur';
 import { useTranslation } from 'react-i18next';
 import { useAudioPlayer } from '@/hooks/useAudioPlayer';
 import { ChevronLeft, ChevronRight, Volume2 } from 'lucide-react-native';
@@ -107,7 +107,7 @@ export default function QuranLearnScreen() {
       <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={styles.container}>
         
         {/* Helper Banner */}
-        <BlurView intensity={40} tint={colors.glassTint as any} style={[styles.banner, { borderColor: colors.border }]}>
+        <ThemeCard intensity={40}  style={[styles.banner, { borderColor: colors.border }]}>
           <TouchableOpacity 
             onPress={() => {
               if (ayahAudioUrl) {
@@ -124,7 +124,7 @@ export default function QuranLearnScreen() {
               ? 'উচ্চারণ ও অর্থ জানতে যেকোনো আরবি শব্দের উপর ট্যাপ করুন। অথবা সম্পূর্ণ আয়াত শুনতে প্লে বাটনে চাপুন।' 
               : 'Tap on any Arabic word to hear its pronunciation. Or press Play to hear the full Ayah.'}
           </Text>
-        </BlurView>
+        </ThemeCard>
 
         {/* Tajweed Legend */}
         <View 
@@ -143,7 +143,7 @@ export default function QuranLearnScreen() {
         {/* Translation Box */}
         <View style={{ minHeight: 80, marginBottom: Spacing.three }}>
           {selectedWord ? (
-            <BlurView intensity={50} tint={colors.glassTint as any} style={[styles.translationBox, { borderColor: colors.accent }]}>
+            <ThemeCard intensity={50}  style={[styles.translationBox, { borderColor: colors.accent }]}>
               <Text style={[styles.selectedArabic, { color: colors.highlight }]}>
                 {selectedWord.text_uthmani}
               </Text>
@@ -153,7 +153,7 @@ export default function QuranLearnScreen() {
               <Text style={[styles.selectedTranslation, { color: colors.text }]}>
                 {selectedWord.translation?.text || ''}
               </Text>
-            </BlurView>
+            </ThemeCard>
           ) : (
             <View style={[styles.translationBoxPlaceholder, { borderColor: colors.border }]} />
           )}

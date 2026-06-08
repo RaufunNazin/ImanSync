@@ -1,10 +1,10 @@
+import ThemeCard from '@/components/ThemeCard';
 import React, { useEffect, useState } from 'react';
 import { View, Text, StyleSheet, ScrollView, TouchableOpacity } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useRouter } from 'expo-router';
 import { Fonts, Spacing, useThemeColors } from '@/constants/theme';
 import PageHeader from '@/components/page-header';
-import { BlurView } from 'expo-blur';
 import { useTranslation } from 'react-i18next';
 import { QURAN_CURRICULUM } from '@/data/quran-curriculum';
 import AsyncStorage from '@react-native-async-storage/async-storage';
@@ -75,9 +75,9 @@ export default function LearnQuranHubScreen() {
                         {isCompleted && <CheckCircle size={16} color={colors.background} />}
                       </View>
                       
-                      <BlurView 
+                      <ThemeCard 
                         intensity={40} 
-                        tint={colors.glassTint as any} 
+                         
                         style={[styles.lessonCard, { borderColor: isCompleted ? colors.highlight + '50' : colors.border }]}
                       >
                         <View style={styles.lessonInfo}>
@@ -95,7 +95,7 @@ export default function LearnQuranHubScreen() {
                         <View style={[styles.startBtn, { backgroundColor: colors.accent + '20' }]}>
                           <ChevronRight size={20} color={colors.accent} />
                         </View>
-                      </BlurView>
+                      </ThemeCard>
                     </View>
                   </TouchableOpacity>
                 );

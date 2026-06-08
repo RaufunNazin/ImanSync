@@ -1,9 +1,10 @@
 import React, { useState, useMemo } from 'react';
+import ThemeCard from '@/components/ThemeCard';
 import { View, Text, StyleSheet, ScrollView, TouchableOpacity, TextInput, Modal, KeyboardAvoidingView, Platform, Dimensions } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useTranslation } from 'react-i18next';
 import { useRouter } from 'expo-router';
-import { BlurView } from 'expo-blur';
+
 import { Target, Edit3, X, Plus, Minus, History, CheckCircle2 } from 'lucide-react-native';
 import * as Haptics from 'expo-haptics';
 
@@ -60,7 +61,7 @@ export default function QuranTrackerScreen() {
         <ScrollView contentContainerStyle={styles.container} showsVerticalScrollIndicator={false}>
           
           {/* Progress Overview Card */}
-          <BlurView intensity={30} tint={colors.glassTint as any} style={[styles.card, themeStyles.cardShadow, { borderColor: colors.border }]}>
+          <View  style={[styles.card, themeStyles.cardShadow, { borderColor: colors.border }]}>
             <View style={styles.cardHeader}>
               <View style={{ flexDirection: 'row', alignItems: 'center', gap: Spacing.two }}>
                 <Target size={20} color={isGoalMet ? colors.highlight : colors.accent} />
@@ -111,10 +112,10 @@ export default function QuranTrackerScreen() {
                 <Text style={[styles.quickAddText, { color: isGoalMet ? colors.highlight : colors.accent }]}>{t('quran.addPage', { defaultValue: 'Add Page' })}</Text>
               </TouchableOpacity>
             </View>
-          </BlurView>
+          </View>
 
           {/* Goal Customization */}
-          <View style={[styles.card, themeStyles.cardShadow, { backgroundColor: colors.backgroundElement, borderColor: colors.border }]}>
+          <ThemeCard  style={[styles.card]}>
             <View style={styles.cardHeader}>
               <Text style={[styles.cardTitle, { color: colors.text }]}>{t('quran.dailyGoal', { defaultValue: 'Daily Goal' })}</Text>
               <TouchableOpacity onPress={() => setIsEditingGoal(!isEditingGoal)}>
@@ -142,12 +143,12 @@ export default function QuranTrackerScreen() {
                 </View>
               )}
             </View>
-          </View>
+          </ThemeCard>
 
           {/* Daily Reflection / Notes */}
           <View style={{ marginTop: Spacing.four }}>
             <Text style={[styles.sectionTitle, { color: colors.textSecondary }]}>{t('quran.dailyReflection', { defaultValue: "Today's Reflection" })}</Text>
-            <View style={[styles.noteContainer, { backgroundColor: colors.backgroundElement, borderColor: colors.border }]}>
+            <ThemeCard  style={styles.noteContainer}>
               <TextInput
                 style={[styles.noteInput, { color: colors.text }]}
                 placeholder={t('quran.writeNote', { defaultValue: 'Write down what you learned or felt today...' })}
@@ -158,7 +159,7 @@ export default function QuranTrackerScreen() {
                 onBlur={saveNote}
                 textAlignVertical="top"
               />
-            </View>
+            </ThemeCard>
           </View>
 
           {/* Reading History (Heatmap) */}
@@ -168,7 +169,7 @@ export default function QuranTrackerScreen() {
               <History size={16} color={colors.textSecondary} />
             </View>
             
-            <BlurView intensity={30} tint={colors.glassTint as any} style={[styles.card, themeStyles.cardShadow, { borderColor: colors.border }]}>
+            <View  style={[styles.card, themeStyles.cardShadow, { borderColor: colors.border }]}>
               <View style={styles.heatmapGrid}>
                 {past30Days.map((dateStr) => {
                   const pages = readingStore.historyLog[dateStr] || 0;
@@ -208,7 +209,7 @@ export default function QuranTrackerScreen() {
                 </View>
                 <Text style={{ fontFamily: Fonts.outfit, fontSize: 12, color: colors.textSecondary }}>{t('common.more', { defaultValue: 'More' })}</Text>
               </View>
-            </BlurView>
+            </View>
           </View>
           
           <View style={{ height: 100 }} />
@@ -220,7 +221,7 @@ export default function QuranTrackerScreen() {
         <Modal visible={true} transparent animationType="fade" onRequestClose={() => setHistoryModalDate(null)}>
           <View style={styles.modalBackdrop}>
             <TouchableOpacity style={StyleSheet.absoluteFill} activeOpacity={1} onPress={() => setHistoryModalDate(null)}>
-              <BlurView intensity={30} tint="dark" style={StyleSheet.absoluteFill} />
+              <View   style={StyleSheet.absoluteFill} />
             </TouchableOpacity>
             
             <View style={[styles.modalCard, { backgroundColor: colors.background, borderColor: colors.border }]}>

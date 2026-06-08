@@ -1,3 +1,4 @@
+import ThemeCard from '@/components/ThemeCard';
 import React, { useEffect, useState, useRef } from 'react';
 import { StyleSheet, Text, TouchableOpacity, View, Animated } from 'react-native';
 import { useLocalSearchParams, useRouter } from 'expo-router';
@@ -5,7 +6,6 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { Fonts, Spacing, useThemeColors } from '@/constants/theme';
 import PageHeader from '@/components/page-header';
 import { useTranslation } from 'react-i18next';
-import { BlurView } from 'expo-blur';
 import { ChevronRight } from 'lucide-react-native';
 import SkeletonBox from '@/components/SkeletonBox';
 import DuaService, { UnifiedDuaItem } from '@/services/duaService';
@@ -135,9 +135,9 @@ export default function DuaCategoryScreen() {
   const renderItem = ({ item: dua }: { item: UnifiedDuaItem }) => {
     const title = dua.name;
     return (
-      <BlurView
+      <ThemeCard
         intensity={40}
-        tint={colors.glassTint as any}
+        
         style={[styles.itemWrapper, { borderColor: colors.border }]}
       >
         <TouchableOpacity
@@ -177,7 +177,7 @@ export default function DuaCategoryScreen() {
           </View>
           <ChevronRight size={20} color={colors.textSecondary} />
         </TouchableOpacity>
-      </BlurView>
+      </ThemeCard>
     );
   };
 
@@ -220,14 +220,14 @@ export default function DuaCategoryScreen() {
       {loading ? (
         <View style={[styles.list, { gap: Spacing.three, padding: Spacing.four, paddingTop: 0 }]}>
           {[...Array(5)].map((_, i) => (
-            <BlurView key={i} intensity={40} tint={colors.glassTint as any} style={[styles.itemWrapper, { borderColor: colors.border }]}>
+            <ThemeCard key={i} intensity={40}  style={[styles.itemWrapper, { borderColor: colors.border }]}>
               <View style={[styles.item]}>
                 <View style={[styles.itemContent]}>
                   <SkeletonBox width={`${50 + (i % 3) * 15}%` as any} height={16} borderRadius={4} color={colors.border} />
                 </View>
                 <ChevronRight size={20} color={colors.border} />
               </View>
-            </BlurView>
+            </ThemeCard>
           ))}
         </View>
       ) : (

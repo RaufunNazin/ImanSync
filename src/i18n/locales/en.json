@@ -126,7 +126,12 @@
     "targetPages": "{{count}} Pages / Day",
     "todayProgress": "Today's Progress",
     "trackerTitle": "Reading Tracker",
-    "writeNote": "Write down what you learned or felt today..."
+    "writeNote": "Write down what you learned or felt today...",
+    "reciters": {
+      "mishary": "Mishary Rashid Alafasy",
+      "abdulBaset": "AbdulBaset AbdulSamad",
+      "sudais": "Abdur-Rahman as-Sudais"
+    }
   },
   "quranSettings": {
     "title": "Reading Preferences",
@@ -310,7 +315,8 @@
     "bnTranslit": "Bangla Transliteration",
     "searchPlaceholder": "Search by name or translation...",
     "searchMyDuas": "Search My Duas",
-    "searchBookmarks": "Search Bookmarks"
+    "searchBookmarks": "Search Bookmarks",
+    "searchCategory": "Search Categories..."
   },
   "settings": {
     "viewSource": "View Source Code",
@@ -371,7 +377,20 @@
     "permanentStorageConfirmEnable": "Enable & Move Duas",
     "permanentStorageConfirmDisable": "Turn Off & Keep Locally",
     "storageChangeFailed": "Could not change storage mode. Please try again.",
-    "error": "Error"
+    "error": "Error",
+    "calendarSettings": "Calendar Settings",
+    "showBanglaCalendar": "Show Bangla Calendar",
+    "banglaOffset": "Bangla Date Adjustment",
+    "devMode": "Developer Mode",
+    "checkingUpdates": "Checking for updates...",
+    "pleaseWait": "Please wait",
+    "upToDate": "App is up to date",
+    "downloadingUpdate": "Downloading update...",
+    "restartingApp": "Restarting app...",
+    "devModeUpdateMsg": "Cannot update in dev mode",
+    "adjustments": "Adjustments",
+    "locationPermissionMsg": "Please enable location permissions to fetch prayer times for your area.",
+    "locationFetchError": "Could not fetch location."
   },
   "names": {
     "titleEn": "Allah's 99 Names",
@@ -387,7 +406,10 @@
     "qiblaDirection": "Qibla Direction",
     "turnRight": "Turn {{degrees}}° right",
     "turnLeft": "Turn {{degrees}}° left",
-    "facingQibla": "You are facing the Qibla!"
+    "facingQibla": "You are facing the Qibla!",
+    "east": "E",
+    "south": "S",
+    "west": "W"
   },
   "stories": {
     "titleEn": "Stories & Context",
@@ -1124,7 +1146,10 @@
     "fri": "Fri",
     "sat": "Sat"
   },
-  "search": "Search...",
+  "search": {
+    "noMatchingDuas": "No matching duas found for \"{{query}}\"",
+    "noMatchingQuran": "No results found for \"{{query}}\""
+  },
   "noResults": "No results found",
   "trivia": {
     "title": "Islamic Trivia",
@@ -1140,6 +1165,20 @@
   },
   "common": {
     "less": "Less",
-    "more": "More"
-  }
+    "more": "More",
+    "cancel": "Cancel",
+    "create": "Create",
+    "done": "Done",
+    "edit": "Edit",
+    "error": "Error",
+    "permissionDenied": "Permission Denied"
+  },
+  "myDuas": {
+    "arabicPlaceholder": "بِسْمِ اللَّهِ...",
+    "bnTranslationPlaceholder": "Bangla Translation...",
+    "bnTransliterationPlaceholder": "Bangla Transliteration...",
+    "enTranslationPlaceholder": "English Translation...",
+    "enTransliterationPlaceholder": "English Transliteration..."
+  },
+  "searchLabel": "Search..."
 }

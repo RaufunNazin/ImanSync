@@ -1,9 +1,9 @@
+import ThemeCard from '@/components/ThemeCard';
 import React, { useCallback, useState } from 'react';
 import { ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Fonts, Spacing, useThemeColors } from '@/constants/theme';
 import PageHeader from '@/components/page-header';
-import { BlurView } from 'expo-blur';
 import { ChevronRight, Bookmark, Search } from 'lucide-react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useFocusEffect, useRouter } from 'expo-router';
@@ -93,10 +93,10 @@ export default function DuaBookmarksScreen() {
         <View style={styles.list}>
           {/* Folders (only in root) */}
           {!folderId && folderStore.folders.map(folder => (
-            <BlurView
+            <ThemeCard
               key={folder.id}
               intensity={40}
-              tint={colors.glassTint as any}
+              
               style={[styles.itemWrapper, { borderColor: colors.border }]}
             >
               <TouchableOpacity
@@ -117,7 +117,7 @@ export default function DuaBookmarksScreen() {
                 </View>
                 <ChevronRight size={20} color={colors.textSecondary} />
               </TouchableOpacity>
-            </BlurView>
+            </ThemeCard>
           ))}
 
           {/* Divider if both exist */}
@@ -132,10 +132,10 @@ export default function DuaBookmarksScreen() {
             const title = dua.translationEn || dua.translationBn || "Saved Dua";
 
             return (
-              <BlurView
+              <ThemeCard
                 key={index}
                 intensity={40}
-                tint={colors.glassTint as any}
+                
                 style={[styles.itemWrapper, { borderColor: colors.border }]}
               >
                 <TouchableOpacity
@@ -163,7 +163,7 @@ export default function DuaBookmarksScreen() {
                   </TouchableOpacity>
                   <ChevronRight size={20} color={colors.textSecondary} />
                 </TouchableOpacity>
-              </BlurView>
+              </ThemeCard>
             );
           })}
           

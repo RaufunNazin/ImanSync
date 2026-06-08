@@ -1,6 +1,6 @@
+import ThemeCard from '@/components/ThemeCard';
 import { Fonts, Spacing, useThemeColors } from '@/constants/theme';
 import PageHeader from '@/components/page-header';
-import { BlurView } from 'expo-blur';
 import { useRouter } from 'expo-router';
 import { BookOpen, History, PenTool } from 'lucide-react-native';
 import React from 'react';
@@ -36,21 +36,21 @@ export default function StoriesScreen() {
         </Text>
 
         <View style={styles.featureList}>
-          <BlurView intensity={30} tint={colors.glassTint as any} style={styles.featureCard}>
+          <ThemeCard intensity={30}  style={styles.featureCard}>
             <PenTool size={24} color={colors.accent} />
             <View style={styles.featureTextWrapper}>
               <Text style={[styles.featureTitle, { color: colors.text }]}>{t('stories.authentic')}</Text>
               <Text style={[styles.featureDesc, { color: colors.textSecondary }]}>{t('stories.authenticDesc')}</Text>
             </View>
-          </BlurView>
+          </ThemeCard>
 
-          <BlurView intensity={30} tint={colors.glassTint as any} style={styles.featureCard}>
+          <ThemeCard intensity={30}  style={styles.featureCard}>
             <BookOpen size={24} color={colors.accent} />
             <View style={styles.featureTextWrapper}>
               <Text style={[styles.featureTitle, { color: colors.text }]}>{t('stories.deeper')}</Text>
               <Text style={[styles.featureDesc, { color: colors.textSecondary }]}>{t('stories.deeperDesc')}</Text>
             </View>
-          </BlurView>
+          </ThemeCard>
         </View>
 
         <View style={{ flex: 1 }} />

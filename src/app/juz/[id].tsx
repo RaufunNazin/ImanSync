@@ -1,6 +1,6 @@
+import ThemeCard from '@/components/ThemeCard';
 import { Fonts, Spacing, useThemeColors } from '@/constants/theme';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import { BlurView } from 'expo-blur';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { Bookmark, ChevronLeft, Minus, Plus, Settings2, X, Play, Pause } from 'lucide-react-native';
 import React, { useEffect, useRef, useState } from 'react';
@@ -287,19 +287,19 @@ export default function JuzScreen() {
                 style={[{ padding: 12, borderRadius: 12, borderWidth: 1, borderColor: colors.border }, currentReciterId === 7 && { borderColor: colors.highlight, backgroundColor: colors.highlight + '15' }]} 
                 onPress={() => setReciter(7)}
               >
-                <Text style={[styles.settingLabel, { color: currentReciterId === 7 ? colors.highlight : colors.text }]}>Mishary Rashid Alafasy</Text>
+                <Text style={[styles.settingLabel, { color: currentReciterId === 7 ? colors.highlight : colors.text }]}>{t("quran.reciters.mishary")}</Text>
               </TouchableOpacity>
               <TouchableOpacity 
                 style={[{ padding: 12, borderRadius: 12, borderWidth: 1, borderColor: colors.border }, currentReciterId === 1 && { borderColor: colors.highlight, backgroundColor: colors.highlight + '15' }]} 
                 onPress={() => setReciter(1)}
               >
-                <Text style={[styles.settingLabel, { color: currentReciterId === 1 ? colors.highlight : colors.text }]}>AbdulBaset AbdulSamad</Text>
+                <Text style={[styles.settingLabel, { color: currentReciterId === 1 ? colors.highlight : colors.text }]}>{t("quran.reciters.abdulBaset")}</Text>
               </TouchableOpacity>
               <TouchableOpacity 
                 style={[{ padding: 12, borderRadius: 12, borderWidth: 1, borderColor: colors.border }, currentReciterId === 3 && { borderColor: colors.highlight, backgroundColor: colors.highlight + '15' }]} 
                 onPress={() => setReciter(3)}
               >
-                <Text style={[styles.settingLabel, { color: currentReciterId === 3 ? colors.highlight : colors.text }]}>Abdur-Rahman as-Sudais</Text>
+                <Text style={[styles.settingLabel, { color: currentReciterId === 3 ? colors.highlight : colors.text }]}>{t("quran.reciters.sudais")}</Text>
               </TouchableOpacity>
             </View>
           </ScrollView>
@@ -368,7 +368,7 @@ export default function JuzScreen() {
           onScroll={handleScroll}
           scrollEventThrottle={16}
           renderItem={({ item }) => (
-            <BlurView intensity={30} tint={colors.glassTint as any} style={styles.ayahCardWrapper}>
+            <ThemeCard intensity={30}  style={styles.ayahCardWrapper}>
               <View style={styles.ayahCard}>
                 <View style={styles.ayahHeader}>
                   <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8 }}>
@@ -408,7 +408,7 @@ export default function JuzScreen() {
                   </Text>
                 )}
               </View>
-            </BlurView>
+            </ThemeCard>
           )}
         />
       )}

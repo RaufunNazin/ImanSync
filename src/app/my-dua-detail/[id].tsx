@@ -1,7 +1,7 @@
+import ThemeCard from '@/components/ThemeCard';
 import React, { useEffect, useState } from 'react';
 import { View, Text, StyleSheet, ScrollView, ActivityIndicator, Image, TouchableOpacity, Modal, TouchableWithoutFeedback } from 'react-native';
 import { Trash2, Edit2, Bookmark, Settings2, Minus, Plus, X } from 'lucide-react-native';
-import { BlurView } from 'expo-blur';
 import { saveMyDuas } from '@/utils/my-duas-storage';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { SafeAreaView } from 'react-native-safe-area-context';
@@ -300,7 +300,7 @@ export default function MyDuaDetailScreen() {
       <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={styles.container}>
         <TouchableOpacity activeOpacity={0.9} onLongPress={() => setShowOptionsSheet(true)} delayLongPress={300}>
           {dua.type === 'text' && (
-            <BlurView intensity={40} tint={colors.glassTint as any} style={[styles.card, themeStyles.cardShadow, { borderColor: colors.border }]}>
+            <ThemeCard intensity={40}  style={[styles.card, themeStyles.cardShadow, { borderColor: colors.border }]}>
               {showArabic && (
                 <View style={styles.section}>
                   <Text style={[styles.arabic, { color: colors.text, fontSize: settings.arabicFontSize, lineHeight: settings.arabicFontSize * 1.6 }]}>{dua.arabic}</Text>
@@ -336,7 +336,7 @@ export default function MyDuaDetailScreen() {
                   <Text style={[styles.translation, { color: colors.text, fontSize: settings.translationFontSize, lineHeight: settings.translationFontSize * 1.5 }]}>{(dua.translationEn || dua.translation || '').replace(/\\n/g, '\n')}</Text>
                 </View>
               )}
-            </BlurView>
+            </ThemeCard>
           )}
 
           {dua.type === 'image' && localUri && (

@@ -1,3 +1,4 @@
+import ThemeCard from '@/components/ThemeCard';
 import React, { useEffect, useState, useRef } from 'react';
 import { ActivityIndicator, StyleSheet, Text, TouchableOpacity, View, Animated } from 'react-native';
 import { useRouter } from 'expo-router';
@@ -5,7 +6,6 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { Fonts, Spacing, useThemeColors } from '@/constants/theme';
 import PageHeader from '@/components/page-header';
 import { useTranslation } from 'react-i18next';
-import { BlurView } from 'expo-blur';
 import { Search, FolderLock, X, AlertTriangle } from 'lucide-react-native';
 import {
   loadMyDuas, saveMyDuas, saveMediaFile, UserDua,
@@ -182,9 +182,9 @@ export default function MyDuasScreen() {
       }}
       onPress={() => router.push(`/my-dua-detail/${dua.id}` as any)}
     >
-      <BlurView
+      <ThemeCard
         intensity={40}
-        tint={colors.glassTint as any}
+        
         style={[styles.duaCard, { borderColor: colors.border }]}
       >
         <View style={styles.duaHeader}>
@@ -208,7 +208,7 @@ export default function MyDuasScreen() {
           </View>
           <ChevronRight size={20} color={colors.textSecondary} />
         </View>
-      </BlurView>
+      </ThemeCard>
     </TouchableOpacity>
   );
 

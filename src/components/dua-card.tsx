@@ -1,7 +1,7 @@
 import React from 'react';
 import { StyleSheet, Text, TouchableOpacity, View } from 'react-native';
-import { BlurView } from 'expo-blur';
-import { Fonts, Spacing, useThemeStyles } from '@/constants/theme';
+import ThemeCard from '@/components/ThemeCard';
+import { Fonts, Spacing } from '@/constants/theme';
 import { useTranslation } from 'react-i18next';
 import { Bookmark } from 'lucide-react-native';
 import { formatNumber } from '@/utils/formatNumber';
@@ -32,16 +32,14 @@ export default function DuaCard({
   colors,
 }: DuaCardProps) {
   const { t, i18n } = useTranslation();
-  const themeStyles = useThemeStyles();
-
+  
   return (
-    <View style={[styles.wrapper, { borderColor: colors.border }]}>
-      <BlurView intensity={40} tint={colors.glassTint as any} style={StyleSheet.absoluteFill} />
-      <TouchableOpacity
-        style={[styles.card, themeStyles.cardShadow,
+    <ThemeCard intensity={40} style={[styles.wrapper, 
           (isMyDuas || id === 'bookmarks') && { backgroundColor: colors.accent + '1A' },
           isCustom && { backgroundColor: colors.highlight + '1A' }
-        ]}
+    ]}>
+      <TouchableOpacity
+        style={[styles.card]}
         activeOpacity={0.7}
         onPress={onPress}
         onLongPress={onLongPress}
@@ -64,14 +62,14 @@ export default function DuaCard({
 
 
         </TouchableOpacity>
-    </View>
+    </ThemeCard>
   );
 }
 
 const styles = StyleSheet.create({
   wrapper: {
     borderRadius: 20,
-    overflow: 'hidden',
+    
     borderWidth: 1,
     flex: 1,
   },

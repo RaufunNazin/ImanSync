@@ -10,6 +10,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { formatNumber } from '@/utils/formatNumber';
 import OptionsModal from '@/components/OptionsModal';
 import SkeletonBox from '@/components/SkeletonBox';
+import ThemeCard from '@/components/ThemeCard';
 import { getBanglaDate } from '@/utils/banglaCalendar';
 import { Switch } from 'react-native';
 
@@ -282,7 +283,7 @@ export default function CalendarScreen() {
             <View style={[styles.daysBar, { backgroundColor: colors.backgroundElement, borderColor: colors.border }]}>
               {Array.from({length: 7}).map((_, i) => (
                 <View key={i} style={styles.gridCellHeader}>
-                  <SkeletonBox width={24} height={12} borderRadius={6} color={colors.border} />
+                  <SkeletonBox width={24} height={12} borderRadius={6} color={colors.border} loaded={false} />
                 </View>
               ))}
             </View>
@@ -291,32 +292,32 @@ export default function CalendarScreen() {
             <View style={{ flexDirection: 'row', flexWrap: 'wrap' }}>
               {Array.from({length: 42}).map((_, i) => (
                 <View key={i} style={styles.gridCell}>
-                  <SkeletonBox width={28} height={20} borderRadius={6} color={colors.border} />
-                  <SkeletonBox width={16} height={10} borderRadius={4} color={colors.border} style={{ marginTop: 2, marginBottom: 4 }} />
+                  <SkeletonBox width={28} height={20} borderRadius={6} color={colors.border} loaded={false} />
+                  <SkeletonBox width={16} height={10} borderRadius={4} color={colors.border} style={{ marginTop: 2, marginBottom: 4 }} loaded={false} />
                 </View>
               ))}
             </View>
 
             {/* Details Skeletons */}
             <View style={styles.detailsContainer}>
-              <View style={[styles.infoCard, { borderColor: colors.border, backgroundColor: colors.backgroundElement }]}>
-                <SkeletonBox width={180} height={20} borderRadius={10} color={colors.border} style={{ marginBottom: 2 }} />
-                <SkeletonBox width={120} height={14} borderRadius={7} color={colors.border} />
-              </View>
+              <ThemeCard style={[styles.infoCard]}>
+                <SkeletonBox width={180} height={20} borderRadius={10} color={colors.border} style={{ marginBottom: 2 }} loaded={false} />
+                <SkeletonBox width={120} height={14} borderRadius={7} color={colors.border} loaded={false} />
+              </ThemeCard>
               <View style={styles.timesRow}>
-                <View style={[styles.infoCard, styles.timeBoxHalf, { borderColor: colors.border, backgroundColor: colors.backgroundElement, marginRight: 4, marginLeft: 0 }]}>
-                  <SkeletonBox width={80} height={12} borderRadius={6} color={colors.border} style={{ marginBottom: 4 }} />
-                  <SkeletonBox width={60} height={22} borderRadius={11} color={colors.border} />
-                </View>
-                <View style={[styles.infoCard, styles.timeBoxHalf, { borderColor: colors.border, backgroundColor: colors.backgroundElement, marginLeft: 4, marginRight: 0 }]}>
-                  <SkeletonBox width={80} height={12} borderRadius={6} color={colors.border} style={{ marginBottom: 4 }} />
-                  <SkeletonBox width={60} height={22} borderRadius={11} color={colors.border} />
-                </View>
+                <ThemeCard style={[styles.infoCard, styles.timeBoxHalf, { marginRight: 4, marginLeft: 0 }]}>
+                  <SkeletonBox width={80} height={12} borderRadius={6} color={colors.border} style={{ marginBottom: 4 }} loaded={false} />
+                  <SkeletonBox width={60} height={22} borderRadius={11} color={colors.border} loaded={false} />
+                </ThemeCard>
+                <ThemeCard style={[styles.infoCard, styles.timeBoxHalf, { marginLeft: 4, marginRight: 0 }]}>
+                  <SkeletonBox width={80} height={12} borderRadius={6} color={colors.border} style={{ marginBottom: 4 }} loaded={false} />
+                  <SkeletonBox width={60} height={22} borderRadius={11} color={colors.border} loaded={false} />
+                </ThemeCard>
               </View>
-              <View style={[styles.infoCard, { borderColor: colors.border, backgroundColor: colors.backgroundElement, marginBottom: 0 }]}>
-                <SkeletonBox width={60} height={12} borderRadius={6} color={colors.border} style={{ marginBottom: 8 }} />
-                <SkeletonBox width={140} height={16} borderRadius={8} color={colors.border} />
-              </View>
+              <ThemeCard style={[styles.infoCard, { marginBottom: 0 }]}>
+                <SkeletonBox width={60} height={12} borderRadius={6} color={colors.border} style={{ marginBottom: 8 }} loaded={false} />
+                <SkeletonBox width={140} height={16} borderRadius={8} color={colors.border} loaded={false} />
+              </ThemeCard>
             </View>
           </View>
         ) : (
@@ -347,7 +348,7 @@ export default function CalendarScreen() {
               return (
               <View style={styles.detailsContainer}>
                 {/* Date Card */}
-                <View style={[styles.infoCard, { borderColor: colors.border, backgroundColor: colors.backgroundElement }]}>
+                <ThemeCard style={[styles.infoCard]}>
                   <Text style={[styles.detailDateMain, { color: colors.highlight }]}>
                     {formatNumber(adjustedHijri.day, i18n.language)} {getLocalizedHijriMonth(adjustedHijri.month.number)} {formatNumber(adjustedHijri.year, i18n.language)}
                   </Text>
@@ -355,26 +356,26 @@ export default function CalendarScreen() {
                     {formatGregorianDate(selectedDayData.date.gregorian.date)}
                     {prefs.showBanglaCalendar && ` • ${formatNumber(bDate.day.toString(), i18n.language)} ${bDate.monthName} ${formatNumber(bDate.year.toString(), i18n.language)}`}
                   </Text>
-                </View>
+                </ThemeCard>
 
                 {/* Times Cards */}
                 <View style={styles.timesRow}>
-                  <View style={[styles.infoCard, styles.timeBoxHalf, { borderColor: colors.border, backgroundColor: colors.backgroundElement, marginRight: 4, marginLeft: 0 }]}>
+                  <ThemeCard style={[styles.infoCard, styles.timeBoxHalf, { marginRight: 4, marginLeft: 0 }]}>
                     <Text style={[styles.timeLabel, { color: colors.textSecondary }]}>{t('calendar.sahriEnd')}</Text>
                     <Text style={[styles.timeValue, { color: colors.highlight }]}>
                       {formatTimeStr(selectedDayData.timings.Fajr)}
                     </Text>
-                  </View>
-                  <View style={[styles.infoCard, styles.timeBoxHalf, { borderColor: colors.border, backgroundColor: colors.backgroundElement, marginLeft: 4, marginRight: 0 }]}>
+                  </ThemeCard>
+                  <ThemeCard style={[styles.infoCard, styles.timeBoxHalf, { marginLeft: 4, marginRight: 0 }]}>
                     <Text style={[styles.timeLabel, { color: colors.textSecondary }]}>{t('calendar.iftarTime')}</Text>
                     <Text style={[styles.timeValue, { color: colors.accent }]}>
                       {formatTimeStr(selectedDayData.timings.Maghrib)}
                     </Text>
-                  </View>
+                  </ThemeCard>
                 </View>
 
                 {/* Events Card */}
-                <View style={[styles.infoCard, { borderColor: colors.border, backgroundColor: colors.backgroundElement, marginBottom: 0 }]}>
+                <ThemeCard style={[styles.infoCard, { marginBottom: 0 }]}>
                   <Text style={[styles.eventsLabel, { color: colors.textSecondary }]}>{t('calendar.events')}</Text>
                   {adjustedHijri.holidays && adjustedHijri.holidays.length > 0 ? (
                     adjustedHijri.holidays.map((h: string, i: number) => (
@@ -383,7 +384,7 @@ export default function CalendarScreen() {
                   ) : (
                     <Text style={[styles.eventText, { color: colors.textSecondary }]}>{t('calendar.noEvents')}</Text>
                   )}
-                </View>
+                </ThemeCard>
               </View>
             )})()}
           </>

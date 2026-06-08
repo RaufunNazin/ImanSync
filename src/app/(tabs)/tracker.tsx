@@ -1,8 +1,8 @@
+import ThemeCard from '@/components/ThemeCard';
 import PageHeader from '@/components/page-header';
 import { Fonts, Spacing, useThemeColors } from '@/constants/theme';
 import { formatNumber } from '@/utils/formatNumber';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import { BlurView } from 'expo-blur';
 import * as Haptics from 'expo-haptics';
 import { Activity, BookOpen, CheckCircle2, HandCoins, Heart, RotateCcw, X, History } from 'lucide-react-native';
 import { useFocusEffect, useRouter } from 'expo-router';
@@ -12,7 +12,7 @@ import { ScrollView, StyleSheet, Text, TouchableOpacity, View, AppState, Modal, 
 import Animated, { useAnimatedProps, useAnimatedStyle, useSharedValue, withSpring, withTiming } from 'react-native-reanimated';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import Svg, { Circle } from 'react-native-svg';
-import SkeletonBox from '@/components/SkeletonBox';
+import AnimatedProgressBar from '@/components/AnimatedProgressBar';
 import { useQadaStore } from '@/store/qadaStore';
 // @ts-ignore
 import ConfettiCannon from 'react-native-confetti-cannon';
@@ -52,9 +52,9 @@ const TaskCard = ({ task, isDone, onToggle, colors, t }: { task: typeof DAILY_TA
 
   return (
     <Animated.View style={[styles.taskCardWrapper, animatedStyle]}>
-      <BlurView
+      <ThemeCard
         intensity={isDone ? 70 : 25}
-        tint={colors.glassTint as any}
+        
         style={[
           styles.taskCardBlur,
           isDone && { borderColor: colors.accent, borderWidth: 1.5 },
@@ -94,7 +94,7 @@ const TaskCard = ({ task, isDone, onToggle, colors, t }: { task: typeof DAILY_TA
             </View>
           )}
         </TouchableOpacity>
-      </BlurView>
+      </ThemeCard>
     </Animated.View>
   );
 };
@@ -262,24 +262,25 @@ export default function TrackerScreen() {
         <Text style={[styles.sectionTitle, { color: colors.textSecondary, marginTop: Spacing.four }]}>
           {t('tracker.consistency', { title })}
         </Text>
-        <BlurView intensity={40} tint={colors.glassTint as any} style={[styles.chartCard, { borderColor: colors.border }]}>
+        <ThemeCard intensity={40}  style={[styles.chartCard, { borderColor: colors.border }]}>
           <View style={styles.chartContainer}>
             {bars.map((val: number, i: number) => (
               <TouchableOpacity
                 key={i}
-                style={styles.chartBarWrapper}
+                style={[styles.chartBarWrapper, { justifyContent: 'flex-end' }]}
                 onPress={() => {
                   Haptics.selectionAsync();
                   setHistoryModalDate(pastDays[i]);
                 }}
               >
-                <View style={[
-                  styles.chartBar,
-                  {
-                    height: `${Math.max(val, 2)}%`,
-                    backgroundColor: val === 100 ? colors.accent : val > 0 ? colors.highlight : colors.border
-                  }
-                ]} />
+                <AnimatedProgressBar
+                  progress={loading ? 0 : Math.max(val, val > 0 ? 2 : 0)}
+                  color={val === 100 ? colors.accent : val > 0 ? colors.highlight : colors.border}
+                  trackColor="transparent"
+                  height={undefined as any}
+                  duration={800}
+                  style={{ width: '100%', flex: 1, borderRadius: 4, transform: [{ rotate: '180deg' }] }}
+                />
               </TouchableOpacity>
             ))}
           </View>
@@ -310,7 +311,7 @@ export default function TrackerScreen() {
           <Text style={[styles.chartDesc, { color: colors.textSecondary, fontSize: 11, opacity: 0.6, marginTop: 8 }]}>
             {t('tracker.clickBarsHint', { defaultValue: 'Click on the bars to view daily details' })}
           </Text>
-        </BlurView>
+        </ThemeCard>
       </View>
     );
   };
@@ -381,38 +382,8 @@ export default function TrackerScreen() {
           ))}
         </View>
 
-        {loading ? (
-          <>
-            <View style={[styles.progressCard, { borderColor: colors.border, backgroundColor: colors.backgroundElement }]}>
-              <View style={styles.progressHeader}>
-                <View style={{ flex: 1, gap: 10 }}>
-                  <SkeletonBox width={140} height={22} borderRadius={11} color={colors.border} />
-                  <SkeletonBox width={180} height={14} borderRadius={7} color={colors.border} />
-                </View>
-                <SkeletonBox width={64} height={64} borderRadius={32} color={colors.border} />
-              </View>
-              <SkeletonBox width={200} height={14} borderRadius={7} color={colors.border} style={{ marginTop: 12 }} />
-            </View>
-
-            <View style={styles.gridSection}>
-              <SkeletonBox width={140} height={18} borderRadius={8} color={colors.border} style={{ marginBottom: 12 }} />
-              <View style={styles.taskGrid}>
-                {[...Array(9)].map((_, i) => (
-                  <View key={i} style={[styles.taskCardWrapper]}>
-                    <View style={[styles.taskCardBlur, { backgroundColor: colors.backgroundElement, borderColor: colors.border, borderWidth: 1 }]}>
-                      <View style={[styles.taskCard]}>
-                        <SkeletonBox width={60} height={14} borderRadius={7} color={colors.border} style={{ marginBottom: 16 }} />
-                        <View style={[styles.taskCardIcon, { backgroundColor: colors.border, opacity: 0.5 }]} />
-                      </View>
-                    </View>
-                  </View>
-                ))}
-              </View>
-            </View>
-          </>
-        ) : (
-          <>
-            <BlurView intensity={50} tint={colors.glassTint as any} style={[styles.progressCard, { borderColor: colors.border }]}>
+        <>
+            <ThemeCard intensity={50}  style={[styles.progressCard, { borderColor: colors.border }]}>
               <View style={styles.progressHeader}>
                 <View style={{ flex: 1 }}>
                   <Text style={[styles.progressTitle, { color: colors.text }]}>
@@ -420,14 +391,14 @@ export default function TrackerScreen() {
                   </Text>
                   <Text style={[styles.progressSubtitle, { color: colors.textSecondary }]}>
                     {activeTab === 'Daily'
-                      ? t('tracker.tasksCompleted', { count: formatNumber(completedCount, i18n.language), total: formatNumber(DAILY_TASKS.length, i18n.language) })
+                      ? i18n.language === 'bn' ? `${formatNumber(completedCount, 'bn')}/${formatNumber(DAILY_TASKS.length, 'bn')} কাজ সম্পন্ন` : `${completedCount}/${DAILY_TASKS.length} tasks done`
                       : t('tracker.consistency', { title: activeTab === 'Weekly' ? t('tracker.weekly') : t('tracker.monthly') })}
                   </Text>
                 </View>
 
                 <View style={styles.progressCircleContainer}>
                   <Svg width={64} height={64} viewBox="0 0 64 64" style={[styles.svgAbsolute, { transform: [{ rotate: '-90deg' }] }]}>
-                    <Circle cx={32} cy={32} r={radius} stroke={colors.border} strokeWidth={strokeWidth} fill="none" />
+                    <Circle cx={32} cy={32} r={radius} stroke={colors.textSecondary} strokeOpacity={0.15} strokeWidth={strokeWidth} fill="none" />
                     <AnimatedCircle
                       cx={32}
                       cy={32}
@@ -451,24 +422,23 @@ export default function TrackerScreen() {
               <Text style={[styles.encouragement, { color: colors.accent }]}>
                 {getEncouragementMsg(displayPercentage)}
               </Text>
-            </BlurView>
+            </ThemeCard>
 
 
             {activeTab === 'Daily' && renderDaily()}
             {activeTab === 'Weekly' && renderRealChart(7, t('tracker.weekly'), weeklyData)}
             {activeTab === 'Monthly' && renderRealChart(30, t('tracker.monthly'), monthlyData)}
-          </>
-        )}
-      </ScrollView>
+        </>
+        </ScrollView>
 
       {/* Interactive History Modal */}
       {historyModalDate && (
         <Modal visible={true} transparent animationType="fade" onRequestClose={() => setHistoryModalDate(null)}>
           <View style={styles.modalBackdrop}>
             <TouchableOpacity style={StyleSheet.absoluteFill} activeOpacity={1} onPress={() => setHistoryModalDate(null)}>
-              <BlurView intensity={30} tint="dark" style={StyleSheet.absoluteFill} />
+              <ThemeCard intensity={30} style={StyleSheet.absoluteFill} />
             </TouchableOpacity>
-            <View style={[styles.modalCard, { backgroundColor: colors.background, borderColor: colors.border }]}>
+            <ThemeCard intensity={80} style={[styles.modalCard, { borderColor: colors.border }]}>
               <View style={styles.modalHeader}>
                 <Text style={[styles.modalTitle, { color: colors.text }]}>
                   {new Date(historyModalDate).toLocaleDateString(i18n.language, { weekday: 'long', month: 'long', day: 'numeric' })}
@@ -498,7 +468,7 @@ export default function TrackerScreen() {
                   );
                 })}
               </ScrollView>
-            </View>
+            </ThemeCard>
           </View>
         </Modal>
       )}

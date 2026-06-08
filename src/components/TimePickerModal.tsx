@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { Modal, StyleSheet, Text, TouchableOpacity, View, PanResponder, Animated } from 'react-native';
-import { BlurView } from 'expo-blur';
+import ThemeCard from '@/components/ThemeCard';
 import { Fonts, Spacing } from '@/constants/theme';
 import { useTranslation } from 'react-i18next';
 import { formatNumber } from '@/utils/formatNumber';
@@ -182,7 +182,7 @@ export default function TimePickerModal({
   return (
     <Modal visible={visible} transparent animationType="fade">
       <View style={styles.overlay}>
-        <BlurView intensity={20} tint="dark" style={StyleSheet.absoluteFill} />
+        <ThemeCard intensity={20} style={StyleSheet.absoluteFill} />
         
         <View style={[styles.container, { backgroundColor: colors.background, borderColor: colors.border }]}>
           <Text style={[styles.title, { color: colors.textSecondary }]}>{title}</Text>

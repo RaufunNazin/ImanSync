@@ -287,7 +287,7 @@ export default function DuaSearchScreen() {
             })}
             {searchQuery.length > 0 && searchResults.length === 0 && !fetchingAll && (
               <Text style={[styles.emptyText, { color: colors.textSecondary }]}>
-                No matching duas found for "{searchQuery}"
+                {t('search.noMatchingDuas', { query: searchQuery })}
               </Text>
             )}
           </View>

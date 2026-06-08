@@ -1,13 +1,13 @@
+import ThemeCard from '@/components/ThemeCard';
 import React, { useEffect } from 'react';
 import { View, Text, StyleSheet, ScrollView, TouchableOpacity } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useTranslation } from 'react-i18next';
 import { useRouter } from 'expo-router';
-import { BlurView } from 'expo-blur';
 import { Plus, Minus, ArrowLeft, History } from 'lucide-react-native';
 import * as Haptics from 'expo-haptics';
 
-import { Fonts, Spacing, useThemeColors, useThemeStyles } from '@/constants/theme';
+import { Fonts, Spacing, useThemeColors,  } from '@/constants/theme';
 import { useQadaStore, QadaType } from '@/store/qadaStore';
 import { formatNumber } from '@/utils/formatNumber';
 import Animated, { LinearTransition, FadeIn, FadeOut } from 'react-native-reanimated';
@@ -15,8 +15,7 @@ import Animated, { LinearTransition, FadeIn, FadeOut } from 'react-native-reanim
 export default function QadaTrackerScreen() {
   const { t, i18n } = useTranslation();
   const colors = useThemeColors();
-  const themeStyles = useThemeStyles();
-  const router = useRouter();
+    const router = useRouter();
   const qadaStore = useQadaStore();
 
   useEffect(() => {
@@ -32,7 +31,7 @@ export default function QadaTrackerScreen() {
     const count = qadaStore[type];
     
     return (
-      <BlurView intensity={30} tint={colors.glassTint as any} style={[styles.card, themeStyles.cardShadow, { borderColor: colors.border }]}>
+      <ThemeCard intensity={30} style={styles.card}>
         <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' }}>
           
           <View style={{ flex: 1, flexDirection: 'row', alignItems: 'center', gap: Spacing.three }}>
@@ -64,7 +63,7 @@ export default function QadaTrackerScreen() {
           </Animated.View>
 
         </View>
-      </BlurView>
+      </ThemeCard>
     );
   };
 

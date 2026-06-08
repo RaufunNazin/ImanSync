@@ -319,7 +319,7 @@ export default function AddDuaModal({ visible, onClose, onSave, initialData, col
                     <Text style={[styles.label, { color: colors.textSecondary }]}>{t('dua.duaArabic')}</Text>
                     <TextInput
                       style={[styles.input, styles.textArea, { color: colors.text, backgroundColor: colors.card, borderColor: colors.border, fontFamily: Fonts.arabic }]}
-                      placeholder="بِسْمِ اللَّهِ..."
+                      placeholder={t("myDuas.arabicPlaceholder", { defaultValue: "بِسْمِ اللَّهِ..." })}
                       placeholderTextColor={colors.textSecondary + '88'}
                       value={arabic}
                       onChangeText={setArabic}
@@ -334,7 +334,7 @@ export default function AddDuaModal({ visible, onClose, onSave, initialData, col
                         <Text style={[styles.label, { color: colors.textSecondary }]}>{t('dua.duaTranslationBn', {defaultValue: 'Bangla Translation'})}</Text>
                         <TextInput
                           style={[styles.input, styles.textArea, { color: colors.text, backgroundColor: colors.card, borderColor: colors.border }]}
-                          placeholder="বাংলা অনুবাদ..."
+                          placeholder={t("myDuas.bnTranslationPlaceholder", { defaultValue: "বাংলা অনুবাদ..." })}
                           placeholderTextColor={colors.textSecondary + '88'}
                           value={translationBn}
                           onChangeText={setTranslationBn}
@@ -345,7 +345,7 @@ export default function AddDuaModal({ visible, onClose, onSave, initialData, col
                         <Text style={[styles.label, { color: colors.textSecondary }]}>{t('dua.duaTransliterationBn', {defaultValue: 'Bangla Transliteration'})}</Text>
                         <TextInput
                           style={[styles.input, styles.textArea, { color: colors.text, backgroundColor: colors.card, borderColor: colors.border }]}
-                          placeholder="বাংলা উচ্চারণ..."
+                          placeholder={t("myDuas.bnTransliterationPlaceholder", { defaultValue: "বাংলা উচ্চারণ..." })}
                           placeholderTextColor={colors.textSecondary + '88'}
                           value={transliterationBn}
                           onChangeText={setTransliterationBn}
@@ -359,7 +359,7 @@ export default function AddDuaModal({ visible, onClose, onSave, initialData, col
                         <Text style={[styles.label, { color: colors.textSecondary }]}>{t('dua.duaTranslationEn', {defaultValue: 'English Translation'})}</Text>
                         <TextInput
                           style={[styles.input, styles.textArea, { color: colors.text, backgroundColor: colors.card, borderColor: colors.border }]}
-                          placeholder="English Translation..."
+                          placeholder={t("myDuas.enTranslationPlaceholder", { defaultValue: "English Translation..." })}
                           placeholderTextColor={colors.textSecondary + '88'}
                           value={translationEn}
                           onChangeText={setTranslationEn}
@@ -370,7 +370,7 @@ export default function AddDuaModal({ visible, onClose, onSave, initialData, col
                         <Text style={[styles.label, { color: colors.textSecondary }]}>{t('dua.duaTransliterationEn', {defaultValue: 'English Transliteration'})}</Text>
                         <TextInput
                           style={[styles.input, styles.textArea, { color: colors.text, backgroundColor: colors.card, borderColor: colors.border }]}
-                          placeholder="English Transliteration..."
+                          placeholder={t("myDuas.enTransliterationPlaceholder", { defaultValue: "English Transliteration..." })}
                           placeholderTextColor={colors.textSecondary + '88'}
                           value={transliterationEn}
                           onChangeText={setTransliterationEn}
