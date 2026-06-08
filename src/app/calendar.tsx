@@ -1,6 +1,6 @@
 import PageHeader from '@/components/page-header';
 import React, { useEffect, useState, useMemo } from 'react';
-import { Colors, Fonts, Spacing } from '@/constants/theme';
+import { Fonts, Spacing, useThemeColors } from '@/constants/theme';
 import { usePreferencesStore } from '@/store/preferencesStore';
 import { useThemeStore } from '@/store/themeStore';
 import { ChevronLeft, ChevronRight } from 'lucide-react-native';
@@ -16,7 +16,7 @@ import { Switch } from 'react-native';
 export default function CalendarScreen() {
   const { t, i18n } = useTranslation();
   const theme = useThemeStore((s) => s.theme);
-  const colors = Colors[theme === 'unspecified' ? 'light' : theme ?? 'light'];
+  const colors = useThemeColors();
   const prefs = usePreferencesStore();
 
   const [currentDate, setCurrentDate] = useState(new Date());
@@ -277,9 +277,9 @@ export default function CalendarScreen() {
         </View>
 
         {loading ? (
-          <View style={{ flex: 1 }}>
+          <View style={{ flexShrink: 1, marginBottom: Spacing.four }}>
             {/* Days Bar skeleton */}
-            <View style={[styles.daysBar, { backgroundColor: colors.backgroundElement, borderColor: colors.border, paddingVertical: 12 }]}>
+            <View style={[styles.daysBar, { backgroundColor: colors.backgroundElement, borderColor: colors.border }]}>
               {Array.from({length: 7}).map((_, i) => (
                 <View key={i} style={styles.gridCellHeader}>
                   <SkeletonBox width={24} height={12} borderRadius={6} color={colors.border} />
@@ -288,7 +288,7 @@ export default function CalendarScreen() {
             </View>
             
             {/* Grid Cells Skeleton */}
-            <View style={{ flexDirection: 'row', flexWrap: 'wrap', marginBottom: Spacing.four }}>
+            <View style={{ flexDirection: 'row', flexWrap: 'wrap' }}>
               {Array.from({length: 42}).map((_, i) => (
                 <View key={i} style={styles.gridCell}>
                   <SkeletonBox width={28} height={20} borderRadius={6} color={colors.border} />

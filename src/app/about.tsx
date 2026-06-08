@@ -4,12 +4,10 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { useTranslation } from 'react-i18next';
 import PageHeader from '@/components/page-header';
 import { FontAwesome } from '@expo/vector-icons';
-import { Colors, Fonts, Spacing } from '@/constants/theme';
-import { useThemeStore } from '@/store/themeStore';
+import { Fonts, Spacing, useThemeColors } from '@/constants/theme';
 
 export default function AboutScreen() {
-  const scheme = useThemeStore((s) => s.theme);
-  const colors = Colors[scheme === 'unspecified' ? 'light' : scheme];
+  const colors = useThemeColors();
   const { t } = useTranslation();
 
   return (

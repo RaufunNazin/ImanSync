@@ -1,10 +1,10 @@
 import PageHeader from '@/components/page-header';
-import { Colors, Fonts, Spacing } from '@/constants/theme';
+import { Fonts, Spacing, useThemeColors } from '@/constants/theme';
 import { formatNumber } from '@/utils/formatNumber';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { BlurView } from 'expo-blur';
 import { useFocusEffect, useRouter } from 'expo-router';
-import { Bookmark, Search, Target, Flame, DownloadCloud, CheckCircle, Loader2, Minus, Plus, GraduationCap, ChevronRight, X, BookOpen } from 'lucide-react-native';
+import { Bookmark, Search, Target, DownloadCloud, CheckCircle, Loader2, GraduationCap, ChevronRight, X, BookOpen } from 'lucide-react-native';
 import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { StyleSheet, Text, TouchableOpacity, View, Animated } from 'react-native';
@@ -23,7 +23,7 @@ import * as Haptics from 'expo-haptics';
 
 export default function QuranScreen() {
   const scheme = useThemeStore((s) => s.theme);
-  const colors = Colors[scheme === 'unspecified' ? 'light' : scheme];
+  const colors = useThemeColors();
   const router = useRouter();
   const { t, i18n } = useTranslation();
   const audioStore = useAudioStore();
@@ -209,9 +209,39 @@ export default function QuranScreen() {
       <PageHeader 
         titleEn={t('quran.titleEn')} 
         rightElement={
-          <TouchableOpacity onPress={() => router.push('/quran-search' as any)} hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}>
-            <Search size={22} color={colors.textSecondary} />
-          </TouchableOpacity>
+          <View style={{ flexDirection: 'row', alignItems: 'center', gap: Spacing.three }}>
+            <TouchableOpacity 
+              activeOpacity={0.7}
+              style={{ 
+                flexDirection: 'row', 
+                alignItems: 'center', 
+                backgroundColor: isGoalMet ? colors.highlight + '22' : colors.accent + '22', 
+                paddingHorizontal: 10, 
+                paddingVertical: 5, 
+                borderRadius: 14, 
+                borderWidth: 1, 
+                borderColor: isGoalMet ? colors.highlight : colors.accent 
+              }}
+              onPress={() => {
+                Haptics.selectionAsync();
+                router.push('/quran-tracker' as any);
+              }}
+            >
+              <Target size={12} color={isGoalMet ? colors.highlight : colors.accent} style={{ marginRight: 4 }} />
+              <Text style={{ 
+                fontFamily: Fonts.outfit, 
+                fontSize: 12, 
+                color: isGoalMet ? colors.highlight : colors.accent, 
+                fontWeight: '600' 
+              }}>
+                {formatNumber(pagesReadToday, i18n.language)} / {formatNumber(readingStore.dailyGoalPages, i18n.language)}
+              </Text>
+            </TouchableOpacity>
+
+            <TouchableOpacity onPress={() => router.push('/quran-search' as any)} hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}>
+              <Search size={22} color={colors.textSecondary} />
+            </TouchableOpacity>
+          </View>
         }
       />
 
@@ -232,61 +262,6 @@ export default function QuranScreen() {
            </View>
         )}
 
-        {/* Daily Reading Goal Banner */}
-        <View style={{ backgroundColor: colors.backgroundElement, borderRadius: 16, padding: Spacing.four, marginBottom: Spacing.four, borderWidth: 1, borderColor: colors.border, zIndex: 10 }}>
-          <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: Spacing.three }}>
-            <View style={{ flexDirection: 'row', alignItems: 'center', gap: Spacing.two }}>
-              <Target size={18} color={isGoalMet ? colors.highlight : colors.accent} />
-              <Text style={{ fontFamily: Fonts.outfit, fontSize: 16, color: colors.text, fontWeight: '600' }}>
-                {t('quran.dailyGoal', { defaultValue: 'Daily Reading Goal' })}
-              </Text>
-            </View>
-            <View style={{ flexDirection: 'row', alignItems: 'center', gap: Spacing.one }}>
-              <Flame size={16} color={readingStore.currentStreak > 0 ? '#ff9800' : colors.textSecondary} />
-              <Text style={{ fontFamily: Fonts.outfit, fontSize: 14, color: readingStore.currentStreak > 0 ? '#ff9800' : colors.textSecondary, fontWeight: '600' }}>
-                {formatNumber(readingStore.currentStreak, i18n.language)} {t('quran.streak', { defaultValue: 'Day Streak' })}
-              </Text>
-            </View>
-          </View>
-          
-          <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' }}>
-            <View style={{ flex: 1, marginRight: Spacing.four }}>
-              <View style={{ flexDirection: 'row', justifyContent: 'space-between', marginBottom: 6 }}>
-                <Text style={{ fontFamily: Fonts.outfit, fontSize: 13, color: colors.textSecondary }}>
-                  {formatNumber(pagesReadToday, i18n.language)} / {formatNumber(readingStore.dailyGoalPages, i18n.language)} {t('quran.pages', { defaultValue: 'Pages' })}
-                </Text>
-                {isGoalMet && (
-                  <Text style={{ fontFamily: Fonts.outfit, fontSize: 13, color: colors.highlight, fontWeight: '600' }}>
-                    {t('quran.goalMet', { defaultValue: 'Goal Met!' })}
-                  </Text>
-                )}
-              </View>
-              <View style={{ height: 6, backgroundColor: colors.border, borderRadius: 3, overflow: 'hidden' }}>
-                <View style={{ height: '100%', width: `${Math.min(100, (pagesReadToday / readingStore.dailyGoalPages) * 100)}%`, backgroundColor: isGoalMet ? colors.highlight : colors.accent, borderRadius: 3 }} />
-              </View>
-            </View>
-
-            <View style={{ flexDirection: 'row', gap: Spacing.two }}>
-              <TouchableOpacity 
-                style={{ width: 36, height: 36, borderRadius: 18, backgroundColor: colors.border, alignItems: 'center', justifyContent: 'center' }}
-                onPress={() => {
-                  if (pagesReadToday > 0) readingStore.addPagesRead(-1);
-                }}
-              >
-                <Minus size={16} color={colors.text} />
-              </TouchableOpacity>
-              <TouchableOpacity 
-                style={{ width: 36, height: 36, borderRadius: 18, backgroundColor: isGoalMet ? colors.highlight + '22' : colors.accent + '22', alignItems: 'center', justifyContent: 'center', borderWidth: 1, borderColor: isGoalMet ? colors.highlight : colors.accent }}
-                onPress={() => {
-                  readingStore.addPagesRead(1);
-                  Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-                }}
-              >
-                <Plus size={16} color={isGoalMet ? colors.highlight : colors.accent} />
-              </TouchableOpacity>
-            </View>
-          </View>
-        </View>
 
         {/* Word-by-Word Learn Mode CTA */}
         {showLearnBanner && (
@@ -339,7 +314,7 @@ export default function QuranScreen() {
 
         {/* Tab Content */}
         {loading && activeTab === 'surah' ? (
-          <View style={[styles.listContainer, { marginTop: 8 }]}>
+          <View style={[styles.listContainer]}>
             {[...Array(8)].map((_, i) => (
               <View key={i} style={[styles.surahRowWrapper, { borderColor: colors.border, backgroundColor: colors.backgroundElement }]}>
                 <View style={[styles.surahRow]}>

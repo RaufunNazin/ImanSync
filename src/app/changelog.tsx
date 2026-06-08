@@ -3,13 +3,11 @@ import { View, Text, StyleSheet, ScrollView } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useTranslation } from 'react-i18next';
 import PageHeader from '@/components/page-header';
-import { Colors, Fonts, Spacing } from '@/constants/theme';
-import { useThemeStore } from '@/store/themeStore';
+import { Fonts, Spacing, useThemeColors } from '@/constants/theme';
 import systemConfig from '../../system_config.json';
 
 export default function ChangelogScreen() {
-  const scheme = useThemeStore((s) => s.theme);
-  const colors = Colors[scheme === 'unspecified' ? 'light' : scheme];
+  const colors = useThemeColors();
   const { t, i18n } = useTranslation();
   
   const lang = (i18n.language === 'bn' ? 'bn' : 'en') as 'en' | 'bn';

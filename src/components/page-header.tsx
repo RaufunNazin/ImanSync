@@ -1,9 +1,8 @@
-import { Colors, Fonts, Spacing } from '@/constants/theme';
+import { Fonts, Spacing, useThemeColors } from '@/constants/theme';
 import { useRouter } from 'expo-router';
 import { ChevronLeft } from 'lucide-react-native';
 import React from 'react';
 import { StyleSheet, Text, TouchableOpacity, View, Image } from 'react-native';
-import { useThemeStore } from '@/store/themeStore';
 
 interface PageHeaderProps {
   titleEn: string;
@@ -29,8 +28,7 @@ export default function PageHeader({
   icon,
   rightElement,
 }: PageHeaderProps) {
-  const scheme = useThemeStore((s) => s.theme);
-  const colors = Colors[scheme === 'unspecified' ? 'light' : scheme ?? 'light'];
+  const colors = useThemeColors();
   const router = useRouter();
 
   return (

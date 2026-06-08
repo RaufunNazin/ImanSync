@@ -1,4 +1,4 @@
-import { Colors, Fonts, Spacing } from '@/constants/theme';
+import { Fonts, Spacing, useThemeColors } from '@/constants/theme';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { BlurView } from 'expo-blur';
 import { useLocalSearchParams, useRouter } from 'expo-router';
@@ -9,7 +9,6 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { useTranslation } from 'react-i18next';
 import { formatNumber } from '@/utils/formatNumber';
 import { useAudioStore } from '@/store/audioStore';
-import { useThemeStore } from '@/store/themeStore';
 
 interface Ayah {
   numberInSurah: number;
@@ -41,8 +40,7 @@ const DEFAULT_SETTINGS: Settings = {
 
 export default function JuzScreen() {
   const { id, ayah } = useLocalSearchParams();
-  const scheme = useThemeStore((s) => s.theme);
-  const colors = Colors[scheme === 'unspecified' ? 'light' : scheme];
+  const colors = useThemeColors();
   const router = useRouter();
   const { t, i18n } = useTranslation();
 

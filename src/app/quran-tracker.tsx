@@ -1,0 +1,386 @@
+import React, { useState, useMemo } from 'react';
+import { View, Text, StyleSheet, ScrollView, TouchableOpacity, TextInput, Modal, KeyboardAvoidingView, Platform, Dimensions } from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
+import { useTranslation } from 'react-i18next';
+import { useRouter } from 'expo-router';
+import { BlurView } from 'expo-blur';
+import { Target, Edit3, X, Plus, Minus, History, CheckCircle2 } from 'lucide-react-native';
+import * as Haptics from 'expo-haptics';
+
+import { Fonts, Spacing, useThemeColors, useThemeStyles } from '@/constants/theme';
+import { useReadingStore } from '@/store/readingStore';
+import { formatNumber } from '@/utils/formatNumber';
+import PageHeader from '@/components/page-header';
+import { getLocalYYYYMMDD } from '@/utils/dateUtils';
+
+const generatePastDays = (days: number) => {
+  const arr = [];
+  const today = new Date();
+  for (let i = days - 1; i >= 0; i--) {
+    const d = new Date(today);
+    d.setDate(d.getDate() - i);
+    arr.push(getLocalYYYYMMDD(d));
+  }
+  return arr;
+};
+
+export default function QuranTrackerScreen() {
+  const colors = useThemeColors();
+  const themeStyles = useThemeStyles();
+  const { t, i18n } = useTranslation();
+  const router = useRouter();
+  const readingStore = useReadingStore();
+
+  const todayStr = getLocalYYYYMMDD();
+  const pagesReadToday = readingStore.historyLog[todayStr] || 0;
+  const isGoalMet = pagesReadToday >= readingStore.dailyGoalPages;
+
+  const [noteText, setNoteText] = useState(readingStore.notesLog[todayStr] || '');
+  const [isEditingGoal, setIsEditingGoal] = useState(false);
+  const [historyModalDate, setHistoryModalDate] = useState<string | null>(null);
+
+  const saveNote = () => {
+    readingStore.setNote(todayStr, noteText.trim());
+    Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
+  };
+
+  const handleGoalChange = (delta: number) => {
+    const newGoal = Math.max(1, readingStore.dailyGoalPages + delta);
+    readingStore.setDailyGoal(newGoal);
+    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+  };
+
+  const past30Days = useMemo(() => generatePastDays(30), []);
+
+  return (
+    <SafeAreaView style={[styles.safeArea, { backgroundColor: colors.background }]}>
+      <PageHeader titleEn={t('quran.trackerTitle', { defaultValue: 'Reading Tracker' })} showBack onBack={() => router.back()} />
+
+      <KeyboardAvoidingView behavior={Platform.OS === 'ios' ? 'padding' : 'height'} style={{ flex: 1 }}>
+        <ScrollView contentContainerStyle={styles.container} showsVerticalScrollIndicator={false}>
+          
+          {/* Progress Overview Card */}
+          <BlurView intensity={30} tint={colors.glassTint as any} style={[styles.card, themeStyles.cardShadow, { borderColor: colors.border }]}>
+            <View style={styles.cardHeader}>
+              <View style={{ flexDirection: 'row', alignItems: 'center', gap: Spacing.two }}>
+                <Target size={20} color={isGoalMet ? colors.highlight : colors.accent} />
+                <Text style={[styles.cardTitle, { color: colors.text }]}>{t('quran.todayProgress', { defaultValue: "Today's Progress" })}</Text>
+              </View>
+              {isGoalMet && (
+                <View style={{ flexDirection: 'row', alignItems: 'center', gap: 4, backgroundColor: colors.highlight + '22', paddingHorizontal: 8, paddingVertical: 4, borderRadius: 12 }}>
+                  <CheckCircle2 size={14} color={colors.highlight} />
+                  <Text style={{ fontFamily: Fonts.outfit, fontSize: 12, color: colors.highlight, fontWeight: '600' }}>{t('quran.goalMet', { defaultValue: 'Goal Met' })}</Text>
+                </View>
+              )}
+            </View>
+
+            <View style={styles.statsRow}>
+              <View style={styles.statBox}>
+                <Text style={[styles.statValue, { color: colors.text }]}>{formatNumber(pagesReadToday, i18n.language)}</Text>
+                <Text style={[styles.statLabel, { color: colors.textSecondary }]}>{t('quran.pagesRead', { defaultValue: 'Pages Read' })}</Text>
+              </View>
+              <View style={[styles.statDivider, { backgroundColor: colors.border }]} />
+              <View style={styles.statBox}>
+                <Text style={[styles.statValue, { color: '#ff9800' }]}>{formatNumber(readingStore.currentStreak, i18n.language)}</Text>
+                <Text style={[styles.statLabel, { color: colors.textSecondary }]}>{t('quran.currentStreak', { defaultValue: 'Current Streak' })}</Text>
+              </View>
+              <View style={[styles.statDivider, { backgroundColor: colors.border }]} />
+              <View style={styles.statBox}>
+                <Text style={[styles.statValue, { color: colors.text }]}>{formatNumber(readingStore.longestStreak, i18n.language)}</Text>
+                <Text style={[styles.statLabel, { color: colors.textSecondary }]}>{t('quran.longestStreak', { defaultValue: 'Longest Streak' })}</Text>
+              </View>
+            </View>
+
+            <View style={styles.quickAddRow}>
+              <TouchableOpacity 
+                style={[styles.quickAddBtn, { backgroundColor: colors.backgroundElement, borderColor: colors.border, borderWidth: 1 }]}
+                onPress={() => {
+                  if (pagesReadToday > 0) readingStore.addPagesRead(-1);
+                }}
+              >
+                <Minus size={20} color={colors.text} />
+              </TouchableOpacity>
+              <TouchableOpacity 
+                style={[styles.quickAddBtn, { backgroundColor: isGoalMet ? colors.highlight + '22' : colors.accent + '22', flex: 2, borderColor: isGoalMet ? colors.highlight : colors.accent, borderWidth: 1 }]}
+                onPress={() => {
+                  readingStore.addPagesRead(1);
+                  Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+                }}
+              >
+                <Plus size={20} color={isGoalMet ? colors.highlight : colors.accent} />
+                <Text style={[styles.quickAddText, { color: isGoalMet ? colors.highlight : colors.accent }]}>{t('quran.addPage', { defaultValue: 'Add Page' })}</Text>
+              </TouchableOpacity>
+            </View>
+          </BlurView>
+
+          {/* Goal Customization */}
+          <View style={[styles.card, themeStyles.cardShadow, { backgroundColor: colors.backgroundElement, borderColor: colors.border }]}>
+            <View style={styles.cardHeader}>
+              <Text style={[styles.cardTitle, { color: colors.text }]}>{t('quran.dailyGoal', { defaultValue: 'Daily Goal' })}</Text>
+              <TouchableOpacity onPress={() => setIsEditingGoal(!isEditingGoal)}>
+                <Text style={{ fontFamily: Fonts.outfit, fontSize: 14, color: colors.accent, fontWeight: '600' }}>
+                  {isEditingGoal ? t('common.done', { defaultValue: 'Done' }) : t('common.edit', { defaultValue: 'Edit' })}
+                </Text>
+              </TouchableOpacity>
+            </View>
+            <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' }}>
+              <Text style={{ fontFamily: Fonts.outfit, fontSize: 16, color: colors.textSecondary }}>
+                {t('quran.targetPages', { count: formatNumber(readingStore.dailyGoalPages, i18n.language), defaultValue: `${readingStore.dailyGoalPages} Pages / Day` })}
+              </Text>
+              
+              {isEditingGoal && (
+                <View style={{ flexDirection: 'row', alignItems: 'center', gap: Spacing.three }}>
+                  <TouchableOpacity onPress={() => handleGoalChange(-1)} style={[styles.goalBtn, { backgroundColor: colors.border }]}>
+                    <Minus size={16} color={colors.text} />
+                  </TouchableOpacity>
+                  <Text style={{ fontFamily: Fonts.outfit, fontSize: 18, color: colors.text, fontWeight: '600', width: 24, textAlign: 'center' }}>
+                    {formatNumber(readingStore.dailyGoalPages, i18n.language)}
+                  </Text>
+                  <TouchableOpacity onPress={() => handleGoalChange(1)} style={[styles.goalBtn, { backgroundColor: colors.accent }]}>
+                    <Plus size={16} color="#FFF" />
+                  </TouchableOpacity>
+                </View>
+              )}
+            </View>
+          </View>
+
+          {/* Daily Reflection / Notes */}
+          <View style={{ marginTop: Spacing.four }}>
+            <Text style={[styles.sectionTitle, { color: colors.textSecondary }]}>{t('quran.dailyReflection', { defaultValue: "Today's Reflection" })}</Text>
+            <View style={[styles.noteContainer, { backgroundColor: colors.backgroundElement, borderColor: colors.border }]}>
+              <TextInput
+                style={[styles.noteInput, { color: colors.text }]}
+                placeholder={t('quran.writeNote', { defaultValue: 'Write down what you learned or felt today...' })}
+                placeholderTextColor={colors.textSecondary + '88'}
+                multiline
+                value={noteText}
+                onChangeText={setNoteText}
+                onBlur={saveNote}
+                textAlignVertical="top"
+              />
+            </View>
+          </View>
+
+          {/* Reading History (Heatmap) */}
+          <View style={{ marginTop: Spacing.six }}>
+            <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', marginBottom: Spacing.three }}>
+              <Text style={[styles.sectionTitle, { color: colors.textSecondary, marginBottom: 0 }]}>{t('quran.history', { defaultValue: 'Reading History (30 Days)' })}</Text>
+              <History size={16} color={colors.textSecondary} />
+            </View>
+            
+            <BlurView intensity={30} tint={colors.glassTint as any} style={[styles.card, themeStyles.cardShadow, { borderColor: colors.border }]}>
+              <View style={styles.heatmapGrid}>
+                {past30Days.map((dateStr) => {
+                  const pages = readingStore.historyLog[dateStr] || 0;
+                  const hasNote = !!readingStore.notesLog[dateStr];
+                  let bgColor: string = colors.border;
+                  let opacity = 0.3;
+                  
+                  if (pages > 0) {
+                    const ratio = Math.min(pages / readingStore.dailyGoalPages, 1);
+                    bgColor = ratio >= 1 ? colors.highlight : colors.accent;
+                    opacity = ratio >= 1 ? 1 : Math.max(0.4, ratio);
+                  }
+
+                  return (
+                    <TouchableOpacity
+                      key={dateStr}
+                      onPress={() => {
+                        Haptics.selectionAsync();
+                        setHistoryModalDate(dateStr);
+                      }}
+                      style={[
+                        styles.heatmapCell,
+                        { backgroundColor: bgColor, opacity }
+                      ]}
+                    >
+                      {hasNote && <View style={[styles.noteDot, { backgroundColor: pages > 0 ? '#FFF' : colors.accent }]} />}
+                    </TouchableOpacity>
+                  );
+                })}
+              </View>
+              <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'center', marginTop: Spacing.four, gap: Spacing.two }}>
+                <Text style={{ fontFamily: Fonts.outfit, fontSize: 12, color: colors.textSecondary }}>{t('common.less', { defaultValue: 'Less' })}</Text>
+                <View style={{ flexDirection: 'row', gap: 4 }}>
+                  {[0.3, 0.5, 0.7, 1].map((op, idx) => (
+                    <View key={idx} style={{ width: 10, height: 10, borderRadius: 3, backgroundColor: colors.highlight, opacity: op }} />
+                  ))}
+                </View>
+                <Text style={{ fontFamily: Fonts.outfit, fontSize: 12, color: colors.textSecondary }}>{t('common.more', { defaultValue: 'More' })}</Text>
+              </View>
+            </BlurView>
+          </View>
+          
+          <View style={{ height: 100 }} />
+        </ScrollView>
+      </KeyboardAvoidingView>
+
+      {/* History Detail Modal */}
+      {historyModalDate && (
+        <Modal visible={true} transparent animationType="fade" onRequestClose={() => setHistoryModalDate(null)}>
+          <View style={styles.modalBackdrop}>
+            <TouchableOpacity style={StyleSheet.absoluteFill} activeOpacity={1} onPress={() => setHistoryModalDate(null)}>
+              <BlurView intensity={30} tint="dark" style={StyleSheet.absoluteFill} />
+            </TouchableOpacity>
+            
+            <View style={[styles.modalCard, { backgroundColor: colors.background, borderColor: colors.border }]}>
+              <View style={styles.modalHeader}>
+                <Text style={[styles.modalTitle, { color: colors.text }]}>
+                  {new Date(historyModalDate).toLocaleDateString(i18n.language, { weekday: 'long', month: 'long', day: 'numeric' })}
+                </Text>
+                <TouchableOpacity onPress={() => setHistoryModalDate(null)} style={[styles.closeBtn, { backgroundColor: colors.backgroundElement }]}>
+                  <X size={20} color={colors.textSecondary} />
+                </TouchableOpacity>
+              </View>
+
+              <View style={{ alignItems: 'center', marginVertical: Spacing.four }}>
+                <Text style={{ fontFamily: Fonts.outfit, fontSize: 48, color: colors.highlight, fontWeight: '700' }}>
+                  {formatNumber(readingStore.historyLog[historyModalDate] || 0, i18n.language)}
+                </Text>
+                <Text style={{ fontFamily: Fonts.outfit, fontSize: 16, color: colors.textSecondary, marginTop: 4 }}>
+                  {t('quran.pagesRead', { defaultValue: 'Pages Read' })}
+                </Text>
+              </View>
+
+              {readingStore.notesLog[historyModalDate] ? (
+                <View style={{ marginTop: Spacing.two }}>
+                  <Text style={[styles.sectionTitle, { color: colors.textSecondary, fontSize: 12 }]}>{t('quran.reflection', { defaultValue: 'Reflection' })}</Text>
+                  <View style={{ backgroundColor: colors.backgroundElement, padding: Spacing.four, borderRadius: 16, borderWidth: 1, borderColor: colors.border }}>
+                    <Text style={{ fontFamily: Fonts.outfit, fontSize: 15, color: colors.text, lineHeight: 22 }}>
+                      {readingStore.notesLog[historyModalDate]}
+                    </Text>
+                  </View>
+                </View>
+              ) : (
+                <View style={{ alignItems: 'center', marginTop: Spacing.two, padding: Spacing.four }}>
+                  <Edit3 size={24} color={colors.textSecondary} opacity={0.5} style={{ marginBottom: Spacing.two }} />
+                  <Text style={{ fontFamily: Fonts.outfit, fontSize: 14, color: colors.textSecondary, textAlign: 'center' }}>
+                    {t('quran.noNotes', { defaultValue: 'No reflections recorded for this day.' })}
+                  </Text>
+                </View>
+              )}
+            </View>
+          </View>
+        </Modal>
+      )}
+    </SafeAreaView>
+  );
+}
+
+const styles = StyleSheet.create({
+  safeArea: { flex: 1 },
+  container: { padding: Spacing.four },
+  card: {
+    borderRadius: 16,
+    borderWidth: 1,
+    padding: Spacing.four,
+    marginBottom: Spacing.four,
+    overflow: 'hidden',
+  },
+  cardHeader: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    marginBottom: Spacing.four,
+  },
+  cardTitle: {
+    fontFamily: Fonts.outfit,
+    fontSize: 16,
+    fontWeight: '600',
+  },
+  statsRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    marginBottom: Spacing.five,
+  },
+  statBox: {
+    flex: 1,
+    alignItems: 'center',
+  },
+  statValue: {
+    fontFamily: Fonts.outfit,
+    fontSize: 28,
+    fontWeight: '700',
+    marginBottom: 4,
+  },
+  statLabel: {
+    fontFamily: Fonts.outfit,
+    fontSize: 12,
+  },
+  statDivider: {
+    width: 1,
+    height: '60%',
+  },
+  quickAddRow: {
+    flexDirection: 'row',
+    gap: Spacing.three,
+  },
+  quickAddBtn: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    paddingVertical: 12,
+    borderRadius: 16,
+    gap: Spacing.two,
+  },
+  quickAddText: {
+    fontFamily: Fonts.outfit,
+    fontSize: 16,
+    fontWeight: '600',
+  },
+  goalBtn: {
+    width: 32,
+    height: 32,
+    borderRadius: 16,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  sectionTitle: {
+    fontFamily: Fonts.outfit,
+    fontSize: 13,
+    textTransform: 'uppercase',
+    letterSpacing: 1.2,
+    marginBottom: Spacing.three,
+    marginLeft: Spacing.one,
+  },
+  noteContainer: {
+    borderWidth: 1,
+    borderRadius: 16,
+    padding: Spacing.four,
+    minHeight: 120,
+  },
+  noteInput: {
+    fontFamily: Fonts.outfit,
+    fontSize: 15,
+    flex: 1,
+    lineHeight: 22,
+  },
+  heatmapGrid: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    gap: 8,
+    justifyContent: 'center',
+  },
+  heatmapCell: {
+    width: Math.floor((Dimensions.get('window').width - 100) / 7),
+    aspectRatio: 1,
+    borderRadius: 8,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  noteDot: {
+    width: 4,
+    height: 4,
+    borderRadius: 2,
+    position: 'absolute',
+    bottom: 4,
+  },
+  
+  // Modal Styles
+  modalBackdrop: { flex: 1, justifyContent: 'center', padding: Spacing.four },
+  modalCard: { padding: Spacing.four, borderRadius: 20, borderWidth: 1, overflow: 'hidden' },
+  modalHeader: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' },
+  modalTitle: { fontFamily: Fonts.outfit, fontSize: 18, textTransform: 'capitalize' },
+  closeBtn: { width: 32, height: 32, borderRadius: 16, alignItems: 'center', justifyContent: 'center' },
+});

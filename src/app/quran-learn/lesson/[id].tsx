@@ -2,10 +2,9 @@ import React, { useEffect, useState, useMemo, useRef } from 'react';
 import { View, Text, StyleSheet, ScrollView, TouchableOpacity } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useLocalSearchParams, useRouter } from 'expo-router';
-import { Colors, Fonts, Spacing } from '@/constants/theme';
+import { Fonts, Spacing, useThemeColors } from '@/constants/theme';
 import PageHeader from '@/components/page-header';
 import { useTranslation } from 'react-i18next';
-import { useThemeStore } from '@/store/themeStore';
 import { QURAN_CURRICULUM, LessonItem } from '@/data/quran-curriculum';
 import { useAudioPlayer } from '@/hooks/useAudioPlayer';
 import AsyncStorage from '@react-native-async-storage/async-storage';
@@ -15,8 +14,7 @@ import { Check, ChevronLeft, ChevronRight, Volume2 } from 'lucide-react-native';
 
 export default function LessonPlayerScreen() {
   const { id } = useLocalSearchParams<{ id: string }>();
-  const scheme = useThemeStore((s) => s.theme);
-  const colors = Colors[scheme === 'unspecified' ? 'light' : scheme];
+  const colors = useThemeColors();
   const { t, i18n } = useTranslation();
   const router = useRouter();
   const { playAudio } = useAudioPlayer();

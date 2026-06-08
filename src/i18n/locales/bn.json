@@ -107,7 +107,26 @@
     "dailyGoal": "দৈনিক পাঠের লক্ষ্য",
     "streak": "দিনের ধারা (Streak)",
     "pages": "পৃষ্ঠা",
-    "goalMet": "লক্ষ্য অর্জিত!"
+    "goalMet": "লক্ষ্য অর্জিত!",
+    "addPage": "পৃষ্ঠা যোগ করুন",
+    "bookmarkedAyahs": "বুকমার্ক করা আয়াত",
+    "bookmarkedJuz": "বুকমার্ক করা পারা",
+    "bookmarkedSurahs": "বুকমার্ক করা সূরা",
+    "currentStreak": "বর্তমান ধারাবাহিকতা",
+    "dailyReflection": "আজকের উপলব্ধি",
+    "history": "পড়ার ইতিহাস (৩০ দিন)",
+    "juzBookmarked": "পারা বুকমার্ক করা হয়েছে",
+    "juzBookmarkRemoved": "পারা বুকমার্ক সরানো হয়েছে",
+    "longestStreak": "দীর্ঘতম ধারাবাহিকতা",
+    "noNotes": "এই দিনের জন্য কোন উপলব্ধি রেকর্ড করা নেই।",
+    "pagesRead": "পৃষ্ঠা পড়া হয়েছে",
+    "reflection": "উপলব্ধি",
+    "surahBookmarked": "সূরা বুকমার্ক করা হয়েছে",
+    "surahBookmarkRemoved": "সূরা বুকমার্ক সরানো হয়েছে",
+    "targetPages": "প্রতিদিন {{count}} পৃষ্ঠা",
+    "todayProgress": "আজকের অগ্রগতি",
+    "trackerTitle": "পড়ার ট্র্যাকার",
+    "writeNote": "আজ যা শিখেছেন বা অনুভব করেছেন তা লিখুন..."
   },
   "quranSettings": {
     "title": "রিডিং সেটিংস",
@@ -171,7 +190,8 @@
     "totalMissed": "মোট ছুটে যাওয়া নামাজ",
     "prayers": "নামাজসমূহ",
     "fasting": "রোজা",
-    "missedFasts": "ছুটে যাওয়া রোজা"
+    "missedFasts": "ছুটে যাওয়া রোজা",
+    "kazaChip": "{{namaj}} ওয়াক্ত"
   },
   "dua": {
     "titleEn": "দোয়া ও জিকির",
@@ -272,7 +292,9 @@
     "folderName": "ফোল্ডারের নাম",
     "moveToFolder": "ফোল্ডারে সরান",
     "noFolder": "কোন ফোল্ডার নেই",
-    "savedItems": "সংরক্ষিত দোয়া"
+    "savedItems": "সংরক্ষিত দোয়া",
+    "retry": "পুনরায় চেষ্টা করুন",
+    "prev": "পূর্ববর্তী"
   },
   "duaSettings": {
     "title": "দোয়ার সেটিংস",
@@ -1231,5 +1253,9 @@
     "score": "স্কোর: {{score}}",
     "finish": "শেষ করুন",
     "nextQuestion": "পরবর্তী প্রশ্ন"
+  },
+  "common": {
+    "less": "কম",
+    "more": "বেশি"
   }
 }

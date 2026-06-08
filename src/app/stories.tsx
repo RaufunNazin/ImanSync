@@ -1,4 +1,4 @@
-import { Colors, Fonts, Spacing } from '@/constants/theme';
+import { Fonts, Spacing, useThemeColors } from '@/constants/theme';
 import PageHeader from '@/components/page-header';
 import { BlurView } from 'expo-blur';
 import { useRouter } from 'expo-router';
@@ -7,11 +7,9 @@ import React from 'react';
 import { StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useTranslation } from 'react-i18next';
-import { useThemeStore } from '@/store/themeStore';
 
 export default function StoriesScreen() {
-  const scheme = useThemeStore((s) => s.theme);
-  const colors = Colors[scheme === 'unspecified' ? 'light' : scheme];
+  const colors = useThemeColors();
   const router = useRouter();
   const { t } = useTranslation();
 

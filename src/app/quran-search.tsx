@@ -1,4 +1,4 @@
-import { Colors, Fonts, Spacing } from '@/constants/theme';
+import { Fonts, Spacing, useThemeColors } from '@/constants/theme';
 import { formatNumber } from '@/utils/formatNumber';
 import { BlurView } from 'expo-blur';
 import { useRouter } from 'expo-router';
@@ -39,7 +39,7 @@ interface Surah {
 
 export default function QuranSearchScreen() {
   const scheme = useThemeStore((s) => s.theme);
-  const colors = Colors[scheme === 'unspecified' ? 'light' : scheme];
+  const colors = useThemeColors();
   const router = useRouter();
   const { t, i18n } = useTranslation();
   

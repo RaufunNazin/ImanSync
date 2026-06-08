@@ -107,7 +107,26 @@
     "dailyGoal": "Daily Reading Goal",
     "streak": "Day Streak",
     "pages": "Pages",
-    "goalMet": "Goal Met!"
+    "goalMet": "Goal Met!",
+    "addPage": "Add Page",
+    "bookmarkedAyahs": "Bookmarked Ayahs",
+    "bookmarkedJuz": "Bookmarked Juz",
+    "bookmarkedSurahs": "Bookmarked Surahs",
+    "currentStreak": "Current Streak",
+    "dailyReflection": "Today's Reflection",
+    "history": "Reading History (30 Days)",
+    "juzBookmarked": "Juz bookmarked",
+    "juzBookmarkRemoved": "Juz bookmark removed",
+    "longestStreak": "Longest Streak",
+    "noNotes": "No reflections recorded for this day.",
+    "pagesRead": "Pages Read",
+    "reflection": "Reflection",
+    "surahBookmarked": "Surah bookmarked",
+    "surahBookmarkRemoved": "Surah bookmark removed",
+    "targetPages": "{{count}} Pages / Day",
+    "todayProgress": "Today's Progress",
+    "trackerTitle": "Reading Tracker",
+    "writeNote": "Write down what you learned or felt today..."
   },
   "quranSettings": {
     "title": "Reading Preferences",
@@ -171,7 +190,8 @@
     "totalMissed": "Total Missed Prayers",
     "prayers": "Prayers",
     "fasting": "Fasting",
-    "missedFasts": "Missed Fasts"
+    "missedFasts": "Missed Fasts",
+    "kazaChip": "{{namaj}} N"
   },
   "dua": {
     "titleEn": "Dua & Zikr",
@@ -1117,5 +1137,9 @@
     "score": "Score: {{score}}",
     "finish": "Finish",
     "nextQuestion": "Next Question"
+  },
+  "common": {
+    "less": "Less",
+    "more": "More"
   }
 }

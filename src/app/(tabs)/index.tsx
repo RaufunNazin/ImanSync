@@ -1,6 +1,6 @@
 import PageHeader from '@/components/page-header';
 import SkeletonBox from '@/components/SkeletonBox';
-import { Colors, Fonts, Spacing } from '@/constants/theme';
+import { Fonts, Spacing, useThemeColors } from '@/constants/theme';
 import { usePreferencesStore } from '@/store/preferencesStore';
 import { useThemeStore } from '@/store/themeStore';
 import { getDistrictName } from '@/utils/districts';
@@ -11,7 +11,7 @@ import { BlurView } from 'expo-blur';
 import * as Haptics from 'expo-haptics';
 import { LinearGradient } from 'expo-linear-gradient';
 import { useFocusEffect, useRouter } from 'expo-router';
-import { Book, BookOpen, CalendarDays, Compass, GraduationCap, MapPin, Share2, Brain } from 'lucide-react-native';
+import { Book, BookOpen, CalendarDays, Compass, GraduationCap, MapPin, Share2, Brain, History } from 'lucide-react-native';
 import React, { useCallback, useEffect, useMemo, useState, useRef } from 'react';
 import { useTranslation } from 'react-i18next';
 import {
@@ -23,7 +23,6 @@ import {
 } from 'react-native';
 import Animated, { useAnimatedStyle, withTiming, FadeIn, FadeOut } from 'react-native-reanimated';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import dailyHadith from '@/data/dailyHadith.json';
 import ViewShot from 'react-native-view-shot';
 import * as Sharing from 'expo-sharing';
 
@@ -54,6 +53,12 @@ interface DailyVerse {
   surahId: number;
   surahDefaultName: string;
   ayahNum: number;
+}
+
+interface DailyHadith {
+  english: string;
+  bengali: string;
+  reference: string;
 }
 
 // ── Helpers ──────────────────────────────────────────────────────────────────
@@ -167,7 +172,7 @@ function SpecialTimeCard({ item, colors, i18nLanguage, styles, t }: { item: Spec
 
 export default function HomeScreen() {
   const scheme = useThemeStore((s) => s.theme);
-  const colors = Colors[scheme === 'unspecified' ? 'light' : scheme ?? 'light'];
+  const colors = useThemeColors();
   const router = useRouter();
   const { t, i18n } = useTranslation();
 
@@ -175,21 +180,12 @@ export default function HomeScreen() {
   const [rawTimings, setRawTimings] = useState<Record<string, string>>({});
   const [hijriRaw, setHijriRaw] = useState<{day: string, monthEn: string, monthNumber: number, year: string} | null>(null);
   const [dailyVerse, setDailyVerse] = useState<DailyVerse | null>(null);
+  const [dailyHadith, setDailyHadith] = useState<DailyHadith | null>(null);
   const [trackerHistory, setTrackerHistory] = useState<Record<string, Record<string, boolean>>>({});
   const prefs = usePreferencesStore();
   const locationCity = prefs.manualCity || prefs.location?.city || 'Dhaka';
   const locationName = getDistrictName(locationCity, i18n.language);
 
-  const hadithIndex = useMemo(() => {
-    const todayStr = getLocalYYYYMMDD();
-    let hash = 0;
-    for (let i = 0; i < todayStr.length; i++) {
-      hash = todayStr.charCodeAt(i) + ((hash << 5) - hash);
-    }
-    return Math.abs(hash) % dailyHadith.length;
-  }, []);
-  const todayHadith = dailyHadith[hadithIndex];
-  
   const hadithRef = useRef(null);
 
   const shareHadith = async () => {
@@ -291,6 +287,31 @@ export default function HomeScreen() {
         }
       })
       .catch((e) => console.error('Verse fetch error:', e));
+  }, []);
+
+  // Fetch a random daily Hadith from Bukhari
+  useEffect(() => {
+    const todayStr = getLocalYYYYMMDD();
+    let hash = 0;
+    for (let i = 0; i < todayStr.length; i++) {
+      hash = todayStr.charCodeAt(i) + ((hash << 5) - hash);
+    }
+    const hadithNum = (Math.abs(hash) % 7563) + 1; // Sahih al-Bukhari has ~7563 hadiths
+
+    Promise.all([
+      fetch(`https://cdn.jsdelivr.net/gh/fawazahmed0/hadith-api@1/editions/eng-bukhari/${hadithNum}.json`).then((r) => r.json()),
+      fetch(`https://cdn.jsdelivr.net/gh/fawazahmed0/hadith-api@1/editions/ben-bukhari/${hadithNum}.json`).then((r) => r.json()),
+    ])
+      .then(([enJson, bnJson]) => {
+        if (enJson.hadiths?.[0] && bnJson.hadiths?.[0]) {
+          setDailyHadith({
+            english: enJson.hadiths[0].text,
+            bengali: bnJson.hadiths[0].text,
+            reference: `Sahih al-Bukhari ${hadithNum}`
+          });
+        }
+      })
+      .catch((e) => console.error('Hadith fetch error:', e));
   }, []);
 
   // Derive prayer states from raw timings
@@ -697,7 +718,7 @@ export default function HomeScreen() {
             </BlurView>
           </TouchableOpacity>
         ) : (
-          <View style={[styles.heroCard, { borderColor: colors.border, backgroundColor: colors.backgroundElement, borderWidth: 1, paddingVertical: 20, paddingHorizontal: 24, overflow: 'hidden', marginBottom: 0 }]}>
+          <View style={[styles.heroCard, { borderColor: colors.border, backgroundColor: colors.backgroundElement, borderWidth: 1, paddingVertical: 20, paddingHorizontal: 24, overflow: 'hidden', marginBottom: Spacing.four }]}>
             <SkeletonBox width={150} height={32} borderRadius={8} color={colors.border} style={{ alignSelf: 'center', marginBottom: 2 }} />
             <View style={{ flexDirection: 'row', justifyContent: 'space-between', marginBottom: Spacing.four }}>
               <View>
@@ -771,6 +792,17 @@ export default function HomeScreen() {
               <BlurView intensity={40} tint={colors.glassTint as any} style={styles.actionItemBlur}>
                 <Brain size={20} color={colors.accent} />
                 <Text style={[styles.actionText, { color: colors.text }]}>{t('home.trivia', { defaultValue: 'Islamic Trivia' })}</Text>
+              </BlurView>
+            </TouchableOpacity>
+
+            <TouchableOpacity 
+              activeOpacity={0.7}
+              style={[styles.actionItemCard, { borderColor: colors.border }]} 
+              onPress={() => router.push('/qada-tracker' as any)}
+            >
+              <BlurView intensity={40} tint={colors.glassTint as any} style={styles.actionItemBlur}>
+                <History size={20} color={colors.highlight} />
+                <Text style={[styles.actionText, { color: colors.text }]}>{t('tracker.qadaTitle', { defaultValue: 'Qada Tracker' })}</Text>
               </BlurView>
             </TouchableOpacity>
           </View>
@@ -991,21 +1023,31 @@ export default function HomeScreen() {
               <Share2 size={18} color={colors.textSecondary} />
             </TouchableOpacity>
           </View>
-          <ViewShot ref={hadithRef} options={{ format: 'png', quality: 1 }}>
-            <BlurView intensity={20} tint={colors.glassTint as any} style={[styles.inspirationCard, { borderColor: colors.border, padding: Spacing.six, backgroundColor: colors.backgroundElement }]}>
-              <View style={{ alignItems: 'center' }}>
-                <Text style={{ fontFamily: Fonts.outfit, fontSize: 16, color: colors.text, textAlign: 'center', fontStyle: 'italic', marginBottom: Spacing.four, lineHeight: 24 }}>
-                  "{todayHadith.text}"
-                </Text>
-                <Text style={{ fontFamily: Fonts.outfit, fontSize: 13, color: colors.highlight, fontWeight: '600', marginBottom: 2 }}>
-                  {todayHadith.narrator}
-                </Text>
-                <Text style={{ fontFamily: Fonts.outfit, fontSize: 11, color: colors.textSecondary }}>
-                  {todayHadith.reference}
-                </Text>
+          {dailyHadith ? (
+            <ViewShot ref={hadithRef} options={{ format: 'png', quality: 1 }}>
+              <BlurView intensity={20} tint={colors.glassTint as any} style={[styles.inspirationCard, { borderColor: colors.border, padding: Spacing.six, backgroundColor: colors.backgroundElement }]}>
+                <View style={{ alignItems: 'center' }}>
+                  <Text style={{ fontFamily: Fonts.outfit, fontSize: 16, color: colors.text, textAlign: 'center', fontStyle: 'italic', marginBottom: Spacing.four, lineHeight: 24 }}>
+                    "{i18n.language === 'bn' ? dailyHadith.bengali : dailyHadith.english}"
+                  </Text>
+                  <Text style={{ fontFamily: Fonts.outfit, fontSize: 11, color: colors.accent, marginTop: 4 }}>
+                    — {dailyHadith.reference}
+                  </Text>
+                </View>
+              </BlurView>
+            </ViewShot>
+          ) : (
+            <View>
+              <View style={[styles.inspirationCard, { backgroundColor: colors.backgroundElement, borderColor: colors.border, borderWidth: 1, borderRadius: 24, paddingHorizontal: Spacing.four, paddingVertical: Spacing.six }]}>
+                <View style={{ alignItems: 'center', gap: 12 }}>
+                  <SkeletonBox width={260} height={20} borderRadius={8} color={colors.border} />
+                  <SkeletonBox width={220} height={20} borderRadius={8} color={colors.border} />
+                  <SkeletonBox width={150} height={20} borderRadius={8} color={colors.border} />
+                  <SkeletonBox width={100} height={12} borderRadius={6} color={colors.border} style={{ marginTop: 8 }} />
+                </View>
               </View>
-            </BlurView>
-          </ViewShot>
+            </View>
+          )}
         </View>
 
       </ScrollView>

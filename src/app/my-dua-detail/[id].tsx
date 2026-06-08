@@ -5,8 +5,7 @@ import { BlurView } from 'expo-blur';
 import { saveMyDuas } from '@/utils/my-duas-storage';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { Colors, Fonts, Spacing } from '@/constants/theme';
-import { useThemeStore } from '@/store/themeStore';
+import { Fonts, Spacing, useThemeColors, useThemeStyles } from '@/constants/theme';
 import { useTranslation } from 'react-i18next';
 import PageHeader from '@/components/page-header';
 import { loadMyDuas, UserDua, getMediaUri } from '@/utils/my-duas-storage';
@@ -40,8 +39,8 @@ const DEFAULT_SETTINGS: DuaSettings = {
 
 export default function MyDuaDetailScreen() {
   const { id } = useLocalSearchParams<{ id: string }>();
-  const scheme = useThemeStore((s) => s.theme);
-  const colors = Colors[scheme === 'unspecified' ? 'light' : scheme];
+  const colors = useThemeColors();
+  const themeStyles = useThemeStyles();
   const { t, i18n } = useTranslation();
   const router = useRouter();
   
@@ -301,7 +300,7 @@ export default function MyDuaDetailScreen() {
       <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={styles.container}>
         <TouchableOpacity activeOpacity={0.9} onLongPress={() => setShowOptionsSheet(true)} delayLongPress={300}>
           {dua.type === 'text' && (
-            <BlurView intensity={40} tint={colors.glassTint as any} style={[styles.card, { borderColor: colors.border }]}>
+            <BlurView intensity={40} tint={colors.glassTint as any} style={[styles.card, themeStyles.cardShadow, { borderColor: colors.border }]}>
               {showArabic && (
                 <View style={styles.section}>
                   <Text style={[styles.arabic, { color: colors.text, fontSize: settings.arabicFontSize, lineHeight: settings.arabicFontSize * 1.6 }]}>{dua.arabic}</Text>

@@ -2,12 +2,11 @@ import React, { useEffect, useState, useRef } from 'react';
 import { StyleSheet, Text, TouchableOpacity, View, Animated } from 'react-native';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { Colors, Fonts, Spacing } from '@/constants/theme';
+import { Fonts, Spacing, useThemeColors } from '@/constants/theme';
 import PageHeader from '@/components/page-header';
 import { useTranslation } from 'react-i18next';
 import { BlurView } from 'expo-blur';
 import { ChevronRight } from 'lucide-react-native';
-import { useThemeStore } from '@/store/themeStore';
 import SkeletonBox from '@/components/SkeletonBox';
 import DuaService, { UnifiedDuaItem } from '@/services/duaService';
 import { loadMyDuas, saveMyDuas, saveMediaFile, UserDua } from '@/utils/my-duas-storage';
@@ -20,8 +19,7 @@ import PinSheet from '@/components/pin-sheet';
 const PINNED_DUAS_KEY = 'imansync_pinned_duas';
 export default function DuaCategoryScreen() {
   const { id, name, isCustom } = useLocalSearchParams<{ id: string; name: string; isCustom?: string }>();
-  const scheme = useThemeStore((s) => s.theme);
-  const colors = Colors[scheme === 'unspecified' ? 'light' : scheme];
+  const colors = useThemeColors();
   const { t, i18n } = useTranslation();
   const router = useRouter();
 
@@ -220,7 +218,7 @@ export default function DuaCategoryScreen() {
       />
       
       {loading ? (
-        <View style={[styles.list, { marginTop: 8, paddingHorizontal: Spacing.four }]}>
+        <View style={[styles.list, { gap: Spacing.three, padding: Spacing.four, paddingTop: 0 }]}>
           {[...Array(5)].map((_, i) => (
             <BlurView key={i} intensity={40} tint={colors.glassTint as any} style={[styles.itemWrapper, { borderColor: colors.border }]}>
               <View style={[styles.item]}>

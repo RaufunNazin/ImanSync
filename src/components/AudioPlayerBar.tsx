@@ -2,17 +2,16 @@ import React, { useEffect, useRef, useState } from 'react';
 import { View, Text, StyleSheet, TouchableOpacity, ActivityIndicator, Animated } from 'react-native';
 import { useAudioStore } from '@/store/audioStore';
 import { Play, Pause, X, SkipForward } from 'lucide-react-native';
-import { Colors, Fonts, Spacing } from '@/constants/theme';
+import { Fonts, Spacing, useThemeColors, useThemeStyles } from '@/constants/theme';
 import { Platform } from 'react-native';
 import { useTranslation } from 'react-i18next';
 import { formatNumber } from '@/utils/formatNumber';
-import { useThemeStore } from '@/store/themeStore';
 import { useSegments } from 'expo-router';
 
 export default function AudioPlayerBar() {
   const { currentSurahId, currentSurahName, isPlaying, isLoading, pause, resume, stop, playNext, playlist, playbackMode, currentAyahNumber, juzAyahs, currentJuzAyahIndex, hideGlobalBanner } = useAudioStore();
-  const scheme = useThemeStore((s) => s.theme);
-  const colors = Colors[scheme === 'unspecified' ? 'light' : scheme];
+  const colors = useThemeColors();
+  const themeStyles = useThemeStyles();
   const { t, i18n } = useTranslation();
   const segments = useSegments() as string[];
 
@@ -97,7 +96,7 @@ export default function AudioPlayerBar() {
 
   return (
     <Animated.View style={[styles.container, { transform: [{ translateY }], opacity }]}>
-      <View style={[styles.card, { backgroundColor: colors.background, borderColor: colors.accent }]}>
+      <View style={[styles.card, themeStyles.cardShadow, { backgroundColor: colors.background, borderColor: colors.accent }]}>
         <View style={styles.info}>
           <Text style={[styles.title, { color: colors.text }]} numberOfLines={1}>
             {t('surahNames.' + data.id, { defaultValue: data.name || ('Surah ' + data.id) })}

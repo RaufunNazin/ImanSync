@@ -1,4 +1,4 @@
-import { Colors, Fonts, Spacing } from '@/constants/theme';
+import { Fonts, Spacing, useThemeColors } from '@/constants/theme';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { BlurView } from 'expo-blur';
 import { useLocalSearchParams, useRouter } from 'expo-router';
@@ -9,7 +9,6 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { useTranslation } from 'react-i18next';
 import { formatNumber } from '@/utils/formatNumber';
 import { useAudioStore } from '@/store/audioStore';
-import { useThemeStore } from '@/store/themeStore';
 import { useDownloadStore } from '@/store/downloadStore';
 
 interface Ayah {
@@ -42,8 +41,7 @@ const DEFAULT_SETTINGS: Settings = {
 
 export default function SurahScreen() {
   const { id, ayah } = useLocalSearchParams();
-  const scheme = useThemeStore((s) => s.theme);
-  const colors = Colors[scheme === 'unspecified' ? 'light' : scheme];
+  const colors = useThemeColors();
   const router = useRouter();
   const { t, i18n } = useTranslation();
   
@@ -372,10 +370,15 @@ export default function SurahScreen() {
             style={styles.backBtn}
           >
             {downloadStore.downloadedFiles[`${currentReciterId}_${id}`] ? (
-              <CheckCircle size={20} color={colors.highlight} />
+              <View style={{ flexDirection: 'row', alignItems: 'center', gap: 4 }}>
+                <CheckCircle size={20} color={colors.highlight} />
+              </View>
             ) : downloadStore.downloadProgress[`${currentReciterId}_${id}`] !== undefined ? (
-              <View style={{ position: 'relative', alignItems: 'center', justifyContent: 'center' }}>
-                <Loader2 size={20} color={colors.accent} style={{ transform: [{ rotate: `${downloadStore.downloadProgress[`${currentReciterId}_${id}`]}deg` }] }} />
+              <View style={{ flexDirection: 'row', alignItems: 'center', gap: 4 }}>
+                <Text style={{ fontFamily: Fonts.outfit, fontSize: 12, color: colors.accent }}>
+                  {Math.round(downloadStore.downloadProgress[`${currentReciterId}_${id}`])}%
+                </Text>
+                <Loader2 size={16} color={colors.accent} style={{ transform: [{ rotate: `${downloadStore.downloadProgress[`${currentReciterId}_${id}`] * 3.6}deg` }] }} />
               </View>
             ) : (
               <DownloadCloud size={20} color={colors.textSecondary} opacity={0.6} />

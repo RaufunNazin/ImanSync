@@ -1,13 +1,12 @@
 import React, { useCallback, useState } from 'react';
 import { ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { Colors, Fonts, Spacing } from '@/constants/theme';
+import { Fonts, Spacing, useThemeColors } from '@/constants/theme';
 import PageHeader from '@/components/page-header';
 import { BlurView } from 'expo-blur';
 import { ChevronRight, Bookmark, Search } from 'lucide-react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useFocusEffect, useRouter } from 'expo-router';
-import { useThemeStore } from '@/store/themeStore';
 import { useTranslation } from 'react-i18next';
 import { useFolderStore } from '@/store/folderStore';
 import { useLocalSearchParams } from 'expo-router';
@@ -16,8 +15,7 @@ import { TextInput } from 'react-native-gesture-handler';
 import { Modal } from 'react-native';
 
 export default function DuaBookmarksScreen() {
-  const scheme = useThemeStore((s) => s.theme);
-  const colors = Colors[scheme === 'unspecified' ? 'light' : scheme];
+  const colors = useThemeColors();
   const router = useRouter();
   const { t } = useTranslation();
 

@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { View, Text, StyleSheet, ScrollView, TouchableOpacity, ActivityIndicator } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useLocalSearchParams } from 'expo-router';
-import { Colors, Fonts, Spacing } from '@/constants/theme';
+import { Fonts, Spacing, useThemeColors } from '@/constants/theme';
 import PageHeader from '@/components/page-header';
 import { BlurView } from 'expo-blur';
 import { useTranslation } from 'react-i18next';
@@ -10,7 +10,6 @@ import { useAudioPlayer } from '@/hooks/useAudioPlayer';
 import { ChevronLeft, ChevronRight, Volume2 } from 'lucide-react-native';
 import { parseTajweed } from '@/utils/tajweedParser';
 import { TajweedLegendItems } from '@/constants/tajweed';
-import { useThemeStore } from '@/store/themeStore';
 
 interface Word {
   id: number;
@@ -24,8 +23,7 @@ interface Word {
 }
 
 export default function QuranLearnScreen() {
-  const scheme = useThemeStore((s) => s.theme);
-  const colors = Colors[scheme === 'unspecified' ? 'light' : scheme];
+  const colors = useThemeColors();
 
   const { surahId = '1', ayahId = '1' } = useLocalSearchParams<{ surahId: string, ayahId: string }>();
   const [words, setWords] = useState<Word[]>([]);

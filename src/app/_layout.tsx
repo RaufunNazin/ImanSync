@@ -5,7 +5,7 @@ import { StyleSheet, View, Animated, Platform } from 'react-native';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import * as NavigationBar from 'expo-navigation-bar';
 import * as SystemUI from 'expo-system-ui';
-import { Colors } from '@/constants/theme';
+import { useThemeColors } from '@/constants/theme';
 import { SQLiteProvider } from 'expo-sqlite';
 import { migrateDbIfNeeded } from '@/lib/db';
 
@@ -22,6 +22,7 @@ import AudioPlayerBar from '@/components/AudioPlayerBar';
 import { useThemeStore } from '@/store/themeStore';
 import SystemAnnouncer from '@/components/SystemAnnouncer';
 import { usePreferencesStore } from '@/store/preferencesStore';
+import { useDownloadStore } from '@/store/downloadStore';
 import { scheduleAllNotifications } from '@/services/notificationService';
 import { AppState, AppStateStatus } from 'react-native';
 
@@ -59,6 +60,9 @@ export default function RootLayout() {
       setThemeLoaded(true);
     });
 
+    // Initialize offline audio downloads
+    useDownloadStore.getState().initialize().catch(e => console.log('Download store init error:', e));
+
     // Fix #3: only re-schedule when the calendar date actually changes,
     // not on every app-foreground event (which fires many times per day).
     let lastScheduledDate = '';
@@ -89,10 +93,7 @@ export default function RootLayout() {
 
 
 
-  const colors = useMemo(
-    () => Colors[colorScheme === 'unspecified' ? 'light' : colorScheme || 'light'],
-    [colorScheme]
-  );
+  const colors = useThemeColors();
 
   // ── Imperative system bar sync ─────────────────────────────────────────────
   // Uses expo-status-bar's OWN imperative API (same module as <StatusBar>)

@@ -3,8 +3,7 @@ import { Modal, StyleSheet, Text, TouchableOpacity, View, ScrollView } from 'rea
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import * as Updates from 'expo-updates';
 import { useTranslation } from 'react-i18next';
-import { Colors, Fonts, Spacing } from '@/constants/theme';
-import { useThemeStore } from '@/store/themeStore';
+import { Fonts, Spacing, useThemeColors, useThemeStyles } from '@/constants/theme';
 import { Bell, RefreshCw, Info, X } from 'lucide-react-native';
 
 const SYSTEM_CONFIG_URL = 'https://raw.githubusercontent.com/RaufunNazin/ImanSync/main/system_config.json';
@@ -29,8 +28,8 @@ interface SystemConfig {
 
 export default function SystemAnnouncer() {
   const { t, i18n } = useTranslation();
-  const scheme = useThemeStore((s) => s.theme);
-  const colors = Colors[scheme === 'unspecified' ? 'light' : scheme || 'light'];
+  const colors = useThemeColors();
+  const themeStyles = useThemeStyles();
 
   const [updateReady, setUpdateReady] = useState(false);
   const [changelog, setChangelog] = useState<SystemConfig['changelog'][0] | null>(null);
@@ -115,7 +114,7 @@ export default function SystemAnnouncer() {
       {/* Update Ready Modal */}
       <Modal visible={updateReady} transparent animationType="fade">
         <View style={styles.overlay}>
-          <View style={[styles.card, { backgroundColor: colors.background, borderColor: colors.border }]}>
+          <View style={[styles.card, themeStyles.cardShadow, { backgroundColor: colors.background, borderColor: colors.border }]}>
             <View style={[styles.iconWrap, { backgroundColor: colors.highlight + '20' }]}>
               <RefreshCw size={32} color={colors.highlight} />
             </View>
@@ -133,7 +132,7 @@ export default function SystemAnnouncer() {
       {/* Changelog Modal */}
       <Modal visible={!!changelog && !updateReady} transparent animationType="slide">
         <View style={styles.overlay}>
-          <View style={[styles.card, { backgroundColor: colors.background, borderColor: colors.border, maxHeight: '80%' }]}>
+          <View style={[styles.card, themeStyles.cardShadow, { backgroundColor: colors.background, borderColor: colors.border, maxHeight: '80%' }]}>
             <TouchableOpacity style={[styles.closeBtn, { backgroundColor: colors.backgroundElement }]} onPress={dismissChangelog}>
               <X size={20} color={colors.textSecondary} />
             </TouchableOpacity>
@@ -164,7 +163,7 @@ export default function SystemAnnouncer() {
       {/* Notification Modal */}
       <Modal visible={!!notification && !updateReady && !changelog} transparent animationType="slide">
         <View style={styles.overlay}>
-          <View style={[styles.card, { backgroundColor: colors.background, borderColor: colors.border }]}>
+          <View style={[styles.card, themeStyles.cardShadow, { backgroundColor: colors.background, borderColor: colors.border }]}>
             <View style={[styles.iconWrap, { backgroundColor: colors.highlight + '20' }]}>
               <Bell size={16} color={colors.highlight} />
             </View>

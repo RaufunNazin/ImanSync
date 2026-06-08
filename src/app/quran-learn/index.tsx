@@ -2,18 +2,16 @@ import React, { useEffect, useState } from 'react';
 import { View, Text, StyleSheet, ScrollView, TouchableOpacity } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useRouter } from 'expo-router';
-import { Colors, Fonts, Spacing } from '@/constants/theme';
+import { Fonts, Spacing, useThemeColors } from '@/constants/theme';
 import PageHeader from '@/components/page-header';
 import { BlurView } from 'expo-blur';
 import { useTranslation } from 'react-i18next';
-import { useThemeStore } from '@/store/themeStore';
 import { QURAN_CURRICULUM } from '@/data/quran-curriculum';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { BookOpen, CheckCircle, ChevronRight } from 'lucide-react-native';
 
 export default function LearnQuranHubScreen() {
-  const scheme = useThemeStore((s) => s.theme);
-  const colors = Colors[scheme === 'unspecified' ? 'light' : scheme];
+  const colors = useThemeColors();
   const { t } = useTranslation();
   const router = useRouter();
   

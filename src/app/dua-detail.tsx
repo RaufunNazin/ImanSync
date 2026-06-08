@@ -1,5 +1,5 @@
 import PageHeader from '@/components/page-header';
-import { Colors, Fonts, Spacing } from '@/constants/theme';
+import { Fonts, Spacing, useThemeColors, useThemeStyles } from '@/constants/theme';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { BlurView } from 'expo-blur';
 import * as Haptics from 'expo-haptics';
@@ -10,7 +10,6 @@ import { useTranslation } from 'react-i18next';
 import { Modal, ScrollView, StyleSheet, Text, TouchableOpacity, TouchableWithoutFeedback, View, Image } from 'react-native';
 import { curatedImageMap } from '@/data/curated-images';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { useThemeStore } from '@/store/themeStore';
 import ImageViewerModal from '@/components/ImageViewerModal';
 
 interface DuaSettings {
@@ -46,9 +45,8 @@ export default function DuaDetailScreen() {
     source: string;
     image?: string;
   }>();
-  
-  const scheme = useThemeStore((s) => s.theme);
-  const colors = Colors[scheme === 'unspecified' ? 'light' : scheme];
+  const colors = useThemeColors();
+  const themeStyles = useThemeStyles();
   const { t, i18n } = useTranslation();
 
   const [settings, setSettings] = useState<DuaSettings>(() => ({
@@ -276,7 +274,7 @@ export default function DuaDetailScreen() {
         )}
 
         {hasTextContent && (
-          <BlurView intensity={40} tint={colors.glassTint as any} style={[styles.card, { borderColor: colors.border }]}>
+          <BlurView intensity={40} tint={colors.glassTint as any} style={[styles.card, themeStyles.cardShadow, { borderColor: colors.border }]}>
 
             {showArabic && (
               <View style={styles.section}>

@@ -8,17 +8,20 @@ interface ReadingState {
   longestStreak: number;
   lastReadDate: string | null;
   historyLog: Record<string, number>; // "YYYY-MM-DD" -> pages read
+  notesLog: Record<string, string>; // "YYYY-MM-DD" -> note
   initialize: () => Promise<void>;
   addPagesRead: (pages: number) => void;
   setDailyGoal: (goal: number) => void;
+  setNote: (date: string, note: string) => void;
 }
 
 export const useReadingStore = create<ReadingState>((set, get) => ({
-  dailyGoalPages: 5,
+  dailyGoalPages: 3,
   currentStreak: 0,
   longestStreak: 0,
   lastReadDate: null,
   historyLog: {},
+  notesLog: {},
 
   initialize: async () => {
     try {
@@ -88,6 +91,7 @@ export const useReadingStore = create<ReadingState>((set, get) => ({
       longestStreak: newLongest,
       lastReadDate: newLastRead || state.lastReadDate,
       historyLog: newLog,
+      notesLog: state.notesLog,
     };
     AsyncStorage.setItem('imansync_reading_store', JSON.stringify(toSave)).catch(console.error);
   },
@@ -101,6 +105,23 @@ export const useReadingStore = create<ReadingState>((set, get) => ({
       longestStreak: state.longestStreak,
       lastReadDate: state.lastReadDate,
       historyLog: state.historyLog,
+      notesLog: state.notesLog,
+    };
+    AsyncStorage.setItem('imansync_reading_store', JSON.stringify(toSave)).catch(console.error);
+  },
+
+  setNote: (date: string, note: string) => {
+    const state = get();
+    const newNotesLog = { ...state.notesLog, [date]: note };
+    set({ notesLog: newNotesLog });
+    
+    const toSave = {
+      dailyGoalPages: state.dailyGoalPages,
+      currentStreak: state.currentStreak,
+      longestStreak: state.longestStreak,
+      lastReadDate: state.lastReadDate,
+      historyLog: state.historyLog,
+      notesLog: newNotesLog,
     };
     AsyncStorage.setItem('imansync_reading_store', JSON.stringify(toSave)).catch(console.error);
   }

@@ -1,4 +1,4 @@
-import { Colors, Fonts, Spacing } from '@/constants/theme';
+import { Fonts, Spacing, useThemeColors } from '@/constants/theme';
 
 import { useRouter, useLocalSearchParams } from 'expo-router';
 import { ChevronLeft, ChevronRight, X } from 'lucide-react-native';
@@ -20,7 +20,6 @@ import {
   Platform
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { useThemeStore } from '@/store/themeStore';
 import DuaService, { UnifiedDuaItem } from '@/services/duaService';
 import Animated, { 
   FadeIn, 
@@ -33,8 +32,7 @@ import Animated, {
 const { width } = Dimensions.get('window');
 
 export default function DuaSearchScreen() {
-  const scheme = useThemeStore((s) => s.theme);
-  const colors = Colors[scheme === 'unspecified' ? 'light' : scheme];
+  const colors = useThemeColors();
   const router = useRouter();
   const { categoryId, isCustom, categoryName } = useLocalSearchParams<{ categoryId?: string, isCustom?: string, categoryName?: string }>();
   const { t, i18n } = useTranslation();

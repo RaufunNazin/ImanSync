@@ -1,14 +1,13 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { View, Text, StyleSheet, TouchableOpacity, Dimensions } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useRouter } from 'expo-router';
-import { ArrowLeft, CheckCircle2, XCircle, Brain, RefreshCw } from 'lucide-react-native';
+import { ArrowLeft, CheckCircle2, XCircle, Brain, RefreshCw, ArrowRight } from 'lucide-react-native';
 import * as Haptics from 'expo-haptics';
 import Animated, { useAnimatedStyle, withSpring, withTiming, runOnJS, useSharedValue, FadeInDown } from 'react-native-reanimated';
 import ConfettiCannon from 'react-native-confetti-cannon';
 
-import { Colors, Fonts, Spacing } from '@/constants/theme';
-import { useThemeStore } from '@/store/themeStore';
+import { Fonts, Spacing, useThemeColors, useThemeStyles } from '@/constants/theme';
 import { useTranslation } from 'react-i18next';
 import { formatNumber } from '@/utils/formatNumber';
 import triviaData from '@/data/trivia.json';
@@ -26,8 +25,8 @@ function shuffle(array: any[]) {
 }
 
 export default function TriviaScreen() {
-  const scheme = useThemeStore(s => s.theme);
-  const colors = Colors[scheme === 'unspecified' ? 'light' : scheme];
+  const colors = useThemeColors();
+  const themeStyles = useThemeStyles();
   const router = useRouter();
   const { t, i18n } = useTranslation();
   const isBn = i18n.language === 'bn';
@@ -37,17 +36,19 @@ export default function TriviaScreen() {
   const [selectedOption, setSelectedOption] = useState<number | null>(null);
   const [score, setScore] = useState(0);
   const [isFinished, setIsFinished] = useState(false);
+  const timerRef = useRef<NodeJS.Timeout | null>(null);
 
   const cardOffset = useSharedValue(0);
   const cardOpacity = useSharedValue(1);
 
-  // Initialize quiz with 5 random questions
+  // Initialize quiz with random questions
   useEffect(() => {
     startNewGame();
   }, []);
 
   const startNewGame = () => {
-    const shuffled = shuffle(triviaData).slice(0, 5);
+    if (timerRef.current) clearTimeout(timerRef.current);
+    const shuffled = shuffle(triviaData).slice(0, 20);
     setQuestions(shuffled);
     setCurrentIndex(0);
     setScore(0);
@@ -69,9 +70,15 @@ export default function TriviaScreen() {
     } else {
       Haptics.notificationAsync(Haptics.NotificationFeedbackType.Error);
     }
+
+    if (timerRef.current) clearTimeout(timerRef.current);
+    timerRef.current = setTimeout(() => {
+      nextQuestion();
+    }, 1500);
   };
 
   const nextQuestion = () => {
+    if (timerRef.current) clearTimeout(timerRef.current);
     cardOffset.value = withTiming(-width, { duration: 300 }, () => {
       runOnJS(advanceState)();
     });
@@ -150,7 +157,7 @@ export default function TriviaScreen() {
               <View style={[styles.progressBarFill, { backgroundColor: colors.accent, width: `${((currentIndex) / questions.length) * 100}%` }]} />
             </View>
 
-            <Animated.View style={[styles.card, { backgroundColor: colors.backgroundElement, borderColor: colors.border }, animatedCardStyle]}>
+            <Animated.View style={[styles.card, themeStyles.cardShadow, { backgroundColor: colors.backgroundElement, borderColor: colors.border }, animatedCardStyle]}>
               <Text style={[styles.questionText, { color: colors.text }]}>
                 {isBn && currentQ.question_bn ? currentQ.question_bn : currentQ.question}
               </Text>
@@ -197,10 +204,10 @@ export default function TriviaScreen() {
             {selectedOption !== null && (
               <Animated.View entering={FadeInDown.duration(300).delay(200)} style={styles.footer}>
                 <TouchableOpacity 
-                  style={[styles.nextBtn, { backgroundColor: colors.highlight }]}
+                  style={[styles.nextBtn, { backgroundColor: colors.highlight, width: 64, height: 64, borderRadius: 32, alignSelf: 'flex-end', justifyContent: 'center' }]}
                   onPress={nextQuestion}
                 >
-                  <Text style={styles.nextText}>{currentIndex === questions.length - 1 ? t('trivia.finish', { defaultValue: 'Finish' }) : t('trivia.nextQuestion', { defaultValue: 'Next Question' })}</Text>
+                  <ArrowRight size={28} color="#FFF" />
                 </TouchableOpacity>
               </Animated.View>
             )}

@@ -2,7 +2,7 @@ import React, { useEffect, useState, useRef } from 'react';
 import { ActivityIndicator, StyleSheet, Text, TouchableOpacity, View, Animated } from 'react-native';
 import { useRouter } from 'expo-router';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { Colors, Fonts, Spacing } from '@/constants/theme';
+import { Fonts, Spacing, useThemeColors } from '@/constants/theme';
 import PageHeader from '@/components/page-header';
 import { useTranslation } from 'react-i18next';
 import { BlurView } from 'expo-blur';
@@ -14,7 +14,6 @@ import {
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import AddDuaModal from '@/components/add-dua-modal';
 import SkeletonBox from '@/components/SkeletonBox';
-import { useThemeStore } from '@/store/themeStore';
 import { ChevronRight, Image as ImageIcon, Video, Type, Bookmark, Plus, FolderOpen } from 'lucide-react-native';
 import PinSheet from '@/components/pin-sheet';
 
@@ -23,8 +22,7 @@ const RELINK_NEEDED_KEY    = 'imansync_storage_relink';
 const PINNED_DUAS_KEY      = 'imansync_pinned_duas';
 
 export default function MyDuasScreen() {
-  const scheme = useThemeStore((s) => s.theme);
-  const colors = Colors[scheme === 'unspecified' ? 'light' : scheme];
+  const colors = useThemeColors();
   const { t, i18n } = useTranslation();
   const router = useRouter();
 
@@ -251,7 +249,7 @@ export default function MyDuasScreen() {
       {loading ? (
         <View style={{ flex: 1 }}>
           {renderHeader()}
-          <View style={[styles.list, { marginTop: Spacing.four, paddingHorizontal: Spacing.four }]}>
+          <View style={[styles.list, { gap: Spacing.three, padding: Spacing.four, paddingTop: 0 }]}>
             {[...Array(5)].map((_, i) => (
               <View key={i} style={[styles.duaCard, { backgroundColor: colors.backgroundElement, borderColor: colors.border }]}>
                 <View style={styles.duaHeader}>

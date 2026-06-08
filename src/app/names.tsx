@@ -1,4 +1,4 @@
-import { Colors, Fonts, Spacing } from '@/constants/theme';
+import { Fonts, Spacing, useThemeColors, useThemeStyles } from '@/constants/theme';
 import PageHeader from '@/components/page-header';
 import { BlurView } from 'expo-blur';
 import React from 'react';
@@ -6,7 +6,6 @@ import { FlatList, StyleSheet, Text, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useTranslation } from 'react-i18next';
 import { formatNumber } from '@/utils/formatNumber';
-import { useThemeStore } from '@/store/themeStore';
 
 interface NameItem {
   id: string;
@@ -16,8 +15,8 @@ interface NameItem {
 }
 
 export default function NamesScreen() {
-  const scheme = useThemeStore((s) => s.theme);
-  const colors = Colors[scheme === 'unspecified' ? 'light' : scheme];
+  const colors = useThemeColors();
+  const themeStyles = useThemeStyles();
 
   const { t, i18n } = useTranslation();
 
@@ -33,7 +32,7 @@ export default function NamesScreen() {
         contentContainerStyle={styles.list}
         renderItem={({ item }) => (
           <BlurView intensity={40} tint={colors.glassTint as any} style={[styles.cardWrapper, { borderColor: colors.border }]}>
-            <View style={styles.card}>
+            <View style={[styles.card, themeStyles.cardShadow]}>
               <View style={[styles.numberBox, { backgroundColor: 'rgba(255,255,255,0.05)', borderColor: colors.border, borderWidth: 1 }]}>
                 <Text style={[styles.numberText, { color: colors.textSecondary }]}>{formatNumber(item.id, i18n.language)}</Text>
               </View>

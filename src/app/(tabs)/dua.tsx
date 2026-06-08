@@ -1,7 +1,7 @@
 import DuaCard from '@/components/dua-card';
 import PageHeader from '@/components/page-header';
 import PinSheet from '@/components/pin-sheet';
-import { Colors, Fonts, Spacing } from '@/constants/theme';
+import { Fonts, Spacing, useThemeColors } from '@/constants/theme';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useFocusEffect, useRouter } from 'expo-router';
 import { FolderLock, Search, X, CheckCircle2, AlertCircle, Plus } from 'lucide-react-native';
@@ -16,7 +16,6 @@ import { loadMyDuas, saveMyDuas, saveMediaFile, UserDua } from '@/utils/my-duas-
 
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { useThemeStore } from '@/store/themeStore';
 import SkeletonBox from '@/components/SkeletonBox';
 import { getStorageMode, loadCustomCategories, saveCustomCategories } from '@/utils/my-duas-storage';
 import { usePreferencesStore } from '@/store/preferencesStore';
@@ -34,8 +33,7 @@ const PIN_STORAGE_KEY    = 'imansync_dua_pins';
 const BANNER_DISMISSED_KEY = 'imansync_storage_banner_dismissed';
 
 export default function DuaScreen() {
-  const scheme = useThemeStore((s) => s.theme);
-  const colors = Colors[scheme === 'unspecified' ? 'light' : scheme];
+  const colors = useThemeColors();
   const { t, i18n } = useTranslation();
   const router = useRouter();
 
@@ -414,7 +412,7 @@ export default function DuaScreen() {
             {loading ? (
               [...Array(4)].map((_, i) => (
                 <View key={i} style={[styles.gridItem]}>
-                  <View style={[{ minHeight: 70, borderRadius: 20, borderWidth: 1, borderColor: colors.border, backgroundColor: colors.backgroundElement, padding: 8, paddingVertical: 8, alignItems: 'center', justifyContent: 'center' }]}>
+                  <View style={[{ minHeight: 70, borderRadius: 20, borderWidth: 1, borderColor: colors.border, backgroundColor: colors.backgroundElement, padding: Spacing.two, paddingVertical: Spacing.two, alignItems: 'center', justifyContent: 'center' }]}>
                     <View style={{ alignItems: 'center', justifyContent: 'center', gap: 2, paddingHorizontal: 8 }}>
                       <SkeletonBox width={110} height={16} borderRadius={8} color={colors.border} />
                       <SkeletonBox width={70} height={12} borderRadius={6} color={colors.border} />

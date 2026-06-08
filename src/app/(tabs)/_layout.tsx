@@ -1,14 +1,12 @@
 import React from 'react';
 import { Platform } from 'react-native';
-import { Colors } from '@/constants/theme';
+import { useThemeColors } from '@/constants/theme';
 import { Home, BookOpen, Map, Heart, Settings } from 'lucide-react-native';
 import { useTranslation } from 'react-i18next';
-import { useThemeStore } from '@/store/themeStore';
 import { Tabs } from 'expo-router';
 
 export default function TabLayout() {
-  const scheme = useThemeStore((s) => s.theme);
-  const colors = Colors[scheme === 'unspecified' ? 'light' : scheme];
+  const colors = useThemeColors();
   const { t } = useTranslation();
 
   return (

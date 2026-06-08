@@ -1,5 +1,5 @@
 import PageHeader from '@/components/page-header';
-import { Colors, Fonts, Spacing } from '@/constants/theme';
+import { Fonts, Spacing, useThemeColors } from '@/constants/theme';
 import { formatNumber } from '@/utils/formatNumber';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { BlurView } from 'expo-blur';
@@ -12,8 +12,8 @@ import { ScrollView, StyleSheet, Text, TouchableOpacity, View, AppState, Modal, 
 import Animated, { useAnimatedProps, useAnimatedStyle, useSharedValue, withSpring, withTiming } from 'react-native-reanimated';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import Svg, { Circle } from 'react-native-svg';
-import { useThemeStore } from '@/store/themeStore';
 import SkeletonBox from '@/components/SkeletonBox';
+import { useQadaStore } from '@/store/qadaStore';
 // @ts-ignore
 import ConfettiCannon from 'react-native-confetti-cannon';
 
@@ -100,8 +100,7 @@ const TaskCard = ({ task, isDone, onToggle, colors, t }: { task: typeof DAILY_TA
 };
 
 export default function TrackerScreen() {
-  const scheme = useThemeStore((s) => s.theme);
-  const colors = Colors[scheme === 'unspecified' ? 'light' : scheme];
+  const colors = useThemeColors();
   const { t, i18n } = useTranslation();
   const router = useRouter();
 
@@ -114,6 +113,12 @@ export default function TrackerScreen() {
   // New features state
   const [showConfetti, setShowConfetti] = useState(false);
   const [historyModalDate, setHistoryModalDate] = useState<string | null>(null);
+
+  const qadaStore = useQadaStore();
+
+  useEffect(() => {
+    qadaStore.initialize();
+  }, []);
 
   useEffect(() => {
     const sub = AppState.addEventListener('change', (state) => {
@@ -320,9 +325,45 @@ export default function TrackerScreen() {
     return t('tracker.msg_0');
   };
 
+  const totalKazaNamaj = qadaStore.fajr + qadaStore.dhuhr + qadaStore.asr + qadaStore.maghrib + qadaStore.isha + qadaStore.witr;
+
+  const isKazaFree = totalKazaNamaj === 0;
+  const chipColor = isKazaFree ? colors.accent : '#ef4444';
+  const chipBg = chipColor + '22';
+
+  const kazaChip = (
+    <TouchableOpacity 
+      activeOpacity={0.7}
+      style={{ 
+        flexDirection: 'row', 
+        alignItems: 'center', 
+        backgroundColor: chipBg, 
+        paddingHorizontal: 10, 
+        paddingVertical: 5, 
+        borderRadius: 14, 
+        borderWidth: 1, 
+        borderColor: chipColor 
+      }}
+      onPress={() => {
+        Haptics.selectionAsync();
+        router.push('/qada-tracker' as any);
+      }}
+    >
+      <History size={12} color={chipColor} style={{ marginRight: 4 }} />
+      <Text style={{ 
+        fontFamily: Fonts.outfit, 
+        fontSize: 12, 
+        color: chipColor, 
+        fontWeight: '600' 
+      }}>
+        {t('tracker.kazaChip', { namaj: formatNumber(totalKazaNamaj, i18n.language), defaultValue: `${formatNumber(totalKazaNamaj, i18n.language)} N` })}
+      </Text>
+    </TouchableOpacity>
+  );
+
   return (
     <SafeAreaView style={[styles.safeArea, { backgroundColor: colors.background }]}>
-      <PageHeader titleEn={t('tracker.titleEn')} titleAr={t('tracker.titleAr')} />
+      <PageHeader titleEn={t('tracker.titleEn')} titleAr={t('tracker.titleAr')} rightElement={kazaChip} />
       <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={styles.container}>
 
         <View style={[styles.tabsContainer, { borderBottomColor: colors.border }]}>
@@ -412,26 +453,6 @@ export default function TrackerScreen() {
               </Text>
             </BlurView>
 
-            {/* Qada Tracker Button */}
-            <TouchableOpacity 
-              activeOpacity={0.8}
-              onPress={() => router.push('/qada-tracker' as any)}
-              style={{ marginBottom: Spacing.four }}
-            >
-              <BlurView intensity={30} tint={colors.glassTint as any} style={{ borderRadius: 20, padding: Spacing.four, flexDirection: 'row', alignItems: 'center', borderColor: colors.border, borderWidth: 1 }}>
-                <View style={{ width: 44, height: 44, borderRadius: 22, backgroundColor: colors.highlight + '22', alignItems: 'center', justifyContent: 'center' }}>
-                  <History size={22} color={colors.highlight} />
-                </View>
-                <View style={{ flex: 1, marginLeft: Spacing.three }}>
-                  <Text style={{ fontFamily: Fonts.outfit, fontSize: 16, color: colors.text, fontWeight: '600' }}>
-                    {t('tracker.qadaTitle', { defaultValue: 'Missed Prayers (Qada)' })}
-                  </Text>
-                  <Text style={{ fontFamily: Fonts.outfit, fontSize: 13, color: colors.textSecondary, marginTop: 2 }}>
-                    {t('tracker.qadaDesc', { defaultValue: 'Track and make up your missed prayers and fasts.' })}
-                  </Text>
-                </View>
-              </BlurView>
-            </TouchableOpacity>
 
             {activeTab === 'Daily' && renderDaily()}
             {activeTab === 'Weekly' && renderRealChart(7, t('tracker.weekly'), weeklyData)}
