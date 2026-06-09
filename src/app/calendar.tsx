@@ -13,6 +13,7 @@ import SkeletonBox from '@/components/SkeletonBox';
 import ThemeCard from '@/components/ThemeCard';
 import { getBanglaDate } from '@/utils/banglaCalendar';
 import { Switch } from 'react-native';
+import Animated, { FadeIn, FadeOut, LinearTransition } from 'react-native-reanimated';
 
 export default function CalendarScreen() {
   const { t, i18n } = useTranslation();
@@ -228,11 +229,13 @@ export default function CalendarScreen() {
 
   // Convert "03:45 (+06)" to "03:45"
   const formatTimeStr = (timeStr: string) => {
-    const raw = timeStr.split(' ')[0];
-    const [hStr, mStr] = raw.split(':');
-    let h = parseInt(hStr, 10);
-    h = h % 12 || 12;
-    return formatNumber(`${h}:${mStr}`, i18n.language);
+    // timeStr is like "05:30 (EEST)"
+    const clean = timeStr.split(' ')[0];
+    const [h, m] = clean.split(':').map(Number);
+    const date = new Date();
+    date.setHours(h, m, 0, 0);
+    const timeEn = date.toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit', hour12: true });
+    return formatNumber(timeEn, i18n.language);
   };
 
   return (
@@ -260,7 +263,7 @@ export default function CalendarScreen() {
         }
       />
 
-      <View style={styles.container}>
+      <Animated.View layout={LinearTransition.springify().damping(16).stiffness(120)} style={styles.container}>
         
         {/* Month Selector */}
         <View style={styles.monthSelector}>
@@ -281,7 +284,7 @@ export default function CalendarScreen() {
           const daysInMonth = new Date(currentDate.getFullYear(), currentDate.getMonth() + 1, 0).getDate();
           
           return (
-            <>
+            <Animated.View key="loading" entering={FadeIn} exiting={FadeOut} style={{ flex: 1 }}>
               <View style={{ flexShrink: 1, marginBottom: Spacing.four }}>
                 {/* Days Bar skeleton */}
                 <View style={[styles.daysBar, { backgroundColor: colors.backgroundElement, borderColor: colors.border }]}>
@@ -337,32 +340,32 @@ export default function CalendarScreen() {
               <View style={styles.detailsContainer}>
                 {/* Date Card */}
                 <ThemeCard style={[styles.infoCard]}>
-                  <SkeletonBox width={180} height={20} borderRadius={10} color={colors.border} style={{ marginBottom: 2 }} loaded={false} />
-                  <SkeletonBox width={120} height={14} borderRadius={7} color={colors.border} loaded={false} />
+                  <SkeletonBox width={180} height={24} borderRadius={10} color={colors.border} style={{ marginBottom: 2 }} loaded={false} />
+                  <SkeletonBox width={120} height={18} borderRadius={7} color={colors.border} loaded={false} />
                 </ThemeCard>
 
                 {/* Times Cards */}
                 <View style={styles.timesRow}>
                   <ThemeCard style={[styles.infoCard, styles.timeBoxHalf, { marginRight: 4, marginLeft: 0 }]}>
                     <Text style={[styles.timeLabel, { color: colors.textSecondary }]}>{t('calendar.sahriEnd')}</Text>
-                    <SkeletonBox width={60} height={22} borderRadius={11} color={colors.border} loaded={false} />
+                    <SkeletonBox width={90} height={30} borderRadius={11} color={colors.border} loaded={false} />
                   </ThemeCard>
                   <ThemeCard style={[styles.infoCard, styles.timeBoxHalf, { marginLeft: 4, marginRight: 0 }]}>
                     <Text style={[styles.timeLabel, { color: colors.textSecondary }]}>{t('calendar.iftarTime')}</Text>
-                    <SkeletonBox width={60} height={22} borderRadius={11} color={colors.border} loaded={false} />
+                    <SkeletonBox width={90} height={30} borderRadius={11} color={colors.border} loaded={false} />
                   </ThemeCard>
                 </View>
 
                 {/* Events Card */}
                 <ThemeCard style={[styles.infoCard, { marginBottom: 0 }]}>
                   <Text style={[styles.eventsLabel, { color: colors.textSecondary }]}>{t('calendar.events')}</Text>
-                  <SkeletonBox width={140} height={16} borderRadius={8} color={colors.border} loaded={false} />
+                  <SkeletonBox width={140} height={20} borderRadius={8} color={colors.border} loaded={false} />
                 </ThemeCard>
               </View>
-            </>
+            </Animated.View>
           );
         })() : (
-          <>
+          <Animated.View key="loaded" entering={FadeIn} exiting={FadeOut} style={{ flex: 1 }}>
             {/* Grid */}
             {renderGrid()}
 
@@ -428,10 +431,10 @@ export default function CalendarScreen() {
                 </ThemeCard>
               </View>
             )})()}
-          </>
+          </Animated.View>
         )}
 
-      </View>
+      </Animated.View>
 
       <OptionsModal
         visible={optionsModalVisible}

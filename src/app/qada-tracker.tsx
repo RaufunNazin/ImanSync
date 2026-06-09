@@ -11,6 +11,7 @@ import { Fonts, Spacing, useThemeColors,  } from '@/constants/theme';
 import { useQadaStore, QadaType } from '@/store/qadaStore';
 import { formatNumber } from '@/utils/formatNumber';
 import Animated, { LinearTransition, FadeIn, FadeOut } from 'react-native-reanimated';
+import SkeletonBox from '@/components/SkeletonBox';
 
 export default function QadaTrackerScreen() {
   const { t, i18n } = useTranslation();
@@ -36,9 +37,11 @@ export default function QadaTrackerScreen() {
           
           <View style={{ flex: 1, flexDirection: 'row', alignItems: 'center', gap: Spacing.three }}>
             <Text style={[styles.cardTitle, { color: colors.text, minWidth: 70 }]}>{t(labelKey)}</Text>
-            <Text style={[styles.cardCount, { color: count > 0 ? colors.highlight : colors.textSecondary }]}>
-              {formatNumber(count, i18n.language)}
-            </Text>
+            <SkeletonBox width={40} height={30} borderRadius={8} color={colors.border} loaded={qadaStore.isLoaded}>
+              <Text style={[styles.cardCount, { color: count > 0 ? colors.highlight : colors.textSecondary }]}>
+                {formatNumber(count, i18n.language)}
+              </Text>
+            </SkeletonBox>
           </View>
 
           <Animated.View layout={LinearTransition.springify()} style={[styles.cardActions, { width: 140 }]}>
@@ -91,9 +94,11 @@ export default function QadaTrackerScreen() {
                 {t('tracker.prayers', { defaultValue: 'Prayers' })}
               </Text>
             </View>
-            <Text style={[styles.summaryValue, { color: colors.text }]}>
-              {formatNumber(totalPrayers, i18n.language)}
-            </Text>
+            <SkeletonBox width={60} height={52} borderRadius={12} color={colors.border} loaded={qadaStore.isLoaded}>
+              <Text style={[styles.summaryValue, { color: colors.text }]}>
+                {formatNumber(totalPrayers, i18n.language)}
+              </Text>
+            </SkeletonBox>
           </View>
           
           <View style={[styles.summaryCard, { flex: 1, backgroundColor: colors.backgroundElement, borderColor: colors.border }]}>
@@ -103,9 +108,11 @@ export default function QadaTrackerScreen() {
                 {t('tracker.fasting', { defaultValue: 'Fasting' })}
               </Text>
             </View>
-            <Text style={[styles.summaryValue, { color: colors.text }]}>
-              {formatNumber(qadaStore.fasts, i18n.language)}
-            </Text>
+            <SkeletonBox width={60} height={52} borderRadius={12} color={colors.border} loaded={qadaStore.isLoaded}>
+              <Text style={[styles.summaryValue, { color: colors.text }]}>
+                {formatNumber(qadaStore.fasts, i18n.language)}
+              </Text>
+            </SkeletonBox>
           </View>
         </View>
 

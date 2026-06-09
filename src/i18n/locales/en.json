@@ -87,7 +87,8 @@
     "timeRemainingMinsOnly": "{{minutes}}\nmin",
     "timeLeft": "Left",
     "hadithOfTheDay": "Hadith of the Day",
-    "trivia": "Islamic Trivia"
+    "trivia": "Islamic Trivia",
+    "qadaBadge": "You have {{count}} Qada prayers"
   },
   "quran": {
     "titleEn": "Al-Quran",
@@ -149,7 +150,8 @@
     "enTranslit": "English Transliteration",
     "bnTranslit": "Bangla Transliteration",
     "autoPlayNextAyah": "Auto-play Next Ayah",
-    "reciter": "Audio Reciter"
+    "reciter": "Audio Reciter",
+    "interactiveAudio": "Interactive word-by-word audio & translation"
   },
   "tracker": {
     "titleEn": "Daily Tracker",
@@ -163,6 +165,7 @@
     "weekly": "Weekly",
     "monthly": "Monthly",
     "tasksCompleted": "{{count}} of {{total}} tasks completed",
+    "tasksDone": "{{completed}}/{{total}} tasks done",
     "trackingCons": "Consistency",
     "msg_0": "Bismillah. Let's start the day with intention.",
     "msg_20": "Every small step brings you closer to Allah.",
@@ -358,6 +361,7 @@
     "dndFrom": "Quiet Hours Start",
     "dndTo": "Quiet Hours End",
     "dndSchedule": "Schedule",
+    "to": "to",
     "save": "Save",
     "cancel": "Cancel",
     "aboutImanSync": "About ImanSync",
@@ -1197,5 +1201,13 @@
     "Magh": "Magh",
     "Falgun": "Falgun",
     "Chaitra": "Chaitra"
+  },
+  "days": {
+    "monday": "Monday",
+    "thursday": "Thursday"
+  },
+  "time": {
+    "am": "AM",
+    "pm": "PM"
   }
 }

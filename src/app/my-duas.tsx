@@ -6,7 +6,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { Fonts, Spacing, useThemeColors } from '@/constants/theme';
 import PageHeader from '@/components/page-header';
 import { useTranslation } from 'react-i18next';
-import { Search, FolderLock, X, AlertTriangle } from 'lucide-react-native';
+import { Search, FolderLock, X } from 'lucide-react-native';
 import {
   loadMyDuas, saveMyDuas, saveMediaFile, UserDua,
   getStorageMode, clearRelinkFlag, initPermanentStorage, migrateDuas, getStorageUri,
@@ -133,13 +133,13 @@ export default function MyDuasScreen() {
       {/* ── Relink Banner ─────────────────────────────────────────────── */}
 
         {showRelinkBanner && (
-          <View style={[styles.banner, styles.bannerRelink, { borderColor: '#EF4444', backgroundColor: '#FEF2F2' }]}>
-            <AlertTriangle size={18} color="#EF4444" style={{ flexShrink: 0 }} />
-            <Text style={[styles.bannerText, { color: '#B91C1C', flex: 1 }]}>
+          <View style={[styles.banner, styles.bannerRelink, { borderColor: colors.accent, backgroundColor: colors.accent + '15' }]}>
+            <FolderLock size={20} color={colors.accent} style={{ marginRight: Spacing.three }} />
+            <Text style={[styles.bannerText, { color: colors.text, flex: 1 }]}>
               {t('dua.relinkStorage')}
             </Text>
             <TouchableOpacity activeOpacity={1}
-              style={[styles.bannerBtn, { backgroundColor: '#EF4444' }]}
+              style={[styles.bannerBtn, { backgroundColor: colors.accent }]}
               onPress={handleRelink}
               disabled={relinkLoading}
             >

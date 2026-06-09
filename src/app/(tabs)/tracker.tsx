@@ -394,7 +394,7 @@ export default function TrackerScreen() {
                   <SkeletonBox loaded={!loading} width={140} height={16} borderRadius={4} color={colors.border} style={{ marginTop: 2 }}>
                     <Text style={[styles.progressSubtitle, { color: colors.textSecondary }]}>
                       {activeTab === 'Daily'
-                        ? i18n.language === 'bn' ? `${formatNumber(completedCount, 'bn')}/${formatNumber(DAILY_TASKS.length, 'bn')} কাজ সম্পন্ন` : `${completedCount}/${DAILY_TASKS.length} tasks done`
+                        ? t('tracker.tasksDone', { completed: formatNumber(completedCount, i18n.language), total: formatNumber(DAILY_TASKS.length, i18n.language) })
                         : t('tracker.consistency', { title: activeTab === 'Weekly' ? t('tracker.weekly') : t('tracker.monthly') })}
                     </Text>
                   </SkeletonBox>
@@ -416,7 +416,7 @@ export default function TrackerScreen() {
                     />
                   </Svg>
                   <View style={styles.progressTextContainer}>
-                    <SkeletonBox loaded={!loading} width={34} height={16} borderRadius={4} color={colors.border}>
+                    <SkeletonBox loaded={!loading} width={34} height={20} borderRadius={4} color={colors.border}>
                       <Text style={[styles.progressText, { color: colors.accent }]}>
                         {formatNumber(displayPercentage, i18n.language)}%
                       </Text>
@@ -425,7 +425,7 @@ export default function TrackerScreen() {
                 </View>
               </View>
 
-              <SkeletonBox loaded={!loading} width={240} height={16} borderRadius={4} color={colors.border} style={{ marginTop: Spacing.two }}>
+              <SkeletonBox loaded={!loading} width={240} height={20} borderRadius={4} color={colors.border} style={{ marginTop: Spacing.two }}>
                 <Text style={[styles.encouragement, { color: colors.accent, marginTop: 0 }]}>
                   {getEncouragementMsg(displayPercentage)}
                 </Text>

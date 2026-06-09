@@ -7,6 +7,7 @@ interface ThemeCardProps extends ViewProps {
   children?: React.ReactNode;
   intensity?: number; // Kept for API compatibility, but ignored
   animated?: boolean;
+  layout?: any;
 }
 
 export default function ThemeCard({ style, children, intensity, animated, ...props }: ThemeCardProps) {

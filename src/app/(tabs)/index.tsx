@@ -63,9 +63,10 @@ interface DailyHadith {
 const formatAMPM = (date: Date, lang: string = 'en'): string => {
   let hours = date.getHours();
   let minutes = date.getMinutes();
+  const ampm = hours >= 12 ? ' PM' : ' AM';
   hours = hours % 12 || 12;
   const timeStr = `${hours}:${String(minutes).padStart(2, '0')}`;
-  return formatNumber(timeStr, lang);
+  return formatNumber(timeStr, lang) + ampm;
 };
 
 const parseTime = (timeStr: string, baseDate: Date): Date => {
@@ -98,9 +99,9 @@ export default function HomeScreen() {
   const qada = useQadaStore();
   const totalQada = qada.fajr + qada.dhuhr + qada.asr + qada.maghrib + qada.isha + qada.witr;
   
-  const qadaBadgeText = i18n.language === 'bn'
-    ? `${formatNumber(totalQada.toString(), 'bn')} টি কাযা নামাজ`
-    : `${totalQada} missed prayer${totalQada === 1 ? '' : 's'}`;
+  const qadaBadgeText = t('home.qadaBadge', { 
+    count: formatNumber(totalQada.toString(), i18n.language)
+  });
 
 
   const [currentTime, setCurrentTime] = useState(new Date());

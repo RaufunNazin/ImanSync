@@ -11,6 +11,7 @@ interface QadaState {
   isha: number;
   witr: number;
   fasts: number;
+  isLoaded: boolean;
   initialize: () => Promise<void>;
   updateQada: (type: QadaType, amount: number) => void;
 }
@@ -23,15 +24,19 @@ export const useQadaStore = create<QadaState>((set, get) => ({
   isha: 0,
   witr: 0,
   fasts: 0,
+  isLoaded: false,
 
   initialize: async () => {
     try {
       const val = await AsyncStorage.getItem('imansync_qada_store');
       if (val) {
-        set(JSON.parse(val));
+        set({ ...JSON.parse(val), isLoaded: true });
+      } else {
+        set({ isLoaded: true });
       }
     } catch (e) {
       console.error('Failed to load qada store', e);
+      set({ isLoaded: true });
     }
   },
 

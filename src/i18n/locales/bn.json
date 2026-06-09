@@ -87,7 +87,8 @@
     "timeRemainingMinsOnly": "{{minutes}}\nমিনিট",
     "timeLeft": "বাকি",
     "hadithOfTheDay": "আজকের হাদিস",
-    "trivia": "ইসলামিক কুইজ"
+    "trivia": "ইসলামিক কুইজ",
+    "qadaBadge": "আপনার {{count}} ওয়াক্ত কাজা নামাজ রয়েছে"
   },
   "quran": {
     "titleEn": "আল-কুরআন",
@@ -149,7 +150,8 @@
     "enTranslit": "ইংরেজি উচ্চারণ",
     "bnTranslit": "বাংলা উচ্চারণ",
     "reciter": "অডিও তিলাওয়াতকারী",
-    "autoPlayNextAyah": "পরের আয়াত অটো-প্লে"
+    "autoPlayNextAyah": "পরের আয়াত অটো-প্লে",
+    "interactiveAudio": "ইন্টারেক্টিভ শব্দ-ভিত্তিক অডিও ও অনুবাদ"
   },
   "tracker": {
     "titleEn": "আমল ট্র্যাকার",
@@ -163,6 +165,7 @@
     "weekly": "সাপ্তাহিক",
     "monthly": "মাসিক",
     "tasksCompleted": "{{total}} এর মধ্যে {{count}}টি কমপ্লিট",
+    "tasksDone": "{{total}} এর মধ্যে {{completed}}টি কাজ সম্পন্ন",
     "trackingCons": "ধারাবাহিকতা",
     "msg_0": "বিসমিল্লাহ। সঠিক নিয়তে দিন শুরু করুন।",
     "msg_20": "প্রতিটি ছোট আমলই গুরুত্বপূর্ণ।",
@@ -358,6 +361,7 @@
     "dndFrom": "নীরব সময় শুরু",
     "dndTo": "নীরব সময় শেষ",
     "dndSchedule": "সময়সূচী",
+    "to": "থেকে",
     "save": "সেভ করুন",
     "cancel": "ক্যান্সেল",
     "aboutImanSync": "ImanSync সম্পর্কে",
@@ -1313,5 +1317,13 @@
     "Magh": "মাঘ",
     "Falgun": "ফাল্গুন",
     "Chaitra": "চৈত্র"
+  },
+  "days": {
+    "monday": "সোমবার",
+    "thursday": "বৃহস্পতিবার"
+  },
+  "time": {
+    "am": "এএম",
+    "pm": "পিএম"
   }
 }

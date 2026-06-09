@@ -35,8 +35,8 @@ export default function DuaCard({
   
   return (
     <ThemeCard intensity={40} style={[styles.wrapper, 
-          (isMyDuas || id === 'bookmarks') && { backgroundColor: colors.accent + '1A' },
-          isCustom && { backgroundColor: colors.highlight + '1A' }
+          (isMyDuas || id === 'bookmarks') && { borderColor: colors.accent },
+          isCustom && { borderColor: colors.highlight }
     ]}>
       <TouchableOpacity activeOpacity={1}
         style={[styles.card]}

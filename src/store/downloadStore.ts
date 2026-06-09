@@ -1,6 +1,7 @@
 import { create } from 'zustand';
-import * as FileSystem from 'expo-file-system';
+import * as FileSystem from 'expo-file-system/legacy';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import { Platform } from 'react-native';
 
 interface DownloadState {
   downloadedFiles: Record<string, string>; // key: `${reciterId}_${surahId}`, value: local file URI
@@ -13,9 +14,10 @@ interface DownloadState {
 }
 
 const STORAGE_KEY = 'imansync_downloaded_audio';
-const AUDIO_DIR = ((FileSystem as any).documentDirectory || (FileSystem as any).cacheDirectory) + 'quran_audio';
+const AUDIO_DIR = Platform.OS === 'web' ? '' : ((FileSystem as any).documentDirectory || (FileSystem as any).cacheDirectory) + 'quran_audio';
 
 async function ensureDirExists() {
+  if (Platform.OS === 'web') return;
   const info = await FileSystem.getInfoAsync(AUDIO_DIR);
   if (!info.exists) {
     await FileSystem.makeDirectoryAsync(AUDIO_DIR, { intermediates: true });
@@ -27,6 +29,7 @@ export const useDownloadStore = create<DownloadState>((set, get) => ({
   downloadProgress: {},
 
   initialize: async () => {
+    if (Platform.OS === 'web') return;
     try {
       await ensureDirExists();
       const stored = await AsyncStorage.getItem(STORAGE_KEY);
@@ -55,6 +58,7 @@ export const useDownloadStore = create<DownloadState>((set, get) => ({
   },
 
   downloadSurah: async (reciterId: number, surahId: number) => {
+    if (Platform.OS === 'web') return;
     const key = `${reciterId}_${surahId}`;
     
     // Check if already downloading or downloaded
@@ -121,6 +125,7 @@ export const useDownloadStore = create<DownloadState>((set, get) => ({
   },
 
   deleteSurah: async (reciterId: number, surahId: number) => {
+    if (Platform.OS === 'web') return;
     const key = `${reciterId}_${surahId}`;
     const localUri = get().downloadedFiles[key];
     

@@ -397,7 +397,7 @@ export default function DuaScreen() {
         <View style={[styles.section, { padding: Spacing.four }]}>
           <View style={styles.grid}>
             {loading ? (
-              [...Array(6)].map((_, i) => (
+              [...Array(20)].map((_, i) => (
                 <View key={i} style={[styles.gridItem]}>
                   <ThemeCard style={{ minHeight: 70, borderRadius: 20, padding: Spacing.two, paddingVertical: Spacing.two, alignItems: 'center', justifyContent: 'center' }}>
                     <View style={{ alignItems: 'center', justifyContent: 'center', gap: 2, paddingHorizontal: 8 }}>

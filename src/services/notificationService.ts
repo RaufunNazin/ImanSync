@@ -1,11 +1,12 @@
 import i18n from '@/i18n';
 import notifee, { AndroidImportance, TimestampTrigger, TriggerType } from '@notifee/react-native';
+import { formatNumber } from '@/utils/formatNumber';
 import { QuietHours, usePreferencesStore } from '../store/preferencesStore';
 
-const PRAYERS_START_CHANNEL = 'prayers_start_channel_v4';
-const PRAYERS_END_CHANNEL = 'prayers_end_channel_v4';
-const EVENTS_CHANNEL = 'events_channel_v4';
-const TASKS_CHANNEL = 'tasks_channel_v4';
+const PRAYERS_START_CHANNEL = 'prayers_start_channel_v5';
+const PRAYERS_END_CHANNEL = 'prayers_end_channel_v5';
+const EVENTS_CHANNEL = 'events_channel_v5';
+const TASKS_CHANNEL = 'tasks_channel_v5';
 
 // Check if a day is Eid al-Fitr or Eid al-Adha/Tashreeq days (fasting is forbidden)
 function isForbiddenFastingDay(hijriDay: number, hijriMonth: number): boolean {
@@ -69,7 +70,9 @@ function formatAMPM(date: Date) {
   let minutes = date.getMinutes();
   const ampm = hours >= 12 ? ' PM' : ' AM';
   hours = hours % 12 || 12;
-  return hours + ':' + String(minutes).padStart(2, '0') + ampm;
+  const hoursFormatted = formatNumber(hours, i18n.language);
+  const minutesFormatted = formatNumber(String(minutes).padStart(2, '0'), i18n.language);
+  return `${hoursFormatted}:${minutesFormatted} ${ampm}`;
 }
 
 export async function setupChannels() {
@@ -86,18 +89,21 @@ export async function setupChannels() {
     id: PRAYERS_END_CHANNEL,
     name: 'Prayer End Alerts',
     importance: AndroidImportance.DEFAULT,
+    sound: 'default',
   });
 
   await notifee.createChannel({
     id: EVENTS_CHANNEL,
     name: 'Islamic Events',
     importance: AndroidImportance.DEFAULT,
+    sound: 'default',
   });
 
   await notifee.createChannel({
     id: TASKS_CHANNEL,
     name: 'Task Reminders',
     importance: AndroidImportance.DEFAULT,
+    sound: 'default',
   });
 }
 
@@ -339,7 +345,7 @@ async function scheduleEventsDay(dayData: any, targetDate: Date, quietHours: Qui
     if (triggerDate.getTime() > now.getTime() && !isQuietHour(triggerDate, quietHours)) {
       await notifee.createTriggerNotification({
         title: i18n.t('notifications.fastingTitle'),
-        body: i18n.t('notifications.fastingBody', { day: dayOfWeek === 1 ? 'Monday' : 'Thursday' }),
+        body: i18n.t('notifications.fastingBody', { day: i18n.t(dayOfWeek === 1 ? 'days.monday' : 'days.thursday') }),
         android: { showTimestamp: true, channelId: EVENTS_CHANNEL, smallIcon: 'notification_icon', color: '#4c956c' , pressAction: { id: 'default' } },
         ios: { sound: 'default', badgeCount: 1 },
       }, { type: TriggerType.TIMESTAMP, timestamp: triggerDate.getTime(), alarmManager: { allowWhileIdle: true } });
@@ -354,7 +360,7 @@ async function scheduleEventsDay(dayData: any, targetDate: Date, quietHours: Qui
     if (triggerDate.getTime() > now.getTime() && !isQuietHour(triggerDate, quietHours)) {
       await notifee.createTriggerNotification({
         title: i18n.t('notifications.whiteDaysTitle'),
-        body: i18n.t('notifications.whiteDaysBody', { day: hijriDay }),
+        body: i18n.t('notifications.whiteDaysBody', { day: formatNumber(hijriDay, i18n.language) }),
         android: { showTimestamp: true, channelId: EVENTS_CHANNEL, smallIcon: 'notification_icon', color: '#4c956c' , pressAction: { id: 'default' } },
         ios: { sound: 'default', badgeCount: 1 },
       }, { type: TriggerType.TIMESTAMP, timestamp: triggerDate.getTime(), alarmManager: { allowWhileIdle: true } });

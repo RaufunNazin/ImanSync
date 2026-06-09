@@ -4,7 +4,7 @@ import { Fonts, Spacing, useThemeColors } from '@/constants/theme';
 import { formatNumber } from '@/utils/formatNumber';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useFocusEffect, useRouter } from 'expo-router';
-import { Bookmark, Search, Target, DownloadCloud, CheckCircle, Loader2, GraduationCap, ChevronRight, X } from 'lucide-react-native';
+import { Bookmark, BookOpen, Search, Target, DownloadCloud, CheckCircle, Loader2, GraduationCap, ChevronRight, X } from 'lucide-react-native';
 import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { StyleSheet, Text, TouchableOpacity, View, Animated } from 'react-native';
@@ -260,8 +260,14 @@ export default function QuranScreen() {
                 else router.push(`/juz/${lastReadJuz.id}?ayah=${lastReadJuz.ayah}`);
               }} 
               hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
+              style={{ alignItems: 'center', justifyContent: 'center' }}
             >
-              <Bookmark size={22} color={colors.textSecondary} />
+              <BookOpen size={22} color={colors.textSecondary} />
+              <View style={{ position: 'absolute', bottom: -5, zIndex: 10, backgroundColor: colors.background, paddingHorizontal: 2, borderRadius: 4 }}>
+                <Text style={{ fontFamily: Fonts.outfit, fontSize: 8, color: colors.textSecondary, fontWeight: '700' }}>
+                  {activeTab === 'surah' ? formatNumber(Number(lastReadSurah.id), i18n.language) : formatNumber(Number(lastReadJuz.id), i18n.language)}:{activeTab === 'surah' ? formatNumber(lastReadSurah.ayah, i18n.language) : formatNumber(lastReadJuz.ayah, i18n.language)}
+                </Text>
+              </View>
             </TouchableOpacity>
 
             <TouchableOpacity activeOpacity={1} onPress={() => router.push('/quran-search' as any)} hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}>
@@ -298,7 +304,7 @@ export default function QuranScreen() {
             <GraduationCap size={24} color={colors.accent} />
             <View style={{ marginLeft: Spacing.three, flex: 1, paddingRight: 8 }}>
               <Text style={{ fontFamily: Fonts.outfit, fontSize: 16, color: colors.text }}>{t('home.learnQuran')}</Text>
-              <Text style={{ fontFamily: Fonts.outfit, fontSize: 13, color: colors.textSecondary, marginTop: 2 }}>{i18n.language === 'bn' ? 'ইন্টারেক্টিভ শব্দ-ভিত্তিক অডিও ও অনুবাদ' : 'Interactive word-by-word audio & translation'}</Text>
+              <Text style={{ fontFamily: Fonts.outfit, fontSize: 13, color: colors.textSecondary, marginTop: 2 }}>{t('quranSettings.interactiveAudio')}</Text>
             </View>
             <ChevronRight size={20} color={colors.textSecondary} style={{ marginRight: 8 }} />
             

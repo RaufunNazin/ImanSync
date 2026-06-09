@@ -74,6 +74,7 @@ export async function getStorageUri(): Promise<string | null> {
 
 // ─── Public: init internal (default, no permissions) ─────────────────────────
 export async function initInternalStorage(): Promise<UserDua[]> {
+  if (Platform.OS === 'web') return [];
   await ensureInternalDir();
   const dir = getInternalDir();
   await AsyncStorage.setItem(STORAGE_KEY, dir);
@@ -94,6 +95,7 @@ export async function initInternalStorage(): Promise<UserDua[]> {
 // ─── Public: init permanent storage (SAF, opt-in) ────────────────────────────
 // Returns { duas, cancelled } — if user cancelled the picker, cancelled = true.
 export async function initPermanentStorage(): Promise<{ duas: UserDua[]; cancelled: boolean }> {
+  if (Platform.OS === 'web') return { duas: [], cancelled: false };
   if (Platform.OS !== 'android') {
     // iOS: fallback to internal; "permanent" on iOS is internal + iCloud backup
     const duas = await initInternalStorage();
@@ -202,6 +204,7 @@ export async function clearRelinkFlag(): Promise<void> {
 
 // ─── Public: load duas ───────────────────────────────────────────────────────
 export async function loadMyDuas(): Promise<UserDua[]> {
+  if (Platform.OS === 'web') return [];
   if (cachedMyDuas) return cachedMyDuas;
 
   const uri = await getStorageUri();
@@ -240,6 +243,7 @@ export async function loadMyDuas(): Promise<UserDua[]> {
 
 // ─── Public: save duas ───────────────────────────────────────────────────────
 export async function saveMyDuas(duas: UserDua[]): Promise<void> {
+  if (Platform.OS === 'web') return;
   const uri = await getStorageUri();
   const mode = await getStorageMode();
   if (!uri) throw new Error('Storage not initialized');
@@ -280,6 +284,7 @@ export async function migrateDuas(
   direction: 'to_permanent' | 'to_internal',
   permanentUri: string
 ): Promise<void> {
+  if (Platform.OS === 'web') return;
   const internalDir = getInternalDir();
   const internalFile = internalDir + FILE_NAME;
 
