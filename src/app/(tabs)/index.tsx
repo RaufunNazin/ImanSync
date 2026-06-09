@@ -622,7 +622,7 @@ export default function HomeScreen() {
               </View>
 
               {/* Centered Countdown */}
-              <View style={{ position: 'absolute', left: 0, right: 0, bottom: 36 }}>
+              <View style={{ position: 'absolute', left: 0, right: 0, bottom: 40 }}>
                 <View style={{ flexDirection: 'row', alignItems: 'baseline', justifyContent: 'center' }}>
                   {displayCountdown.split('').map((char, idx) => (
                     <Text 
