@@ -1,0 +1,802 @@
+{
+  "data": [
+    {
+      "id": 1,
+      "name": "Al-Faatiha",
+      "nameAr": "سُورَةُ ٱلْفَاتِحَةِ",
+      "verses": 7,
+      "type": "Meccan"
+    },
+    {
+      "id": 2,
+      "name": "Al-Baqara",
+      "nameAr": "سُورَةُ البَقَرَةِ",
+      "verses": 286,
+      "type": "Medinan"
+    },
+    {
+      "id": 3,
+      "name": "Aal-i-Imraan",
+      "nameAr": "سُورَةُ آلِ عِمۡرَانَ",
+      "verses": 200,
+      "type": "Medinan"
+    },
+    {
+      "id": 4,
+      "name": "An-Nisaa",
+      "nameAr": "سُورَةُ النِّسَاءِ",
+      "verses": 176,
+      "type": "Medinan"
+    },
+    {
+      "id": 5,
+      "name": "Al-Maaida",
+      "nameAr": "سُورَةُ المَائـِدَةِ",
+      "verses": 120,
+      "type": "Medinan"
+    },
+    {
+      "id": 6,
+      "name": "Al-An'aam",
+      "nameAr": "سُورَةُ الأَنۡعَامِ",
+      "verses": 165,
+      "type": "Meccan"
+    },
+    {
+      "id": 7,
+      "name": "Al-A'raaf",
+      "nameAr": "سُورَةُ الأَعۡرَافِ",
+      "verses": 206,
+      "type": "Meccan"
+    },
+    {
+      "id": 8,
+      "name": "Al-Anfaal",
+      "nameAr": "سُورَةُ الأَنفَالِ",
+      "verses": 75,
+      "type": "Medinan"
+    },
+    {
+      "id": 9,
+      "name": "At-Tawba",
+      "nameAr": "سُورَةُ التَّوۡبَةِ",
+      "verses": 129,
+      "type": "Medinan"
+    },
+    {
+      "id": 10,
+      "name": "Yunus",
+      "nameAr": "سُورَةُ يُونُسَ",
+      "verses": 109,
+      "type": "Meccan"
+    },
+    {
+      "id": 11,
+      "name": "Hud",
+      "nameAr": "سُورَةُ هُودٍ",
+      "verses": 123,
+      "type": "Meccan"
+    },
+    {
+      "id": 12,
+      "name": "Yusuf",
+      "nameAr": "سُورَةُ يُوسُفَ",
+      "verses": 111,
+      "type": "Meccan"
+    },
+    {
+      "id": 13,
+      "name": "Ar-Ra'd",
+      "nameAr": "سُورَةُ الرَّعۡدِ",
+      "verses": 43,
+      "type": "Medinan"
+    },
+    {
+      "id": 14,
+      "name": "Ibrahim",
+      "nameAr": "سُورَةُ إِبۡرَاهِيمَ",
+      "verses": 52,
+      "type": "Meccan"
+    },
+    {
+      "id": 15,
+      "name": "Al-Hijr",
+      "nameAr": "سُورَةُ الحِجۡرِ",
+      "verses": 99,
+      "type": "Meccan"
+    },
+    {
+      "id": 16,
+      "name": "An-Nahl",
+      "nameAr": "سُورَةُ النَّحۡلِ",
+      "verses": 128,
+      "type": "Meccan"
+    },
+    {
+      "id": 17,
+      "name": "Al-Israa",
+      "nameAr": "سُورَةُ الإِسۡرَاءِ",
+      "verses": 111,
+      "type": "Meccan"
+    },
+    {
+      "id": 18,
+      "name": "Al-Kahf",
+      "nameAr": "سُورَةُ الكَهۡفِ",
+      "verses": 110,
+      "type": "Meccan"
+    },
+    {
+      "id": 19,
+      "name": "Maryam",
+      "nameAr": "سُورَةُ مَرۡيَمَ",
+      "verses": 98,
+      "type": "Meccan"
+    },
+    {
+      "id": 20,
+      "name": "Taa-Haa",
+      "nameAr": "سُورَةُ طه",
+      "verses": 135,
+      "type": "Meccan"
+    },
+    {
+      "id": 21,
+      "name": "Al-Anbiyaa",
+      "nameAr": "سُورَةُ الأَنبِيَاءِ",
+      "verses": 112,
+      "type": "Meccan"
+    },
+    {
+      "id": 22,
+      "name": "Al-Hajj",
+      "nameAr": "سُورَةُ الحَجِّ",
+      "verses": 78,
+      "type": "Medinan"
+    },
+    {
+      "id": 23,
+      "name": "Al-Muminoon",
+      "nameAr": "سُورَةُ المُؤۡمِنُونَ",
+      "verses": 118,
+      "type": "Meccan"
+    },
+    {
+      "id": 24,
+      "name": "An-Noor",
+      "nameAr": "سُورَةُ النُّورِ",
+      "verses": 64,
+      "type": "Medinan"
+    },
+    {
+      "id": 25,
+      "name": "Al-Furqaan",
+      "nameAr": "سُورَةُ الفُرۡقَانِ",
+      "verses": 77,
+      "type": "Meccan"
+    },
+    {
+      "id": 26,
+      "name": "Ash-Shu'araa",
+      "nameAr": "سُورَةُ الشُّعَرَاءِ",
+      "verses": 227,
+      "type": "Meccan"
+    },
+    {
+      "id": 27,
+      "name": "An-Naml",
+      "nameAr": "سُورَةُ النَّمۡلِ",
+      "verses": 93,
+      "type": "Meccan"
+    },
+    {
+      "id": 28,
+      "name": "Al-Qasas",
+      "nameAr": "سُورَةُ القَصَصِ",
+      "verses": 88,
+      "type": "Meccan"
+    },
+    {
+      "id": 29,
+      "name": "Al-Ankaboot",
+      "nameAr": "سُورَةُ العَنكَبُوتِ",
+      "verses": 69,
+      "type": "Meccan"
+    },
+    {
+      "id": 30,
+      "name": "Ar-Room",
+      "nameAr": "سُورَةُ الرُّومِ",
+      "verses": 60,
+      "type": "Meccan"
+    },
+    {
+      "id": 31,
+      "name": "Luqman",
+      "nameAr": "سُورَةُ لُقۡمَانَ",
+      "verses": 34,
+      "type": "Meccan"
+    },
+    {
+      "id": 32,
+      "name": "As-Sajda",
+      "nameAr": "سُورَةُ السَّجۡدَةِ",
+      "verses": 30,
+      "type": "Meccan"
+    },
+    {
+      "id": 33,
+      "name": "Al-Ahzaab",
+      "nameAr": "سُورَةُ الأَحۡزَابِ",
+      "verses": 73,
+      "type": "Medinan"
+    },
+    {
+      "id": 34,
+      "name": "Saba",
+      "nameAr": "سُورَةُ سَبَإٍ",
+      "verses": 54,
+      "type": "Meccan"
+    },
+    {
+      "id": 35,
+      "name": "Faatir",
+      "nameAr": "سُورَةُ فَاطِرٍ",
+      "verses": 45,
+      "type": "Meccan"
+    },
+    {
+      "id": 36,
+      "name": "Yaseen",
+      "nameAr": "سُورَةُ يسٓ",
+      "verses": 83,
+      "type": "Meccan"
+    },
+    {
+      "id": 37,
+      "name": "As-Saaffaat",
+      "nameAr": "سُورَةُ الصَّافَّاتِ",
+      "verses": 182,
+      "type": "Meccan"
+    },
+    {
+      "id": 38,
+      "name": "Saad",
+      "nameAr": "سُورَةُ صٓ",
+      "verses": 88,
+      "type": "Meccan"
+    },
+    {
+      "id": 39,
+      "name": "Az-Zumar",
+      "nameAr": "سُورَةُ الزُّمَرِ",
+      "verses": 75,
+      "type": "Meccan"
+    },
+    {
+      "id": 40,
+      "name": "Ghafir",
+      "nameAr": "سُورَةُ غَافِرٍ",
+      "verses": 85,
+      "type": "Meccan"
+    },
+    {
+      "id": 41,
+      "name": "Fussilat",
+      "nameAr": "سُورَةُ فُصِّلَتۡ",
+      "verses": 54,
+      "type": "Meccan"
+    },
+    {
+      "id": 42,
+      "name": "Ash-Shura",
+      "nameAr": "سُورَةُ الشُّورَىٰ",
+      "verses": 53,
+      "type": "Meccan"
+    },
+    {
+      "id": 43,
+      "name": "Az-Zukhruf",
+      "nameAr": "سُورَةُ الزُّخۡرُفِ",
+      "verses": 89,
+      "type": "Meccan"
+    },
+    {
+      "id": 44,
+      "name": "Ad-Dukhaan",
+      "nameAr": "سُورَةُ الدُّخَانِ",
+      "verses": 59,
+      "type": "Meccan"
+    },
+    {
+      "id": 45,
+      "name": "Al-Jaathiya",
+      "nameAr": "سُورَةُ الجَاثِيَةِ",
+      "verses": 37,
+      "type": "Meccan"
+    },
+    {
+      "id": 46,
+      "name": "Al-Ahqaf",
+      "nameAr": "سُورَةُ الأَحۡقَافِ",
+      "verses": 35,
+      "type": "Meccan"
+    },
+    {
+      "id": 47,
+      "name": "Muhammad",
+      "nameAr": "سُورَةُ مُحَمَّدٍ",
+      "verses": 38,
+      "type": "Medinan"
+    },
+    {
+      "id": 48,
+      "name": "Al-Fath",
+      "nameAr": "سُورَةُ الفَتۡحِ",
+      "verses": 29,
+      "type": "Medinan"
+    },
+    {
+      "id": 49,
+      "name": "Al-Hujuraat",
+      "nameAr": "سُورَةُ الحُجُرَاتِ",
+      "verses": 18,
+      "type": "Medinan"
+    },
+    {
+      "id": 50,
+      "name": "Qaaf",
+      "nameAr": "سُورَةُ قٓ",
+      "verses": 45,
+      "type": "Meccan"
+    },
+    {
+      "id": 51,
+      "name": "Adh-Dhaariyat",
+      "nameAr": "سُورَةُ الذَّارِيَاتِ",
+      "verses": 60,
+      "type": "Meccan"
+    },
+    {
+      "id": 52,
+      "name": "At-Tur",
+      "nameAr": "سُورَةُ الطُّورِ",
+      "verses": 49,
+      "type": "Meccan"
+    },
+    {
+      "id": 53,
+      "name": "An-Najm",
+      "nameAr": "سُورَةُ النَّجۡمِ",
+      "verses": 62,
+      "type": "Meccan"
+    },
+    {
+      "id": 54,
+      "name": "Al-Qamar",
+      "nameAr": "سُورَةُ القَمَرِ",
+      "verses": 55,
+      "type": "Meccan"
+    },
+    {
+      "id": 55,
+      "name": "Ar-Rahmaan",
+      "nameAr": "سُورَةُ الرَّحۡمَٰن",
+      "verses": 78,
+      "type": "Medinan"
+    },
+    {
+      "id": 56,
+      "name": "Al-Waaqia",
+      "nameAr": "سُورَةُ الوَاقِعَةِ",
+      "verses": 96,
+      "type": "Meccan"
+    },
+    {
+      "id": 57,
+      "name": "Al-Hadid",
+      "nameAr": "سُورَةُ الحَدِيدِ",
+      "verses": 29,
+      "type": "Medinan"
+    },
+    {
+      "id": 58,
+      "name": "Al-Mujaadila",
+      "nameAr": "سُورَةُ المُجَادلَةِ",
+      "verses": 22,
+      "type": "Medinan"
+    },
+    {
+      "id": 59,
+      "name": "Al-Hashr",
+      "nameAr": "سُورَةُ الحَشۡرِ",
+      "verses": 24,
+      "type": "Medinan"
+    },
+    {
+      "id": 60,
+      "name": "Al-Mumtahana",
+      "nameAr": "سُورَةُ المُمۡتَحنَةِ",
+      "verses": 13,
+      "type": "Medinan"
+    },
+    {
+      "id": 61,
+      "name": "As-Saff",
+      "nameAr": "سُورَةُ الصَّفِّ",
+      "verses": 14,
+      "type": "Medinan"
+    },
+    {
+      "id": 62,
+      "name": "Al-Jumu'a",
+      "nameAr": "سُورَةُ الجُمُعَةِ",
+      "verses": 11,
+      "type": "Medinan"
+    },
+    {
+      "id": 63,
+      "name": "Al-Munaafiqoon",
+      "nameAr": "سُورَةُ المُنَافِقُونَ",
+      "verses": 11,
+      "type": "Medinan"
+    },
+    {
+      "id": 64,
+      "name": "At-Taghaabun",
+      "nameAr": "سُورَةُ التَّغَابُنِ",
+      "verses": 18,
+      "type": "Medinan"
+    },
+    {
+      "id": 65,
+      "name": "At-Talaaq",
+      "nameAr": "سُورَةُ الطَّلَاقِ",
+      "verses": 12,
+      "type": "Medinan"
+    },
+    {
+      "id": 66,
+      "name": "At-Tahrim",
+      "nameAr": "سُورَةُ التَّحۡرِيمِ",
+      "verses": 12,
+      "type": "Medinan"
+    },
+    {
+      "id": 67,
+      "name": "Al-Mulk",
+      "nameAr": "سُورَةُ المُلۡكِ",
+      "verses": 30,
+      "type": "Meccan"
+    },
+    {
+      "id": 68,
+      "name": "Al-Qalam",
+      "nameAr": "سُورَةُ القَلَمِ",
+      "verses": 52,
+      "type": "Meccan"
+    },
+    {
+      "id": 69,
+      "name": "Al-Haaqqa",
+      "nameAr": "سُورَةُ الحَاقَّةِ",
+      "verses": 52,
+      "type": "Meccan"
+    },
+    {
+      "id": 70,
+      "name": "Al-Ma'aarij",
+      "nameAr": "سُورَةُ المَعَارِجِ",
+      "verses": 44,
+      "type": "Meccan"
+    },
+    {
+      "id": 71,
+      "name": "Nooh",
+      "nameAr": "سُورَةُ نُوحٍ",
+      "verses": 28,
+      "type": "Meccan"
+    },
+    {
+      "id": 72,
+      "name": "Al-Jinn",
+      "nameAr": "سُورَةُ الجِنِّ",
+      "verses": 28,
+      "type": "Meccan"
+    },
+    {
+      "id": 73,
+      "name": "Al-Muzzammil",
+      "nameAr": "سُورَةُ المُزَّمِّلِ",
+      "verses": 20,
+      "type": "Meccan"
+    },
+    {
+      "id": 74,
+      "name": "Al-Muddaththir",
+      "nameAr": "سُورَةُ المُدَّثِّرِ",
+      "verses": 56,
+      "type": "Meccan"
+    },
+    {
+      "id": 75,
+      "name": "Al-Qiyaama",
+      "nameAr": "سُورَةُ القِيَامَةِ",
+      "verses": 40,
+      "type": "Meccan"
+    },
+    {
+      "id": 76,
+      "name": "Al-Insaan",
+      "nameAr": "سُورَةُ الإِنسَانِ",
+      "verses": 31,
+      "type": "Medinan"
+    },
+    {
+      "id": 77,
+      "name": "Al-Mursalaat",
+      "nameAr": "سُورَةُ المُرۡسَلَاتِ",
+      "verses": 50,
+      "type": "Meccan"
+    },
+    {
+      "id": 78,
+      "name": "An-Naba",
+      "nameAr": "سُورَةُ النَّبَإِ",
+      "verses": 40,
+      "type": "Meccan"
+    },
+    {
+      "id": 79,
+      "name": "An-Naazi'aat",
+      "nameAr": "سُورَةُ النَّازِعَاتِ",
+      "verses": 46,
+      "type": "Meccan"
+    },
+    {
+      "id": 80,
+      "name": "Abasa",
+      "nameAr": "سُورَةُ عَبَسَ",
+      "verses": 42,
+      "type": "Meccan"
+    },
+    {
+      "id": 81,
+      "name": "At-Takwir",
+      "nameAr": "سُورَةُ التَّكۡوِيرِ",
+      "verses": 29,
+      "type": "Meccan"
+    },
+    {
+      "id": 82,
+      "name": "Al-Infitaar",
+      "nameAr": "سُورَةُ الانفِطَارِ",
+      "verses": 19,
+      "type": "Meccan"
+    },
+    {
+      "id": 83,
+      "name": "Al-Mutaffifin",
+      "nameAr": "سُورَةُ المُطَفِّفِينَ",
+      "verses": 36,
+      "type": "Meccan"
+    },
+    {
+      "id": 84,
+      "name": "Al-Inshiqaaq",
+      "nameAr": "سُورَةُ الانشِقَاقِ",
+      "verses": 25,
+      "type": "Meccan"
+    },
+    {
+      "id": 85,
+      "name": "Al-Burooj",
+      "nameAr": "سُورَةُ البُرُوجِ",
+      "verses": 22,
+      "type": "Meccan"
+    },
+    {
+      "id": 86,
+      "name": "At-Taariq",
+      "nameAr": "سُورَةُ الطَّارِقِ",
+      "verses": 17,
+      "type": "Meccan"
+    },
+    {
+      "id": 87,
+      "name": "Al-A'laa",
+      "nameAr": "سُورَةُ الأَعۡلَىٰ",
+      "verses": 19,
+      "type": "Meccan"
+    },
+    {
+      "id": 88,
+      "name": "Al-Ghaashiya",
+      "nameAr": "سُورَةُ الغَاشِيَةِ",
+      "verses": 26,
+      "type": "Meccan"
+    },
+    {
+      "id": 89,
+      "name": "Al-Fajr",
+      "nameAr": "سُورَةُ الفَجۡرِ",
+      "verses": 30,
+      "type": "Meccan"
+    },
+    {
+      "id": 90,
+      "name": "Al-Balad",
+      "nameAr": "سُورَةُ البَلَدِ",
+      "verses": 20,
+      "type": "Meccan"
+    },
+    {
+      "id": 91,
+      "name": "Ash-Shams",
+      "nameAr": "سُورَةُ الشَّمۡسِ",
+      "verses": 15,
+      "type": "Meccan"
+    },
+    {
+      "id": 92,
+      "name": "Al-Lail",
+      "nameAr": "سُورَةُ اللَّيۡلِ",
+      "verses": 21,
+      "type": "Meccan"
+    },
+    {
+      "id": 93,
+      "name": "Ad-Dhuhaa",
+      "nameAr": "سُورَةُ الضُّحَىٰ",
+      "verses": 11,
+      "type": "Meccan"
+    },
+    {
+      "id": 94,
+      "name": "Ash-Sharh",
+      "nameAr": "سُورَةُ الشَّرۡحِ",
+      "verses": 8,
+      "type": "Meccan"
+    },
+    {
+      "id": 95,
+      "name": "At-Tin",
+      "nameAr": "سُورَةُ التِّينِ",
+      "verses": 8,
+      "type": "Meccan"
+    },
+    {
+      "id": 96,
+      "name": "Al-Alaq",
+      "nameAr": "سُورَةُ العَلَقِ",
+      "verses": 19,
+      "type": "Meccan"
+    },
+    {
+      "id": 97,
+      "name": "Al-Qadr",
+      "nameAr": "سُورَةُ القَدۡرِ",
+      "verses": 5,
+      "type": "Meccan"
+    },
+    {
+      "id": 98,
+      "name": "Al-Bayyina",
+      "nameAr": "سُورَةُ البَيِّنَةِ",
+      "verses": 8,
+      "type": "Medinan"
+    },
+    {
+      "id": 99,
+      "name": "Az-Zalzala",
+      "nameAr": "سُورَةُ الزَّلۡزَلَةِ",
+      "verses": 8,
+      "type": "Medinan"
+    },
+    {
+      "id": 100,
+      "name": "Al-Aadiyaat",
+      "nameAr": "سُورَةُ العَادِيَاتِ",
+      "verses": 11,
+      "type": "Meccan"
+    },
+    {
+      "id": 101,
+      "name": "Al-Qaari'a",
+      "nameAr": "سُورَةُ القَارِعَةِ",
+      "verses": 11,
+      "type": "Meccan"
+    },
+    {
+      "id": 102,
+      "name": "At-Takaathur",
+      "nameAr": "سُورَةُ التَّكَاثُرِ",
+      "verses": 8,
+      "type": "Meccan"
+    },
+    {
+      "id": 103,
+      "name": "Al-Asr",
+      "nameAr": "سُورَةُ العَصۡرِ",
+      "verses": 3,
+      "type": "Meccan"
+    },
+    {
+      "id": 104,
+      "name": "Al-Humaza",
+      "nameAr": "سُورَةُ الهُمَزَةِ",
+      "verses": 9,
+      "type": "Meccan"
+    },
+    {
+      "id": 105,
+      "name": "Al-Fil",
+      "nameAr": "سُورَةُ الفِيلِ",
+      "verses": 5,
+      "type": "Meccan"
+    },
+    {
+      "id": 106,
+      "name": "Quraish",
+      "nameAr": "سُورَةُ قُرَيۡشٍ",
+      "verses": 4,
+      "type": "Meccan"
+    },
+    {
+      "id": 107,
+      "name": "Al-Maa'un",
+      "nameAr": "سُورَةُ المَاعُونِ",
+      "verses": 7,
+      "type": "Meccan"
+    },
+    {
+      "id": 108,
+      "name": "Al-Kawthar",
+      "nameAr": "سُورَةُ الكَوۡثَرِ",
+      "verses": 3,
+      "type": "Meccan"
+    },
+    {
+      "id": 109,
+      "name": "Al-Kaafiroon",
+      "nameAr": "سُورَةُ الكَافِرُونَ",
+      "verses": 6,
+      "type": "Meccan"
+    },
+    {
+      "id": 110,
+      "name": "An-Nasr",
+      "nameAr": "سُورَةُ النَّصۡرِ",
+      "verses": 3,
+      "type": "Medinan"
+    },
+    {
+      "id": 111,
+      "name": "Al-Masad",
+      "nameAr": "سُورَةُ المَسَدِ",
+      "verses": 5,
+      "type": "Meccan"
+    },
+    {
+      "id": 112,
+      "name": "Al-Ikhlaas",
+      "nameAr": "سُورَةُ الإِخۡلَاصِ",
+      "verses": 4,
+      "type": "Meccan"
+    },
+    {
+      "id": 113,
+      "name": "Al-Falaq",
+      "nameAr": "سُورَةُ الفَلَقِ",
+      "verses": 5,
+      "type": "Meccan"
+    },
+    {
+      "id": 114,
+      "name": "An-Naas",
+      "nameAr": "سُورَةُ النَّاسِ",
+      "verses": 6,
+      "type": "Meccan"
+    }
+  ]
+}

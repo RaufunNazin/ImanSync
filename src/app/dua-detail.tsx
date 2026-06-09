@@ -136,14 +136,14 @@ export default function DuaDetailScreen() {
     <View style={styles.settingRow}>
       <Text style={[styles.settingLabel, { color: colors.text }]}>{label}</Text>
       <View style={styles.sizeControls}>
-        <TouchableOpacity 
+        <TouchableOpacity activeOpacity={1} 
           style={[styles.sizeBtn, { backgroundColor: colors.backgroundElement, borderColor: colors.border }]}
           onPress={() => { Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light); onChange(Math.max(12, value - 2)); }}
         >
           <Minus size={18} color={colors.textSecondary} />
         </TouchableOpacity>
         <Text style={[styles.sizeValue, { color: colors.text }]}>{value}</Text>
-        <TouchableOpacity 
+        <TouchableOpacity activeOpacity={1} 
           style={[styles.sizeBtn, { backgroundColor: colors.backgroundElement, borderColor: colors.border }]}
           onPress={() => { Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light); onChange(Math.min(48, value + 2)); }}
         >
@@ -156,9 +156,8 @@ export default function DuaDetailScreen() {
   const renderToggle = (label: string, value: boolean, onChange: (val: boolean) => void) => (
     <View style={styles.settingRow}>
       <Text style={[styles.settingLabel, { color: colors.text }]}>{label}</Text>
-      <TouchableOpacity 
+      <TouchableOpacity activeOpacity={1} 
         style={[styles.toggleWrap, value ? { backgroundColor: colors.highlight } : { backgroundColor: colors.border }]}
-        activeOpacity={0.8}
         onPress={() => { Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light); onChange(!value); }}
       >
         <View style={[styles.toggleThumb, value ? styles.toggleThumbOn : styles.toggleThumbOff]} />
@@ -175,7 +174,7 @@ export default function DuaDetailScreen() {
               <View style={{ width: 40, height: 4, backgroundColor: colors.border, borderRadius: 2, alignSelf: 'center', marginBottom: Spacing.four }} />
               <View style={[styles.modalHeader, { borderBottomColor: colors.border }]}>
                 <Text style={[styles.modalTitle, { color: colors.text }]}>{t('duaSettings.title')}</Text>
-                <TouchableOpacity onPress={() => setSettingsVisible(false)} style={styles.closeBtn}>
+                <TouchableOpacity activeOpacity={1} onPress={() => setSettingsVisible(false)} style={styles.closeBtn}>
                   <X size={24} color={colors.text} />
                 </TouchableOpacity>
               </View>
@@ -223,13 +222,13 @@ export default function DuaDetailScreen() {
         showBack 
         rightElement={
           <View style={{ flexDirection: 'row', gap: Spacing.two, marginLeft: Spacing.two }}>
-            <TouchableOpacity 
+            <TouchableOpacity activeOpacity={1} 
               style={[styles.settingsIconBtn, { backgroundColor: colors.backgroundElement, borderColor: colors.border }]} 
               onPress={toggleBookmark}
             >
               <Bookmark size={16} color={isBookmarked ? colors.accent : colors.textSecondary} fill={isBookmarked ? colors.accent : 'transparent'} />
             </TouchableOpacity>
-            <TouchableOpacity 
+            <TouchableOpacity activeOpacity={1} 
               style={[styles.settingsIconBtn, { backgroundColor: colors.backgroundElement, borderColor: colors.border }]} 
               onPress={() => setSettingsVisible(true)}
             >
@@ -256,7 +255,7 @@ export default function DuaDetailScreen() {
             
             return (
               <>
-                <TouchableOpacity activeOpacity={0.9} onPress={() => setImageViewerVisible(true)}>
+                <TouchableOpacity activeOpacity={1} onPress={() => setImageViewerVisible(true)}>
                   <Image 
                     source={source} 
                     style={{ width: '100%', height: undefined, aspectRatio: ratio, borderRadius: 16, marginBottom: Spacing.four }} 
@@ -349,7 +348,6 @@ const styles = StyleSheet.create({
   },
   container: {
     padding: Spacing.four,
-    paddingTop: 0,
   },
   duaTitle: {
     fontFamily: Fonts.outfit,

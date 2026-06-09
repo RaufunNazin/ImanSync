@@ -149,7 +149,7 @@ export default function LessonPlayerScreen() {
             {activeLesson.items?.map(item => {
               const isTapped = tappedItems.has(item.id);
               return (
-                <TouchableOpacity 
+                <TouchableOpacity activeOpacity={1} 
                   key={item.id} 
                   style={[
                     styles.gridItem,
@@ -174,7 +174,7 @@ export default function LessonPlayerScreen() {
         {/* FLASHCARD UI */}
         {activeLesson.type === 'flashcard' && activeLesson.items && (
           <View style={styles.sequentialContainer}>
-            <TouchableOpacity 
+            <TouchableOpacity activeOpacity={1} 
               style={[styles.flashcard, { backgroundColor: colors.backgroundElement, borderColor: colors.border }]}
               onPress={() => {
                 setFlipped(!flipped);
@@ -182,7 +182,6 @@ export default function LessonPlayerScreen() {
                   playAudio(activeLesson!.items![currentIndex].audioUrl, activeLesson!.items![currentIndex].arabic);
                 }
               }}
-              activeOpacity={0.8}
             >
               <Text style={[styles.flashcardArabic, { color: colors.text }]}>
                 {activeLesson.items[currentIndex].arabic}
@@ -202,10 +201,10 @@ export default function LessonPlayerScreen() {
             </TouchableOpacity>
             
             <View style={styles.controls}>
-              <TouchableOpacity onPress={handlePrevSequential} style={[styles.controlBtn, { backgroundColor: colors.border }]}>
+              <TouchableOpacity activeOpacity={1} onPress={handlePrevSequential} style={[styles.controlBtn, { backgroundColor: colors.border }]}>
                 <ChevronLeft size={24} color={colors.text} />
               </TouchableOpacity>
-              <TouchableOpacity onPress={handleNextSequential} style={[styles.controlBtn, { backgroundColor: colors.highlight }]}>
+              <TouchableOpacity activeOpacity={1} onPress={handleNextSequential} style={[styles.controlBtn, { backgroundColor: colors.highlight }]}>
                 <ChevronRight size={24} color={colors.background} />
               </TouchableOpacity>
             </View>
@@ -215,7 +214,7 @@ export default function LessonPlayerScreen() {
         {/* QUIZ UI */}
         {activeLesson.type === 'quiz' && activeLesson.items && (
           <View style={styles.sequentialContainer}>
-            <TouchableOpacity 
+            <TouchableOpacity activeOpacity={1} 
               style={[styles.audioBtn, { backgroundColor: colors.highlight + '20', borderColor: colors.highlight }]}
               onPress={() => {
                 const url = activeLesson!.items![currentIndex].audioUrl;
@@ -240,7 +239,7 @@ export default function LessonPlayerScreen() {
                 }
 
                 return (
-                  <TouchableOpacity
+                  <TouchableOpacity activeOpacity={1}
                     key={opt.id}
                     style={[styles.quizOptBtn, { backgroundColor: bgColor, borderColor }]}
                     onPress={() => handleQuizAnswer(opt)}
@@ -257,7 +256,7 @@ export default function LessonPlayerScreen() {
 
       {completed && (
         <View style={[styles.footer, { borderTopColor: colors.border, backgroundColor: colors.background }]}>
-          <TouchableOpacity 
+          <TouchableOpacity activeOpacity={1} 
             style={[styles.completeBtn, { backgroundColor: colors.highlight }]}
             onPress={() => {
               if (router.canGoBack()) {
@@ -288,7 +287,6 @@ const styles = StyleSheet.create({
   },
   container: {
     padding: Spacing.four,
-    paddingTop: 0,
     paddingBottom: 100,
   },
   grid: {

@@ -77,11 +77,11 @@ export default function DuaBookmarksScreen() {
         rightElement={
           <View style={{ flexDirection: 'row', gap: Spacing.three }}>
             {!folderId && (
-              <TouchableOpacity onPress={() => setCreateModalVisible(true)} hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}>
+              <TouchableOpacity activeOpacity={1} onPress={() => setCreateModalVisible(true)} hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}>
                 <FolderPlus size={22} color={colors.textSecondary} />
               </TouchableOpacity>
             )}
-            <TouchableOpacity onPress={() => router.push('/dua-search?categoryId=bookmarks' as any)} hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}>
+            <TouchableOpacity activeOpacity={1} onPress={() => router.push('/dua-search?categoryId=bookmarks' as any)} hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}>
               <Search size={22} color={colors.textSecondary} />
             </TouchableOpacity>
           </View>
@@ -99,9 +99,8 @@ export default function DuaBookmarksScreen() {
               
               style={[styles.itemWrapper, { borderColor: colors.border }]}
             >
-              <TouchableOpacity
+              <TouchableOpacity activeOpacity={1}
                 style={styles.item}
-                activeOpacity={0.7}
                 onPress={() => router.push(`/dua-bookmarks?folderId=${folder.id}&folderName=${encodeURIComponent(folder.name)}` as any)}
               >
                 <View style={{ flexDirection: 'row', alignItems: 'center', gap: Spacing.three }}>
@@ -138,9 +137,8 @@ export default function DuaBookmarksScreen() {
                 
                 style={[styles.itemWrapper, { borderColor: colors.border }]}
               >
-                <TouchableOpacity
+                <TouchableOpacity activeOpacity={1}
                   style={styles.item}
-                  activeOpacity={0.7}
                   onPress={() => {
                     router.push({
                       pathname: '/dua-detail',
@@ -158,7 +156,7 @@ export default function DuaBookmarksScreen() {
                       </Text>
                     )}
                   </View>
-                  <TouchableOpacity onPress={() => { setBookmarkToMove(dua); setMoveModalVisible(true); }} hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }} style={{ padding: 4 }}>
+                  <TouchableOpacity activeOpacity={1} onPress={() => { setBookmarkToMove(dua); setMoveModalVisible(true); }} hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }} style={{ padding: 4 }}>
                     <MoreVertical size={20} color={colors.textSecondary} />
                   </TouchableOpacity>
                   <ChevronRight size={20} color={colors.textSecondary} />
@@ -194,10 +192,10 @@ export default function DuaBookmarksScreen() {
               autoFocus
             />
             <View style={{ flexDirection: 'row', gap: Spacing.three }}>
-              <TouchableOpacity style={{ flex: 1, padding: Spacing.four, alignItems: 'center', borderRadius: 12, backgroundColor: colors.background }} onPress={() => setCreateModalVisible(false)}>
+              <TouchableOpacity activeOpacity={1} style={{ flex: 1, padding: Spacing.four, alignItems: 'center', borderRadius: 12, backgroundColor: colors.background }} onPress={() => setCreateModalVisible(false)}>
                 <Text style={{ fontFamily: Fonts.outfit, color: colors.text }}>{t('common.cancel', { defaultValue: 'Cancel' })}</Text>
               </TouchableOpacity>
-              <TouchableOpacity style={{ flex: 1, padding: Spacing.four, alignItems: 'center', borderRadius: 12, backgroundColor: colors.highlight }} onPress={handleCreateFolder}>
+              <TouchableOpacity activeOpacity={1} style={{ flex: 1, padding: Spacing.four, alignItems: 'center', borderRadius: 12, backgroundColor: colors.highlight }} onPress={handleCreateFolder}>
                 <Text style={{ fontFamily: Fonts.outfit, color: '#FFF' }}>{t('common.create', { defaultValue: 'Create' })}</Text>
               </TouchableOpacity>
             </View>
@@ -213,18 +211,18 @@ export default function DuaBookmarksScreen() {
               {t('dua.moveToFolder', { defaultValue: 'Move to Folder' })}
             </Text>
             <ScrollView style={{ maxHeight: 300 }}>
-              <TouchableOpacity style={{ flexDirection: 'row', alignItems: 'center', paddingVertical: Spacing.three, gap: Spacing.three }} onPress={() => moveBookmark(null)}>
+              <TouchableOpacity activeOpacity={1} style={{ flexDirection: 'row', alignItems: 'center', paddingVertical: Spacing.three, gap: Spacing.three }} onPress={() => moveBookmark(null)}>
                 <Folder size={20} color={colors.textSecondary} />
                 <Text style={{ fontFamily: Fonts.outfit, fontSize: 16, color: colors.text }}>{t('dua.noFolder', { defaultValue: 'No Folder' })}</Text>
               </TouchableOpacity>
               {folderStore.folders.map(folder => (
-                <TouchableOpacity key={folder.id} style={{ flexDirection: 'row', alignItems: 'center', paddingVertical: Spacing.three, gap: Spacing.three }} onPress={() => moveBookmark(folder.id)}>
+                <TouchableOpacity activeOpacity={1} key={folder.id} style={{ flexDirection: 'row', alignItems: 'center', paddingVertical: Spacing.three, gap: Spacing.three }} onPress={() => moveBookmark(folder.id)}>
                   <Folder size={20} color={colors.accent} />
                   <Text style={{ fontFamily: Fonts.outfit, fontSize: 16, color: colors.text }}>{folder.name}</Text>
                 </TouchableOpacity>
               ))}
             </ScrollView>
-            <TouchableOpacity style={{ marginTop: Spacing.four, padding: Spacing.four, alignItems: 'center', borderRadius: 12, backgroundColor: colors.background }} onPress={() => setMoveModalVisible(false)}>
+            <TouchableOpacity activeOpacity={1} style={{ marginTop: Spacing.four, padding: Spacing.four, alignItems: 'center', borderRadius: 12, backgroundColor: colors.background }} onPress={() => setMoveModalVisible(false)}>
               <Text style={{ fontFamily: Fonts.outfit, color: colors.text }}>{t('common.cancel', { defaultValue: 'Cancel' })}</Text>
             </TouchableOpacity>
           </View>
@@ -239,8 +237,7 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   container: {
-    paddingTop: 0,
-  },
+      },
   searchContainer: {
     flexDirection: 'row',
     alignItems: 'center',

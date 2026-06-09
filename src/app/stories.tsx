@@ -55,7 +55,7 @@ export default function StoriesScreen() {
 
         <View style={{ flex: 1 }} />
 
-        <TouchableOpacity 
+        <TouchableOpacity activeOpacity={1} 
           style={[styles.notifyBtn, { backgroundColor: colors.highlight }]}
           onPress={() => router.back()}
         >
@@ -90,7 +90,6 @@ const styles = StyleSheet.create({
   content: {
     flex: 1,
     paddingHorizontal: Spacing.six,
-    paddingTop: 0,
   },
   iconWrapper: {
     alignItems: 'center',

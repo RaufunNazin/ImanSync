@@ -191,20 +191,20 @@ export default function AddDuaModal({ visible, onClose, onSave, initialData, col
             <View style={{ width: 40, height: 4, backgroundColor: colors.border, borderRadius: 2, alignSelf: 'center', marginBottom: Spacing.four }} />
             <View style={[styles.header, { borderBottomColor: colors.border }]}>
               <Text style={[styles.title, { color: colors.text }]}>{initialData ? t('dua.editDua', {defaultValue: 'Edit Dua'}) : t('dua.addDua')}</Text>
-              <TouchableOpacity onPress={handleClose} style={[styles.closeBtn, { backgroundColor: colors.card }]}>
+              <TouchableOpacity activeOpacity={1} onPress={handleClose} style={[styles.closeBtn, { backgroundColor: colors.card }]}>
                 <X size={20} color={colors.textSecondary} />
               </TouchableOpacity>
             </View>
 
             <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={styles.content} keyboardShouldPersistTaps="handled" keyboardDismissMode="none">
               <View style={[styles.tabContainer, { backgroundColor: colors.card, borderColor: colors.border }]}>
-                <TouchableOpacity
+                <TouchableOpacity activeOpacity={1}
                   style={[styles.tabBtn, activeTab === 'en' && { backgroundColor: colors.accent }]}
                   onPress={() => setActiveTab('en')}
                 >
                   <Text style={[styles.tabText, { color: activeTab === 'en' ? '#FFF' : colors.textSecondary }]}>{t('quranSettings.enTrans', { defaultValue: 'English' })}</Text>
                 </TouchableOpacity>
-                <TouchableOpacity
+                <TouchableOpacity activeOpacity={1}
                   style={[styles.tabBtn, activeTab === 'bn' && { backgroundColor: colors.accent }]}
                   onPress={() => setActiveTab('bn')}
                 >
@@ -251,24 +251,24 @@ export default function AddDuaModal({ visible, onClose, onSave, initialData, col
                       onChangeText={setNewCategoryName}
                     />
                     <View style={{ flexDirection: 'row', gap: 8, justifyContent: 'flex-end' }}>
-                      <TouchableOpacity style={[styles.createBtn, { paddingVertical: 10, backgroundColor: colors.card, borderColor: colors.border, borderWidth: 1 }]} onPress={() => setIsCreatingCategory(false)}>
+                      <TouchableOpacity activeOpacity={1} style={[styles.createBtn, { paddingVertical: 10, backgroundColor: colors.card, borderColor: colors.border, borderWidth: 1 }]} onPress={() => setIsCreatingCategory(false)}>
                         <Text style={{ color: colors.text, fontFamily: Fonts.outfit }}>{t('dua.cancel', { defaultValue: 'Cancel' })}</Text>
                       </TouchableOpacity>
-                      <TouchableOpacity style={[styles.createBtn, { paddingVertical: 10, backgroundColor: colors.accent }]} onPress={handleCreateCategory}>
+                      <TouchableOpacity activeOpacity={1} style={[styles.createBtn, { paddingVertical: 10, backgroundColor: colors.accent }]} onPress={handleCreateCategory}>
                         <Text style={{ color: '#FFF', fontFamily: Fonts.outfit }}>{t('dua.createCategoryBtn', { defaultValue: 'Create' })}</Text>
                       </TouchableOpacity>
                     </View>
                   </View>
                 ) : (
                   <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 8 }}>
-                    <TouchableOpacity 
+                    <TouchableOpacity activeOpacity={1} 
                       style={[styles.catBadge, !selectedCategoryId && { backgroundColor: colors.accent + '22', borderColor: colors.accent }]}
                       onPress={() => setSelectedCategoryId(null)}
                     >
                       <Text style={[styles.catBadgeText, { color: !selectedCategoryId ? colors.accent : colors.textSecondary }]}>{t('dua.myDuas')}</Text>
                     </TouchableOpacity>
                     {categories.map(c => (
-                      <TouchableOpacity 
+                      <TouchableOpacity activeOpacity={1} 
                         key={c.id}
                         style={[styles.catBadge, selectedCategoryId === c.id && { backgroundColor: colors.accent + '22', borderColor: colors.accent }]}
                         onPress={() => setSelectedCategoryId(c.id)}
@@ -276,7 +276,7 @@ export default function AddDuaModal({ visible, onClose, onSave, initialData, col
                         <Text style={[styles.catBadgeText, { color: selectedCategoryId === c.id ? colors.accent : colors.textSecondary }]}>{c.name}</Text>
                       </TouchableOpacity>
                     ))}
-                    <TouchableOpacity 
+                    <TouchableOpacity activeOpacity={1} 
                       style={[styles.catBadge, { borderStyle: 'dashed', borderColor: colors.textSecondary }]}
                       onPress={() => setIsCreatingCategory(true)}
                     >
@@ -288,7 +288,7 @@ export default function AddDuaModal({ visible, onClose, onSave, initialData, col
               </View>
 
               <View style={styles.typeSelector}>
-                <TouchableOpacity 
+                <TouchableOpacity activeOpacity={1} 
                   style={[styles.typeBtn, mediaType === 'text' && { backgroundColor: colors.accent + '22', borderColor: colors.accent }]} 
                   onPress={() => setMediaType('text')}
                 >
@@ -296,7 +296,7 @@ export default function AddDuaModal({ visible, onClose, onSave, initialData, col
                   <Text style={[styles.typeText, { color: mediaType === 'text' ? colors.accent : colors.textSecondary }]}>{t('dua.typeText', { defaultValue: 'Text' })}</Text>
                 </TouchableOpacity>
                 
-                <TouchableOpacity 
+                <TouchableOpacity activeOpacity={1} 
                   style={[styles.typeBtn, mediaType === 'image' && { backgroundColor: colors.accent + '22', borderColor: colors.accent }]} 
                   onPress={pickImage}
                 >
@@ -304,7 +304,7 @@ export default function AddDuaModal({ visible, onClose, onSave, initialData, col
                   <Text style={[styles.typeText, { color: mediaType === 'image' ? colors.accent : colors.textSecondary }]}>{t('dua.typeImage', { defaultValue: 'Image' })}</Text>
                 </TouchableOpacity>
 
-                <TouchableOpacity 
+                <TouchableOpacity activeOpacity={1} 
                   style={[styles.typeBtn, mediaType === 'video' && { backgroundColor: colors.accent + '22', borderColor: colors.accent }]} 
                   onPress={pickVideo}
                 >
@@ -391,7 +391,7 @@ export default function AddDuaModal({ visible, onClose, onSave, initialData, col
                        <Video size={48} color={colors.accent} />
                     </View>
                   )}
-                  <TouchableOpacity onPress={() => { setMediaUri(null); setMediaType('text'); }}>
+                  <TouchableOpacity activeOpacity={1} onPress={() => { setMediaUri(null); setMediaType('text'); }}>
                     <Text style={{ color: '#EF4444', marginTop: 12, fontFamily: Fonts.outfit }}>{t('dua.removeMedia', { defaultValue: 'Remove' })}</Text>
                   </TouchableOpacity>
                 </View>
@@ -400,7 +400,7 @@ export default function AddDuaModal({ visible, onClose, onSave, initialData, col
             </ScrollView>
 
             <View style={styles.footer}>
-              <TouchableOpacity 
+              <TouchableOpacity activeOpacity={1} 
                 style={[styles.saveBtn, { backgroundColor: isValid ? colors.accent : colors.border }]} 
                 onPress={handleSave}
                 disabled={!isValid}

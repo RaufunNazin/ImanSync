@@ -38,13 +38,13 @@ export default function ConfirmModal({
             {message}
           </Text>
           <View style={styles.buttonRow}>
-            <TouchableOpacity 
+            <TouchableOpacity activeOpacity={1} 
               style={[styles.btn, { backgroundColor: colors.backgroundElement }]} 
               onPress={onCancel}
             >
               <Text style={[styles.btnText, { color: colors.text }]}>{cancelText}</Text>
             </TouchableOpacity>
-            <TouchableOpacity 
+            <TouchableOpacity activeOpacity={1} 
               style={[styles.btn, { backgroundColor: confirmColor }]} 
               onPress={onConfirm}
             >

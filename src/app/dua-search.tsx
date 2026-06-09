@@ -210,7 +210,7 @@ export default function DuaSearchScreen() {
   return (
     <SafeAreaView style={[styles.safeArea, { backgroundColor: colors.background }]}>
       <Animated.View entering={FadeIn.duration(150)} exiting={FadeOut.duration(100)} style={[styles.header, { borderBottomColor: colors.border }]}>
-        <TouchableOpacity onPress={handleBack} style={styles.backBtn} hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}>
+        <TouchableOpacity activeOpacity={1} onPress={handleBack} style={styles.backBtn} hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}>
           <ChevronLeft size={24} color={colors.textSecondary} />
         </TouchableOpacity>
         
@@ -230,7 +230,7 @@ export default function DuaSearchScreen() {
             autoCorrect={false}
           />
           {searchQuery.length > 0 && (
-            <TouchableOpacity onPress={() => setSearchQuery('')} hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}>
+            <TouchableOpacity activeOpacity={1} onPress={() => setSearchQuery('')} hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}>
               <X size={18} color={colors.textSecondary} />
             </TouchableOpacity>
           )}
@@ -250,9 +250,8 @@ export default function DuaSearchScreen() {
               return (
                 <Animated.View entering={FadeIn.duration(300)} key={dua.id}>
                   <View style={[styles.itemWrapper, { borderColor: colors.border, backgroundColor: colors.glassTint === 'light' ? 'rgba(255,255,255,0.7)' : 'rgba(0,0,0,0.5)' }]}>
-                    <TouchableOpacity
+                    <TouchableOpacity activeOpacity={1}
                       style={styles.item}
-                      activeOpacity={0.7}
                       onPress={() => {
                         router.push({
                           pathname: '/dua-detail',
@@ -324,8 +323,7 @@ const styles = StyleSheet.create({
     padding: 0,
   },
   container: { 
-    paddingTop: 0
-  },
+      },
   list: {
     gap: Spacing.three,
     paddingHorizontal: Spacing.four,

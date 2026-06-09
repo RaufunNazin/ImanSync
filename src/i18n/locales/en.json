@@ -1183,5 +1183,19 @@
     "enTranslationPlaceholder": "English Translation...",
     "enTransliterationPlaceholder": "English Transliteration..."
   },
-  "searchLabel": "Search..."
+  "searchLabel": "Search...",
+  "banglaMonths": {
+    "Boishakh": "Boishakh",
+    "Jaistha": "Jaistha",
+    "Ashar": "Ashar",
+    "Srabon": "Srabon",
+    "Bhadro": "Bhadro",
+    "Ashwin": "Ashwin",
+    "Kartik": "Kartik",
+    "Ogrohayon": "Ogrohayon",
+    "Poush": "Poush",
+    "Magh": "Magh",
+    "Falgun": "Falgun",
+    "Chaitra": "Chaitra"
+  }
 }

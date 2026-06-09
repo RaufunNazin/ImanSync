@@ -108,7 +108,7 @@ export default function QuranLearnScreen() {
         
         {/* Helper Banner */}
         <ThemeCard intensity={40}  style={[styles.banner, { borderColor: colors.border }]}>
-          <TouchableOpacity 
+          <TouchableOpacity activeOpacity={1} 
             onPress={() => {
               if (ayahAudioUrl) {
                 const fullUrl = ayahAudioUrl.startsWith('//') ? `https:${ayahAudioUrl}` : ayahAudioUrl;
@@ -176,7 +176,7 @@ export default function QuranLearnScreen() {
               }
 
               return (
-                <TouchableOpacity
+                <TouchableOpacity activeOpacity={1}
                   key={word.id}
                   style={[
                     styles.wordWrap,
@@ -197,7 +197,7 @@ export default function QuranLearnScreen() {
 
       {/* Footer Nav */}
       <View style={[styles.footerNav, { borderTopColor: colors.border, backgroundColor: colors.background }]}>
-        <TouchableOpacity style={styles.navBtn} onPress={goPrev} disabled={currentAyah === 1}>
+        <TouchableOpacity activeOpacity={1} style={styles.navBtn} onPress={goPrev} disabled={currentAyah === 1}>
           <ChevronLeft size={24} color={currentAyah === 1 ? colors.border : colors.text} />
           <Text style={[styles.navBtnText, { color: currentAyah === 1 ? colors.border : colors.text }]}>{t('learn.prev')}</Text>
         </TouchableOpacity>
@@ -206,7 +206,7 @@ export default function QuranLearnScreen() {
           Ayah {currentAyah}
         </Text>
         
-        <TouchableOpacity style={styles.navBtn} onPress={goNext} disabled={maxAyahs !== null && currentAyah >= maxAyahs}>
+        <TouchableOpacity activeOpacity={1} style={styles.navBtn} onPress={goNext} disabled={maxAyahs !== null && currentAyah >= maxAyahs}>
           <Text style={[styles.navBtnText, { color: (maxAyahs !== null && currentAyah >= maxAyahs) ? colors.border : colors.text }]}>{t('learn.next')}</Text>
           <ChevronRight size={24} color={(maxAyahs !== null && currentAyah >= maxAyahs) ? colors.border : colors.text} />
         </TouchableOpacity>
@@ -220,7 +220,6 @@ const styles = StyleSheet.create({
   safeArea: { flex: 1 },
   container: {
     padding: Spacing.four,
-    paddingTop: 0,
     paddingBottom: 100, // Room for footer
   },
   banner: {

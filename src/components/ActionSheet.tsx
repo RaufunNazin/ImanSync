@@ -41,10 +41,9 @@ export default function ActionSheet({
               <Text style={[styles.title, { color: colors.text }]}>{title}</Text>
               
               {options.map((opt, i) => (
-                <TouchableOpacity
+                <TouchableOpacity activeOpacity={1}
                   key={opt.id}
                   style={[styles.actionBtn, { backgroundColor: colors.backgroundElement, marginTop: i > 0 ? Spacing.three : 0 }]}
-                  activeOpacity={0.8}
                   onPress={() => {
                     try {
                       Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);

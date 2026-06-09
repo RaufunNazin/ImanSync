@@ -118,22 +118,22 @@ export default function AudioPlayerBar() {
               <ActivityIndicator size="small" color={colors.highlight} />
             </View>
           ) : data.isPlaying ? (
-            <TouchableOpacity style={styles.btn} onPress={pause}>
+            <TouchableOpacity activeOpacity={1} style={styles.btn} onPress={pause}>
               <Pause size={24} color={colors.highlight} fill={colors.highlight} />
             </TouchableOpacity>
           ) : (
-            <TouchableOpacity style={styles.btn} onPress={resume}>
+            <TouchableOpacity activeOpacity={1} style={styles.btn} onPress={resume}>
               <Play size={24} color={colors.highlight} fill={colors.highlight} />
             </TouchableOpacity>
           )}
 
           {data.playlistLength > 0 && (
-            <TouchableOpacity style={styles.btn} onPress={playNext}>
+            <TouchableOpacity activeOpacity={1} style={styles.btn} onPress={playNext}>
               <SkipForward size={24} color={colors.text} />
             </TouchableOpacity>
           )}
 
-          <TouchableOpacity style={styles.btn} onPress={handleClose}>
+          <TouchableOpacity activeOpacity={1} style={styles.btn} onPress={handleClose}>
             <X size={24} color={colors.textSecondary} />
           </TouchableOpacity>
         </View>

@@ -1,4 +1,5 @@
 import ThemeCard from '@/components/ThemeCard';
+import SkeletonBox from '@/components/SkeletonBox';
 import PageHeader from '@/components/page-header';
 import { Fonts, Spacing, useThemeColors } from '@/constants/theme';
 import { formatNumber } from '@/utils/formatNumber';
@@ -61,9 +62,8 @@ const TaskCard = ({ task, isDone, onToggle, colors, t }: { task: typeof DAILY_TA
           !isDone && { borderColor: colors.border, borderWidth: 1 },
         ]}
       >
-        <TouchableOpacity
+        <TouchableOpacity activeOpacity={1}
           style={styles.taskCard}
-          activeOpacity={0.75}
           onPress={() => {
             onToggle(task.id);
           }}
@@ -265,7 +265,7 @@ export default function TrackerScreen() {
         <ThemeCard intensity={40}  style={[styles.chartCard, { borderColor: colors.border }]}>
           <View style={styles.chartContainer}>
             {bars.map((val: number, i: number) => (
-              <TouchableOpacity
+              <TouchableOpacity activeOpacity={1}
                 key={i}
                 style={[styles.chartBarWrapper, { justifyContent: 'flex-end' }]}
                 onPress={() => {
@@ -287,7 +287,7 @@ export default function TrackerScreen() {
 
           <View style={[styles.heatmapGrid, days === 7 ? styles.heatmapWeekly : styles.heatmapMonthly]}>
             {bars.map((val: number, i: number) => (
-              <TouchableOpacity
+              <TouchableOpacity activeOpacity={1}
                 key={i}
                 onPress={() => {
                   Haptics.selectionAsync();
@@ -305,9 +305,11 @@ export default function TrackerScreen() {
             ))}
           </View>
 
-          <Text style={[styles.chartDesc, { color: colors.textSecondary }]}>
-            {getChartDescMsg(avg)}
-          </Text>
+          <SkeletonBox loaded={!loading} width={240} height={16} borderRadius={4} color={colors.border} style={{ alignSelf: 'center', marginTop: 8 }}>
+            <Text style={[styles.chartDesc, { color: colors.textSecondary, marginTop: 0 }]}>
+              {getChartDescMsg(avg)}
+            </Text>
+          </SkeletonBox>
           <Text style={[styles.chartDesc, { color: colors.textSecondary, fontSize: 11, opacity: 0.6, marginTop: 8 }]}>
             {t('tracker.clickBarsHint', { defaultValue: 'Click on the bars to view daily details' })}
           </Text>
@@ -334,8 +336,7 @@ export default function TrackerScreen() {
   const chipBorder = isKazaFree ? colors.border : '#ef4444';
 
   const kazaChip = (
-    <TouchableOpacity 
-      activeOpacity={0.7}
+    <TouchableOpacity activeOpacity={1}
       style={{ 
         flexDirection: 'row', 
         alignItems: 'center', 
@@ -370,7 +371,7 @@ export default function TrackerScreen() {
 
         <View style={[styles.tabsContainer, { borderBottomColor: colors.border }]}>
           {['Daily', 'Weekly', 'Monthly'].map((tab) => (
-            <TouchableOpacity
+            <TouchableOpacity activeOpacity={1}
               key={tab}
               style={[styles.tabBtn, activeTab === tab && { borderBottomWidth: 2, borderBottomColor: colors.highlight }]}
               onPress={() => {
@@ -390,11 +391,13 @@ export default function TrackerScreen() {
                   <Text style={[styles.progressTitle, { color: colors.text }]}>
                     {activeTab === 'Daily' ? t('tracker.progress') : activeTab === 'Weekly' ? t('tracker.weeklyOverview') : t('tracker.monthly')}
                   </Text>
-                  <Text style={[styles.progressSubtitle, { color: colors.textSecondary }]}>
-                    {activeTab === 'Daily'
-                      ? i18n.language === 'bn' ? `${formatNumber(completedCount, 'bn')}/${formatNumber(DAILY_TASKS.length, 'bn')} কাজ সম্পন্ন` : `${completedCount}/${DAILY_TASKS.length} tasks done`
-                      : t('tracker.consistency', { title: activeTab === 'Weekly' ? t('tracker.weekly') : t('tracker.monthly') })}
-                  </Text>
+                  <SkeletonBox loaded={!loading} width={140} height={16} borderRadius={4} color={colors.border} style={{ marginTop: 2 }}>
+                    <Text style={[styles.progressSubtitle, { color: colors.textSecondary }]}>
+                      {activeTab === 'Daily'
+                        ? i18n.language === 'bn' ? `${formatNumber(completedCount, 'bn')}/${formatNumber(DAILY_TASKS.length, 'bn')} কাজ সম্পন্ন` : `${completedCount}/${DAILY_TASKS.length} tasks done`
+                        : t('tracker.consistency', { title: activeTab === 'Weekly' ? t('tracker.weekly') : t('tracker.monthly') })}
+                    </Text>
+                  </SkeletonBox>
                 </View>
 
                 <View style={styles.progressCircleContainer}>
@@ -413,16 +416,20 @@ export default function TrackerScreen() {
                     />
                   </Svg>
                   <View style={styles.progressTextContainer}>
-                    <Text style={[styles.progressText, { color: colors.accent }]}>
-                      {formatNumber(displayPercentage, i18n.language)}%
-                    </Text>
+                    <SkeletonBox loaded={!loading} width={34} height={16} borderRadius={4} color={colors.border}>
+                      <Text style={[styles.progressText, { color: colors.accent }]}>
+                        {formatNumber(displayPercentage, i18n.language)}%
+                      </Text>
+                    </SkeletonBox>
                   </View>
                 </View>
               </View>
 
-              <Text style={[styles.encouragement, { color: colors.accent }]}>
-                {getEncouragementMsg(displayPercentage)}
-              </Text>
+              <SkeletonBox loaded={!loading} width={240} height={16} borderRadius={4} color={colors.border} style={{ marginTop: Spacing.two }}>
+                <Text style={[styles.encouragement, { color: colors.accent, marginTop: 0 }]}>
+                  {getEncouragementMsg(displayPercentage)}
+                </Text>
+              </SkeletonBox>
             </ThemeCard>
 
 
@@ -436,15 +443,13 @@ export default function TrackerScreen() {
       {historyModalDate && (
         <Modal visible={true} transparent animationType="fade" onRequestClose={() => setHistoryModalDate(null)}>
           <View style={styles.modalBackdrop}>
-            <TouchableOpacity style={StyleSheet.absoluteFill} activeOpacity={1} onPress={() => setHistoryModalDate(null)}>
-              <ThemeCard intensity={30} style={StyleSheet.absoluteFill} />
-            </TouchableOpacity>
+            <TouchableOpacity activeOpacity={1} style={[StyleSheet.absoluteFill, { backgroundColor: 'rgba(0,0,0,0.5)' }]} onPress={() => setHistoryModalDate(null)} />
             <ThemeCard intensity={80} style={[styles.modalCard, { borderColor: colors.border }]}>
               <View style={styles.modalHeader}>
                 <Text style={[styles.modalTitle, { color: colors.text }]}>
                   {new Date(historyModalDate).toLocaleDateString(i18n.language, { weekday: 'long', month: 'long', day: 'numeric' })}
                 </Text>
-                <TouchableOpacity onPress={() => setHistoryModalDate(null)} style={[styles.closeBtn, { backgroundColor: colors.backgroundElement }]}>
+                <TouchableOpacity activeOpacity={1} onPress={() => setHistoryModalDate(null)} style={[styles.closeBtn, { backgroundColor: colors.backgroundElement }]}>
                   <X size={20} color={colors.textSecondary} />
                 </TouchableOpacity>
               </View>
@@ -493,7 +498,7 @@ export default function TrackerScreen() {
 
 const styles = StyleSheet.create({
   safeArea: { flex: 1 },
-  container: { padding: Spacing.four, paddingTop: 0 },
+  container: { padding: Spacing.four },
   tabsContainer: { flexDirection: 'row', marginBottom: Spacing.two, borderBottomWidth: 1 },
   tabBtn: { flex: 1, paddingBottom: 8, alignItems: 'center' },
   tabText: { fontFamily: Fonts.outfit, fontSize: 16 },

@@ -93,7 +93,7 @@ export default function QuranTrackerScreen() {
             </View>
 
             <View style={styles.quickAddRow}>
-              <TouchableOpacity 
+              <TouchableOpacity activeOpacity={1} 
                 style={[styles.quickAddBtn, { backgroundColor: colors.backgroundElement, borderColor: colors.border, borderWidth: 1 }]}
                 onPress={() => {
                   if (pagesReadToday > 0) readingStore.addPagesRead(-1);
@@ -101,7 +101,7 @@ export default function QuranTrackerScreen() {
               >
                 <Minus size={20} color={colors.text} />
               </TouchableOpacity>
-              <TouchableOpacity 
+              <TouchableOpacity activeOpacity={1} 
                 style={[styles.quickAddBtn, { backgroundColor: isGoalMet ? colors.highlight + '22' : colors.accent + '22', flex: 2, borderColor: isGoalMet ? colors.highlight : colors.accent, borderWidth: 1 }]}
                 onPress={() => {
                   readingStore.addPagesRead(1);
@@ -118,7 +118,7 @@ export default function QuranTrackerScreen() {
           <ThemeCard  style={[styles.card]}>
             <View style={styles.cardHeader}>
               <Text style={[styles.cardTitle, { color: colors.text }]}>{t('quran.dailyGoal', { defaultValue: 'Daily Goal' })}</Text>
-              <TouchableOpacity onPress={() => setIsEditingGoal(!isEditingGoal)}>
+              <TouchableOpacity activeOpacity={1} onPress={() => setIsEditingGoal(!isEditingGoal)}>
                 <Text style={{ fontFamily: Fonts.outfit, fontSize: 14, color: colors.accent, fontWeight: '600' }}>
                   {isEditingGoal ? t('common.done', { defaultValue: 'Done' }) : t('common.edit', { defaultValue: 'Edit' })}
                 </Text>
@@ -131,13 +131,13 @@ export default function QuranTrackerScreen() {
               
               {isEditingGoal && (
                 <View style={{ flexDirection: 'row', alignItems: 'center', gap: Spacing.three }}>
-                  <TouchableOpacity onPress={() => handleGoalChange(-1)} style={[styles.goalBtn, { backgroundColor: colors.border }]}>
+                  <TouchableOpacity activeOpacity={1} onPress={() => handleGoalChange(-1)} style={[styles.goalBtn, { backgroundColor: colors.border }]}>
                     <Minus size={16} color={colors.text} />
                   </TouchableOpacity>
                   <Text style={{ fontFamily: Fonts.outfit, fontSize: 18, color: colors.text, fontWeight: '600', width: 24, textAlign: 'center' }}>
                     {formatNumber(readingStore.dailyGoalPages, i18n.language)}
                   </Text>
-                  <TouchableOpacity onPress={() => handleGoalChange(1)} style={[styles.goalBtn, { backgroundColor: colors.accent }]}>
+                  <TouchableOpacity activeOpacity={1} onPress={() => handleGoalChange(1)} style={[styles.goalBtn, { backgroundColor: colors.accent }]}>
                     <Plus size={16} color="#FFF" />
                   </TouchableOpacity>
                 </View>
@@ -184,7 +184,7 @@ export default function QuranTrackerScreen() {
                   }
 
                   return (
-                    <TouchableOpacity
+                    <TouchableOpacity activeOpacity={1}
                       key={dateStr}
                       onPress={() => {
                         Haptics.selectionAsync();
@@ -220,7 +220,7 @@ export default function QuranTrackerScreen() {
       {historyModalDate && (
         <Modal visible={true} transparent animationType="fade" onRequestClose={() => setHistoryModalDate(null)}>
           <View style={styles.modalBackdrop}>
-            <TouchableOpacity style={StyleSheet.absoluteFill} activeOpacity={1} onPress={() => setHistoryModalDate(null)}>
+            <TouchableOpacity activeOpacity={1} style={StyleSheet.absoluteFill} onPress={() => setHistoryModalDate(null)}>
               <View   style={StyleSheet.absoluteFill} />
             </TouchableOpacity>
             
@@ -229,7 +229,7 @@ export default function QuranTrackerScreen() {
                 <Text style={[styles.modalTitle, { color: colors.text }]}>
                   {new Date(historyModalDate).toLocaleDateString(i18n.language, { weekday: 'long', month: 'long', day: 'numeric' })}
                 </Text>
-                <TouchableOpacity onPress={() => setHistoryModalDate(null)} style={[styles.closeBtn, { backgroundColor: colors.backgroundElement }]}>
+                <TouchableOpacity activeOpacity={1} onPress={() => setHistoryModalDate(null)} style={[styles.closeBtn, { backgroundColor: colors.backgroundElement }]}>
                   <X size={20} color={colors.textSecondary} />
                 </TouchableOpacity>
               </View>
@@ -270,7 +270,7 @@ export default function QuranTrackerScreen() {
 
 const styles = StyleSheet.create({
   safeArea: { flex: 1 },
-  container: { padding: Spacing.four, paddingTop: 0 },
+  container: { padding: Spacing.four },
   card: {
     borderRadius: 16,
     borderWidth: 1,

@@ -50,7 +50,7 @@ export default function SpecialTimeCard({ item, colors, i18nLanguage, styles, t 
   }, [showCountdown, item.date?.getTime(), item.time, i18nLanguage, t]);
 
   return (
-    <TouchableOpacity style={{ flex: 1 }} activeOpacity={0.7} onPress={() => {
+    <TouchableOpacity activeOpacity={1} style={{ flex: 1 }} onPress={() => {
       if (item.date && item.time !== '--:--') {
         setShowCountdown(true);
       }
@@ -62,7 +62,7 @@ export default function SpecialTimeCard({ item, colors, i18nLanguage, styles, t 
         {/* Subtle tap cue */}
         {!showCountdown && item.date && item.time !== '--:--' && (
           <View style={{ position: 'absolute', top: 6, right: 7, opacity: 0.3 }}>
-            <Pointer size={14} color={colors.textSecondary} />
+            <Pointer size={12} color={colors.textSecondary} />
           </View>
         )}
         <View style={[styles.specialCardInner, { alignItems: 'center', justifyContent: 'center', paddingVertical: 16 }]}>

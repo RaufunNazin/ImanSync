@@ -95,7 +95,7 @@ export default function SkeletonBox({
       {/* Skeleton shimmer */}
       <Animated.View
         style={[
-          StyleSheet.absoluteFillObject,
+          StyleSheet.absoluteFill,
           {
             width: width as any,
             height,

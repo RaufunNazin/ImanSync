@@ -35,7 +35,7 @@ export default function PageHeader({
     <View style={[styles.header, { borderBottomColor: colors.textSecondary + '20', borderBottomWidth: 1 }]}>
       {/* Back button — only rendered when needed, no placeholder slot */}
       {showBack && (
-        <TouchableOpacity
+        <TouchableOpacity activeOpacity={1}
           onPress={onBack ? onBack : () => router.back()}
           style={styles.backBtn}
           hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
@@ -74,7 +74,6 @@ const styles = StyleSheet.create({
     paddingHorizontal: Spacing.four,
     height: 51,
     borderBottomWidth: StyleSheet.hairlineWidth,
-    marginBottom: Spacing.four,
   },
   backBtn: {
     marginRight: 8,

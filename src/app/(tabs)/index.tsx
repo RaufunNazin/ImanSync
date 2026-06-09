@@ -98,12 +98,6 @@ export default function HomeScreen() {
   const qada = useQadaStore();
   const totalQada = qada.fajr + qada.dhuhr + qada.asr + qada.maghrib + qada.isha + qada.witr;
   
-  const getQadaBadgeColor = () => {
-    if (totalQada === 0) return colors.success;
-    if (totalQada <= 5) return colors.accent;
-    return colors.error;
-  };
-  
   const qadaBadgeText = i18n.language === 'bn'
     ? `${formatNumber(totalQada.toString(), 'bn')} টি কাযা নামাজ`
     : `${totalQada} missed prayer${totalQada === 1 ? '' : 's'}`;
@@ -362,16 +356,16 @@ export default function HomeScreen() {
     }, [fardPrayers, currentTime]);
 
   const timelineProgress = useMemo(() => {
-    if (fardPrayers.length === 0) return 0;
+    if (fardPrayers.length === 0) return { left: 0, width: 0 };
     const timelinePrayers = fardPrayers.filter(p => p.id !== 'sunrise');
-    if (timelinePrayers.length < 5) return 0;
+    if (timelinePrayers.length < 5) return { left: 0, width: 0 };
     
     const now = currentTime.getTime();
     const fajrTime = timelinePrayers[0].date.getTime();
     const ishaTime = timelinePrayers[4].date.getTime();
     
-    if (now <= fajrTime) return 0;
-    if (now >= ishaTime) return 100;
+    if (now <= fajrTime) return { left: 0, width: 0 };
+    if (now >= ishaTime) return { left: 100, width: 0 };
     
     let currentIdx = -1;
     for (let i = 0; i < timelinePrayers.length - 1; i++) {
@@ -381,13 +375,16 @@ export default function HomeScreen() {
       }
     }
     
-    if (currentIdx === -1) return 100;
+    if (currentIdx === -1) return { left: 100, width: 0 };
     
     const segmentStart = timelinePrayers[currentIdx].date.getTime();
     const segmentEnd = timelinePrayers[currentIdx+1].date.getTime();
     const segmentProgress = (now - segmentStart) / (segmentEnd - segmentStart);
     
-    return (currentIdx * 25) + (segmentProgress * 25);
+    return {
+      left: currentIdx * 25,
+      width: segmentProgress * 25
+    };
   }, [fardPrayers, currentTime]);
 
   const countdownStr = useMemo(() => formatCountdown(timeToNextMs), [timeToNextMs]);
@@ -549,8 +546,7 @@ export default function HomeScreen() {
         titleEn="ImanSync"
         icon={require('../../../assets/images/zoomed-icon.png')}
         rightElement={
-          <TouchableOpacity
-            activeOpacity={0.7}
+          <TouchableOpacity activeOpacity={1}
             onPress={() => router.push('/(tabs)/settings?highlight=location')}
             style={{
               flexDirection: 'row',
@@ -579,7 +575,7 @@ export default function HomeScreen() {
           <Text style={[styles.arabicGreeting, { color: colors.accent }]}>
             {t('home.greeting')}
           </Text>
-          <TouchableOpacity onPress={() => router.push('/calendar' as any)} disabled={!hijriDisplay}>
+          <TouchableOpacity activeOpacity={1} onPress={() => router.push('/calendar' as any)} disabled={!hijriDisplay}>
             <SkeletonBox loaded={!!hijriDisplay} width={180} height={14} borderRadius={7} color={colors.border}>
               <Text style={[styles.hijriLabel, { color: colors.textSecondary }]}>
                 {hijriDisplay}
@@ -590,8 +586,7 @@ export default function HomeScreen() {
 
 
         {/* ── Current Prayer Card ────────────────────── */}
-        <TouchableOpacity
-            activeOpacity={0.85}
+        <TouchableOpacity activeOpacity={1}
             onPress={() => prayersWithStatus.length > 0 ? togglePrayerTask(currentPrayer.id) : undefined}
             style={{ marginBottom: Spacing.four }}
           >
@@ -625,8 +620,8 @@ export default function HomeScreen() {
               </View>
 
               {/* Centered Countdown */}
-              <View style={{ alignItems: 'center', marginBottom: 0 }}>
-                <View style={{ flexDirection: 'row', alignItems: 'baseline' }}>
+              <View style={{ position: 'absolute', left: 0, right: 0, bottom: 36 }}>
+                <View style={{ flexDirection: 'row', alignItems: 'baseline', justifyContent: 'center' }}>
                   {displayCountdown.split('').map((char, idx) => (
                     <Text 
                       key={idx} 
@@ -648,26 +643,26 @@ export default function HomeScreen() {
               </View>
 
               {/* Current + Next prayer labels above progress bar */}
-              <View style={{ flexDirection: 'row', justifyContent: 'space-between', marginBottom: 6 }}>
+              <View style={{ flexDirection: 'row', justifyContent: 'space-between', marginBottom: 6, marginTop: 32 }}>
                 <View>
-                  <SkeletonBox loaded={prayersWithStatus.length > 0} width={60} height={12} borderRadius={6} color={colors.border} style={{ marginBottom: 2 }}>
+                  <SkeletonBox loaded={prayersWithStatus.length > 0} width={60} height={14} borderRadius={6} color={colors.border} style={{ marginBottom: 2 }}>
                     <Text style={{ fontFamily: Fonts.outfit, fontSize: 11, color: colors.textSecondary, textTransform: 'uppercase', letterSpacing: 1 }}>
                       {currentPrayer.name}
                     </Text>
                   </SkeletonBox>
-                  <SkeletonBox loaded={prayersWithStatus.length > 0} width={45} height={12} borderRadius={5} color={colors.border} style={{ marginTop: 2 }}>
+                  <SkeletonBox loaded={prayersWithStatus.length > 0} width={45} height={16} borderRadius={5} color={colors.border} style={{ marginTop: 2 }}>
                     <Text style={{ fontFamily: Fonts.outfit, fontSize: 12, color: colors.textSecondary, marginTop: 1 }}>
                       {currentPrayer.time}
                     </Text>
                   </SkeletonBox>
                 </View>
                 <View style={{ alignItems: 'flex-end' }}>
-                  <SkeletonBox loaded={prayersWithStatus.length > 0} width={60} height={12} borderRadius={6} color={colors.border} style={{ marginBottom: 2 }}>
+                  <SkeletonBox loaded={prayersWithStatus.length > 0} width={60} height={14} borderRadius={6} color={colors.border} style={{ marginBottom: 2 }}>
                     <Text style={{ fontFamily: Fonts.outfit, fontSize: 11, color: colors.textSecondary, textTransform: 'uppercase', letterSpacing: 1 }}>
                       {nextPrayer.name}
                     </Text>
                   </SkeletonBox>
-                  <SkeletonBox loaded={prayersWithStatus.length > 0} width={45} height={12} borderRadius={5} color={colors.border} style={{ marginTop: 2 }}>
+                  <SkeletonBox loaded={prayersWithStatus.length > 0} width={45} height={16} borderRadius={5} color={colors.border} style={{ marginTop: 2 }}>
                     <Text style={{ fontFamily: Fonts.outfit, fontSize: 12, color: colors.textSecondary, marginTop: 1 }}>
                       {nextPrayer.time}
                     </Text>
@@ -690,74 +685,65 @@ export default function HomeScreen() {
         <View style={styles.section}>
           <Text style={[styles.sectionTitle, { color: colors.textSecondary }]}>{t('home.quickActions')}</Text>
           <View style={{ flexDirection: 'row', flexWrap: 'wrap', justifyContent: 'space-between' }}>
-            <TouchableOpacity 
-              activeOpacity={0.7}
-              style={[styles.actionItemCard, { borderColor: colors.border }]} 
-              onPress={() => router.push('/qibla')}
-            >
-              <ThemeCard intensity={40} style={styles.actionItemBlur}>
+            <ThemeCard intensity={40} style={[styles.actionItemCard, { borderColor: colors.border }]}>
+              <TouchableOpacity activeOpacity={1}
+                style={styles.actionItemBlur} 
+                onPress={() => router.push('/qibla')}
+              >
                 <Compass size={20} color={colors.accent} />
                 <Text style={[styles.actionText, { color: colors.text }]}>{t('home.qibla')}</Text>
-              </ThemeCard>
-            </TouchableOpacity>
+              </TouchableOpacity>
+            </ThemeCard>
             
-            <TouchableOpacity 
-              activeOpacity={0.7}
-              style={[styles.actionItemCard, { borderColor: colors.border }]} 
-              onPress={() => router.push('/names')}
-            >
-              <ThemeCard intensity={40} style={styles.actionItemBlur}>
+            <ThemeCard intensity={40} style={[styles.actionItemCard, { borderColor: colors.border }]}>
+              <TouchableOpacity activeOpacity={1}
+                style={styles.actionItemBlur} 
+                onPress={() => router.push('/names')}
+              >
                 <Book size={20} color={colors.highlight} />
                 <Text style={[styles.actionText, { color: colors.text }]}>{t('home.names')}</Text>
-              </ThemeCard>
-            </TouchableOpacity>
+              </TouchableOpacity>
+            </ThemeCard>
             
-            <TouchableOpacity 
-              activeOpacity={0.7}
-              style={[styles.actionItemCard, { borderColor: colors.border }]} 
-              onPress={() => router.push('/quran-learn' as any)}
-            >
-              <ThemeCard intensity={40} style={styles.actionItemBlur}>
+            <ThemeCard intensity={40} style={[styles.actionItemCard, { borderColor: colors.border }]}>
+              <TouchableOpacity activeOpacity={1}
+                style={styles.actionItemBlur} 
+                onPress={() => router.push('/quran-learn' as any)}
+              >
                 <GraduationCap size={20} color={colors.accent} />
                 <Text style={[styles.actionText, { color: colors.text }]}>{t('home.learnQuran')}</Text>
-              </ThemeCard>
-            </TouchableOpacity>
+              </TouchableOpacity>
+            </ThemeCard>
 
-            <TouchableOpacity 
-              activeOpacity={0.7}
-              style={[styles.actionItemCard, { borderColor: colors.border }]} 
-              onPress={() => router.push('/calendar' as any)}
-            >
-              <ThemeCard intensity={40} style={styles.actionItemBlur}>
+            <ThemeCard intensity={40} style={[styles.actionItemCard, { borderColor: colors.border }]}>
+              <TouchableOpacity activeOpacity={1}
+                style={styles.actionItemBlur} 
+                onPress={() => router.push('/calendar' as any)}
+              >
                 <CalendarDays size={20} color={colors.highlight} />
                 <Text style={[styles.actionText, { color: colors.text }]}>{t('calendar.titleEn', { defaultValue: 'Islamic Calendar' })}</Text>
-              </ThemeCard>
-            </TouchableOpacity>
+              </TouchableOpacity>
+            </ThemeCard>
 
-            <TouchableOpacity 
-              activeOpacity={0.7}
-              style={[styles.actionItemCard, { borderColor: colors.border }]} 
-              onPress={() => router.push('/trivia' as any)}
-            >
-              <ThemeCard intensity={40} style={styles.actionItemBlur}>
+            <ThemeCard intensity={40} style={[styles.actionItemCard, { borderColor: colors.border }]}>
+              <TouchableOpacity activeOpacity={1}
+                style={styles.actionItemBlur} 
+                onPress={() => router.push('/trivia' as any)}
+              >
                 <Brain size={20} color={colors.accent} />
                 <Text style={[styles.actionText, { color: colors.text }]}>{t('home.trivia', { defaultValue: 'Islamic Trivia' })}</Text>
-              </ThemeCard>
-            </TouchableOpacity>
+              </TouchableOpacity>
+            </ThemeCard>
 
-            <TouchableOpacity
-              activeOpacity={0.7}
-              style={[styles.actionItemCard, { borderColor: totalQada > 0 ? colors.error + '40' : colors.border }]}
-              onPress={() => router.push('/qada-tracker' as any)}
-            >
-              <ThemeCard intensity={40} style={[styles.actionItemBlur, totalQada > 0 && { flexDirection: 'column', alignItems: 'flex-start', justifyContent: 'center', gap: 2, backgroundColor: colors.error + '10' }]}>
+            <ThemeCard intensity={40} style={[styles.actionItemCard, { borderColor: totalQada > 0 ? colors.error + '40' : colors.border }]}>
+              <TouchableOpacity activeOpacity={1}
+                style={[styles.actionItemBlur, totalQada > 0 && { backgroundColor: colors.error + '10' }]}
+                onPress={() => router.push('/qada-tracker' as any)}
+              >
                 {totalQada > 0 ? (
                   <>
-                    <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6 }}>
-                      <History size={16} color={colors.error} />
-                      <Text style={[styles.actionText, { color: colors.text, marginLeft: 0 }]}>{t('tracker.qadaTitle', { defaultValue: 'Qada Tracker' })}</Text>
-                    </View>
-                    <Text style={{ fontFamily: Fonts.outfit, fontSize: 10, color: colors.error, fontWeight: 'bold' }}>{qadaBadgeText}</Text>
+                    <History size={20} color={colors.error} />
+                    <Text style={[styles.actionText, { color: colors.error }]}>{qadaBadgeText}</Text>
                   </>
                 ) : (
                   <>
@@ -765,8 +751,8 @@ export default function HomeScreen() {
                     <Text style={[styles.actionText, { color: colors.text }]}>{t('tracker.qadaTitle', { defaultValue: 'Qada Tracker' })}</Text>
                   </>
                 )}
-              </ThemeCard>
-            </TouchableOpacity>
+              </TouchableOpacity>
+            </ThemeCard>
           </View>
         </View>
 
@@ -778,54 +764,48 @@ export default function HomeScreen() {
           {prayersWithStatus.length > 0 ? (
             <ThemeCard intensity={30} style={[styles.timelineCard, { borderColor: colors.border }]}
             >
-              <View style={{ position: 'relative', width: '100%' }}>
-                {/* Continuous Progress Track */}
-                <View style={{ position: 'absolute', left: '10%', right: '10%', top: 29, height: 2, backgroundColor: colors.border, borderRadius: 1, zIndex: 0 }}>
-                  <Animated.View style={{ height: '100%', backgroundColor: colors.highlight, borderRadius: 1, width: `${timelineProgress}%` }} />
-                </View>
-
-                <View style={styles.timelineRow}>
-                  {prayersWithStatus.filter(p => p.id !== 'sunrise').map((prayer, index, arr) => {
+              <View style={{ position: 'relative', width: '100%', alignItems: 'center' }}>
+                {/* Row 1: Names */}
+                <View style={{ flexDirection: 'row', width: '100%', justifyContent: 'space-between', marginBottom: 6 }}>
+                  {prayersWithStatus.filter(p => p.id !== 'sunrise').map((prayer) => {
                     const isCurrent = prayer.status === 'current';
-                    const isPast = prayer.status === 'past';
-                    const isNext = prayer.status === 'next';
-
-                    let dotStyle: any = { backgroundColor: colors.border };
-                    if (isPast) {
-                      dotStyle = { backgroundColor: colors.highlight };
-                    } else if (isCurrent) {
-                      dotStyle = { backgroundColor: colors.highlight, transform: [{ scale: 1.4 }] };
-                    } else if (isNext) {
-                      dotStyle = { backgroundColor: colors.background, borderColor: colors.highlight, borderWidth: 2 };
-                    }
-
                     return (
-                      <View key={prayer.id} style={styles.timelineCol}>
-                        <Text
-                          style={[
-                            styles.timelineName,
-                            {
-                              color: isCurrent
-                                ? colors.highlight
-                                : colors.textSecondary,
-                              opacity: isPast ? 0.55 : 1,
-                            },
-                          ]}
-                        >
+                      <View key={`name-${prayer.id}`} style={{ width: '20%', alignItems: 'center' }}>
+                        <Text style={[styles.timelineName, { marginBottom: 0, color: isCurrent ? colors.highlight : colors.text, opacity: isCurrent ? 1 : 0.5 }]}>
                           {prayer.name}
                         </Text>
-                        <View style={styles.timelineDotRow}>
-                          <View style={[styles.timelineDot, dotStyle]} />
-                        </View>
-                        <Text
-                          style={[
-                            styles.timelineTime,
-                            {
-                              color: isCurrent ? colors.highlight : colors.textSecondary,
-                              opacity: isPast ? 0.5 : 1,
-                            },
-                          ]}
-                        >
+                      </View>
+                    );
+                  })}
+                </View>
+
+                {/* Row 2: Dots & Lines */}
+                <View style={{ position: 'relative', flexDirection: 'row', width: '100%', justifyContent: 'space-between', alignItems: 'center', marginBottom: 6, zIndex: 2 }}>
+                  <View style={{ position: 'absolute', left: '10%', right: '10%', height: 2, backgroundColor: '#2d2d2dff', borderRadius: 1, zIndex: 0 }} />
+                  <View style={{ position: 'absolute', left: '10%', right: '10%', height: 2, borderRadius: 1, zIndex: 1 }}>
+                    <Animated.View style={{ position: 'absolute', left: `${timelineProgress.left}%`, height: '100%', backgroundColor: colors.highlight, borderRadius: 1, width: `${timelineProgress.width}%` }} />
+                  </View>
+                  {prayersWithStatus.filter(p => p.id !== 'sunrise').map((prayer) => {
+                    const isCurrent = prayer.status === 'current';
+                    let dotStyle: any = { backgroundColor: '#2d2d2dff' };
+                    if (isCurrent) {
+                      dotStyle = { backgroundColor: colors.highlight };
+                    }
+                    return (
+                      <View key={`dot-${prayer.id}`} style={{ width: '20%', alignItems: 'center' }}>
+                        <View style={[styles.timelineDot, dotStyle]} />
+                      </View>
+                    );
+                  })}
+                </View>
+
+                {/* Row 3: Times */}
+                <View style={{ flexDirection: 'row', width: '100%', justifyContent: 'space-between' }}>
+                  {prayersWithStatus.filter(p => p.id !== 'sunrise').map((prayer) => {
+                    const isCurrent = prayer.status === 'current';
+                    return (
+                      <View key={`time-${prayer.id}`} style={{ width: '20%', alignItems: 'center' }}>
+                        <Text style={[styles.timelineTime, { color: isCurrent ? colors.highlight : colors.text, opacity: 1 }]}>
                           {formatNumber(prayer.time, i18n.language)}
                         </Text>
                       </View>
@@ -837,16 +817,26 @@ export default function HomeScreen() {
           ) : null}
           {prayersWithStatus.length === 0 && (
             <ThemeCard intensity={30} style={[styles.timelineCard, { borderColor: colors.border }]}>
-              <View style={{ position: 'relative', width: '100%' }}>
-                <View style={{ position: 'absolute', left: '10%', right: '10%', top: 29, height: 2, backgroundColor: colors.border, borderRadius: 1, zIndex: 0 }} />
-                <View style={styles.timelineRow}>
+              <View style={{ position: 'relative', width: '100%', alignItems: 'center' }}>
+                <View style={{ flexDirection: 'row', width: '100%', justifyContent: 'space-between', marginBottom: 6 }}>
                   {["Fajr","Dhuhr","Asr","Maghrib","Isha"].map((_, i) => (
-                    <View key={i} style={styles.timelineCol}>
-                      <SkeletonBox width={38} height={12} borderRadius={6} color={colors.border} loaded={false} style={{ marginBottom: 6 }} />
-                      <View style={styles.timelineDotRow}>
-                        <View style={[styles.timelineDot, { backgroundColor: colors.border }]} />
-                      </View>
-                      <SkeletonBox width={44} height={10} borderRadius={5} color={colors.border} loaded={false} />
+                    <View key={`name-skel-${i}`} style={{ width: '20%', alignItems: 'center' }}>
+                      <SkeletonBox width={38} height={20} borderRadius={6} color={colors.border} loaded={false} />
+                    </View>
+                  ))}
+                </View>
+                <View style={{ position: 'relative', flexDirection: 'row', width: '100%', justifyContent: 'space-between', alignItems: 'center', marginBottom: 6, zIndex: 2 }}>
+                  <View style={{ position: 'absolute', left: '10%', right: '10%', height: 2, backgroundColor: colors.background, borderRadius: 1, zIndex: 0 }} />
+                  {["Fajr","Dhuhr","Asr","Maghrib","Isha"].map((_, i) => (
+                    <View key={`dot-skel-${i}`} style={{ width: '20%', alignItems: 'center' }}>
+                      <View style={[styles.timelineDot, { backgroundColor: colors.background }]} />
+                    </View>
+                  ))}
+                </View>
+                <View style={{ flexDirection: 'row', width: '100%', justifyContent: 'space-between' }}>
+                  {["Fajr","Dhuhr","Asr","Maghrib","Isha"].map((_, i) => (
+                    <View key={`time-skel-${i}`} style={{ width: '20%', alignItems: 'center' }}>
+                      <SkeletonBox width={44} height={20} borderRadius={5} color={colors.border} loaded={false} />
                     </View>
                   ))}
                 </View>
@@ -872,8 +862,8 @@ export default function HomeScreen() {
                 {['Suhur','Iftar','Tahajjud'].map((label, i) => (
                   <ThemeCard key={i} style={[styles.specialCard]}>
                     <View style={[styles.specialCardInner, { alignItems: 'center', justifyContent: 'center', paddingVertical: 16 }]}>
-                      <SkeletonBox width={70} height={20} borderRadius={6} color={colors.border} style={{ marginBottom: 4 }} loaded={false} />
-                      <Text style={{ fontFamily: Fonts.outfit, fontSize: 12, color: colors.textSecondary }}>{label}</Text>
+                      <SkeletonBox width={70} height={42} borderRadius={6} color={colors.border} style={{ marginBottom: 4 }} loaded={false} />
+                      <Text style={{ fontFamily: Fonts.outfit, fontSize: 10, color: colors.textSecondary, textTransform: 'uppercase', letterSpacing: 1 }}>{label}</Text>
                     </View>
                   </ThemeCard>
                 ))}
@@ -939,28 +929,30 @@ export default function HomeScreen() {
           </View>
         ) : (
           <View>
-            <SkeletonBox width={160} height={15} borderRadius={8} style={{ marginBottom: 12 }} color={colors.border} loaded={false} />
+            <Text style={[styles.sectionTitle, { color: colors.textSecondary }]}>
+              {t('home.dailyInspiration')}
+            </Text>
             <ThemeCard style={[styles.inspirationCard, { borderColor: colors.border, paddingHorizontal: Spacing.four, paddingVertical: Spacing.six }]}>
               <View style={{ alignItems: 'center', gap: 12 }}>
-                <SkeletonBox width={40} height={40} borderRadius={20} color={colors.border} loaded={false} />
-                <SkeletonBox width={200} height={24} borderRadius={8} color={colors.border} loaded={false} />
-                <SkeletonBox width={260} height={24} borderRadius={8} color={colors.border} loaded={false} />
-                <SkeletonBox width={180} height={24} borderRadius={8} color={colors.border} loaded={false} />
-                <SkeletonBox width={240} height={14} borderRadius={7} color={colors.border} style={{ marginTop: 4 }} loaded={false} />
-                <SkeletonBox width={200} height={14} borderRadius={7} color={colors.border} loaded={false} />
-                <SkeletonBox width={120} height={12} borderRadius={6} color={colors.border} style={{ marginTop: 4 }} loaded={false} />
+                <SkeletonBox width={24} height={24} borderRadius={12} color={colors.border} loaded={false} />
+                <SkeletonBox width={200} height={32} borderRadius={8} color={colors.border} loaded={false} />
+                <SkeletonBox width={260} height={32} borderRadius={8} color={colors.border} loaded={false} />
+                <SkeletonBox width={180} height={32} borderRadius={8} color={colors.border} loaded={false} />
+                <SkeletonBox width={240} height={20} borderRadius={7} color={colors.border} style={{ marginTop: 4 }} loaded={false} />
+                <SkeletonBox width={200} height={20} borderRadius={7} color={colors.border} loaded={false} />
+                <SkeletonBox width={120} height={16} borderRadius={6} color={colors.border} style={{ marginTop: 4 }} loaded={false} />
               </View>
             </ThemeCard>
           </View>
         )}
 
         {/* ── Hadith of the Day ─────────────────────────────────── */}
-        <View style={{ marginTop: Spacing.four, marginBottom: Spacing.six }}>
+        <View style={{ marginTop: Spacing.four }}>
           <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: Spacing.two }}>
             <Text style={[styles.sectionTitle, { color: colors.textSecondary, marginBottom: 0 }]}>
               {t('home.hadithOfTheDay', { defaultValue: 'Hadith of the Day' })}
             </Text>
-            <TouchableOpacity onPress={shareHadith} style={{ padding: 4 }}>
+            <TouchableOpacity activeOpacity={1} onPress={shareHadith} style={{ padding: 4 }}>
               <Share2 size={18} color={colors.textSecondary} />
             </TouchableOpacity>
           </View>
@@ -980,10 +972,10 @@ export default function HomeScreen() {
           ) : (
             <ThemeCard style={[styles.inspirationCard, { borderColor: colors.border, paddingHorizontal: Spacing.four, paddingVertical: Spacing.six }]}>
               <View style={{ alignItems: 'center', gap: 12 }}>
-                <SkeletonBox width={260} height={20} borderRadius={8} color={colors.border} loaded={false} />
-                <SkeletonBox width={220} height={20} borderRadius={8} color={colors.border} loaded={false} />
-                <SkeletonBox width={150} height={20} borderRadius={8} color={colors.border} loaded={false} />
-                <SkeletonBox width={100} height={12} borderRadius={6} color={colors.border} style={{ marginTop: 8 }} loaded={false} />
+                <SkeletonBox width={260} height={24} borderRadius={8} color={colors.border} loaded={false} />
+                <SkeletonBox width={220} height={24} borderRadius={8} color={colors.border} loaded={false} />
+                <SkeletonBox width={150} height={24} borderRadius={8} color={colors.border} loaded={false} />
+                <SkeletonBox width={100} height={16} borderRadius={6} color={colors.border} style={{ marginTop: 8 }} loaded={false} />
               </View>
             </ThemeCard>
           )}
@@ -1001,7 +993,6 @@ const styles = StyleSheet.create({
   },
   container: {
     padding: Spacing.four,
-    paddingTop: 0,
   },
 
   // Greeting
@@ -1134,7 +1125,7 @@ const styles = StyleSheet.create({
   },
   timelineName: {
     fontFamily: Fonts.outfit,
-    fontSize: 13,
+    fontSize: 15,
     marginBottom: 6,
   },
   timelineDotRow: {
@@ -1152,7 +1143,7 @@ const styles = StyleSheet.create({
   },
   timelineTime: {
     fontFamily: Fonts.outfit,
-    fontSize: 14,
+    fontSize: 15,
   },
   nextBadge: {
     paddingHorizontal: 6,

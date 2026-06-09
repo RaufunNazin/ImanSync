@@ -131,9 +131,8 @@ export default function TriviaScreen() {
               </Text>
             </View>
 
-            <TouchableOpacity 
-              style={[styles.retryBtn, { backgroundColor: colors.accent }]} 
-              activeOpacity={1}
+            <TouchableOpacity activeOpacity={1} 
+              style={[styles.retryBtn, { backgroundColor: colors.accent }]}
               onPress={startNewGame}
             >
               <RefreshCw size={20} color="#FFF" />
@@ -170,9 +169,8 @@ export default function TriviaScreen() {
                   const showWrong = isSelected && !isCorrectAnswer;
 
                   return (
-                    <TouchableOpacity
+                    <TouchableOpacity activeOpacity={1}
                       key={idx}
-                      activeOpacity={1}
                       disabled={selectedOption !== null}
                       onPress={() => handleOptionPress(idx)}
                       style={[
@@ -203,8 +201,7 @@ export default function TriviaScreen() {
 
             {selectedOption !== null && (
               <Animated.View entering={FadeInDown.duration(300).delay(200)} style={styles.footer}>
-                <TouchableOpacity 
-                  activeOpacity={1}
+                <TouchableOpacity activeOpacity={1}
                   style={[styles.nextBtn, { backgroundColor: colors.highlight, width: 64, height: 64, borderRadius: 32, alignSelf: 'flex-end', justifyContent: 'center' }]}
                   onPress={nextQuestion}
                 >
@@ -231,7 +228,7 @@ const styles = StyleSheet.create({
   },
   backBtn: { padding: 8, marginLeft: -8 },
   headerTitle: { fontFamily: Fonts.outfit, fontSize: 18, fontWeight: '600' },
-  container: { flex: 1, padding: Spacing.four, paddingTop: 0 },
+  container: { flex: 1, padding: Spacing.four },
   
   progressHeader: { flexDirection: 'row', justifyContent: 'space-between', marginBottom: Spacing.two },
   progressText: { fontFamily: Fonts.outfit, fontSize: 14 },

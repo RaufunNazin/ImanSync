@@ -140,9 +140,8 @@ export default function DuaCategoryScreen() {
         
         style={[styles.itemWrapper, { borderColor: colors.border }]}
       >
-        <TouchableOpacity
+        <TouchableOpacity activeOpacity={1}
           style={styles.item}
-          activeOpacity={0.7}
           onLongPress={() => {
             setSelectedDua(dua);
             setPinSheetVisible(true);
@@ -190,7 +189,7 @@ export default function DuaCategoryScreen() {
           {t('dua.noDuasCategory', { defaultValue: 'No duas found in this category.' })}
         </Text>
         {isCustom === 'true' && !id.startsWith('curated_cat_') && (
-          <TouchableOpacity
+          <TouchableOpacity activeOpacity={1}
             style={[styles.emptyBtn, { backgroundColor: colors.accent }]}
             onPress={() => setModalVisible(true)}
           >
@@ -211,14 +210,14 @@ export default function DuaCategoryScreen() {
         titleAr={t('dua.titleAr')} 
         showBack 
         rightElement={
-          <TouchableOpacity onPress={() => router.push({ pathname: '/dua-search', params: { categoryId: id, isCustom: isCustom || 'false', categoryName: name } })} hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}>
+          <TouchableOpacity activeOpacity={1} onPress={() => router.push({ pathname: '/dua-search', params: { categoryId: id, isCustom: isCustom || 'false', categoryName: name } })} hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}>
             <Search size={22} color={colors.textSecondary} />
           </TouchableOpacity>
         }
       />
       
       {loading ? (
-        <View style={[styles.list, { gap: Spacing.three, padding: Spacing.four, paddingTop: 0 }]}>
+        <View style={[styles.list, { gap: Spacing.three, padding: Spacing.four }]}>
           {[...Array(5)].map((_, i) => (
             <ThemeCard key={i} intensity={40}  style={[styles.itemWrapper, { borderColor: colors.border }]}>
               <View style={[styles.item]}>
@@ -280,7 +279,7 @@ export default function DuaCategoryScreen() {
       {isCustom === 'true' && !id.startsWith('curated_cat_') && (
         <>
           <Animated.View style={[styles.fab, { transform: [{ translateY: fabTranslateY }] }]}>
-            <TouchableOpacity
+            <TouchableOpacity activeOpacity={1}
               style={[StyleSheet.absoluteFill, { backgroundColor: colors.accent, borderRadius: 28, justifyContent: 'center', alignItems: 'center' }]}
               onPress={() => setModalVisible(true)}
             >
@@ -307,7 +306,6 @@ const styles = StyleSheet.create({
   },
   container: {
     padding: Spacing.four,
-    paddingTop: 0,
   },
   list: {
     gap: Spacing.three,

@@ -73,7 +73,7 @@ export default function OptionsModal({
               {/* Header */}
               <View style={[styles.header, { borderBottomColor: colors.border }]}>
                 <Text style={[styles.title, { color: colors.text }]}>{title}</Text>
-                <TouchableOpacity onPress={onClose} style={styles.closeBtn}>
+                <TouchableOpacity activeOpacity={1} onPress={onClose} style={styles.closeBtn}>
                   <X size={24} color={colors.text} />
                 </TouchableOpacity>
               </View>
@@ -105,7 +105,7 @@ export default function OptionsModal({
                   filteredOptions.map((opt, index) => {
                     const isSelected = selectedValue === opt.id;
                     return (
-                      <TouchableOpacity
+                      <TouchableOpacity activeOpacity={1}
                         key={opt.id}
                         style={[
                           styles.optionRow,

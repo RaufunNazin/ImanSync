@@ -60,7 +60,6 @@ const styles = StyleSheet.create({
   },
   container: {
     padding: Spacing.four,
-    paddingTop: 0,
   },
   center: {
     flex: 1,

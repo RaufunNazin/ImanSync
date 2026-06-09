@@ -1299,5 +1299,19 @@
     "enTranslationPlaceholder": "ইংরেজি অনুবাদ...",
     "enTransliterationPlaceholder": "ইংরেজি উচ্চারণ..."
   },
-  "searchLabel": "খুঁজুন..."
+  "searchLabel": "খুঁজুন...",
+  "banglaMonths": {
+    "Boishakh": "বৈশাখ",
+    "Jaistha": "জ্যৈষ্ঠ",
+    "Ashar": "আষাঢ়",
+    "Srabon": "শ্রাবণ",
+    "Bhadro": "ভাদ্র",
+    "Ashwin": "আশ্বিন",
+    "Kartik": "কার্তিক",
+    "Ogrohayon": "অগ্রহায়ণ",
+    "Poush": "পৌষ",
+    "Magh": "মাঘ",
+    "Falgun": "ফাল্গুন",
+    "Chaitra": "চৈত্র"
+  }
 }

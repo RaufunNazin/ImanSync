@@ -2,6 +2,7 @@ import React from 'react';
 import { View, Text, TouchableOpacity, StyleSheet, Switch, ActivityIndicator } from 'react-native';
 import { ChevronRight } from 'lucide-react-native';
 import { Fonts, Spacing } from '@/constants/theme';
+import SkeletonBox from './SkeletonBox';
 
 export interface SettingRowProps {
   icon: React.ComponentType<{ size: number; color: string }>;
@@ -12,17 +13,17 @@ export interface SettingRowProps {
   isLast?: boolean;
   highlight?: boolean;
   colors: any;
+  isLoading?: boolean;
 }
 
-export default function SettingRow({ icon: Icon, title, value, type = 'navigate', onPress, isLast, highlight, colors }: SettingRowProps) {
+export default function SettingRow({ icon: Icon, title, value, type = 'navigate', onPress, isLast, highlight, colors, isLoading }: SettingRowProps) {
   return (
-    <TouchableOpacity
+    <TouchableOpacity activeOpacity={1}
       style={[
         styles.settingRow,
         !isLast && { borderBottomWidth: StyleSheet.hairlineWidth, borderBottomColor: colors.border },
         highlight && { backgroundColor: colors.highlight + '20', borderRadius: 12, paddingHorizontal: Spacing.three, marginHorizontal: -Spacing.three }
       ]}
-      activeOpacity={type === 'navigate' ? 0.7 : 0.9}
       onPress={() => {
         if (type === 'toggle') {
           if (onPress) onPress(!value);
@@ -38,7 +39,15 @@ export default function SettingRow({ icon: Icon, title, value, type = 'navigate'
         <Text style={[styles.settingTitle, { color: colors.text }]}>{title}</Text>
       </View>
 
-      {type === 'navigate' ? (
+      {isLoading ? (
+        <View style={{ justifyContent: 'center' }}>
+          {type === 'toggle' ? (
+            <SkeletonBox width={48} height={28} borderRadius={14} color={colors.border} loaded={false} />
+          ) : (
+            <SkeletonBox width={80} height={18} borderRadius={4} color={colors.border} loaded={false} />
+          )}
+        </View>
+      ) : type === 'navigate' ? (
         <View style={{ flexDirection: 'row', alignItems: 'center', flex: value ? 1 : undefined, flexShrink: 1, justifyContent: 'flex-end', paddingLeft: value ? 10 : 0 }}>
           {!!value && <Text style={[styles.settingValue, { color: colors.textSecondary }]}>{value}</Text>}
           <ChevronRight size={20} color={colors.textSecondary} />

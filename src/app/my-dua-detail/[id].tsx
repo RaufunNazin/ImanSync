@@ -179,14 +179,14 @@ export default function MyDuaDetailScreen() {
     <View style={styles.settingRow}>
       <Text style={[styles.settingLabel, { color: colors.text }]}>{label}</Text>
       <View style={styles.sizeControls}>
-        <TouchableOpacity 
+        <TouchableOpacity activeOpacity={1} 
           style={[styles.sizeBtn, { backgroundColor: colors.backgroundElement, borderColor: colors.border }]}
           onPress={() => { Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light); onChange(Math.max(12, value - 2)); }}
         >
           <Minus size={18} color={colors.textSecondary} />
         </TouchableOpacity>
         <Text style={[styles.sizeValue, { color: colors.text }]}>{value}</Text>
-        <TouchableOpacity 
+        <TouchableOpacity activeOpacity={1} 
           style={[styles.sizeBtn, { backgroundColor: colors.backgroundElement, borderColor: colors.border }]}
           onPress={() => { Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light); onChange(Math.min(48, value + 2)); }}
         >
@@ -199,9 +199,8 @@ export default function MyDuaDetailScreen() {
   const renderToggle = (label: string, value: boolean, onChange: (val: boolean) => void) => (
     <View style={styles.settingRow}>
       <Text style={[styles.settingLabel, { color: colors.text }]}>{label}</Text>
-      <TouchableOpacity 
+      <TouchableOpacity activeOpacity={1} 
         style={[styles.toggleWrap, value ? { backgroundColor: colors.highlight } : { backgroundColor: colors.border }]}
-        activeOpacity={0.8}
         onPress={() => { Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light); onChange(!value); }}
       >
         <View style={[styles.toggleThumb, value ? styles.toggleThumbOn : styles.toggleThumbOff]} />
@@ -218,7 +217,7 @@ export default function MyDuaDetailScreen() {
               <View style={{ width: 40, height: 4, backgroundColor: colors.border, borderRadius: 2, alignSelf: 'center', marginBottom: Spacing.four }} />
               <View style={[styles.modalHeader, { borderBottomColor: colors.border }]}>
                 <Text style={[styles.modalTitle, { color: colors.text }]}>{t('duaSettings.title')}</Text>
-                <TouchableOpacity onPress={() => setSettingsVisible(false)} style={styles.closeBtn}>
+                <TouchableOpacity activeOpacity={1} onPress={() => setSettingsVisible(false)} style={styles.closeBtn}>
                   <X size={24} color={colors.text} />
                 </TouchableOpacity>
               </View>
@@ -281,13 +280,13 @@ export default function MyDuaDetailScreen() {
         showBack 
         rightElement={
           <View style={{ flexDirection: 'row', gap: Spacing.two, marginLeft: Spacing.two }}>
-            <TouchableOpacity 
+            <TouchableOpacity activeOpacity={1} 
               style={[styles.settingsIconBtn, { backgroundColor: colors.backgroundElement, borderColor: colors.border }]} 
               onPress={toggleBookmark}
             >
               <Bookmark size={16} color={isBookmarked ? colors.accent : colors.textSecondary} fill={isBookmarked ? colors.accent : 'transparent'} />
             </TouchableOpacity>
-            <TouchableOpacity 
+            <TouchableOpacity activeOpacity={1} 
               style={[styles.settingsIconBtn, { backgroundColor: colors.backgroundElement, borderColor: colors.border }]} 
               onPress={() => setSettingsVisible(true)}
             >
@@ -298,7 +297,7 @@ export default function MyDuaDetailScreen() {
       />
       
       <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={styles.container}>
-        <TouchableOpacity activeOpacity={0.9} onLongPress={() => setShowOptionsSheet(true)} delayLongPress={300}>
+        <TouchableOpacity activeOpacity={1} onLongPress={() => setShowOptionsSheet(true)} delayLongPress={300}>
           {dua.type === 'text' && (
             <ThemeCard intensity={40}  style={[styles.card, themeStyles.cardShadow, { borderColor: colors.border }]}>
               {showArabic && (
@@ -428,7 +427,6 @@ const styles = StyleSheet.create({
   },
   container: {
     padding: Spacing.four,
-    paddingTop: 0,
   },
   settingsIconBtn: {
     width: 32,

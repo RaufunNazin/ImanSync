@@ -140,7 +140,7 @@ export default function CalendarScreen() {
       );
 
       cells.push(
-        <TouchableOpacity
+        <TouchableOpacity activeOpacity={1}
           key={`day-${idx}`}
           style={[
             styles.gridCell,
@@ -242,8 +242,7 @@ export default function CalendarScreen() {
         titleEn={t('calendar.titleEn')}
         titleAr={t('calendar.titleAr')}
         rightElement={
-          <TouchableOpacity 
-            activeOpacity={0.7}
+          <TouchableOpacity activeOpacity={1}
             onPress={() => setOptionsModalVisible(true)}
             style={{
               backgroundColor: colors.backgroundElement,
@@ -265,13 +264,13 @@ export default function CalendarScreen() {
         
         {/* Month Selector */}
         <View style={styles.monthSelector}>
-          <TouchableOpacity onPress={() => changeMonth(-1)} style={styles.navBtn}>
+          <TouchableOpacity activeOpacity={1} onPress={() => changeMonth(-1)} style={styles.navBtn}>
             <ChevronLeft size={24} color={colors.text} />
           </TouchableOpacity>
           <Text style={[styles.monthTitle, { color: colors.text }]}>
             {formatNumber(getMonthName(currentDate), i18n.language)}
           </Text>
-          <TouchableOpacity onPress={() => changeMonth(1)} style={styles.navBtn}>
+          <TouchableOpacity activeOpacity={1} onPress={() => changeMonth(1)} style={styles.navBtn}>
             <ChevronRight size={24} color={colors.text} />
           </TouchableOpacity>
         </View>
@@ -282,48 +281,56 @@ export default function CalendarScreen() {
           const daysInMonth = new Date(currentDate.getFullYear(), currentDate.getMonth() + 1, 0).getDate();
           
           return (
-            <View style={{ flexShrink: 1, marginBottom: Spacing.four }}>
-              {/* Days Bar skeleton */}
-              <View style={[styles.daysBar, { backgroundColor: colors.backgroundElement, borderColor: colors.border }]}>
-                {['sun', 'mon', 'tue', 'wed', 'thu', 'fri', 'sat'].map((day, idx) => (
-                  <View key={`header-${idx}`} style={styles.gridCellHeader}>
-                    <Text style={[styles.gridCellHeaderText, { color: colors.textSecondary }]}>
-                      {t(`calendar.${day}`)}
-                    </Text>
-                  </View>
-                ))}
-              </View>
-              
-              {/* Grid Cells Skeleton */}
-              <View style={{ flexDirection: 'row', flexWrap: 'wrap' }}>
-                {Array.from({length: startDayOfWeek}).map((_, i) => (
-                  <View key={`empty-${i}`} style={styles.gridCell} />
-                ))}
-                {Array.from({length: daysInMonth}).map((_, i) => {
-                  const today = new Date();
-                  const isToday = (i + 1) === today.getDate() &&
-                                  currentDate.getMonth() === today.getMonth() &&
-                                  currentDate.getFullYear() === today.getFullYear();
-
-                  return (
-                    <View key={`day-${i}`} style={[styles.gridCell, { 
-                      borderColor: isToday ? colors.accent : 'transparent',
-                      borderWidth: isToday ? 1 : 0,
-                    }]}>
-                      <Text style={[styles.gregorianText, { color: colors.text }]}>
-                        {formatNumber((i + 1).toString(), i18n.language)}
+            <>
+              <View style={{ flexShrink: 1, marginBottom: Spacing.four }}>
+                {/* Days Bar skeleton */}
+                <View style={[styles.daysBar, { backgroundColor: colors.backgroundElement, borderColor: colors.border }]}>
+                  {['sun', 'mon', 'tue', 'wed', 'thu', 'fri', 'sat'].map((day, idx) => (
+                    <View key={`header-${idx}`} style={styles.gridCellHeader}>
+                      <Text style={[styles.gridCellHeaderText, { color: colors.textSecondary }]}>
+                        {t(`calendar.${day}`)}
                       </Text>
-                      {prefs.showBanglaCalendar ? (
-                        <View style={{ flexDirection: 'row', justifyContent: 'space-between', width: '100%', paddingHorizontal: 4, marginTop: 2 }}>
-                          <SkeletonBox width={12} height={10} borderRadius={4} color={colors.border} loaded={false} />
-                          <SkeletonBox width={12} height={10} borderRadius={4} color={colors.border} loaded={false} />
-                        </View>
-                      ) : (
-                        <SkeletonBox width={16} height={10} borderRadius={4} color={colors.border} style={{ marginTop: 2, marginBottom: 4 }} loaded={false} />
-                      )}
                     </View>
-                  );
-                })}
+                  ))}
+                </View>
+                
+                {/* Grid Cells Skeleton */}
+                <View style={{ flexDirection: 'row', flexWrap: 'wrap' }}>
+                  {Array.from({length: startDayOfWeek}).map((_, i) => (
+                    <View key={`empty-${i}`} style={styles.gridCell} />
+                  ))}
+                  {Array.from({length: daysInMonth}).map((_, i) => {
+                    const today = new Date();
+                    const isToday = (i + 1) === today.getDate() &&
+                                    currentDate.getMonth() === today.getMonth() &&
+                                    currentDate.getFullYear() === today.getFullYear();
+
+                    return (
+                      <View key={`day-${i}`} style={[styles.gridCell, { 
+                        borderColor: isToday ? colors.accent : 'transparent',
+                        borderWidth: isToday ? 1 : 0,
+                      }]}>
+                        <Text style={[styles.gregorianText, { color: colors.text }]}>
+                          {formatNumber((i + 1).toString(), i18n.language)}
+                        </Text>
+                        {prefs.showBanglaCalendar ? (
+                          <View style={{ flexDirection: 'row', justifyContent: 'space-between', width: '100%', paddingHorizontal: 4, marginTop: 2 }}>
+                            <SkeletonBox borderRadius={4} color={colors.border} loaded={false}>
+                              <Text style={[styles.hijriText, { marginTop: 0, marginBottom: 0 }]}>12</Text>
+                            </SkeletonBox>
+                            <SkeletonBox borderRadius={4} color={colors.border} loaded={false}>
+                              <Text style={[styles.hijriText, { marginTop: 0, marginBottom: 0 }]}>12</Text>
+                            </SkeletonBox>
+                          </View>
+                        ) : (
+                          <SkeletonBox borderRadius={4} color={colors.border} loaded={false}>
+                            <Text style={styles.hijriText}>12</Text>
+                          </SkeletonBox>
+                        )}
+                      </View>
+                    );
+                  })}
+                </View>
               </View>
 
               {/* Details Skeletons */}
@@ -352,7 +359,7 @@ export default function CalendarScreen() {
                   <SkeletonBox width={140} height={16} borderRadius={8} color={colors.border} loaded={false} />
                 </ThemeCard>
               </View>
-            </View>
+            </>
           );
         })() : (
           <>
@@ -388,7 +395,7 @@ export default function CalendarScreen() {
                   </Text>
                   <Text style={[styles.detailDateSub, { color: colors.textSecondary }]}>
                     {formatGregorianDate(selectedDayData.date.gregorian.date)}
-                    {prefs.showBanglaCalendar && ` • ${formatNumber(bDate.day.toString(), i18n.language)} ${bDate.monthName} ${formatNumber(bDate.year.toString(), i18n.language)}`}
+                    {prefs.showBanglaCalendar && ` • ${formatNumber(bDate.day.toString(), i18n.language)} ${t('banglaMonths.' + bDate.monthName, { defaultValue: bDate.monthName })} ${formatNumber(bDate.year.toString(), i18n.language)}`}
                   </Text>
                 </ThemeCard>
 
@@ -453,7 +460,7 @@ export default function CalendarScreen() {
               </Text>
               <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 8 }}>
                 {[-2, -1, 0, 1, 2].map(val => (
-                  <TouchableOpacity 
+                  <TouchableOpacity activeOpacity={1} 
                     key={`h-${val}`} 
                     onPress={() => prefs.setPreferences({ hijriOffset: val })}
                     style={{ padding: 8, paddingHorizontal: 12, borderRadius: 8, backgroundColor: prefs.hijriOffset === val ? colors.highlight : colors.backgroundElement, borderWidth: 1, borderColor: colors.border }}
@@ -471,7 +478,7 @@ export default function CalendarScreen() {
                 </Text>
                 <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 8 }}>
                   {[-2, -1, 0, 1, 2].map(val => (
-                    <TouchableOpacity 
+                    <TouchableOpacity activeOpacity={1} 
                       key={`b-${val}`} 
                       onPress={() => prefs.setPreferences({ banglaOffset: val })}
                       style={{ padding: 8, paddingHorizontal: 12, borderRadius: 8, backgroundColor: prefs.banglaOffset === val ? colors.highlight : colors.backgroundElement, borderWidth: 1, borderColor: colors.border }}

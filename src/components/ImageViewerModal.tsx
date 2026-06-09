@@ -26,7 +26,7 @@ export default function ImageViewerModal({ visible, source, onClose }: ImageView
       <StatusBar backgroundColor="rgba(0,0,0,0.95)" barStyle="light-content" />
       <View style={styles.overlay}>
         {/* Close button */}
-        <TouchableOpacity style={styles.closeBtn} onPress={onClose} hitSlop={{ top: 12, bottom: 12, left: 12, right: 12 }}>
+        <TouchableOpacity activeOpacity={1} style={styles.closeBtn} onPress={onClose} hitSlop={{ top: 12, bottom: 12, left: 12, right: 12 }}>
           <X size={28} color="#FFFFFF" />
         </TouchableOpacity>
 

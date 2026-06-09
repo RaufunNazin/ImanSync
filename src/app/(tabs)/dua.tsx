@@ -303,7 +303,7 @@ export default function DuaScreen() {
         <PageHeader 
           titleEn={t('dua.titleEn')} 
           rightElement={
-            <TouchableOpacity onPress={() => router.push('/dua-search' as any)} hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}>
+            <TouchableOpacity activeOpacity={1} onPress={() => router.push('/dua-search' as any)} hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}>
               <Search size={22} color={colors.textSecondary} />
             </TouchableOpacity>
           }
@@ -323,16 +323,15 @@ export default function DuaScreen() {
 
         {/* Permanent Storage Suggestion Banner */}
         {showSuggestBanner && (
-          <TouchableOpacity 
+          <TouchableOpacity activeOpacity={1} 
             style={[styles.banner, { borderColor: colors.highlight + '60', backgroundColor: colors.highlight + '15' }]}
-            activeOpacity={0.8}
             onPress={() => router.push({ pathname: '/settings', params: { highlight: 'storage' } })}
           >
             <FolderLock size={18} color={colors.highlight} style={{ flexShrink: 0 }} />
             <Text style={[styles.bannerText, { color: colors.text, flex: 1 }]}>
               {t('dua.suggestPermanentStorage')}
             </Text>
-            <TouchableOpacity onPress={dismissSuggestBanner} hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}>
+            <TouchableOpacity activeOpacity={1} onPress={dismissSuggestBanner} hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}>
               <X size={16} color={colors.textSecondary} />
             </TouchableOpacity>
           </TouchableOpacity>
@@ -341,7 +340,7 @@ export default function DuaScreen() {
         {/* Main Content */}
         <View style={{ flex: 1 }}>
           {/* Pinned Section */}
-            {pinnedCategories.length > 0 && (
+            {(pinnedCategories.length > 0 || (loading && pinnedIds.length > 0)) && (
               <View style={[styles.section, { paddingLeft: Spacing.four }]}>
                 <Text style={[styles.sectionTitle, { color: colors.textSecondary, marginVertical: Spacing.one }]}>{t('dua.pinned')}</Text>
                 <View>
@@ -350,78 +349,92 @@ export default function DuaScreen() {
                     showsHorizontalScrollIndicator={false}
                     contentContainerStyle={styles.pinnedScroll}
                   >
-                    {pinnedCategories.map((item) => (
-                      <TouchableOpacity
-                        key={item.id}
-                        activeOpacity={0.8}
-                        style={{ width: 160 }}
-                        onPress={() => handleCategoryPress(item)}
-                        onLongPress={() => {
-                          setSelectedCategory(item);
-                          setPinSheetVisible(true);
-                        }}
-                      >
-                        <DuaCard
-                          id={item.id.toString()}
-                          name={getCategoryName(item)}
-                          description={getCategoryDesc(item)}
-                          count={item.count}
-                          isPinned={true}
-                          isCustom={item.isCustom}
-                          colors={colors}
+                    {loading ? (
+                      pinnedIds.map((_, i) => (
+                        <View key={`pin-skel-${i}`} style={{ width: 160 }}>
+                          <ThemeCard style={{ minHeight: 70, borderRadius: 20, padding: Spacing.two, paddingVertical: Spacing.two, alignItems: 'center', justifyContent: 'center' }}>
+                            <View style={{ alignItems: 'center', justifyContent: 'center', gap: 2, paddingHorizontal: 8 }}>
+                              <SkeletonBox width={110} height={20} borderRadius={8} color={colors.border} loaded={false} />
+                              <SkeletonBox width={70} height={16} borderRadius={6} color={colors.border} loaded={false} />
+                            </View>
+                          </ThemeCard>
+                        </View>
+                      ))
+                    ) : (
+                      pinnedCategories.map((item) => (
+                        <TouchableOpacity activeOpacity={1}
+                          key={item.id}
+                          style={{ width: 160 }}
                           onPress={() => handleCategoryPress(item)}
                           onLongPress={() => {
                             setSelectedCategory(item);
                             setPinSheetVisible(true);
                           }}
-                        />
-                      </TouchableOpacity>
-                    ))}
+                        >
+                          <DuaCard
+                            id={item.id.toString()}
+                            name={getCategoryName(item)}
+                            description={getCategoryDesc(item)}
+                            count={item.count}
+                            isPinned={true}
+                            isCustom={item.isCustom}
+                            colors={colors}
+                            onPress={() => handleCategoryPress(item)}
+                            onLongPress={() => {
+                              setSelectedCategory(item);
+                              setPinSheetVisible(true);
+                            }}
+                          />
+                        </TouchableOpacity>
+                      ))
+                    )}
                   </ScrollView>
                 </View>
               </View>
             )}
 
         {/* Main Grid Section */}
-        <View style={[styles.section, { padding: Spacing.four, paddingTop: 0 }]}>
+        <View style={[styles.section, { padding: Spacing.four }]}>
           <View style={styles.grid}>
-            {/* My Duas Tile - Always First */}
-            <View style={styles.gridItem}>
-              <DuaCard
-                id="my_duas"
-                name={t('dua.myDuas')}
-                description={t('dua.myDuasDesc')}
-                count={myDuasCount}
-                isMyDuas={true}
-                colors={colors}
-                onPress={handleMyDuasPress}
-              />
-            </View>
+            {loading ? (
+              [...Array(6)].map((_, i) => (
+                <View key={i} style={[styles.gridItem]}>
+                  <ThemeCard style={{ minHeight: 70, borderRadius: 20, padding: Spacing.two, paddingVertical: Spacing.two, alignItems: 'center', justifyContent: 'center' }}>
+                    <View style={{ alignItems: 'center', justifyContent: 'center', gap: 2, paddingHorizontal: 8 }}>
+                      <SkeletonBox width={110} height={20} borderRadius={8} color={colors.border} loaded={false} />
+                      <SkeletonBox width={70} height={16} borderRadius={6} color={colors.border} loaded={false} />
+                    </View>
+                  </ThemeCard>
+                </View>
+              ))
+            ) : (
+              <>
+                {/* My Duas Tile - Always First */}
+                <View style={styles.gridItem}>
+                  <DuaCard
+                    id="my_duas"
+                    name={t('dua.myDuas')}
+                    description={t('dua.myDuasDesc')}
+                    count={myDuasCount}
+                    isMyDuas={true}
+                    colors={colors}
+                    onPress={handleMyDuasPress}
+                  />
+                </View>
 
-            {/* Bookmarks Tile - Always Second */}
-            <View style={styles.gridItem}>
-              <DuaCard
-                id="bookmarks"
-                name={t('dua.bookmarks')}
-                description={t('dua.bookmarksDesc')}
-                count={bookmarksCount}
-                colors={colors}
-                onPress={handleBookmarksPress}
-              />
-            </View>
+                {/* Bookmarks Tile - Always Second */}
+                <View style={styles.gridItem}>
+                  <DuaCard
+                    id="bookmarks"
+                    name={t('dua.bookmarks')}
+                    description={t('dua.bookmarksDesc')}
+                    count={bookmarksCount}
+                    colors={colors}
+                    onPress={handleBookmarksPress}
+                  />
+                </View>
 
-            {loading
-              ? [...Array(4)].map((_, i) => (
-                  <View key={i} style={[styles.gridItem]}>
-                    <ThemeCard style={{ minHeight: 70, borderRadius: 20, padding: Spacing.two, paddingVertical: Spacing.two, alignItems: 'center', justifyContent: 'center' }}>
-                      <View style={{ alignItems: 'center', justifyContent: 'center', gap: 2, paddingHorizontal: 8 }}>
-                        <SkeletonBox width={110} height={16} borderRadius={8} color={colors.border} loaded={false} />
-                        <SkeletonBox width={70} height={12} borderRadius={6} color={colors.border} loaded={false} />
-                      </View>
-                    </ThemeCard>
-                  </View>
-                ))
-              : unpinnedCategories.map(cat => (
+                {unpinnedCategories.map(cat => (
                   <View key={cat.id} style={styles.gridItem}>
                     <DuaCard
                       id={cat.id}
@@ -434,8 +447,9 @@ export default function DuaScreen() {
                       onLongPress={() => openPinSheet(cat)}
                     />
                   </View>
-                ))
-            }
+                ))}
+              </>
+            )}
           </View>
         </View>
         </View>
@@ -459,7 +473,7 @@ export default function DuaScreen() {
       </SafeAreaView>
     
       <RNAnimated.View style={[styles.fab, { transform: [{ translateY: fabTranslateY }] }]}>
-        <TouchableOpacity
+        <TouchableOpacity activeOpacity={1}
           style={[StyleSheet.absoluteFill, { backgroundColor: colors.accent, borderRadius: 28, justifyContent: 'center', alignItems: 'center' }]}
           onPress={() => setModalVisible(true)}
         >
@@ -532,7 +546,7 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   container: {
-    paddingTop: 0,
+    paddingVertical: Spacing.four,
   },
   banner: {
     flexDirection: 'row',

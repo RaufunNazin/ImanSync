@@ -38,9 +38,8 @@ export default function DuaCard({
           (isMyDuas || id === 'bookmarks') && { backgroundColor: colors.accent + '1A' },
           isCustom && { backgroundColor: colors.highlight + '1A' }
     ]}>
-      <TouchableOpacity
+      <TouchableOpacity activeOpacity={1}
         style={[styles.card]}
-        activeOpacity={0.7}
         onPress={onPress}
         onLongPress={onLongPress}
         delayLongPress={300}

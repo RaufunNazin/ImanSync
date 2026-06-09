@@ -136,7 +136,7 @@ export default function PinSheet({
                     placeholderTextColor={colors.textSecondary}
                   />
                   <View style={{ flexDirection: 'row', gap: Spacing.three, marginTop: Spacing.four }}>
-                    <TouchableOpacity
+                    <TouchableOpacity activeOpacity={1}
                       style={[styles.btn, { backgroundColor: colors.card, flex: 1 }]}
                       onPress={() => {
                         setIsRenaming(false);
@@ -145,7 +145,7 @@ export default function PinSheet({
                     >
                       <Text style={[styles.btnText, { color: colors.text }]}>{t('dua.cancel', { defaultValue: 'Cancel' })}</Text>
                     </TouchableOpacity>
-                    <TouchableOpacity
+                    <TouchableOpacity activeOpacity={1}
                       style={[styles.btn, { backgroundColor: colors.accent, flex: 1 }]}
                       onPress={() => {
                         if (newName.trim() && onRename) {

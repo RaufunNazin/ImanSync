@@ -76,7 +76,6 @@ const styles = StyleSheet.create({
   },
   list: {
     padding: Spacing.four,
-    paddingTop: 0,
     gap: Spacing.three,
   },
   cardWrapper: {
@@ -107,7 +106,7 @@ const styles = StyleSheet.create({
   },
   englishText: {
     fontFamily: Fonts.outfit,
-    fontSize: 18,
+    fontSize: 16,
     marginBottom: 4,
   },
   meaningText: {

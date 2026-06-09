@@ -57,7 +57,7 @@ export default function LearnQuranHubScreen() {
                 const isCompleted = completedLessons.includes(lesson.id);
                 
                 return (
-                  <TouchableOpacity 
+                  <TouchableOpacity activeOpacity={1} 
                     key={lesson.id}
                     onPress={() => handleLessonPress(lesson)}
                     style={styles.lessonWrapper}

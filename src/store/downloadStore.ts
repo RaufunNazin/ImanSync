@@ -13,7 +13,7 @@ interface DownloadState {
 }
 
 const STORAGE_KEY = 'imansync_downloaded_audio';
-const AUDIO_DIR = (FileSystem as any).documentDirectory + 'quran_audio/';
+const AUDIO_DIR = ((FileSystem as any).documentDirectory || (FileSystem as any).cacheDirectory) + 'quran_audio';
 
 async function ensureDirExists() {
   const info = await FileSystem.getInfoAsync(AUDIO_DIR);
@@ -78,7 +78,7 @@ export const useDownloadStore = create<DownloadState>((set, get) => ({
 
       // 2. Download the file
       await ensureDirExists();
-      const localUri = AUDIO_DIR + `reciter_${reciterId}_surah_${surahId}.mp3`;
+      const localUri = AUDIO_DIR + `/reciter_${reciterId}_surah_${surahId}.mp3`;
 
       const downloadResumable = FileSystem.createDownloadResumable(
         url,
@@ -87,7 +87,12 @@ export const useDownloadStore = create<DownloadState>((set, get) => ({
         (downloadProgress) => {
           const progress = downloadProgress.totalBytesExpectedToWrite > 0 ? 
             (downloadProgress.totalBytesWritten / downloadProgress.totalBytesExpectedToWrite) * 100 : 0;
-          set((state) => ({ downloadProgress: { ...state.downloadProgress, [key]: progress } }));
+          
+          const currentProgress = get().downloadProgress[key] || 0;
+          // Throttle updates: only update if progress increased by >= 1% or finished
+          if (progress - currentProgress >= 1 || progress === 100) {
+            set((state) => ({ downloadProgress: { ...state.downloadProgress, [key]: progress } }));
+          }
         }
       );
 

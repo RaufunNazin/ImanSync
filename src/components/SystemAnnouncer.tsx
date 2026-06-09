@@ -122,7 +122,7 @@ export default function SystemAnnouncer() {
             <Text style={[styles.desc, { color: colors.textSecondary }]}>
               {t('system.updateReadyDesc', 'A new version of the app has been downloaded. Restart the app to apply the new features.')}
             </Text>
-            <TouchableOpacity style={[styles.btn, { backgroundColor: colors.highlight }]} onPress={handleRestart}>
+            <TouchableOpacity activeOpacity={1} style={[styles.btn, { backgroundColor: colors.highlight }]} onPress={handleRestart}>
               <Text style={styles.btnText}>{t('system.restartNow', 'Restart Now')}</Text>
             </TouchableOpacity>
           </View>
@@ -133,7 +133,7 @@ export default function SystemAnnouncer() {
       <Modal visible={!!changelog && !updateReady} transparent animationType="slide">
         <View style={styles.overlay}>
           <View style={[styles.card, themeStyles.cardShadow, { backgroundColor: colors.background, borderColor: colors.border, maxHeight: '80%' }]}>
-            <TouchableOpacity style={[styles.closeBtn, { backgroundColor: colors.backgroundElement }]} onPress={dismissChangelog}>
+            <TouchableOpacity activeOpacity={1} style={[styles.closeBtn, { backgroundColor: colors.backgroundElement }]} onPress={dismissChangelog}>
               <X size={20} color={colors.textSecondary} />
             </TouchableOpacity>
             
@@ -153,7 +153,7 @@ export default function SystemAnnouncer() {
               ))}
             </ScrollView>
 
-            <TouchableOpacity style={[styles.btn, { backgroundColor: colors.accent, width: '100%', marginTop: Spacing.two }]} onPress={dismissChangelog}>
+            <TouchableOpacity activeOpacity={1} style={[styles.btn, { backgroundColor: colors.accent, width: '100%', marginTop: Spacing.two }]} onPress={dismissChangelog}>
               <Text style={styles.btnText}>{t('system.awesome', 'Awesome!')}</Text>
             </TouchableOpacity>
           </View>
@@ -171,7 +171,7 @@ export default function SystemAnnouncer() {
             <Text style={[styles.desc, { color: colors.text, textAlign: 'center', fontSize: 16 }]}>
               {notification && getLocalizedText(notification)}
             </Text>
-            <TouchableOpacity style={[styles.btn, { backgroundColor: colors.highlight, width: '100%', marginTop: Spacing.two }]} onPress={dismissNotification}>
+            <TouchableOpacity activeOpacity={1} style={[styles.btn, { backgroundColor: colors.highlight, width: '100%', marginTop: Spacing.two }]} onPress={dismissNotification}>
               <Text style={styles.btnText}>{t('system.gotIt', 'Got It')}</Text>
             </TouchableOpacity>
           </View>

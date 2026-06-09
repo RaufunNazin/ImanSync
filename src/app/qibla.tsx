@@ -3,7 +3,8 @@ import { Fonts, Spacing, useThemeColors } from '@/constants/theme';
 import { formatNumber } from '@/utils/formatNumber';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import * as Location from 'expo-location';
-import React, { useEffect, useState } from 'react';
+import { Magnetometer, Accelerometer } from 'expo-sensors';
+import React, { useEffect, useState, useRef } from 'react';
 import { useTranslation } from 'react-i18next';
 import { StyleSheet, Text, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
@@ -27,18 +28,27 @@ const getQiblaBearing = (lat: number, lon: number) => {
   return (bearing + 360) % 360;
 };
 
+const angleDifference = (a: number, b: number) => {
+  return ((b - a + 540) % 360) - 180;
+};
+
 export default function QiblaScreen() {
   const colors = useThemeColors();
-
   const { t, i18n } = useTranslation();
 
   const [headingState, setHeadingState] = useState(0);
-  const [qiblaBearing, setQiblaBearing] = useState(260); // Default approx for Dhaka
+  const [qiblaBearing, setQiblaBearing] = useState(260);
+  const [accuracy, setAccuracy] = useState<'High' | 'Good' | 'Poor'>('Poor');
+  const [interference, setInterference] = useState(false);
   
   const heading = useSharedValue(0);
 
+  const lastHeadingRef = useRef(0);
+  const historyRef = useRef<number[]>([]);
+  const accelRef = useRef({ x: 0, y: 0, z: 1 });
+
   useEffect(() => {
-    // Load coordinates to calculate exact Qibla direction
+    // 1. Instant load cached location
     AsyncStorage.getItem('imansync_location').then(val => {
       if (val) {
         try {
@@ -48,43 +58,96 @@ export default function QiblaScreen() {
           }
         } catch(e) {}
       } else {
-        // Default Dhaka
-        setQiblaBearing(getQiblaBearing(23.8103, 90.4125));
+        setQiblaBearing(getQiblaBearing(23.8103, 90.4125)); // Default Dhaka
       }
     });
 
-    let headingSub: Location.LocationSubscription | null = null;
-
+    // 2. Background fetch fresh GPS
     (async () => {
       let { status } = await Location.requestForegroundPermissionsAsync();
-      if (status !== 'granted') {
-        console.error('Permission to access location was denied');
-        return;
-      }
-
-      headingSub = await Location.watchHeadingAsync((obj) => {
-        let newHeading = obj.trueHeading >= 0 ? obj.trueHeading : obj.magHeading;
-
-        // Fix the 360 -> 0 wrap around for reanimated
-        let currentHeading = heading.value;
-        let diff = newHeading - (currentHeading % 360);
-        diff = diff % 360; // handle negative modulo
-        if (diff > 180) diff -= 360;
-        if (diff < -180) diff += 360;
-        
-        let targetHeading = currentHeading + diff;
-        
-        heading.value = withTiming(targetHeading, { 
-          duration: 300,
-          easing: Easing.out(Easing.quad)
-        });
-        
-        setHeadingState(newHeading);
-      });
+      if (status !== 'granted') return;
+      
+      try {
+        const currentLoc = await Location.getCurrentPositionAsync({ accuracy: Location.Accuracy.Balanced });
+        if (currentLoc.coords) {
+          setQiblaBearing(getQiblaBearing(currentLoc.coords.latitude, currentLoc.coords.longitude));
+          AsyncStorage.setItem('imansync_location', JSON.stringify({
+            latitude: currentLoc.coords.latitude,
+            longitude: currentLoc.coords.longitude
+          }));
+        }
+      } catch (e) {}
     })();
 
+    // 3. Sensor Setup
+    Magnetometer.setUpdateInterval(100);
+    Accelerometer.setUpdateInterval(100);
+
+    const accelSub = Accelerometer.addListener((data) => {
+      accelRef.current = data;
+    });
+
+    const magSub = Magnetometer.addListener((magData) => {
+      const { x: mx, y: my, z: mz } = magData;
+      const { x: ax, y: ay, z: az } = accelRef.current;
+
+      // Interference Check
+      const magnitude = Math.sqrt(mx * mx + my * my + mz * mz);
+      if (magnitude < 20 || magnitude > 80) {
+        setInterference(true);
+      } else {
+        setInterference(false);
+      }
+
+      // Tilt Compensation
+      let pitch = Math.atan2(ay, Math.sqrt(ax * ax + az * az));
+      let roll = Math.atan2(-ax, az);
+
+      let Yh = my * Math.cos(pitch) - mz * Math.sin(pitch);
+      let Xh = mx * Math.cos(roll) + my * Math.sin(roll) * Math.sin(pitch) + mz * Math.sin(roll) * Math.cos(pitch);
+
+      let rawHeading = Math.atan2(Xh, Yh) * (180 / Math.PI);
+      if (rawHeading < 0) rawHeading += 360;
+
+      // Low Pass Filter
+      const alpha = 0.1;
+      let newHeading = lastHeadingRef.current + alpha * angleDifference(lastHeadingRef.current, rawHeading);
+      newHeading = (newHeading + 360) % 360;
+      lastHeadingRef.current = newHeading;
+
+      // Accuracy Scoring (Variance over last 20 ticks)
+      historyRef.current.push(newHeading);
+      if (historyRef.current.length > 20) historyRef.current.shift();
+
+      if (historyRef.current.length === 20) {
+        const mean = historyRef.current[0];
+        let maxDiff = 0;
+        for (let v of historyRef.current) {
+          const diff = Math.abs(angleDifference(mean, v));
+          if (diff > maxDiff) maxDiff = diff;
+        }
+
+        if (maxDiff > 10) setAccuracy('Poor');
+        else if (maxDiff > 3) setAccuracy('Good');
+        else setAccuracy('High');
+      }
+
+      // Update Animated Value with Shortest Path
+      let currentShared = heading.value;
+      let diff = angleDifference(currentShared % 360, newHeading);
+      let targetHeading = currentShared + diff;
+
+      heading.value = withTiming(targetHeading, { 
+        duration: 200,
+        easing: Easing.out(Easing.quad)
+      });
+      
+      setHeadingState(newHeading);
+    });
+
     return () => {
-      if (headingSub) headingSub.remove();
+      accelSub.remove();
+      magSub.remove();
     };
   }, []);
 
@@ -94,13 +157,10 @@ export default function QiblaScreen() {
     };
   });
 
-  const rotation = qiblaBearing - headingState;
-  
-  let diffText = (rotation + 360) % 360;
-  if (diffText > 180) diffText -= 360;
+  let diffText = angleDifference(headingState, qiblaBearing);
   
   let turnText = '';
-  if (Math.abs(diffText) <= 2) {
+  if (Math.abs(diffText) <= 5) {
     turnText = t('qibla.facingQibla');
   } else if (diffText > 0) {
     turnText = t('qibla.turnRight', { degrees: formatNumber(Math.round(diffText), i18n.language) });
@@ -108,11 +168,26 @@ export default function QiblaScreen() {
     turnText = t('qibla.turnLeft', { degrees: formatNumber(Math.round(Math.abs(diffText)), i18n.language) });
   }
 
+  const accuracyColor = accuracy === 'High' ? colors.success : accuracy === 'Good' ? colors.highlight : colors.error;
+
   return (
     <SafeAreaView style={[styles.safeArea, { backgroundColor: colors.background }]}>
       <PageHeader titleEn={t('qibla.titleEn')} titleAr={t('qibla.titleAr')} showBack />
 
       <View style={styles.container}>
+        
+        {/* Status Indicators */}
+        <View style={styles.statusContainer}>
+          <Text style={[styles.accuracyText, { color: accuracyColor }]}>
+            {t('qibla.accuracy', { defaultValue: 'Compass Accuracy:' })} {accuracy}
+          </Text>
+          {interference && (
+            <Text style={[styles.interferenceText, { color: colors.error }]}>
+              {t('qibla.interference', { defaultValue: 'Magnetic interference detected. Move away from electronics.' })}
+            </Text>
+          )}
+        </View>
+
         <View style={styles.compassWrapper}>
           {/* The Compass Dial that rotates based on phone's heading */}
           <Animated.View style={[styles.compassDial, animatedDialStyle]}>
@@ -123,7 +198,7 @@ export default function QiblaScreen() {
               const isMajor = i % 18 === 0; // 0, 90, 180, 270
               const isMedium = i % 2 === 0;
               // Check if this pin is the closest one to the actual Qibla bearing
-              const isQiblaPin = Math.abs(deg - qiblaBearing) < 2.5 || Math.abs(deg - qiblaBearing) > 357.5;
+              const isQiblaPin = Math.abs(angleDifference(deg, qiblaBearing)) < 2.5;
               
               return (
                 <View 
@@ -174,7 +249,7 @@ export default function QiblaScreen() {
           </View>
         </View>
 
-        <Text style={[styles.description, { color: Math.abs(diffText) <= 2 ? colors.accent : colors.text }]}>
+        <Text style={[styles.description, { color: Math.abs(diffText) <= 5 ? colors.accent : colors.text }]}>
           {turnText}
         </Text>
       </View>
@@ -189,8 +264,24 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     padding: Spacing.four,
-    paddingTop: 0,
     justifyContent: 'center',
+  },
+  statusContainer: {
+    alignItems: 'center',
+    marginBottom: Spacing.six,
+    height: 40,
+    justifyContent: 'center',
+  },
+  accuracyText: {
+    fontFamily: Fonts.outfit,
+    fontSize: 14,
+    marginBottom: 4,
+  },
+  interferenceText: {
+    fontFamily: Fonts.outfit,
+    fontSize: 12,
+    textAlign: 'center',
+    paddingHorizontal: Spacing.six,
   },
   card: {
     padding: Spacing.six,

@@ -138,7 +138,7 @@ export default function MyDuasScreen() {
             <Text style={[styles.bannerText, { color: '#B91C1C', flex: 1 }]}>
               {t('dua.relinkStorage')}
             </Text>
-            <TouchableOpacity
+            <TouchableOpacity activeOpacity={1}
               style={[styles.bannerBtn, { backgroundColor: '#EF4444' }]}
               onPress={handleRelink}
               disabled={relinkLoading}
@@ -158,7 +158,7 @@ export default function MyDuasScreen() {
             <Text style={[styles.bannerText, { color: colors.text, flex: 1 }]}>
               {t('dua.suggestPermanentStorage')}
             </Text>
-            <TouchableOpacity onPress={dismissSuggestBanner} hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}>
+            <TouchableOpacity activeOpacity={1} onPress={dismissSuggestBanner} hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}>
               <X size={16} color={colors.textSecondary} />
             </TouchableOpacity>
           </View>
@@ -174,8 +174,7 @@ export default function MyDuasScreen() {
   });
 
   const renderItem = ({ item: dua }: { item: UserDua }) => (
-    <TouchableOpacity
-      activeOpacity={0.7}
+    <TouchableOpacity activeOpacity={1}
       onLongPress={() => {
         setSelectedDua(dua);
         setPinSheetVisible(true);
@@ -221,7 +220,7 @@ export default function MyDuasScreen() {
         <Text style={{ color: colors.textSecondary, textAlign: 'center', fontFamily: Fonts.outfit, fontSize: 16, marginBottom: 24 }}>
           {t('dua.noMyDuas', { defaultValue: 'No custom duas added.' })}
         </Text>
-        <TouchableOpacity
+        <TouchableOpacity activeOpacity={1}
           style={[styles.emptyBtn, { backgroundColor: colors.accent }]}
           onPress={() => setModalVisible(true)}
         >
@@ -241,7 +240,7 @@ export default function MyDuasScreen() {
         titleAr="" 
         showBack 
         rightElement={
-          <TouchableOpacity onPress={() => router.push('/dua-search?categoryId=my_duas' as any)} hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}>
+          <TouchableOpacity activeOpacity={1} onPress={() => router.push('/dua-search?categoryId=my_duas' as any)} hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}>
             <Search size={22} color={colors.textSecondary} />
           </TouchableOpacity>
         }
@@ -249,7 +248,7 @@ export default function MyDuasScreen() {
       {loading ? (
         <View style={{ flex: 1 }}>
           {renderHeader()}
-          <View style={[styles.list, { gap: Spacing.three, padding: Spacing.four, paddingTop: 0 }]}>
+          <View style={[styles.list, { gap: Spacing.three, padding: Spacing.four }]}>
             {[...Array(5)].map((_, i) => (
               <View key={i} style={[styles.duaCard, { backgroundColor: colors.backgroundElement, borderColor: colors.border }]}>
                 <View style={styles.duaHeader}>
@@ -318,7 +317,7 @@ export default function MyDuasScreen() {
       )}
 
       <Animated.View style={[styles.fab, { transform: [{ translateY: fabTranslateY }] }]}>
-        <TouchableOpacity
+        <TouchableOpacity activeOpacity={1}
           style={[StyleSheet.absoluteFill, { backgroundColor: colors.accent, borderRadius: 28, justifyContent: 'center', alignItems: 'center' }]}
           onPress={() => setModalVisible(true)}
         >
@@ -339,7 +338,7 @@ export default function MyDuasScreen() {
 
 const styles = StyleSheet.create({
   safeArea: { flex: 1 },
-  container: { padding: Spacing.four, paddingTop: 0 },
+  container: { padding: Spacing.four },
   banner: {
     flexDirection: 'row',
     alignItems: 'center',

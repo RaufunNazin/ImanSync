@@ -1,10 +1,18 @@
-import React, { useState, useEffect, useRef } from 'react';
-import { Modal, StyleSheet, Text, TouchableOpacity, View, PanResponder, Animated } from 'react-native';
-import ThemeCard from '@/components/ThemeCard';
-import { Fonts, Spacing } from '@/constants/theme';
-import { useTranslation } from 'react-i18next';
-import { formatNumber } from '@/utils/formatNumber';
-import * as Haptics from 'expo-haptics';
+import ThemeCard from "@/components/ThemeCard";
+import { Fonts, Spacing } from "@/constants/theme";
+import { formatNumber } from "@/utils/formatNumber";
+import * as Haptics from "expo-haptics";
+import React, { useEffect, useRef, useState } from "react";
+import { useTranslation } from "react-i18next";
+import {
+  Animated,
+  Modal,
+  PanResponder,
+  StyleSheet,
+  Text,
+  TouchableOpacity,
+  View,
+} from "react-native";
 
 interface TimePickerModalProps {
   visible: boolean;
@@ -31,13 +39,15 @@ export default function TimePickerModal({
   title,
 }: TimePickerModalProps) {
   const { t, i18n } = useTranslation();
-  
-  const [mode, setMode] = useState<'hour' | 'minute'>('hour');
-  
+
+  const [mode, setMode] = useState<"hour" | "minute">("hour");
+
   // Internal state 0-23 and 0-59
   const [selectedHour, setSelectedHour] = useState(Number(initialHour) || 0);
-  const [selectedMinute, setSelectedMinute] = useState(Number(initialMinute) || 0);
-  
+  const [selectedMinute, setSelectedMinute] = useState(
+    Number(initialMinute) || 0,
+  );
+
   const isAM = selectedHour < 12;
 
   // Refs for PanResponder stale closures
@@ -53,7 +63,7 @@ export default function TimePickerModal({
   const fadeAnim = useRef(new Animated.Value(1)).current;
   const clockCenterRef = useRef({ x: 0, y: 0 });
 
-  const handleModeChange = (newMode: 'hour' | 'minute') => {
+  const handleModeChange = (newMode: "hour" | "minute") => {
     if (newMode === modeRef.current) return;
     Animated.timing(fadeAnim, {
       toValue: 0,
@@ -73,7 +83,7 @@ export default function TimePickerModal({
     if (visible) {
       setSelectedHour(Number(initialHour) || 0);
       setSelectedMinute(Number(initialMinute) || 0);
-      setMode('hour');
+      setMode("hour");
       fadeAnim.setValue(1);
     }
   }, [visible, initialHour, initialMinute]);
@@ -81,7 +91,7 @@ export default function TimePickerModal({
   const handleSetAM = () => {
     if (!isAM) setSelectedHour(Math.max(0, selectedHour - 12));
   };
-  
+
   const handleSetPM = () => {
     if (isAM) setSelectedHour(Math.min(23, selectedHour + 12));
   };
@@ -91,7 +101,7 @@ export default function TimePickerModal({
 
   // The angle for the hand (in degrees)
   let currentAngle = 0;
-  if (mode === 'hour') {
+  if (mode === "hour") {
     currentAngle = displayHour * 30; // 360 / 12
   } else {
     currentAngle = selectedMinute * 6; // 360 / 60
@@ -115,12 +125,12 @@ export default function TimePickerModal({
         handleTouchOffset(dx, dy);
       },
       onPanResponderRelease: () => {
-        if (modeRef.current === 'hour') {
-          handleModeChange('minute');
+        if (modeRef.current === "hour") {
+          handleModeChange("minute");
           Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
         }
       },
-    })
+    }),
   ).current;
 
   const handleTouchOffset = (dx: number, dy: number) => {
@@ -128,11 +138,17 @@ export default function TimePickerModal({
     let deg = angleRad * (180 / Math.PI) + 90;
     if (deg < 0) deg += 360;
 
-    if (modeRef.current === 'hour') {
+    if (modeRef.current === "hour") {
       let val = Math.round(deg / 30) % 12;
       if (val === 0) val = 12;
-      
-      const newHour = isAMRef.current ? (val === 12 ? 0 : val) : (val === 12 ? 12 : val + 12);
+
+      const newHour = isAMRef.current
+        ? val === 12
+          ? 0
+          : val
+        : val === 12
+          ? 12
+          : val + 12;
       if (newHour !== selectedHourRef.current) {
         setSelectedHour(newHour);
         Haptics.selectionAsync();
@@ -151,142 +167,277 @@ export default function TimePickerModal({
   // Generate Numbers to render
   const renderNumbers = (isMask: boolean = false) => {
     const elements = [];
-    const count = 12; 
-    
+    const count = 12;
+
     for (let i = 1; i <= count; i++) {
-      let val = mode === 'hour' ? i : (i === 12 ? 0 : i * 5);
-      let text = mode === 'hour' ? val.toString() : val.toString().padStart(2, '0');
-      
+      let val = mode === "hour" ? i : i === 12 ? 0 : i * 5;
+      let text =
+        mode === "hour" ? val.toString() : val.toString().padStart(2, "0");
+
       const angleDeg = i * 30 - 90;
       const angleRad = angleDeg * (Math.PI / 180);
       const x = RADIUS + Math.cos(angleRad) * NUMBER_RADIUS;
       const y = RADIUS + Math.sin(angleRad) * NUMBER_RADIUS;
 
       // Localize numerals
-      text = formatNumber(parseInt(text), i18n.language).padStart(mode === 'minute' ? 2 : 1, formatNumber(0, i18n.language));
+      text = formatNumber(parseInt(text), i18n.language).padStart(
+        mode === "minute" ? 2 : 1,
+        formatNumber(0, i18n.language),
+      );
 
       elements.push(
-        <View key={i} style={[styles.numberContainer, { left: x - 16, top: y - 16 }]}>
-          <Text style={[styles.numberText, { color: isMask ? '#FFF' : colors.text }]}>
+        <View
+          key={i}
+          style={[styles.numberContainer, { left: x - 16, top: y - 16 }]}
+        >
+          <Text
+            style={[
+              styles.numberText,
+              { color: isMask ? "#FFF" : colors.text },
+            ]}
+          >
             {text}
           </Text>
-        </View>
+        </View>,
       );
     }
     return elements;
   };
 
-  const circleX = RADIUS + Math.cos((currentAngle - 90) * (Math.PI / 180)) * NUMBER_RADIUS - 20;
-  const circleY = RADIUS + Math.sin((currentAngle - 90) * (Math.PI / 180)) * NUMBER_RADIUS - 20;
+  const circleX =
+    RADIUS +
+    Math.cos((currentAngle - 90) * (Math.PI / 180)) * NUMBER_RADIUS -
+    20;
+  const circleY =
+    RADIUS +
+    Math.sin((currentAngle - 90) * (Math.PI / 180)) * NUMBER_RADIUS -
+    20;
 
   return (
     <Modal visible={visible} transparent animationType="fade">
       <View style={styles.overlay}>
         <ThemeCard intensity={20} style={StyleSheet.absoluteFill} />
-        
-        <View style={[styles.container, { backgroundColor: colors.background, borderColor: colors.border }]}>
-          <Text style={[styles.title, { color: colors.textSecondary }]}>{title}</Text>
-          
+
+        <View
+          style={[
+            styles.container,
+            { backgroundColor: colors.background, borderColor: colors.border },
+          ]}
+        >
+          <Text style={[styles.title, { color: colors.textSecondary }]}>
+            {title}
+          </Text>
+
           {/* Header Display */}
           <View style={styles.headerDisplay}>
             <View style={styles.timeGroup}>
-              <TouchableOpacity 
+              <TouchableOpacity
+                activeOpacity={1}
                 style={[
                   styles.headerTimeBtn,
-                  mode === 'hour' && { backgroundColor: colors.highlight + '33' }
+                  mode === "hour" && {
+                    backgroundColor: colors.highlight + "33",
+                  },
                 ]}
-                onPress={() => handleModeChange('hour')}
+                onPress={() => handleModeChange("hour")}
               >
-                <Text style={[styles.timeText, { color: mode === 'hour' ? colors.highlight : colors.textSecondary }]}>
-                  {formatNumber(displayHour, i18n.language).padStart(2, formatNumber(0, i18n.language))}
+                <Text
+                  style={[
+                    styles.timeText,
+                    {
+                      color:
+                        mode === "hour"
+                          ? colors.highlight
+                          : colors.textSecondary,
+                    },
+                  ]}
+                >
+                  {formatNumber(displayHour, i18n.language).padStart(
+                    2,
+                    formatNumber(0, i18n.language),
+                  )}
                 </Text>
               </TouchableOpacity>
-              <Text style={[styles.timeSeparator, { color: colors.textSecondary }]}>:</Text>
-              <TouchableOpacity 
+              <Text
+                style={[styles.timeSeparator, { color: colors.textSecondary }]}
+              >
+                :
+              </Text>
+              <TouchableOpacity
+                activeOpacity={1}
                 style={[
                   styles.headerTimeBtn,
-                  mode === 'minute' && { backgroundColor: colors.highlight + '33' }
+                  mode === "minute" && {
+                    backgroundColor: colors.highlight + "33",
+                  },
                 ]}
-                onPress={() => handleModeChange('minute')}
+                onPress={() => handleModeChange("minute")}
               >
-                <Text style={[styles.timeText, { color: mode === 'minute' ? colors.highlight : colors.textSecondary }]}>
-                  {formatNumber(selectedMinute, i18n.language).padStart(2, formatNumber(0, i18n.language))}
+                <Text
+                  style={[
+                    styles.timeText,
+                    {
+                      color:
+                        mode === "minute"
+                          ? colors.highlight
+                          : colors.textSecondary,
+                    },
+                  ]}
+                >
+                  {formatNumber(selectedMinute, i18n.language).padStart(
+                    2,
+                    formatNumber(0, i18n.language),
+                  )}
                 </Text>
               </TouchableOpacity>
             </View>
-            
+
             {/* AM/PM Toggle */}
-            <View style={[styles.amPmContainer, { borderColor: colors.border }]}>
-              <TouchableOpacity 
-                style={[styles.amPmBtn, isAM && { backgroundColor: colors.highlight + '33' }]} 
+            <View
+              style={[styles.amPmContainer, { borderColor: colors.border }]}
+            >
+              <TouchableOpacity
+                activeOpacity={1}
+                style={[
+                  styles.amPmBtn,
+                  isAM && { backgroundColor: colors.highlight + "33" },
+                ]}
                 onPress={handleSetAM}
               >
-                <Text style={[styles.amPmText, { color: isAM ? colors.highlight : colors.textSecondary }]}>AM</Text>
+                <Text
+                  style={[
+                    styles.amPmText,
+                    { color: isAM ? colors.highlight : colors.textSecondary },
+                  ]}
+                >
+                  AM
+                </Text>
               </TouchableOpacity>
-              <View style={[styles.amPmDivider, { backgroundColor: colors.border }]} />
-              <TouchableOpacity 
-                style={[styles.amPmBtn, !isAM && { backgroundColor: colors.highlight + '33' }]} 
+              <View
+                style={[styles.amPmDivider, { backgroundColor: colors.border }]}
+              />
+              <TouchableOpacity
+                activeOpacity={1}
+                style={[
+                  styles.amPmBtn,
+                  !isAM && { backgroundColor: colors.highlight + "33" },
+                ]}
                 onPress={handleSetPM}
               >
-                <Text style={[styles.amPmText, { color: !isAM ? colors.highlight : colors.textSecondary }]}>PM</Text>
+                <Text
+                  style={[
+                    styles.amPmText,
+                    { color: !isAM ? colors.highlight : colors.textSecondary },
+                  ]}
+                >
+                  PM
+                </Text>
               </TouchableOpacity>
             </View>
           </View>
-          
+
           {/* Radial Clock Face */}
-          <View style={[styles.clockFace, { backgroundColor: colors.backgroundElement, borderWidth: 1, borderColor: colors.border }]}>
-            <Animated.View style={[StyleSheet.absoluteFillObject, { opacity: fadeAnim, justifyContent: 'center', alignItems: 'center' }]}>
+          <View
+            style={[
+              styles.clockFace,
+              {
+                backgroundColor: colors.backgroundElement,
+                borderWidth: 1,
+                borderColor: colors.border,
+              },
+            ]}
+          >
+            <Animated.View
+              style={[
+                StyleSheet.absoluteFill,
+                {
+                  opacity: fadeAnim,
+                  justifyContent: "center",
+                  alignItems: "center",
+                },
+              ]}
+            >
               {renderNumbers()}
 
               {/* Hand Line Wrapper centered in clock */}
-              <View style={[styles.handWrapper, { transform: [{ rotate: `${currentAngle}deg` }] }]}>
+              <View
+                style={[
+                  styles.handWrapper,
+                  { transform: [{ rotate: `${currentAngle}deg` }] },
+                ]}
+              >
                 {/* The visible part of the hand pointing UP (since 0 degrees is top) */}
-                <View style={[styles.handLine, { backgroundColor: colors.highlight }]} />
+                <View
+                  style={[
+                    styles.handLine,
+                    { backgroundColor: colors.highlight },
+                  ]}
+                />
                 <View style={styles.handLineSpacer} />
               </View>
 
               {/* Selection Circle at the tip of the hand */}
-              <View style={[
-                styles.handCircle, 
-                { 
-                  backgroundColor: colors.highlight,
-                  left: circleX,
-                  top: circleY,
-                  overflow: 'hidden',
-                }
-              ]}>
-                <View style={{
-                  position: 'absolute',
-                  left: -circleX,
-                  top: -circleY,
-                  width: CLOCK_DIAMETER,
-                  height: CLOCK_DIAMETER,
-                }}>
+              <View
+                style={[
+                  styles.handCircle,
+                  {
+                    backgroundColor: colors.highlight,
+                    left: circleX,
+                    top: circleY,
+                    overflow: "hidden",
+                  },
+                ]}
+              >
+                <View
+                  style={{
+                    position: "absolute",
+                    left: -circleX,
+                    top: -circleY,
+                    width: CLOCK_DIAMETER,
+                    height: CLOCK_DIAMETER,
+                  }}
+                >
                   {renderNumbers(true)}
                 </View>
               </View>
 
               {/* Center Dot */}
-              <View style={[styles.centerDot, { backgroundColor: colors.highlight }]} />
+              <View
+                style={[
+                  styles.centerDot,
+                  { backgroundColor: colors.highlight },
+                ]}
+              />
             </Animated.View>
 
             {/* Touch Overlay spanning the exact circle */}
             <View {...panResponder.panHandlers} style={styles.touchOverlay} />
           </View>
-          
+
           <View style={styles.footer}>
-            <TouchableOpacity 
-              style={[styles.button, { backgroundColor: colors.backgroundElement }]} 
+            <TouchableOpacity
+              activeOpacity={1}
+              style={[
+                styles.button,
+                { backgroundColor: colors.backgroundElement },
+              ]}
               onPress={onClose}
             >
-              <Text style={[styles.buttonText, { color: colors.textSecondary }]}>{t('settings.cancel')}</Text>
+              <Text
+                style={[styles.buttonText, { color: colors.textSecondary }]}
+              >
+                {t("settings.cancel")}
+              </Text>
             </TouchableOpacity>
-            
-            <TouchableOpacity 
-              style={[styles.button, { backgroundColor: colors.accent }]} 
+
+            <TouchableOpacity
+              activeOpacity={1}
+              style={[styles.button, { backgroundColor: colors.accent }]}
               onPress={() => onSave(selectedHour, selectedMinute)}
             >
-              <Text style={[styles.buttonText, { color: '#FFF' }]}>{t('settings.save')}</Text>
+              <Text style={[styles.buttonText, { color: "#FFF" }]}>
+                {t("settings.save")}
+              </Text>
             </TouchableOpacity>
           </View>
         </View>
@@ -298,43 +449,43 @@ export default function TimePickerModal({
 const styles = StyleSheet.create({
   overlay: {
     flex: 1,
-    backgroundColor: 'rgba(0,0,0,0.5)',
-    alignItems: 'center',
-    justifyContent: 'center',
+    backgroundColor: "rgba(0,0,0,0.5)",
+    alignItems: "center",
+    justifyContent: "center",
     padding: Spacing.four,
   },
   container: {
-    width: '100%',
+    width: "100%",
     maxWidth: 340,
     borderRadius: 28,
     borderWidth: 1,
     padding: Spacing.five,
-    alignItems: 'center',
+    alignItems: "center",
   },
   title: {
     fontFamily: Fonts.outfit,
     fontSize: 14,
     marginBottom: Spacing.two,
-    alignSelf: 'flex-start',
+    alignSelf: "flex-start",
   },
   headerDisplay: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    width: '100%',
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+    width: "100%",
     marginBottom: Spacing.two,
   },
   timeGroup: {
-    flexDirection: 'row',
-    alignItems: 'center',
+    flexDirection: "row",
+    alignItems: "center",
   },
   headerTimeBtn: {
     paddingHorizontal: 12,
     paddingVertical: 2,
     borderRadius: 14,
     minWidth: 76,
-    alignItems: 'center',
-    justifyContent: 'center',
+    alignItems: "center",
+    justifyContent: "center",
   },
   timeText: {
     fontFamily: Fonts.outfit,
@@ -349,42 +500,42 @@ const styles = StyleSheet.create({
   amPmContainer: {
     borderWidth: 1,
     borderRadius: 12,
-    overflow: 'hidden',
+    overflow: "hidden",
     width: 60,
   },
   amPmBtn: {
     paddingVertical: 6,
-    alignItems: 'center',
+    alignItems: "center",
   },
   amPmText: {
     fontFamily: Fonts.outfit,
     fontSize: 14,
-    fontWeight: 'bold',
+    fontWeight: "bold",
   },
   amPmDivider: {
     height: 1,
-    width: '100%',
+    width: "100%",
   },
   clockFace: {
     width: CLOCK_DIAMETER,
     height: CLOCK_DIAMETER,
     borderRadius: RADIUS,
-    position: 'relative',
-    justifyContent: 'center',
-    alignItems: 'center',
+    position: "relative",
+    justifyContent: "center",
+    alignItems: "center",
     marginBottom: Spacing.four,
   },
   touchOverlay: {
-    ...StyleSheet.absoluteFillObject,
+    ...StyleSheet.absoluteFill,
     borderRadius: RADIUS,
     zIndex: 10,
   },
   numberContainer: {
-    position: 'absolute',
+    position: "absolute",
     width: 32,
     height: 32,
-    justifyContent: 'center',
-    alignItems: 'center',
+    justifyContent: "center",
+    alignItems: "center",
     zIndex: 1, // Above hand line, below touch overlay
   },
   numberText: {
@@ -395,44 +546,44 @@ const styles = StyleSheet.create({
     width: 8,
     height: 8,
     borderRadius: 4,
-    position: 'absolute',
+    position: "absolute",
     zIndex: 3,
   },
   handWrapper: {
-    position: 'absolute',
+    position: "absolute",
     width: 2,
     height: NUMBER_RADIUS * 2,
-    justifyContent: 'center',
-    alignItems: 'center',
+    justifyContent: "center",
+    alignItems: "center",
     zIndex: 0,
   },
   handLine: {
     flex: 1,
-    width: '100%',
+    width: "100%",
   },
   handLineSpacer: {
     flex: 1,
   },
   handCircle: {
-    position: 'absolute',
+    position: "absolute",
     width: 40,
     height: 40,
     borderRadius: 20,
     zIndex: 2,
-    justifyContent: 'center',
-    alignItems: 'center',
+    justifyContent: "center",
+    alignItems: "center",
   },
   footer: {
-    flexDirection: 'row',
+    flexDirection: "row",
     gap: Spacing.three,
     marginTop: Spacing.five,
-    width: '100%',
+    width: "100%",
   },
   button: {
     flex: 1,
     paddingVertical: 14,
     borderRadius: 12,
-    alignItems: 'center',
+    alignItems: "center",
   },
   buttonText: {
     fontFamily: Fonts.outfit,

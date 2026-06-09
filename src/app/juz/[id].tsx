@@ -220,7 +220,7 @@ export default function JuzScreen() {
   const renderSettingsModal = () => (
     <Modal visible={modalVisible} transparent animationType="slide" onRequestClose={() => setModalVisible(false)}>
       <View style={styles.modalOverlay}>
-        <TouchableOpacity style={StyleSheet.absoluteFill} activeOpacity={1} onPress={() => setModalVisible(false)} />
+        <TouchableOpacity activeOpacity={1} style={StyleSheet.absoluteFill} onPress={() => setModalVisible(false)} />
         <View 
           style={[styles.modalContent, { backgroundColor: colors.background, borderColor: colors.border }]}
         >
@@ -228,7 +228,7 @@ export default function JuzScreen() {
           
           <View style={styles.modalHeader}>
             <Text style={[styles.modalTitle, { color: colors.text }]}>{t('quranSettings.title')}</Text>
-            <TouchableOpacity onPress={() => setModalVisible(false)} style={styles.closeBtn}>
+            <TouchableOpacity activeOpacity={1} onPress={() => setModalVisible(false)} style={styles.closeBtn}>
               <X size={24} color={colors.text} />
             </TouchableOpacity>
           </View>
@@ -239,11 +239,11 @@ export default function JuzScreen() {
             <View style={styles.settingRow}>
               <Text style={[styles.settingLabel, { color: colors.text }]}>{t('quranSettings.arabicFont')}</Text>
               <View style={styles.stepper}>
-                <TouchableOpacity onPress={() => updateSetting('arabicFontSize', Math.max(20, settings.arabicFontSize - 2))} style={[styles.stepBtn, { borderColor: colors.border }]}>
+                <TouchableOpacity activeOpacity={1} onPress={() => updateSetting('arabicFontSize', Math.max(20, settings.arabicFontSize - 2))} style={[styles.stepBtn, { borderColor: colors.border }]}>
                   <Minus size={16} color={colors.text} />
                 </TouchableOpacity>
                 <Text style={[styles.stepVal, { color: colors.text }]}>{formatNumber(settings.arabicFontSize, i18n.language)}</Text>
-                <TouchableOpacity onPress={() => updateSetting('arabicFontSize', Math.min(60, settings.arabicFontSize + 2))} style={[styles.stepBtn, { borderColor: colors.border }]}>
+                <TouchableOpacity activeOpacity={1} onPress={() => updateSetting('arabicFontSize', Math.min(60, settings.arabicFontSize + 2))} style={[styles.stepBtn, { borderColor: colors.border }]}>
                   <Plus size={16} color={colors.text} />
                 </TouchableOpacity>
               </View>
@@ -252,11 +252,11 @@ export default function JuzScreen() {
             <View style={styles.settingRow}>
               <Text style={[styles.settingLabel, { color: colors.text }]}>{t('quranSettings.translationFont')}</Text>
               <View style={styles.stepper}>
-                <TouchableOpacity onPress={() => updateSetting('translationFontSize', Math.max(12, settings.translationFontSize - 1))} style={[styles.stepBtn, { borderColor: colors.border }]}>
+                <TouchableOpacity activeOpacity={1} onPress={() => updateSetting('translationFontSize', Math.max(12, settings.translationFontSize - 1))} style={[styles.stepBtn, { borderColor: colors.border }]}>
                   <Minus size={16} color={colors.text} />
                 </TouchableOpacity>
                 <Text style={[styles.stepVal, { color: colors.text }]}>{formatNumber(settings.translationFontSize, i18n.language)}</Text>
-                <TouchableOpacity onPress={() => updateSetting('translationFontSize', Math.min(30, settings.translationFontSize + 1))} style={[styles.stepBtn, { borderColor: colors.border }]}>
+                <TouchableOpacity activeOpacity={1} onPress={() => updateSetting('translationFontSize', Math.min(30, settings.translationFontSize + 1))} style={[styles.stepBtn, { borderColor: colors.border }]}>
                   <Plus size={16} color={colors.text} />
                 </TouchableOpacity>
               </View>
@@ -283,19 +283,19 @@ export default function JuzScreen() {
             {/* Audio Reciter */}
             <Text style={[styles.sectionTitle, { color: colors.textSecondary, marginTop: Spacing.four }]}>{t('quranSettings.reciter', { defaultValue: 'Audio Reciter' })}</Text>
             <View style={{ flexDirection: 'column', alignItems: 'stretch', gap: 12, paddingBottom: Spacing.four }}>
-              <TouchableOpacity 
+              <TouchableOpacity activeOpacity={1} 
                 style={[{ padding: 12, borderRadius: 12, borderWidth: 1, borderColor: colors.border }, currentReciterId === 7 && { borderColor: colors.highlight, backgroundColor: colors.highlight + '15' }]} 
                 onPress={() => setReciter(7)}
               >
                 <Text style={[styles.settingLabel, { color: currentReciterId === 7 ? colors.highlight : colors.text }]}>{t("quran.reciters.mishary")}</Text>
               </TouchableOpacity>
-              <TouchableOpacity 
+              <TouchableOpacity activeOpacity={1} 
                 style={[{ padding: 12, borderRadius: 12, borderWidth: 1, borderColor: colors.border }, currentReciterId === 1 && { borderColor: colors.highlight, backgroundColor: colors.highlight + '15' }]} 
                 onPress={() => setReciter(1)}
               >
                 <Text style={[styles.settingLabel, { color: currentReciterId === 1 ? colors.highlight : colors.text }]}>{t("quran.reciters.abdulBaset")}</Text>
               </TouchableOpacity>
-              <TouchableOpacity 
+              <TouchableOpacity activeOpacity={1} 
                 style={[{ padding: 12, borderRadius: 12, borderWidth: 1, borderColor: colors.border }, currentReciterId === 3 && { borderColor: colors.highlight, backgroundColor: colors.highlight + '15' }]} 
                 onPress={() => setReciter(3)}
               >
@@ -319,12 +319,12 @@ export default function JuzScreen() {
   return (
     <SafeAreaView style={[styles.safeArea, { backgroundColor: colors.background }]}>
       <View style={styles.header}>
-        <TouchableOpacity onPress={handleBack} style={styles.backBtn}>
+        <TouchableOpacity activeOpacity={1} onPress={handleBack} style={styles.backBtn}>
           <ChevronLeft size={22} color={colors.textSecondary} />
         </TouchableOpacity>
         <Text style={[styles.title, { color: colors.text, flex: 1, textAlign: 'center' }]}>{t('quran.juz', { id: formatNumber(id as string, i18n.language) })}</Text>
         <View style={{ flexDirection: 'row', gap: Spacing.three, alignItems: 'center' }}>
-          <TouchableOpacity 
+          <TouchableOpacity activeOpacity={1} 
             onPress={() => {
               const isThisJuz = playbackMode === 'juz' && storeJuzAyahs.length > 0 && ayahs.length > 0 && 
                                 storeJuzAyahs[0].surahId === ayahs[0].surahId && 
@@ -346,7 +346,7 @@ export default function JuzScreen() {
               <Play size={20} color={colors.highlight} fill={colors.highlight} />
             )}
           </TouchableOpacity>
-          <TouchableOpacity onPress={() => setModalVisible(true)} style={styles.backBtn}>
+          <TouchableOpacity activeOpacity={1} onPress={() => setModalVisible(true)} style={styles.backBtn}>
             <Settings2 size={20} color={colors.textSecondary} />
           </TouchableOpacity>
         </View>
@@ -377,7 +377,7 @@ export default function JuzScreen() {
                     </View>
                     <Text style={[styles.surahTag, { color: colors.textSecondary }]}>{t('surahNames.' + item.surahId, { defaultValue: item.surahName })}</Text>
                   </View>
-                  <TouchableOpacity onPress={() => toggleBookmark(item)}>
+                  <TouchableOpacity activeOpacity={1} onPress={() => toggleBookmark(item)}>
                     <Bookmark 
                       size={20} 
                       color={colors.accent} 
@@ -431,7 +431,7 @@ const styles = StyleSheet.create({
   backBtn: { padding: 2 },
   title: { fontFamily: Fonts.outfit, fontSize: 14 },
   loaderContainer: { flex: 1, justifyContent: 'center', alignItems: 'center' },
-  list: { padding: Spacing.four, paddingTop: 0, gap: Spacing.four },
+  list: { padding: Spacing.four, gap: Spacing.four },
   
   ayahCardWrapper: {
     borderRadius: 20,

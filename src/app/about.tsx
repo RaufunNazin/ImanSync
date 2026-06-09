@@ -50,9 +50,8 @@ export default function AboutScreen() {
         </View>
 
         {/* Source Code Button */}
-        <TouchableOpacity 
+        <TouchableOpacity activeOpacity={1} 
           style={[styles.sourceBtn, { backgroundColor: colors.backgroundElement, borderColor: colors.border }]}
-          activeOpacity={0.7}
           onPress={() => Linking.openURL('https://github.com/RaufunNazin/ImanSync.git')}
         >
           <FontAwesome name="github" size={20} color={colors.text} />
@@ -75,7 +74,6 @@ const styles = StyleSheet.create({
   },
   container: {
     padding: Spacing.four,
-    paddingTop: 0,
     alignItems: 'center',
     gap: Spacing.four,
   },

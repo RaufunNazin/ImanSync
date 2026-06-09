@@ -100,7 +100,7 @@ export default function QuranSearchScreen() {
   return (
     <SafeAreaView style={[styles.safeArea, { backgroundColor: colors.background }]}>
       <Animated.View entering={FadeIn.duration(150)} exiting={FadeOut.duration(100)} style={[styles.header, { borderBottomColor: colors.border }]}>
-        <TouchableOpacity onPress={handleBack} style={styles.backBtn} hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}>
+        <TouchableOpacity activeOpacity={1} onPress={handleBack} style={styles.backBtn} hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}>
           <ChevronLeft size={24} color={colors.textSecondary} />
         </TouchableOpacity>
         
@@ -115,7 +115,7 @@ export default function QuranSearchScreen() {
             autoCorrect={false}
           />
           {searchQuery.length > 0 && (
-            <TouchableOpacity onPress={() => setSearchQuery('')} hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}>
+            <TouchableOpacity activeOpacity={1} onPress={() => setSearchQuery('')} hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}>
               <X size={18} color={colors.textSecondary} />
             </TouchableOpacity>
           )}
@@ -137,9 +137,8 @@ export default function QuranSearchScreen() {
                 filteredSurahs.map((surah) => (
                   <Animated.View entering={FadeIn.duration(300)} key={surah.id}>
                     <ThemeCard intensity={30}  style={[styles.surahRowWrapper, { borderColor: colors.border }]}>
-                      <TouchableOpacity 
-                        style={styles.surahRow} 
-                        activeOpacity={0.7}
+                      <TouchableOpacity activeOpacity={1} 
+                        style={styles.surahRow}
                         onPress={() => router.push(`/surah/${surah.id}`)}
                       >
                         <View style={styles.surahLeft}>
@@ -195,8 +194,7 @@ const styles = StyleSheet.create({
     padding: 0,
   },
   container: { 
-    padding: Spacing.four,
-    paddingTop: 0
+    padding: Spacing.four
   },
   listContainer: {
     gap: Spacing.three,
