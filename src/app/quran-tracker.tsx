@@ -270,7 +270,7 @@ export default function QuranTrackerScreen() {
 
 const styles = StyleSheet.create({
   safeArea: { flex: 1 },
-  container: { padding: Spacing.four },
+  container: { padding: Spacing.four, paddingTop: 0 },
   card: {
     borderRadius: 16,
     borderWidth: 1,

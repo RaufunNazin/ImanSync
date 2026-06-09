@@ -288,6 +288,7 @@ const styles = StyleSheet.create({
   },
   container: {
     padding: Spacing.four,
+    paddingTop: 0,
     paddingBottom: 100,
   },
   grid: {

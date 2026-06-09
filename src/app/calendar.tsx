@@ -226,14 +226,13 @@ export default function CalendarScreen() {
     return formatNumber(date.toLocaleDateString(i18n.language === 'bn' ? 'bn-BD' : 'en-US', { day: '2-digit', month: 'long', year: 'numeric' }), i18n.language);
   };
 
-  // Convert "03:45 (+06)" to "03:45 AM" roughly
+  // Convert "03:45 (+06)" to "03:45"
   const formatTimeStr = (timeStr: string) => {
     const raw = timeStr.split(' ')[0];
     const [hStr, mStr] = raw.split(':');
     let h = parseInt(hStr, 10);
-    const ampm = h >= 12 ? ' PM' : ' AM';
     h = h % 12 || 12;
-    return formatNumber(`${h}:${mStr}${ampm}`, i18n.language);
+    return formatNumber(`${h}:${mStr}`, i18n.language);
   };
 
   return (
@@ -277,50 +276,85 @@ export default function CalendarScreen() {
           </TouchableOpacity>
         </View>
 
-        {loading ? (
-          <View style={{ flexShrink: 1, marginBottom: Spacing.four }}>
-            {/* Days Bar skeleton */}
-            <View style={[styles.daysBar, { backgroundColor: colors.backgroundElement, borderColor: colors.border }]}>
-              {Array.from({length: 7}).map((_, i) => (
-                <View key={i} style={styles.gridCellHeader}>
-                  <SkeletonBox width={24} height={12} borderRadius={6} color={colors.border} loaded={false} />
-                </View>
-              ))}
-            </View>
-            
-            {/* Grid Cells Skeleton */}
-            <View style={{ flexDirection: 'row', flexWrap: 'wrap' }}>
-              {Array.from({length: 42}).map((_, i) => (
-                <View key={i} style={styles.gridCell}>
-                  <SkeletonBox width={28} height={20} borderRadius={6} color={colors.border} loaded={false} />
-                  <SkeletonBox width={16} height={10} borderRadius={4} color={colors.border} style={{ marginTop: 2, marginBottom: 4 }} loaded={false} />
-                </View>
-              ))}
-            </View>
+        {loading ? (() => {
+          const firstDayDate = new Date(currentDate.getFullYear(), currentDate.getMonth(), 1);
+          const startDayOfWeek = firstDayDate.getDay();
+          const daysInMonth = new Date(currentDate.getFullYear(), currentDate.getMonth() + 1, 0).getDate();
+          
+          return (
+            <View style={{ flexShrink: 1, marginBottom: Spacing.four }}>
+              {/* Days Bar skeleton */}
+              <View style={[styles.daysBar, { backgroundColor: colors.backgroundElement, borderColor: colors.border }]}>
+                {['sun', 'mon', 'tue', 'wed', 'thu', 'fri', 'sat'].map((day, idx) => (
+                  <View key={`header-${idx}`} style={styles.gridCellHeader}>
+                    <Text style={[styles.gridCellHeaderText, { color: colors.textSecondary }]}>
+                      {t(`calendar.${day}`)}
+                    </Text>
+                  </View>
+                ))}
+              </View>
+              
+              {/* Grid Cells Skeleton */}
+              <View style={{ flexDirection: 'row', flexWrap: 'wrap' }}>
+                {Array.from({length: startDayOfWeek}).map((_, i) => (
+                  <View key={`empty-${i}`} style={styles.gridCell} />
+                ))}
+                {Array.from({length: daysInMonth}).map((_, i) => {
+                  const today = new Date();
+                  const isToday = (i + 1) === today.getDate() &&
+                                  currentDate.getMonth() === today.getMonth() &&
+                                  currentDate.getFullYear() === today.getFullYear();
 
-            {/* Details Skeletons */}
-            <View style={styles.detailsContainer}>
-              <ThemeCard style={[styles.infoCard]}>
-                <SkeletonBox width={180} height={20} borderRadius={10} color={colors.border} style={{ marginBottom: 2 }} loaded={false} />
-                <SkeletonBox width={120} height={14} borderRadius={7} color={colors.border} loaded={false} />
-              </ThemeCard>
-              <View style={styles.timesRow}>
-                <ThemeCard style={[styles.infoCard, styles.timeBoxHalf, { marginRight: 4, marginLeft: 0 }]}>
-                  <SkeletonBox width={80} height={12} borderRadius={6} color={colors.border} style={{ marginBottom: 4 }} loaded={false} />
-                  <SkeletonBox width={60} height={22} borderRadius={11} color={colors.border} loaded={false} />
+                  return (
+                    <View key={`day-${i}`} style={[styles.gridCell, { 
+                      borderColor: isToday ? colors.accent : 'transparent',
+                      borderWidth: isToday ? 1 : 0,
+                    }]}>
+                      <Text style={[styles.gregorianText, { color: colors.text }]}>
+                        {formatNumber((i + 1).toString(), i18n.language)}
+                      </Text>
+                      {prefs.showBanglaCalendar ? (
+                        <View style={{ flexDirection: 'row', justifyContent: 'space-between', width: '100%', paddingHorizontal: 4, marginTop: 2 }}>
+                          <SkeletonBox width={12} height={10} borderRadius={4} color={colors.border} loaded={false} />
+                          <SkeletonBox width={12} height={10} borderRadius={4} color={colors.border} loaded={false} />
+                        </View>
+                      ) : (
+                        <SkeletonBox width={16} height={10} borderRadius={4} color={colors.border} style={{ marginTop: 2, marginBottom: 4 }} loaded={false} />
+                      )}
+                    </View>
+                  );
+                })}
+              </View>
+
+              {/* Details Skeletons */}
+              <View style={styles.detailsContainer}>
+                {/* Date Card */}
+                <ThemeCard style={[styles.infoCard]}>
+                  <SkeletonBox width={180} height={20} borderRadius={10} color={colors.border} style={{ marginBottom: 2 }} loaded={false} />
+                  <SkeletonBox width={120} height={14} borderRadius={7} color={colors.border} loaded={false} />
                 </ThemeCard>
-                <ThemeCard style={[styles.infoCard, styles.timeBoxHalf, { marginLeft: 4, marginRight: 0 }]}>
-                  <SkeletonBox width={80} height={12} borderRadius={6} color={colors.border} style={{ marginBottom: 4 }} loaded={false} />
-                  <SkeletonBox width={60} height={22} borderRadius={11} color={colors.border} loaded={false} />
+
+                {/* Times Cards */}
+                <View style={styles.timesRow}>
+                  <ThemeCard style={[styles.infoCard, styles.timeBoxHalf, { marginRight: 4, marginLeft: 0 }]}>
+                    <Text style={[styles.timeLabel, { color: colors.textSecondary }]}>{t('calendar.sahriEnd')}</Text>
+                    <SkeletonBox width={60} height={22} borderRadius={11} color={colors.border} loaded={false} />
+                  </ThemeCard>
+                  <ThemeCard style={[styles.infoCard, styles.timeBoxHalf, { marginLeft: 4, marginRight: 0 }]}>
+                    <Text style={[styles.timeLabel, { color: colors.textSecondary }]}>{t('calendar.iftarTime')}</Text>
+                    <SkeletonBox width={60} height={22} borderRadius={11} color={colors.border} loaded={false} />
+                  </ThemeCard>
+                </View>
+
+                {/* Events Card */}
+                <ThemeCard style={[styles.infoCard, { marginBottom: 0 }]}>
+                  <Text style={[styles.eventsLabel, { color: colors.textSecondary }]}>{t('calendar.events')}</Text>
+                  <SkeletonBox width={140} height={16} borderRadius={8} color={colors.border} loaded={false} />
                 </ThemeCard>
               </View>
-              <ThemeCard style={[styles.infoCard, { marginBottom: 0 }]}>
-                <SkeletonBox width={60} height={12} borderRadius={6} color={colors.border} style={{ marginBottom: 8 }} loaded={false} />
-                <SkeletonBox width={140} height={16} borderRadius={8} color={colors.border} loaded={false} />
-              </ThemeCard>
             </View>
-          </View>
-        ) : (
+          );
+        })() : (
           <>
             {/* Grid */}
             {renderGrid()}
@@ -555,7 +589,7 @@ const styles = StyleSheet.create({
   },
   timeValue: {
     fontFamily: Fonts.outfit,
-    fontSize: 22,
+    fontSize: 24,
     textAlign: 'center',
   },
   eventsLabel: {

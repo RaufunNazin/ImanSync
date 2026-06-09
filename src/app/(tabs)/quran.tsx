@@ -210,29 +210,29 @@ export default function QuranScreen() {
         titleEn={t('quran.titleEn')} 
         rightElement={
           <View style={{ flexDirection: 'row', alignItems: 'center', gap: Spacing.three }}>
-            <TouchableOpacity 
+            <TouchableOpacity
               activeOpacity={0.7}
-              style={{ 
-                flexDirection: 'row', 
-                alignItems: 'center', 
-                backgroundColor: isGoalMet ? colors.highlight + '22' : colors.accent + '22', 
-                paddingHorizontal: 10, 
-                paddingVertical: 5, 
-                borderRadius: 14, 
-                borderWidth: 1, 
-                borderColor: isGoalMet ? colors.highlight : colors.accent 
+              style={{
+                flexDirection: 'row',
+                alignItems: 'center',
+                backgroundColor: isGoalMet ? colors.highlight + '22' : 'transparent',
+                paddingHorizontal: 10,
+                paddingVertical: 5,
+                borderRadius: 14,
+                borderWidth: 1,
+                borderColor: isGoalMet ? colors.highlight : colors.border
               }}
               onPress={() => {
                 Haptics.selectionAsync();
                 router.push('/quran-tracker' as any);
               }}
             >
-              <Target size={12} color={isGoalMet ? colors.highlight : colors.accent} style={{ marginRight: 4 }} />
-              <Text style={{ 
-                fontFamily: Fonts.outfit, 
-                fontSize: 12, 
-                color: isGoalMet ? colors.highlight : colors.accent, 
-                fontWeight: '600' 
+              <Target size={12} color={isGoalMet ? colors.highlight : colors.textSecondary} style={{ marginRight: 4 }} />
+              <Text style={{
+                fontFamily: Fonts.outfit,
+                fontSize: 12,
+                color: isGoalMet ? colors.highlight : colors.textSecondary,
+                fontWeight: '600'
               }}>
                 {formatNumber(pagesReadToday, i18n.language)} / {formatNumber(readingStore.dailyGoalPages, i18n.language)}
               </Text>

@@ -220,6 +220,7 @@ const styles = StyleSheet.create({
   safeArea: { flex: 1 },
   container: {
     padding: Spacing.four,
+    paddingTop: 0,
     paddingBottom: 100, // Room for footer
   },
   banner: {

@@ -157,6 +157,7 @@ const styles = StyleSheet.create({
   },
   container: {
     padding: Spacing.four,
+    paddingTop: 0,
   },
   summaryCard: {
     padding: Spacing.three,

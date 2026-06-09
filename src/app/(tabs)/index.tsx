@@ -63,9 +63,8 @@ interface DailyHadith {
 const formatAMPM = (date: Date, lang: string = 'en'): string => {
   let hours = date.getHours();
   let minutes = date.getMinutes();
-  const ampm = hours >= 12 ? ' PM' : ' AM';
   hours = hours % 12 || 12;
-  const timeStr = `${hours}:${String(minutes).padStart(2, '0')}${ampm}`;
+  const timeStr = `${hours}:${String(minutes).padStart(2, '0')}`;
   return formatNumber(timeStr, lang);
 };
 
@@ -106,8 +105,8 @@ export default function HomeScreen() {
   };
   
   const qadaBadgeText = i18n.language === 'bn'
-    ? `${formatNumber(totalQada.toString(), 'bn')} টি নামাজ`
-    : `${totalQada} prayer${totalQada === 1 ? '' : 's'}`;
+    ? `${formatNumber(totalQada.toString(), 'bn')} টি কাযা নামাজ`
+    : `${totalQada} missed prayer${totalQada === 1 ? '' : 's'}`;
 
 
   const [currentTime, setCurrentTime] = useState(new Date());
@@ -361,6 +360,35 @@ export default function HomeScreen() {
 
       return { currentPrayer: curP, nextPrayer: nxtP, timeToNextMs, prayersWithStatus, progressPercent };
     }, [fardPrayers, currentTime]);
+
+  const timelineProgress = useMemo(() => {
+    if (fardPrayers.length === 0) return 0;
+    const timelinePrayers = fardPrayers.filter(p => p.id !== 'sunrise');
+    if (timelinePrayers.length < 5) return 0;
+    
+    const now = currentTime.getTime();
+    const fajrTime = timelinePrayers[0].date.getTime();
+    const ishaTime = timelinePrayers[4].date.getTime();
+    
+    if (now <= fajrTime) return 0;
+    if (now >= ishaTime) return 100;
+    
+    let currentIdx = -1;
+    for (let i = 0; i < timelinePrayers.length - 1; i++) {
+      if (now >= timelinePrayers[i].date.getTime() && now < timelinePrayers[i+1].date.getTime()) {
+        currentIdx = i;
+        break;
+      }
+    }
+    
+    if (currentIdx === -1) return 100;
+    
+    const segmentStart = timelinePrayers[currentIdx].date.getTime();
+    const segmentEnd = timelinePrayers[currentIdx+1].date.getTime();
+    const segmentProgress = (now - segmentStart) / (segmentEnd - segmentStart);
+    
+    return (currentIdx * 25) + (segmentProgress * 25);
+  }, [fardPrayers, currentTime]);
 
   const countdownStr = useMemo(() => formatCountdown(timeToNextMs), [timeToNextMs]);
   const displayCountdown = formatNumber(countdownStr, i18n.language);
@@ -628,7 +656,7 @@ export default function HomeScreen() {
                     </Text>
                   </SkeletonBox>
                   <SkeletonBox loaded={prayersWithStatus.length > 0} width={45} height={12} borderRadius={5} color={colors.border} style={{ marginTop: 2 }}>
-                    <Text style={{ fontFamily: Fonts.outfit, fontSize: 10, color: colors.textSecondary, marginTop: 1 }}>
+                    <Text style={{ fontFamily: Fonts.outfit, fontSize: 12, color: colors.textSecondary, marginTop: 1 }}>
                       {currentPrayer.time}
                     </Text>
                   </SkeletonBox>
@@ -640,7 +668,7 @@ export default function HomeScreen() {
                     </Text>
                   </SkeletonBox>
                   <SkeletonBox loaded={prayersWithStatus.length > 0} width={45} height={12} borderRadius={5} color={colors.border} style={{ marginTop: 2 }}>
-                    <Text style={{ fontFamily: Fonts.outfit, fontSize: 10, color: colors.textSecondary, marginTop: 1 }}>
+                    <Text style={{ fontFamily: Fonts.outfit, fontSize: 12, color: colors.textSecondary, marginTop: 1 }}>
                       {nextPrayer.time}
                     </Text>
                   </SkeletonBox>
@@ -719,17 +747,24 @@ export default function HomeScreen() {
 
             <TouchableOpacity
               activeOpacity={0.7}
-              style={[styles.actionItemCard, { borderColor: colors.border }]}
+              style={[styles.actionItemCard, { borderColor: totalQada > 0 ? colors.error + '40' : colors.border }]}
               onPress={() => router.push('/qada-tracker' as any)}
             >
-              <ThemeCard intensity={40} style={[styles.actionItemBlur, { flexDirection: 'column', alignItems: 'flex-start', justifyContent: 'center', gap: 2 }]}>
-                <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6 }}>
-                  <History size={20} color={colors.highlight} />
-                  <Text style={[styles.actionText, { color: colors.text, marginLeft: 0 }]}>{t('tracker.qadaTitle', { defaultValue: 'Qada Tracker' })}</Text>
-                </View>
-                <View style={{ backgroundColor: getQadaBadgeColor(), paddingHorizontal: 6, paddingVertical: 2, borderRadius: 10, marginTop: 4 }}>
-                  <Text style={{ fontFamily: Fonts.outfit, fontSize: 10, color: '#fff', fontWeight: 'bold' }}>{qadaBadgeText}</Text>
-                </View>
+              <ThemeCard intensity={40} style={[styles.actionItemBlur, totalQada > 0 && { flexDirection: 'column', alignItems: 'flex-start', justifyContent: 'center', gap: 2, backgroundColor: colors.error + '10' }]}>
+                {totalQada > 0 ? (
+                  <>
+                    <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6 }}>
+                      <History size={16} color={colors.error} />
+                      <Text style={[styles.actionText, { color: colors.text, marginLeft: 0 }]}>{t('tracker.qadaTitle', { defaultValue: 'Qada Tracker' })}</Text>
+                    </View>
+                    <Text style={{ fontFamily: Fonts.outfit, fontSize: 10, color: colors.error, fontWeight: 'bold' }}>{qadaBadgeText}</Text>
+                  </>
+                ) : (
+                  <>
+                    <History size={20} color={colors.highlight} />
+                    <Text style={[styles.actionText, { color: colors.text }]}>{t('tracker.qadaTitle', { defaultValue: 'Qada Tracker' })}</Text>
+                  </>
+                )}
               </ThemeCard>
             </TouchableOpacity>
           </View>
@@ -743,94 +778,78 @@ export default function HomeScreen() {
           {prayersWithStatus.length > 0 ? (
             <ThemeCard intensity={30} style={[styles.timelineCard, { borderColor: colors.border }]}
             >
-              <View style={styles.timelineRow}>
-                {prayersWithStatus.filter(p => p.id !== 'sunrise').map((prayer, index, arr) => {
-                  const isCurrent = prayer.status === 'current';
-                  const isNext = prayer.status === 'next';
-                  const isPast = prayer.status === 'past';
-                  const isFirst = index === 0;
-                  const isLast = index === arr.length - 1;
-                  const dotColor = isCurrent
-                    ? colors.highlight
-                    : isNext
-                    ? 'transparent'
-                    : isPast
-                    ? colors.textSecondary
-                    : colors.border;
-                  const leftLineColor = (isPast || isCurrent) ? colors.highlight + '88' : colors.border;
-                  const rightLineColor = (isPast || isCurrent) ? colors.highlight + '88' : colors.border;
+              <View style={{ position: 'relative', width: '100%' }}>
+                {/* Continuous Progress Track */}
+                <View style={{ position: 'absolute', left: '10%', right: '10%', top: 29, height: 2, backgroundColor: colors.border, borderRadius: 1, zIndex: 0 }}>
+                  <Animated.View style={{ height: '100%', backgroundColor: colors.highlight, borderRadius: 1, width: `${timelineProgress}%` }} />
+                </View>
 
-                  return (
-                    <View key={prayer.id} style={styles.timelineCol}>
-                      <Text
-                        style={[
-                          styles.timelineName,
-                          {
-                            color: isCurrent
-                              ? colors.highlight
-                              : colors.textSecondary,
-                            opacity: isPast ? 0.55 : 1,
-                          },
-                        ]}
-                      >
-                        {prayer.name}
-                      </Text>
-                      <View style={styles.timelineDotRow}>
-                        <View
+                <View style={styles.timelineRow}>
+                  {prayersWithStatus.filter(p => p.id !== 'sunrise').map((prayer, index, arr) => {
+                    const isCurrent = prayer.status === 'current';
+                    const isPast = prayer.status === 'past';
+                    const isNext = prayer.status === 'next';
+
+                    let dotStyle: any = { backgroundColor: colors.border };
+                    if (isPast) {
+                      dotStyle = { backgroundColor: colors.highlight };
+                    } else if (isCurrent) {
+                      dotStyle = { backgroundColor: colors.highlight, transform: [{ scale: 1.4 }] };
+                    } else if (isNext) {
+                      dotStyle = { backgroundColor: colors.background, borderColor: colors.highlight, borderWidth: 2 };
+                    }
+
+                    return (
+                      <View key={prayer.id} style={styles.timelineCol}>
+                        <Text
                           style={[
-                            styles.timelineConnectorLeft,
-                            { backgroundColor: isFirst ? 'transparent' : leftLineColor },
-                          ]}
-                        />
-                        <View
-                          style={[
-                            styles.timelineDot,
-                            { backgroundColor: dotColor },
-                            isCurrent && { transform: [{ scale: 1.3 }] },
-                            isNext && {
-                              borderColor: colors.highlight,
-                              borderWidth: 2,
+                            styles.timelineName,
+                            {
+                              color: isCurrent
+                                ? colors.highlight
+                                : colors.textSecondary,
+                              opacity: isPast ? 0.55 : 1,
                             },
                           ]}
-                        />
-                        <View
+                        >
+                          {prayer.name}
+                        </Text>
+                        <View style={styles.timelineDotRow}>
+                          <View style={[styles.timelineDot, dotStyle]} />
+                        </View>
+                        <Text
                           style={[
-                            styles.timelineConnectorRight,
-                            { backgroundColor: isLast ? 'transparent' : rightLineColor },
+                            styles.timelineTime,
+                            {
+                              color: isCurrent ? colors.highlight : colors.textSecondary,
+                              opacity: isPast ? 0.5 : 1,
+                            },
                           ]}
-                        />
+                        >
+                          {formatNumber(prayer.time, i18n.language)}
+                        </Text>
                       </View>
-                      <Text
-                        style={[
-                          styles.timelineTime,
-                          {
-                            color: isCurrent ? colors.highlight : colors.textSecondary,
-                            opacity: isPast ? 0.5 : 1,
-                          },
-                        ]}
-                      >
-                        {formatNumber(prayer.time, i18n.language)}
-                      </Text>
-                    </View>
-                  );
-                })}
+                    );
+                  })}
+                </View>
               </View>
             </ThemeCard>
           ) : null}
           {prayersWithStatus.length === 0 && (
             <ThemeCard intensity={30} style={[styles.timelineCard, { borderColor: colors.border }]}>
-              <View style={styles.timelineRow}>
-                {["Fajr","Dhuhr","Asr","Maghrib","Isha"].map((_, i) => (
-                  <View key={i} style={styles.timelineCol}>
-                    <SkeletonBox width={38} height={12} borderRadius={6} color={colors.border} loaded={false} />
-                    <View style={styles.timelineDotRow}>
-                      <View style={[styles.timelineConnectorLeft, { backgroundColor: i === 0 ? 'transparent' : colors.border }]} />
-                      <View style={[styles.timelineDot, { backgroundColor: colors.border }]} />
-                      <View style={[styles.timelineConnectorRight, { backgroundColor: i === 4 ? 'transparent' : colors.border }]} />
+              <View style={{ position: 'relative', width: '100%' }}>
+                <View style={{ position: 'absolute', left: '10%', right: '10%', top: 29, height: 2, backgroundColor: colors.border, borderRadius: 1, zIndex: 0 }} />
+                <View style={styles.timelineRow}>
+                  {["Fajr","Dhuhr","Asr","Maghrib","Isha"].map((_, i) => (
+                    <View key={i} style={styles.timelineCol}>
+                      <SkeletonBox width={38} height={12} borderRadius={6} color={colors.border} loaded={false} style={{ marginBottom: 6 }} />
+                      <View style={styles.timelineDotRow}>
+                        <View style={[styles.timelineDot, { backgroundColor: colors.border }]} />
+                      </View>
+                      <SkeletonBox width={44} height={10} borderRadius={5} color={colors.border} loaded={false} />
                     </View>
-                    <SkeletonBox width={44} height={10} borderRadius={5} color={colors.border} loaded={false} />
-                  </View>
-                ))}
+                  ))}
+                </View>
               </View>
             </ThemeCard>
           )}
@@ -1126,30 +1145,14 @@ const styles = StyleSheet.create({
     marginBottom: 6,
   },
   timelineDot: {
-    width: 11,
-    height: 11,
+    width: 12,
+    height: 12,
     borderRadius: 6,
-    backgroundColor: 'rgba(150,150,150,0.3)',
     zIndex: 1,
-  },
-  timelineConnector: {
-    flex: 1,
-    height: 2,
-    borderRadius: 1,
-  },
-  timelineConnectorLeft: {
-    flex: 1,
-    height: 2,
-    borderRadius: 1,
-  },
-  timelineConnectorRight: {
-    flex: 1,
-    height: 2,
-    borderRadius: 1,
   },
   timelineTime: {
     fontFamily: Fonts.outfit,
-    fontSize: 12,
+    fontSize: 14,
   },
   nextBadge: {
     paddingHorizontal: 6,
@@ -1235,7 +1238,7 @@ const styles = StyleSheet.create({
   },
   restrictedTime: {
     fontFamily: Fonts.outfit,
-    fontSize: 13,
+    fontSize: 15,
     textAlign: 'right',
   },
 

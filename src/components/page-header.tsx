@@ -32,7 +32,7 @@ export default function PageHeader({
   const router = useRouter();
 
   return (
-    <View style={[styles.header, { borderBottomColor: colors.border }]}>
+    <View style={[styles.header, { borderBottomColor: colors.textSecondary + '20', borderBottomWidth: 1 }]}>
       {/* Back button — only rendered when needed, no placeholder slot */}
       {showBack && (
         <TouchableOpacity

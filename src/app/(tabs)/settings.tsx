@@ -1,3 +1,4 @@
+import Animated, { FadeIn, FadeOut } from 'react-native-reanimated';
 import ThemeCard from '@/components/ThemeCard';
 import OptionsModal from '@/components/OptionsModal';
 import PageHeader from '@/components/page-header';
@@ -264,17 +265,19 @@ export default function SettingsScreen() {
             colors={colors}
           />
           {prefs.showBanglaCalendar && (
-            <SettingRow
-              icon={CalendarDays}
-              title={t('settings.banglaOffset', { defaultValue: 'Bangla Date Adjustment' })}
-              value={`${prefs.banglaOffset > 0 ? '+' : ''}${formatNumber(prefs.banglaOffset || 0, i18n.language)} ${t('settings.days', { defaultValue: 'Days' })}`}
-              onPress={() => {
-                setOptionsModalType('bangla');
-                setOptionsModalVisible(true);
-              }}
-              isLast={true}
-              colors={colors}
-            />
+            <Animated.View entering={FadeIn} exiting={FadeOut}>
+              <SettingRow
+                icon={CalendarDays}
+                title={t('settings.banglaOffset', { defaultValue: 'Bangla Date Adjustment' })}
+                value={`${prefs.banglaOffset > 0 ? '+' : ''}${formatNumber(prefs.banglaOffset || 0, i18n.language)} ${t('settings.days', { defaultValue: 'Days' })}`}
+                onPress={() => {
+                  setOptionsModalType('bangla');
+                  setOptionsModalVisible(true);
+                }}
+                isLast={true}
+                colors={colors}
+              />
+            </Animated.View>
           )}
         </ThemeCard>
 
@@ -282,7 +285,7 @@ export default function SettingsScreen() {
         <ThemeCard style={[styles.card]}>
           <SettingRow icon={Bell} title={t('settings.masterToggle', { defaultValue: 'Master Toggle' })} value={prefs.notificationsEnabled} type="toggle" isLast={!prefs.notificationsEnabled} onPress={toggleNotifications} colors={colors} />
           {prefs.notificationsEnabled && (
-            <>
+            <Animated.View entering={FadeIn} exiting={FadeOut}>
               <SettingRow icon={Clock} title={t('settings.prayerStartAlerts', { defaultValue: 'Prayer Start Alerts' })} value={prefs.prayerStartAlerts} type="toggle" onPress={togglePrayerStartAlerts} colors={colors} />
               <SettingRow icon={Clock} title={t('settings.prayerEndAlerts', { defaultValue: 'Prayer End Alerts' })} value={prefs.prayerEndAlerts} type="toggle" onPress={togglePrayerEndAlerts} colors={colors} />
               <SettingRow icon={ListTodo} title={t('settings.dailyReminders', { defaultValue: 'Daily Reminders' })} value={prefs.taskRemindersEnabled} type="toggle" onPress={toggleTaskReminders} colors={colors} />
@@ -299,7 +302,7 @@ export default function SettingsScreen() {
                 colors={colors}
               />
               {prefs.quietHours.enabled && (
-                <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', paddingBottom: Spacing.three, paddingLeft: 52 }}>
+                <Animated.View entering={FadeIn} exiting={FadeOut} style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', paddingBottom: Spacing.three, paddingLeft: 52 }}>
                   <Text style={[styles.settingTitle, { color: colors.textSecondary, fontSize: 13 }]}>
                     {t('settings.dndSchedule')}
                   </Text>
@@ -324,9 +327,9 @@ export default function SettingsScreen() {
                       </Text>
                     </TouchableOpacity>
                   </View>
-                </View>
+                </Animated.View>
               )}
-            </>
+            </Animated.View>
           )}
         </ThemeCard>
 
@@ -365,7 +368,7 @@ export default function SettingsScreen() {
           <SettingRow
             icon={Calculator}
             title={t('settings.calcMethod')}
-            value={t(CALC_METHODS.find(m => m.id === prefs.calcMethod)?.key as any || 'settings.calcMethod_1')}
+            value={t((CALC_METHODS.find(m => m.id === prefs.calcMethod)?.key + '_short') as any || 'settings.calcMethod_1_short')}
             onPress={() => {
               setOptionsModalType('calc');
               setOptionsModalVisible(true);

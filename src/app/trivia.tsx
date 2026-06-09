@@ -89,7 +89,7 @@ export default function TriviaScreen() {
       setCurrentIndex(c => c + 1);
       setSelectedOption(null);
       cardOffset.value = width;
-      cardOffset.value = withSpring(0, { damping: 15 });
+      cardOffset.value = withSpring(0, { damping: 30, stiffness: 120 });
     } else {
       setIsFinished(true);
     }
@@ -107,7 +107,7 @@ export default function TriviaScreen() {
   return (
     <SafeAreaView style={[styles.safeArea, { backgroundColor: colors.background }]}>
       <View style={[styles.header, { borderBottomColor: colors.border }]}>
-        <TouchableOpacity onPress={() => router.back()} style={styles.backBtn} hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}>
+        <TouchableOpacity activeOpacity={1} onPress={() => router.back()} style={styles.backBtn} hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}>
           <ArrowLeft size={24} color={colors.text} />
         </TouchableOpacity>
         <Text style={[styles.headerTitle, { color: colors.text }]}>{t('trivia.title', { defaultValue: 'Islamic Trivia' })}</Text>
@@ -133,7 +133,7 @@ export default function TriviaScreen() {
 
             <TouchableOpacity 
               style={[styles.retryBtn, { backgroundColor: colors.accent }]} 
-              activeOpacity={0.8}
+              activeOpacity={1}
               onPress={startNewGame}
             >
               <RefreshCw size={20} color="#FFF" />
@@ -172,7 +172,7 @@ export default function TriviaScreen() {
                   return (
                     <TouchableOpacity
                       key={idx}
-                      activeOpacity={0.7}
+                      activeOpacity={1}
                       disabled={selectedOption !== null}
                       onPress={() => handleOptionPress(idx)}
                       style={[
@@ -204,6 +204,7 @@ export default function TriviaScreen() {
             {selectedOption !== null && (
               <Animated.View entering={FadeInDown.duration(300).delay(200)} style={styles.footer}>
                 <TouchableOpacity 
+                  activeOpacity={1}
                   style={[styles.nextBtn, { backgroundColor: colors.highlight, width: 64, height: 64, borderRadius: 32, alignSelf: 'flex-end', justifyContent: 'center' }]}
                   onPress={nextQuestion}
                 >
@@ -230,7 +231,7 @@ const styles = StyleSheet.create({
   },
   backBtn: { padding: 8, marginLeft: -8 },
   headerTitle: { fontFamily: Fonts.outfit, fontSize: 18, fontWeight: '600' },
-  container: { flex: 1, padding: Spacing.four },
+  container: { flex: 1, padding: Spacing.four, paddingTop: 0 },
   
   progressHeader: { flexDirection: 'row', justifyContent: 'space-between', marginBottom: Spacing.two },
   progressText: { fontFamily: Fonts.outfit, fontSize: 14 },

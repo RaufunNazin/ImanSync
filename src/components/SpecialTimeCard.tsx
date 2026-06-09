@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { View, Text, TouchableOpacity } from 'react-native';
 import Animated, { FadeIn, FadeOut } from 'react-native-reanimated';
+import { Pointer } from 'lucide-react-native';
 import ThemeCard from '@/components/ThemeCard';
 import { Fonts } from '@/constants/theme';
 import { formatNumber } from '@/utils/formatNumber';
@@ -61,7 +62,7 @@ export default function SpecialTimeCard({ item, colors, i18nLanguage, styles, t 
         {/* Subtle tap cue */}
         {!showCountdown && item.date && item.time !== '--:--' && (
           <View style={{ position: 'absolute', top: 6, right: 7, opacity: 0.3 }}>
-            <Text style={{ fontFamily: Fonts.outfit, fontSize: 8, color: colors.textSecondary }}>⏱</Text>
+            <Pointer size={14} color={colors.textSecondary} />
           </View>
         )}
         <View style={[styles.specialCardInner, { alignItems: 'center', justifyContent: 'center', paddingVertical: 16 }]}>
@@ -71,12 +72,8 @@ export default function SpecialTimeCard({ item, colors, i18nLanguage, styles, t 
                 {remainingStr}
               </Animated.Text>
             ) : (
-              <Animated.Text key="time" entering={FadeIn.duration(300)} exiting={FadeOut.duration(300)} style={{ position: 'absolute', fontFamily: Fonts.outfit, fontSize: 20, color: colors.accent, textAlign: 'center' }}>
-                {formatNumber(item.time, i18nLanguage).split(/( AM| PM)/).map((part: string, index: number) =>
-                  (part === ' AM' || part === ' PM') ?
-                    <Text key={index} style={{ fontSize: 11, fontWeight: '500' }}>{part}</Text> :
-                    part
-                )}
+              <Animated.Text key="time" entering={FadeIn.duration(300)} exiting={FadeOut.duration(300)} style={{ position: 'absolute', fontFamily: Fonts.outfit, fontSize: 22, color: colors.accent, textAlign: 'center' }}>
+                {formatNumber(item.time, i18nLanguage)}
               </Animated.Text>
             )}
           </View>

@@ -329,8 +329,9 @@ export default function TrackerScreen() {
   const totalKazaNamaj = qadaStore.fajr + qadaStore.dhuhr + qadaStore.asr + qadaStore.maghrib + qadaStore.isha + qadaStore.witr;
 
   const isKazaFree = totalKazaNamaj === 0;
-  const chipColor = isKazaFree ? colors.accent : '#ef4444';
-  const chipBg = chipColor + '22';
+  const chipColor = isKazaFree ? colors.textSecondary : '#ef4444';
+  const chipBg = isKazaFree ? 'transparent' : '#ef444422';
+  const chipBorder = isKazaFree ? colors.border : '#ef4444';
 
   const kazaChip = (
     <TouchableOpacity 
@@ -343,7 +344,7 @@ export default function TrackerScreen() {
         paddingVertical: 5, 
         borderRadius: 14, 
         borderWidth: 1, 
-        borderColor: chipColor 
+        borderColor: chipBorder 
       }}
       onPress={() => {
         Haptics.selectionAsync();
