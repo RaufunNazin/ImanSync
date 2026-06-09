@@ -535,8 +535,8 @@ export default function SettingsScreen() {
                   <X size={20} color={colors.textSecondary} />
                 </TouchableOpacity>
 
-                <View style={[updateStyles.iconWrap, { backgroundColor: colors.highlight + '20' }]}>
-                  <FolderLock size={32} color={colors.highlight} />
+                <View style={[updateStyles.iconWrap, { backgroundColor: colors.textSecondary + '20' }]}>
+                  <FolderLock size={32} color={colors.textSecondary} />
                 </View>
 
                 <Text style={[updateStyles.title, { color: colors.text }]}>

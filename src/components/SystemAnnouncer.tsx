@@ -147,7 +147,7 @@ export default function SystemAnnouncer() {
             <ScrollView showsVerticalScrollIndicator={false} style={{ width: '100%', marginTop: Spacing.four }}>
               {changelog && getLocalizedText(changelog).map((line: string, i: number) => (
                 <View key={i} style={styles.bulletRow}>
-                  <View style={[styles.bullet, { backgroundColor: colors.accent }]} />
+                  <View style={[styles.bullet, { backgroundColor: colors.textSecondary }]} />
                   <Text style={[styles.bulletText, { color: colors.text }]}>{line}</Text>
                 </View>
               ))}

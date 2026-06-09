@@ -4,7 +4,7 @@ import { View, Text, StyleSheet, ScrollView, TouchableOpacity } from 'react-nati
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useTranslation } from 'react-i18next';
 import { useRouter } from 'expo-router';
-import { Plus, Minus, ArrowLeft, History } from 'lucide-react-native';
+import { Plus, Minus, ArrowLeft } from 'lucide-react-native';
 import * as Haptics from 'expo-haptics';
 
 import { Fonts, Spacing, useThemeColors,  } from '@/constants/theme';
@@ -79,17 +79,16 @@ export default function QadaTrackerScreen() {
           <ArrowLeft size={24} color={colors.text} />
         </TouchableOpacity>
         <Text style={[styles.headerTitle, { color: colors.text }]}>
-          {t('tracker.qadaTitle', { defaultValue: 'Missed Prayers (Qada)' })}
+          {t('tracker.qadaTitle', { defaultValue: 'Missed Prayers' })}
         </Text>
         <View style={{ width: 40 }} />
       </View>
 
       <ScrollView contentContainerStyle={styles.container} showsVerticalScrollIndicator={false}>
         
-        <View style={{ flexDirection: 'row', gap: Spacing.three, marginBottom: Spacing.six }}>
+        <View style={{ flexDirection: 'row', gap: Spacing.three, marginBottom: Spacing.four }}>
           <View style={[styles.summaryCard, { flex: 1, backgroundColor: colors.backgroundElement, borderColor: colors.border }]}>
             <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6, marginBottom: 4 }}>
-              <History size={14} color={colors.highlight} />
               <Text style={[styles.summaryTitle, { color: colors.textSecondary }]}>
                 {t('tracker.prayers', { defaultValue: 'Prayers' })}
               </Text>
@@ -103,7 +102,6 @@ export default function QadaTrackerScreen() {
           
           <View style={[styles.summaryCard, { flex: 1, backgroundColor: colors.backgroundElement, borderColor: colors.border }]}>
             <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6, marginBottom: 4 }}>
-              <History size={14} color={colors.highlight} />
               <Text style={[styles.summaryTitle, { color: colors.textSecondary }]}>
                 {t('tracker.fasting', { defaultValue: 'Fasting' })}
               </Text>

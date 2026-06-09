@@ -359,7 +359,7 @@ export default function TrackerScreen() {
         color: chipColor, 
         fontWeight: '600' 
       }}>
-        {t('tracker.kazaChip', { namaj: formatNumber(totalKazaNamaj, i18n.language), defaultValue: `${formatNumber(totalKazaNamaj, i18n.language)} N` })}
+        {t('tracker.kazaChip', { namaj: formatNumber(totalKazaNamaj, i18n.language), count: totalKazaNamaj, defaultValue: `${formatNumber(totalKazaNamaj, i18n.language)} Prayers` })}
       </Text>
     </TouchableOpacity>
   );
@@ -426,7 +426,7 @@ export default function TrackerScreen() {
               </View>
 
               <SkeletonBox loaded={!loading} width={240} height={20} borderRadius={4} color={colors.border} style={{ marginTop: Spacing.two }}>
-                <Text style={[styles.encouragement, { color: colors.accent, marginTop: 0 }]}>
+                <Text style={[styles.encouragement, { color: colors.textSecondary, marginTop: 0 }]}>
                   {getEncouragementMsg(displayPercentage)}
                 </Text>
               </SkeletonBox>

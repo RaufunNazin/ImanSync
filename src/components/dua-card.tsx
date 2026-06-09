@@ -51,7 +51,7 @@ export default function DuaCard({
           )}
 
           <View style={styles.content}>
-            <Text style={[styles.name, { color: isCustom ? colors.highlight : colors.accent }]} numberOfLines={2}>
+            <Text style={[styles.name, { color: colors.text }]} numberOfLines={2}>
               {name}
             </Text>
             {count !== undefined && (

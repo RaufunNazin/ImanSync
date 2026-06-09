@@ -88,7 +88,8 @@
     "timeLeft": "Left",
     "hadithOfTheDay": "Hadith of the Day",
     "trivia": "Islamic Trivia",
-    "qadaBadge": "You have {{count}} Qada prayers"
+    "qadaBadge_one": "{{formatted}} Qada prayer",
+    "qadaBadge_other": "{{formatted}} Qada prayers"
   },
   "quran": {
     "titleEn": "Al-Quran",
@@ -193,13 +194,14 @@
     "chartMsg_80": "A solid {{avg}}% average! You're doing great.",
     "chartMsg_99": "An excellent {{avg}}% average! Almost perfect consistency.",
     "chartMsg_100": "Flawless consistency! May Allah accept your efforts.",
-    "qadaTitle": "Missed Prayers (Qada)",
+    "qadaTitle": "Missed Prayers",
     "qadaDesc": "Track and make up your missed prayers and fasts.",
     "totalMissed": "Total Missed Prayers",
     "prayers": "Prayers",
     "fasting": "Fasting",
     "missedFasts": "Missed Fasts",
-    "kazaChip": "{{namaj}} N"
+    "kazaChip_one": "{{namaj}} Prayer",
+    "kazaChip_other": "{{namaj}} Prayers"
   },
   "dua": {
     "titleEn": "Dua & Zikr",

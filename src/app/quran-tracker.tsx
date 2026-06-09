@@ -8,7 +8,7 @@ import { useRouter } from 'expo-router';
 import { Target, Edit3, X, Plus, Minus, History, CheckCircle2 } from 'lucide-react-native';
 import * as Haptics from 'expo-haptics';
 
-import { Fonts, Spacing, useThemeColors, useThemeStyles } from '@/constants/theme';
+import { Fonts, Spacing, useThemeColors } from '@/constants/theme';
 import { useReadingStore } from '@/store/readingStore';
 import { formatNumber } from '@/utils/formatNumber';
 import PageHeader from '@/components/page-header';
@@ -27,7 +27,6 @@ const generatePastDays = (days: number) => {
 
 export default function QuranTrackerScreen() {
   const colors = useThemeColors();
-  const themeStyles = useThemeStyles();
   const { t, i18n } = useTranslation();
   const router = useRouter();
   const readingStore = useReadingStore();
@@ -61,7 +60,7 @@ export default function QuranTrackerScreen() {
         <ScrollView contentContainerStyle={styles.container} showsVerticalScrollIndicator={false}>
           
           {/* Progress Overview Card */}
-          <View  style={[styles.card, themeStyles.cardShadow, { borderColor: colors.border }]}>
+          <ThemeCard style={styles.card}>
             <View style={styles.cardHeader}>
               <View style={{ flexDirection: 'row', alignItems: 'center', gap: Spacing.two }}>
                 <Target size={20} color={isGoalMet ? colors.highlight : colors.accent} />
@@ -80,12 +79,12 @@ export default function QuranTrackerScreen() {
                 <Text style={[styles.statValue, { color: colors.text }]}>{formatNumber(pagesReadToday, i18n.language)}</Text>
                 <Text style={[styles.statLabel, { color: colors.textSecondary }]}>{t('quran.pagesRead', { defaultValue: 'Pages Read' })}</Text>
               </View>
-              <View style={[styles.statDivider, { backgroundColor: colors.border }]} />
+              <View style={[styles.statDivider, { backgroundColor: colors.textSecondary + '20' }]} />
               <View style={styles.statBox}>
                 <Text style={[styles.statValue, { color: '#ff9800' }]}>{formatNumber(readingStore.currentStreak, i18n.language)}</Text>
                 <Text style={[styles.statLabel, { color: colors.textSecondary }]}>{t('quran.currentStreak', { defaultValue: 'Current Streak' })}</Text>
               </View>
-              <View style={[styles.statDivider, { backgroundColor: colors.border }]} />
+              <View style={[styles.statDivider, { backgroundColor: colors.textSecondary + '20' }]} />
               <View style={styles.statBox}>
                 <Text style={[styles.statValue, { color: colors.text }]}>{formatNumber(readingStore.longestStreak, i18n.language)}</Text>
                 <Text style={[styles.statLabel, { color: colors.textSecondary }]}>{t('quran.longestStreak', { defaultValue: 'Longest Streak' })}</Text>
@@ -94,7 +93,7 @@ export default function QuranTrackerScreen() {
 
             <View style={styles.quickAddRow}>
               <TouchableOpacity activeOpacity={1} 
-                style={[styles.quickAddBtn, { backgroundColor: colors.backgroundElement, borderColor: colors.border, borderWidth: 1 }]}
+                style={[styles.quickAddBtn, { backgroundColor: colors.backgroundElement, borderColor: colors.textSecondary + '20', borderWidth: 1 }]}
                 onPress={() => {
                   if (pagesReadToday > 0) readingStore.addPagesRead(-1);
                 }}
@@ -112,10 +111,10 @@ export default function QuranTrackerScreen() {
                 <Text style={[styles.quickAddText, { color: isGoalMet ? colors.highlight : colors.accent }]}>{t('quran.addPage', { defaultValue: 'Add Page' })}</Text>
               </TouchableOpacity>
             </View>
-          </View>
+          </ThemeCard>
 
           {/* Goal Customization */}
-          <ThemeCard  style={[styles.card]}>
+          <ThemeCard style={styles.card}>
             <View style={styles.cardHeader}>
               <Text style={[styles.cardTitle, { color: colors.text }]}>{t('quran.dailyGoal', { defaultValue: 'Daily Goal' })}</Text>
               <TouchableOpacity activeOpacity={1} onPress={() => setIsEditingGoal(!isEditingGoal)}>
@@ -131,7 +130,7 @@ export default function QuranTrackerScreen() {
               
               {isEditingGoal && (
                 <View style={{ flexDirection: 'row', alignItems: 'center', gap: Spacing.three }}>
-                  <TouchableOpacity activeOpacity={1} onPress={() => handleGoalChange(-1)} style={[styles.goalBtn, { backgroundColor: colors.border }]}>
+                  <TouchableOpacity activeOpacity={1} onPress={() => handleGoalChange(-1)} style={[styles.goalBtn, { backgroundColor: colors.backgroundElement, borderWidth: 1, borderColor: colors.textSecondary + '20' }]}>
                     <Minus size={16} color={colors.text} />
                   </TouchableOpacity>
                   <Text style={{ fontFamily: Fonts.outfit, fontSize: 18, color: colors.text, fontWeight: '600', width: 24, textAlign: 'center' }}>
@@ -169,13 +168,13 @@ export default function QuranTrackerScreen() {
               <History size={16} color={colors.textSecondary} />
             </View>
             
-            <View  style={[styles.card, themeStyles.cardShadow, { borderColor: colors.border }]}>
+            <ThemeCard style={styles.card}>
               <View style={styles.heatmapGrid}>
                 {past30Days.map((dateStr) => {
                   const pages = readingStore.historyLog[dateStr] || 0;
                   const hasNote = !!readingStore.notesLog[dateStr];
-                  let bgColor: string = colors.border;
-                  let opacity = 0.3;
+                  let bgColor: string = colors.textSecondary + '30';
+                  let opacity = 1;
                   
                   if (pages > 0) {
                     const ratio = Math.min(pages / readingStore.dailyGoalPages, 1);
@@ -209,7 +208,7 @@ export default function QuranTrackerScreen() {
                 </View>
                 <Text style={{ fontFamily: Fonts.outfit, fontSize: 12, color: colors.textSecondary }}>{t('common.more', { defaultValue: 'More' })}</Text>
               </View>
-            </View>
+            </ThemeCard>
           </View>
           
           <View style={{ height: 100 }} />
@@ -221,10 +220,10 @@ export default function QuranTrackerScreen() {
         <Modal visible={true} transparent animationType="fade" onRequestClose={() => setHistoryModalDate(null)}>
           <View style={styles.modalBackdrop}>
             <TouchableOpacity activeOpacity={1} style={StyleSheet.absoluteFill} onPress={() => setHistoryModalDate(null)}>
-              <View   style={StyleSheet.absoluteFill} />
+              <View style={StyleSheet.absoluteFill} />
             </TouchableOpacity>
             
-            <View style={[styles.modalCard, { backgroundColor: colors.background, borderColor: colors.border }]}>
+            <ThemeCard style={styles.modalCard}>
               <View style={styles.modalHeader}>
                 <Text style={[styles.modalTitle, { color: colors.text }]}>
                   {new Date(historyModalDate).toLocaleDateString(i18n.language, { weekday: 'long', month: 'long', day: 'numeric' })}
@@ -245,8 +244,8 @@ export default function QuranTrackerScreen() {
 
               {readingStore.notesLog[historyModalDate] ? (
                 <View style={{ marginTop: Spacing.two }}>
-                  <Text style={[styles.sectionTitle, { color: colors.textSecondary, fontSize: 12 }]}>{t('quran.reflection', { defaultValue: 'Reflection' })}</Text>
-                  <View style={{ backgroundColor: colors.backgroundElement, padding: Spacing.four, borderRadius: 16, borderWidth: 1, borderColor: colors.border }}>
+                  <Text style={[styles.sectionTitle, { color: colors.textSecondary }]}>{t('quran.reflection', { defaultValue: 'Reflection' })}</Text>
+                  <View style={{ backgroundColor: colors.backgroundElement, padding: Spacing.four, borderRadius: 16, borderWidth: 1, borderColor: colors.textSecondary + '20' }}>
                     <Text style={{ fontFamily: Fonts.outfit, fontSize: 15, color: colors.text, lineHeight: 22 }}>
                       {readingStore.notesLog[historyModalDate]}
                     </Text>
@@ -260,7 +259,7 @@ export default function QuranTrackerScreen() {
                   </Text>
                 </View>
               )}
-            </View>
+            </ThemeCard>
           </View>
         </Modal>
       )}
@@ -272,8 +271,7 @@ const styles = StyleSheet.create({
   safeArea: { flex: 1 },
   container: { padding: Spacing.four },
   card: {
-    borderRadius: 16,
-    borderWidth: 1,
+    borderRadius: 20,
     padding: Spacing.four,
     marginBottom: Spacing.four,
     overflow: 'hidden',
@@ -339,9 +337,10 @@ const styles = StyleSheet.create({
   },
   sectionTitle: {
     fontFamily: Fonts.outfit,
-    fontSize: 13,
+    fontSize: 10,
     textTransform: 'uppercase',
     letterSpacing: 1.2,
+    opacity: 0.6,
     marginBottom: Spacing.three,
     marginLeft: Spacing.one,
   },
@@ -379,8 +378,13 @@ const styles = StyleSheet.create({
   },
   
   // Modal Styles
-  modalBackdrop: { flex: 1, justifyContent: 'center', padding: Spacing.four },
-  modalCard: { padding: Spacing.four, borderRadius: 20, borderWidth: 1, overflow: 'hidden' },
+  modalBackdrop: {
+    flex: 1,
+    justifyContent: 'center',
+    padding: Spacing.four,
+    backgroundColor: 'rgba(0,0,0,0.6)',
+  },
+  modalCard: { padding: Spacing.four, borderRadius: 20 },
   modalHeader: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' },
   modalTitle: { fontFamily: Fonts.outfit, fontSize: 18, textTransform: 'capitalize' },
   closeBtn: { width: 32, height: 32, borderRadius: 16, alignItems: 'center', justifyContent: 'center' },

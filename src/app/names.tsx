@@ -33,14 +33,14 @@ export default function NamesScreen() {
         renderItem={({ item }) => (
           <ThemeCard intensity={40}  style={[styles.cardWrapper, { borderColor: colors.border }]}>
             <View style={[styles.card, themeStyles.cardShadow]}>
-              <View style={[styles.numberBox, { backgroundColor: 'rgba(255,255,255,0.05)', borderColor: colors.border, borderWidth: 1 }]}>
+              <View style={[styles.numberBox, { backgroundColor: colors.textSecondary + '15', borderColor: colors.border, borderWidth: 1 }]}>
                 <Text style={[styles.numberText, { color: colors.textSecondary }]}>{formatNumber(item.id, i18n.language)}</Text>
               </View>
               <View style={styles.textContainer}>
                 <Text style={[styles.englishText, { color: colors.text }]}>{item.english}</Text>
                 <Text style={[styles.meaningText, { color: colors.textSecondary }]}>{item.meaning}</Text>
               </View>
-              <Text style={[styles.arabicText, { color: colors.accent }]}>{item.arabic}</Text>
+              <Text style={[styles.arabicText, { color: colors.text }]}>{item.arabic}</Text>
             </View>
           </ThemeCard>
         )}

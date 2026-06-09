@@ -22,8 +22,8 @@ export default function StoriesScreen() {
 
       <View style={styles.content}>
         <View style={styles.iconWrapper}>
-          <View style={[styles.circle, { backgroundColor: 'rgba(255,255,255,0.05)' }]}>
-            <History size={64} color={colors.accent} />
+          <View style={[styles.circle, { backgroundColor: colors.textSecondary + '15', borderColor: colors.textSecondary + '20' }]}>
+            <History size={64} color={colors.textSecondary} />
           </View>
         </View>
 
@@ -36,16 +36,16 @@ export default function StoriesScreen() {
         </Text>
 
         <View style={styles.featureList}>
-          <ThemeCard intensity={30}  style={styles.featureCard}>
-            <PenTool size={24} color={colors.accent} />
+          <ThemeCard intensity={30}  style={[styles.featureCard, { borderColor: colors.textSecondary + '20' }]}>
+            <PenTool size={24} color={colors.textSecondary} />
             <View style={styles.featureTextWrapper}>
               <Text style={[styles.featureTitle, { color: colors.text }]}>{t('stories.authentic')}</Text>
               <Text style={[styles.featureDesc, { color: colors.textSecondary }]}>{t('stories.authenticDesc')}</Text>
             </View>
           </ThemeCard>
 
-          <ThemeCard intensity={30}  style={styles.featureCard}>
-            <BookOpen size={24} color={colors.accent} />
+          <ThemeCard intensity={30}  style={[styles.featureCard, { borderColor: colors.textSecondary + '20' }]}>
+            <BookOpen size={24} color={colors.textSecondary} />
             <View style={styles.featureTextWrapper}>
               <Text style={[styles.featureTitle, { color: colors.text }]}>{t('stories.deeper')}</Text>
               <Text style={[styles.featureDesc, { color: colors.textSecondary }]}>{t('stories.deeperDesc')}</Text>
@@ -103,7 +103,6 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
     borderWidth: 1,
-    borderColor: 'rgba(255,255,255,0.1)',
   },
   heading: {
     fontFamily: Fonts.outfit,
@@ -127,7 +126,6 @@ const styles = StyleSheet.create({
     padding: Spacing.four,
     borderRadius: 20,
     borderWidth: 1,
-    borderColor: 'rgba(255,255,255,0.05)',
   },
   featureTextWrapper: {
     marginLeft: Spacing.four,

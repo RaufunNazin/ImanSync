@@ -117,7 +117,7 @@ export default function TriviaScreen() {
       <View style={styles.container}>
         {isFinished ? (
           <Animated.View entering={FadeInDown.springify()} style={styles.resultContainer}>
-            <Brain size={64} color={colors.accent} style={{ marginBottom: Spacing.four }} />
+            <Brain size={64} color={colors.textSecondary} style={{ marginBottom: Spacing.four }} />
             <Text style={[styles.resultTitle, { color: colors.text }]}>{t('trivia.quizCompleted', { defaultValue: 'Quiz Completed!' })}</Text>
             <Text style={[styles.resultScore, { color: colors.highlight }]}>
               {formatNumber(score, i18n.language)} / {formatNumber(questions.length, i18n.language)}
@@ -191,7 +191,7 @@ export default function TriviaScreen() {
               </View>
 
               {selectedOption !== null && (
-                <Animated.View entering={FadeInDown.duration(300)} style={[styles.explanationBox, { backgroundColor: colors.accent + '15', borderColor: colors.accent }]}>
+                <Animated.View entering={FadeInDown.duration(300)} style={[styles.explanationBox, { backgroundColor: colors.textSecondary + '10', borderColor: colors.textSecondary + '20' }]}>
                   <Text style={[styles.explanationText, { color: colors.textSecondary }]}>
                     {isBn && currentQ.explanation_bn ? currentQ.explanation_bn : currentQ.explanation}
                   </Text>

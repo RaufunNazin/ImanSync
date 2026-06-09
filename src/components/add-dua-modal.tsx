@@ -388,7 +388,7 @@ export default function AddDuaModal({ visible, onClose, onSave, initialData, col
                     <Image source={{ uri: mediaUri }} style={{ width: '100%', height: 200, borderRadius: 8 }} resizeMode="contain" />
                   ) : (
                     <View style={{ width: '100%', height: 150, backgroundColor: colors.backgroundElement, borderRadius: 8, alignItems: 'center', justifyContent: 'center' }}>
-                       <Video size={48} color={colors.accent} />
+                       <Video size={48} color={colors.textSecondary} />
                     </View>
                   )}
                   <TouchableOpacity activeOpacity={1} onPress={() => { setMediaUri(null); setMediaType('text'); }}>

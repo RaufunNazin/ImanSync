@@ -324,10 +324,10 @@ export default function DuaScreen() {
         {/* Permanent Storage Suggestion Banner */}
         {showSuggestBanner && (
           <TouchableOpacity activeOpacity={1} 
-            style={[styles.banner, { borderColor: colors.highlight + '60', backgroundColor: colors.highlight + '15' }]}
+            style={[styles.banner, { borderColor: colors.textSecondary + '20', backgroundColor: colors.textSecondary + '10' }]}
             onPress={() => router.push({ pathname: '/settings', params: { highlight: 'storage' } })}
           >
-            <FolderLock size={18} color={colors.highlight} style={{ flexShrink: 0 }} />
+            <FolderLock size={18} color={colors.textSecondary} style={{ flexShrink: 0 }} />
             <Text style={[styles.bannerText, { color: colors.text, flex: 1 }]}>
               {t('dua.suggestPermanentStorage')}
             </Text>
@@ -394,7 +394,7 @@ export default function DuaScreen() {
             )}
 
         {/* Main Grid Section */}
-        <View style={[styles.section, { padding: Spacing.four }]}>
+        <View style={[styles.section, { paddingHorizontal: Spacing.four }]}>
           <View style={styles.grid}>
             {loading ? (
               [...Array(20)].map((_, i) => (
@@ -526,7 +526,7 @@ export default function DuaScreen() {
 }
 
 const { width } = Dimensions.get('window');
-const cardWidth = (width - Spacing.four * 2 - Spacing.three) / 2;
+const cardWidth = Math.floor((width - Spacing.four * 2 - Spacing.three) / 2);
 
 const styles = StyleSheet.create({
 

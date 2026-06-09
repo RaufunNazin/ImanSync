@@ -19,16 +19,16 @@ export default function TabLayout() {
         tabBarStyle: {
           backgroundColor: colors.background,
           borderTopWidth: 1,
-          borderTopColor: colors.border,
+          borderTopColor: colors.textSecondary + '20',
           elevation: 0,
           shadowOpacity: 0,
           height: Platform.OS === 'ios' ? 88 : 70,
           paddingBottom: Platform.OS === 'ios' ? 28 : 8,
+          marginTop: 0,
         },
         tabBarLabelStyle: {
           fontSize: 10,
           textTransform: 'none',
-          marginTop: 2,
         },
         lazy: true,
         animation: 'shift',

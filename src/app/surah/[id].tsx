@@ -2,7 +2,7 @@ import ThemeCard from '@/components/ThemeCard';
 import { Fonts, Spacing, useThemeColors } from '@/constants/theme';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useLocalSearchParams, useRouter } from 'expo-router';
-import { Bookmark, ChevronLeft, Minus, Plus, Settings2, X, Play, Pause, DownloadCloud, CheckCircle, Loader2 } from 'lucide-react-native';
+import { Bookmark, ChevronLeft, Minus, Plus, Settings2, X, Play, Pause, DownloadCloud, CheckCircle } from 'lucide-react-native';
 import React, { useEffect, useRef, useState } from 'react';
 import { ActivityIndicator, FlatList, Modal, ScrollView, StyleSheet, Switch, Text, TouchableOpacity, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
@@ -10,6 +10,8 @@ import { useTranslation } from 'react-i18next';
 import { formatNumber } from '@/utils/formatNumber';
 import { useAudioStore } from '@/store/audioStore';
 import { useDownloadStore } from '@/store/downloadStore';
+import DownloadProgressRing from '@/components/DownloadProgressRing';
+import ConfirmModal from '@/components/ConfirmModal';
 
 interface Ayah {
   numberInSurah: number;
@@ -61,6 +63,7 @@ export default function SurahScreen() {
   }));
   const [modalVisible, setModalVisible] = useState(false);
   const [bookmarkedAyahs, setBookmarkedAyahs] = useState<Record<string, boolean>>({});
+  const [deleteDownloadConfirm, setDeleteDownloadConfirm] = useState(false);
 
   const flatListRef = useRef<FlatList>(null);
   const isInitialScrollDone = useRef(false);
@@ -213,7 +216,7 @@ export default function SurahScreen() {
       <View style={styles.modalOverlay}>
         <TouchableOpacity activeOpacity={1} style={StyleSheet.absoluteFill} onPress={() => setModalVisible(false)} />
         <View 
-          style={[styles.modalContent, { backgroundColor: colors.background, borderColor: colors.border }]}
+          style={[styles.modalContent, { backgroundColor: colors.background, borderColor: colors.textSecondary + '20' }]}
         >
           <View style={{ width: 40, height: 4, backgroundColor: colors.border, borderRadius: 2, alignSelf: 'center', marginBottom: Spacing.four }} />
           <View style={styles.modalHeader}>
@@ -226,7 +229,7 @@ export default function SurahScreen() {
           <ScrollView showsVerticalScrollIndicator={false}>
             {/* Font Sizes */}
             <Text style={[styles.sectionTitle, { color: colors.textSecondary }]}>{t('quranSettings.textSizes')}</Text>
-            <View style={[styles.settingRow, { borderBottomColor: colors.border }]}>
+            <View style={[styles.settingRow, { borderBottomColor: colors.textSecondary + '20' }]}>
               <Text style={[styles.settingLabel, { color: colors.text }]}>{t('quranSettings.arabicFont')}</Text>
               <View style={styles.stepper}>
                 <TouchableOpacity activeOpacity={1} onPress={() => updateSetting('arabicFontSize', Math.max(20, settings.arabicFontSize - 2))} style={[styles.stepBtn, { borderColor: colors.border }]}>
@@ -239,7 +242,7 @@ export default function SurahScreen() {
               </View>
             </View>
 
-            <View style={[styles.settingRow, { borderBottomColor: colors.border }]}>
+            <View style={[styles.settingRow, { borderBottomColor: colors.textSecondary + '20' }]}>
               <Text style={[styles.settingLabel, { color: colors.text }]}>{t('quranSettings.translationFont')}</Text>
               <View style={styles.stepper}>
                 <TouchableOpacity activeOpacity={1} onPress={() => updateSetting('translationFontSize', Math.max(12, settings.translationFontSize - 1))} style={[styles.stepBtn, { borderColor: colors.border }]}>
@@ -252,7 +255,7 @@ export default function SurahScreen() {
               </View>
             </View>
 
-            <View style={[styles.settingRow, { borderBottomColor: colors.border }]}>
+            <View style={[styles.settingRow, { borderBottomColor: colors.textSecondary + '20' }]}>
               <Text style={[styles.settingLabel, { color: colors.text }]}>{t('quranSettings.translitFont')}</Text>
               <View style={styles.stepper}>
                 <TouchableOpacity activeOpacity={1} onPress={() => updateSetting('translitFontSize', Math.max(10, settings.translitFontSize - 1))} style={[styles.stepBtn, { borderColor: colors.border }]}>
@@ -267,18 +270,18 @@ export default function SurahScreen() {
 
             {/* Translations */}
             <Text style={[styles.sectionTitle, { color: colors.textSecondary, marginTop: Spacing.four }]}>{t('quranSettings.translations')}</Text>
-            <View style={[styles.settingRow, { borderBottomColor: colors.border }]}>
+            <View style={[styles.settingRow, { borderBottomColor: colors.textSecondary + '20' }]}>
               <Text style={[styles.settingLabel, { color: colors.text }]}>{t('quranSettings.enTrans')}</Text>
               <Switch value={settings.showEnglish} onValueChange={(v) => updateSetting('showEnglish', v)} trackColor={{ false: colors.border, true: colors.highlight }} thumbColor="#FFFFFF" />
             </View>
-            <View style={[styles.settingRow, { borderBottomColor: colors.border }]}>
+            <View style={[styles.settingRow, { borderBottomColor: colors.textSecondary + '20' }]}>
               <Text style={[styles.settingLabel, { color: colors.text }]}>{t('quranSettings.bnTrans')}</Text>
               <Switch value={settings.showBangla} onValueChange={(v) => updateSetting('showBangla', v)} trackColor={{ false: colors.border, true: colors.highlight }} thumbColor="#FFFFFF" />
             </View>
 
             {/* Transliterations */}
             <Text style={[styles.sectionTitle, { color: colors.textSecondary, marginTop: Spacing.four }]}>{t('quranSettings.translit', { defaultValue: 'Transliteration' })}</Text>
-            <View style={[styles.settingRow, { borderBottomColor: colors.border }]}>
+            <View style={[styles.settingRow, { borderBottomColor: colors.textSecondary + '20' }]}>
               <Text style={[styles.settingLabel, { color: colors.text }]}>{t('quranSettings.enTranslit', { defaultValue: 'Show Transliteration' })}</Text>
               <Switch value={settings.showEnglishTranslit} onValueChange={(v) => updateSetting('showEnglishTranslit', v)} trackColor={{ false: colors.border, true: colors.highlight }} thumbColor="#FFFFFF" />
             </View>
@@ -286,7 +289,7 @@ export default function SurahScreen() {
             {/* Audio Reciter */}
             <Text style={[styles.sectionTitle, { color: colors.textSecondary, marginTop: Spacing.four }]}>{t('quranSettings.reciter', { defaultValue: 'Audio Reciter' })}</Text>
             
-            <View style={[styles.settingRow, { borderBottomColor: colors.border, marginBottom: Spacing.two }]}>
+            <View style={[styles.settingRow, { borderBottomColor: colors.textSecondary + '20', marginBottom: Spacing.two }]}>
               <Text style={[styles.settingLabel, { color: colors.text }]}>{t('quranSettings.autoPlayNextAyah', { defaultValue: 'Auto-Play Next Ayah' })}</Text>
               <Switch value={settings.autoPlayNextAyah} onValueChange={(v) => updateSetting('autoPlayNextAyah', v)} trackColor={{ false: colors.border, true: colors.highlight }} thumbColor="#FFFFFF" />
             </View>
@@ -362,7 +365,7 @@ export default function SurahScreen() {
               const progress = downloadStore.downloadProgress[key];
               
               if (isDownloaded) {
-                downloadStore.deleteSurah(reciterId, surahId);
+                setDeleteDownloadConfirm(true);
               } else if (progress === undefined) {
                 downloadStore.downloadSurah(reciterId, surahId);
               }
@@ -371,15 +374,16 @@ export default function SurahScreen() {
           >
             {downloadStore.downloadedFiles[`${currentReciterId}_${id}`] ? (
               <View style={{ flexDirection: 'row', alignItems: 'center', gap: 4 }}>
-                <CheckCircle size={20} color={colors.highlight} />
+                <CheckCircle size={18} color={colors.highlight} />
               </View>
             ) : downloadStore.downloadProgress[`${currentReciterId}_${id}`] !== undefined ? (
-              <View style={{ flexDirection: 'row', alignItems: 'center', gap: 4 }}>
-                <Text style={{ fontFamily: Fonts.outfit, fontSize: 12, color: colors.accent }}>
-                  {Math.round(downloadStore.downloadProgress[`${currentReciterId}_${id}`])}%
-                </Text>
-                <Loader2 size={16} color={colors.accent} style={{ transform: [{ rotate: `${downloadStore.downloadProgress[`${currentReciterId}_${id}`] * 3.6}deg` }] }} />
-              </View>
+              <DownloadProgressRing
+                size={22}
+                progress={downloadStore.downloadProgress[`${currentReciterId}_${id}`]}
+                color={colors.accent}
+                trackColor={colors.textSecondary + '30'}
+                label={formatNumber(Math.round(downloadStore.downloadProgress[`${currentReciterId}_${id}`]), i18n.language)}
+              />
             ) : (
               <DownloadCloud size={20} color={colors.textSecondary} opacity={0.6} />
             )}
@@ -408,7 +412,7 @@ export default function SurahScreen() {
             <ThemeCard intensity={30}  style={[styles.ayahCardWrapper, { borderColor: colors.border }]}>
               <View style={styles.ayahCard}>
                 <View style={styles.ayahHeader}>
-                  <View style={[styles.numberCircle, { borderColor: colors.border, backgroundColor: 'rgba(255,255,255,0.05)' }]}>
+                  <View style={[styles.numberCircle, { borderColor: colors.textSecondary + '20', backgroundColor: colors.textSecondary + '15' }]}>
                     <Text style={[styles.numberText, { color: colors.textSecondary }]}>{formatNumber(item.numberInSurah, i18n.language)}</Text>
                   </View>
                   <View style={{ flexDirection: 'row', gap: Spacing.two, alignItems: 'center' }}>
@@ -442,7 +446,7 @@ export default function SurahScreen() {
                 </Text>
 
                 {settings.showEnglishTranslit && item.englishTranslit && (
-                  <Text style={[styles.translitText, { color: colors.accent, fontSize: settings.translitFontSize, lineHeight: settings.translitFontSize * 1.5 }]}>
+                  <Text style={[styles.translitText, { color: colors.textSecondary, fontSize: settings.translitFontSize, lineHeight: settings.translitFontSize * 1.5 }]}>
                     {item.englishTranslit}
                   </Text>
                 )}
@@ -465,6 +469,17 @@ export default function SurahScreen() {
       )}
 
       {renderSettingsModal()}
+      <ConfirmModal
+        visible={deleteDownloadConfirm}
+        title={t('quran.deleteDownloadTitle', { defaultValue: 'Delete Audio' })}
+        message={t('quran.deleteDownloadMessage', { defaultValue: 'Remove this downloaded surah audio from your device?' })}
+        confirmText={t('quran.deleteDownloadConfirm', { defaultValue: 'Delete' })}
+        cancelText={t('common.cancel', { defaultValue: 'Cancel' })}
+        onConfirm={() => { setDeleteDownloadConfirm(false); downloadStore.deleteSurah(currentReciterId, Number(id)); }}
+        onCancel={() => setDeleteDownloadConfirm(false)}
+        colors={colors}
+        confirmColor="#EF4444"
+      />
     </SafeAreaView>
   );
 }
@@ -489,7 +504,6 @@ const styles = StyleSheet.create({
     borderRadius: 20,
     marginBottom: Spacing.four,
     borderWidth: 1,
-    borderColor: 'rgba(255,255,255,0.1)',
   },
   contextTitle: { fontFamily: Fonts.outfit, fontSize: 18, marginBottom: Spacing.two },
   contextText: { fontFamily: Fonts.outfit, fontSize: 14, lineHeight: 22 },
@@ -498,7 +512,6 @@ const styles = StyleSheet.create({
     borderRadius: 20,
     overflow: 'hidden',
     borderWidth: 1,
-    borderColor: 'rgba(255,255,255,0.05)',
   },
   ayahCard: { padding: Spacing.five },
   ayahHeader: { flexDirection: 'row', justifyContent: 'space-between', marginBottom: Spacing.three },
@@ -529,7 +542,6 @@ const styles = StyleSheet.create({
     padding: Spacing.five,
     maxHeight: '80%',
     borderTopWidth: 1,
-    borderColor: 'rgba(255,255,255,0.1)',
     overflow: 'hidden',
   },
   modalHeader: {
@@ -556,7 +568,6 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     paddingVertical: Spacing.three,
     borderBottomWidth: StyleSheet.hairlineWidth,
-    borderBottomColor: 'rgba(255,255,255,0.1)'
   },
   settingLabel: { fontFamily: Fonts.outfit, fontSize: 16 },
   settingSub: { fontFamily: Fonts.outfit, fontSize: 12, marginTop: 2 },

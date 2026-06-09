@@ -100,7 +100,8 @@ export default function HomeScreen() {
   const totalQada = qada.fajr + qada.dhuhr + qada.asr + qada.maghrib + qada.isha + qada.witr;
   
   const qadaBadgeText = t('home.qadaBadge', { 
-    count: formatNumber(totalQada.toString(), i18n.language)
+    count: totalQada,
+    formatted: formatNumber(totalQada.toString(), i18n.language)
   });
 
 
@@ -573,7 +574,7 @@ export default function HomeScreen() {
       >
         {/* ── Greeting ────────────────────────────────────────────── */}
         <View style={styles.greetingSection}>
-          <Text style={[styles.arabicGreeting, { color: colors.accent }]}>
+          <Text style={[styles.arabicGreeting, { color: colors.text }]}>
             {t('home.greeting')}
           </Text>
           <TouchableOpacity activeOpacity={1} onPress={() => router.push('/calendar' as any)} disabled={!hijriDisplay}>
@@ -653,7 +654,9 @@ export default function HomeScreen() {
                   </SkeletonBox>
                   <SkeletonBox loaded={prayersWithStatus.length > 0} width={45} height={16} borderRadius={5} color={colors.border} style={{ marginTop: 2 }}>
                     <Text style={{ fontFamily: Fonts.outfit, fontSize: 12, color: colors.textSecondary, marginTop: 1 }}>
-                      {currentPrayer.time}
+                      {currentPrayer.time.replace(/ AM| PM/g, '')}
+                      {currentPrayer.time.includes(' AM') && <Text style={{ fontSize: 8 }}> AM</Text>}
+                      {currentPrayer.time.includes(' PM') && <Text style={{ fontSize: 8 }}> PM</Text>}
                     </Text>
                   </SkeletonBox>
                 </View>
@@ -665,7 +668,9 @@ export default function HomeScreen() {
                   </SkeletonBox>
                   <SkeletonBox loaded={prayersWithStatus.length > 0} width={45} height={16} borderRadius={5} color={colors.border} style={{ marginTop: 2 }}>
                     <Text style={{ fontFamily: Fonts.outfit, fontSize: 12, color: colors.textSecondary, marginTop: 1 }}>
-                      {nextPrayer.time}
+                      {nextPrayer.time.replace(/ AM| PM/g, '')}
+                      {nextPrayer.time.includes(' AM') && <Text style={{ fontSize: 8 }}> AM</Text>}
+                      {nextPrayer.time.includes(' PM') && <Text style={{ fontSize: 8 }}> PM</Text>}
                     </Text>
                   </SkeletonBox>
                 </View>
@@ -691,7 +696,7 @@ export default function HomeScreen() {
                 style={styles.actionItemBlur} 
                 onPress={() => router.push('/qibla')}
               >
-                <Compass size={20} color={colors.accent} />
+                <Compass size={20} color={colors.text} />
                 <Text style={[styles.actionText, { color: colors.text }]}>{t('home.qibla')}</Text>
               </TouchableOpacity>
             </ThemeCard>
@@ -701,7 +706,7 @@ export default function HomeScreen() {
                 style={styles.actionItemBlur} 
                 onPress={() => router.push('/names')}
               >
-                <Book size={20} color={colors.highlight} />
+                <Book size={20} color={colors.text} />
                 <Text style={[styles.actionText, { color: colors.text }]}>{t('home.names')}</Text>
               </TouchableOpacity>
             </ThemeCard>
@@ -711,7 +716,7 @@ export default function HomeScreen() {
                 style={styles.actionItemBlur} 
                 onPress={() => router.push('/quran-learn' as any)}
               >
-                <GraduationCap size={20} color={colors.accent} />
+                <GraduationCap size={20} color={colors.text} />
                 <Text style={[styles.actionText, { color: colors.text }]}>{t('home.learnQuran')}</Text>
               </TouchableOpacity>
             </ThemeCard>
@@ -721,7 +726,7 @@ export default function HomeScreen() {
                 style={styles.actionItemBlur} 
                 onPress={() => router.push('/calendar' as any)}
               >
-                <CalendarDays size={20} color={colors.highlight} />
+                <CalendarDays size={20} color={colors.text} />
                 <Text style={[styles.actionText, { color: colors.text }]}>{t('calendar.titleEn', { defaultValue: 'Islamic Calendar' })}</Text>
               </TouchableOpacity>
             </ThemeCard>
@@ -731,7 +736,7 @@ export default function HomeScreen() {
                 style={styles.actionItemBlur} 
                 onPress={() => router.push('/trivia' as any)}
               >
-                <Brain size={20} color={colors.accent} />
+                <Brain size={20} color={colors.text} />
                 <Text style={[styles.actionText, { color: colors.text }]}>{t('home.trivia', { defaultValue: 'Islamic Trivia' })}</Text>
               </TouchableOpacity>
             </ThemeCard>
@@ -748,7 +753,7 @@ export default function HomeScreen() {
                   </>
                 ) : (
                   <>
-                    <History size={20} color={colors.highlight} />
+                    <History size={20} color={colors.text} />
                     <Text style={[styles.actionText, { color: colors.text }]}>{t('tracker.qadaTitle', { defaultValue: 'Qada Tracker' })}</Text>
                   </>
                 )}
@@ -807,7 +812,7 @@ export default function HomeScreen() {
                     return (
                       <View key={`time-${prayer.id}`} style={{ width: '20%', alignItems: 'center' }}>
                         <Text style={[styles.timelineTime, { color: isCurrent ? colors.highlight : colors.text, opacity: 1 }]}>
-                          {formatNumber(prayer.time, i18n.language)}
+                          {formatNumber(prayer.time.replace(/ AM| PM/g, ''), i18n.language)}
                         </Text>
                       </View>
                     );
@@ -907,9 +912,9 @@ export default function HomeScreen() {
             <ThemeCard intensity={20} style={[styles.inspirationCard, { borderColor: colors.border }]}>
               <View style={{ alignItems: 'center' }}>
                 <View style={styles.quoteIconContainer}>
-                  <BookOpen size={24} color={colors.accent} />
+                  <BookOpen size={24} color={colors.textSecondary} />
                 </View>
-                <Text style={[styles.inspirationArabic, { color: colors.highlight }]}>
+                <Text style={[styles.inspirationArabic, { color: colors.text }]}>
                   {dailyVerse.arabic}
                 </Text>
                 {i18n.language !== 'bn' && (
@@ -922,7 +927,7 @@ export default function HomeScreen() {
                     {dailyVerse.translationBn}
                   </Text>
                 )}
-                <Text style={[styles.inspirationRef, { color: colors.accent }]}>
+                <Text style={[styles.inspirationRef, { color: colors.textSecondary }]}>
                   — {t('surahNames.' + dailyVerse.surahId, { defaultValue: dailyVerse.surahDefaultName })} {formatNumber(dailyVerse.surahId, i18n.language)}:{formatNumber(dailyVerse.ayahNum, i18n.language)}
                 </Text>
               </View>

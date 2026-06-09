@@ -222,7 +222,7 @@ export default function JuzScreen() {
       <View style={styles.modalOverlay}>
         <TouchableOpacity activeOpacity={1} style={StyleSheet.absoluteFill} onPress={() => setModalVisible(false)} />
         <View 
-          style={[styles.modalContent, { backgroundColor: colors.background, borderColor: colors.border }]}
+          style={[styles.modalContent, { backgroundColor: colors.background, borderColor: colors.textSecondary + '20' }]}
         >
           <View style={{ width: 40, height: 4, backgroundColor: colors.border, borderRadius: 2, alignSelf: 'center', marginBottom: Spacing.four }} />
           
@@ -236,7 +236,7 @@ export default function JuzScreen() {
           <ScrollView showsVerticalScrollIndicator={false}>
             {/* Font Sizes */}
             <Text style={[styles.sectionTitle, { color: colors.textSecondary }]}>{t('quranSettings.textSizes')}</Text>
-            <View style={styles.settingRow}>
+            <View style={[styles.settingRow, { borderBottomColor: colors.textSecondary + '20' }]}>
               <Text style={[styles.settingLabel, { color: colors.text }]}>{t('quranSettings.arabicFont')}</Text>
               <View style={styles.stepper}>
                 <TouchableOpacity activeOpacity={1} onPress={() => updateSetting('arabicFontSize', Math.max(20, settings.arabicFontSize - 2))} style={[styles.stepBtn, { borderColor: colors.border }]}>
@@ -249,7 +249,7 @@ export default function JuzScreen() {
               </View>
             </View>
 
-            <View style={styles.settingRow}>
+            <View style={[styles.settingRow, { borderBottomColor: colors.textSecondary + '20' }]}>
               <Text style={[styles.settingLabel, { color: colors.text }]}>{t('quranSettings.translationFont')}</Text>
               <View style={styles.stepper}>
                 <TouchableOpacity activeOpacity={1} onPress={() => updateSetting('translationFontSize', Math.max(12, settings.translationFontSize - 1))} style={[styles.stepBtn, { borderColor: colors.border }]}>
@@ -264,18 +264,18 @@ export default function JuzScreen() {
 
             {/* Translations */}
             <Text style={[styles.sectionTitle, { color: colors.textSecondary, marginTop: Spacing.four }]}>{t('quranSettings.translations')}</Text>
-            <View style={styles.settingRow}>
+            <View style={[styles.settingRow, { borderBottomColor: colors.textSecondary + '20' }]}>
               <Text style={[styles.settingLabel, { color: colors.text }]}>{t('quranSettings.enTrans')}</Text>
               <Switch value={settings.showEnglish} onValueChange={(v) => updateSetting('showEnglish', v)} trackColor={{ true: colors.highlight }} />
             </View>
-            <View style={styles.settingRow}>
+            <View style={[styles.settingRow, { borderBottomColor: colors.textSecondary + '20' }]}>
               <Text style={[styles.settingLabel, { color: colors.text }]}>{t('quranSettings.bnTrans')}</Text>
               <Switch value={settings.showBangla} onValueChange={(v) => updateSetting('showBangla', v)} trackColor={{ true: colors.highlight }} />
             </View>
 
             {/* Transliterations */}
             <Text style={[styles.sectionTitle, { color: colors.textSecondary, marginTop: Spacing.four }]}>{t('quranSettings.translit', { defaultValue: 'Transliteration' })}</Text>
-            <View style={styles.settingRow}>
+            <View style={[styles.settingRow, { borderBottomColor: colors.textSecondary + '20' }]}>
               <Text style={[styles.settingLabel, { color: colors.text }]}>{t('quranSettings.enTranslit', { defaultValue: 'Show Transliteration' })}</Text>
               <Switch value={settings.showEnglishTranslit} onValueChange={(v) => updateSetting('showEnglishTranslit', v)} trackColor={{ true: colors.highlight }} />
             </View>
@@ -372,7 +372,7 @@ export default function JuzScreen() {
               <View style={styles.ayahCard}>
                 <View style={styles.ayahHeader}>
                   <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8 }}>
-                    <View style={[styles.numberCircle, { borderColor: colors.border, backgroundColor: 'rgba(255,255,255,0.05)' }]}>
+                    <View style={[styles.numberCircle, { borderColor: colors.textSecondary + '20', backgroundColor: colors.textSecondary + '15' }]}>
                       <Text style={[styles.numberText, { color: colors.textSecondary }]}>{formatNumber(item.numberInSurah, i18n.language)}</Text>
                     </View>
                     <Text style={[styles.surahTag, { color: colors.textSecondary }]}>{t('surahNames.' + item.surahId, { defaultValue: item.surahName })}</Text>
@@ -391,7 +391,7 @@ export default function JuzScreen() {
                 </Text>
 
                 {settings.showEnglishTranslit && item.englishTranslit && (
-                  <Text style={[styles.translitText, { color: colors.accent, fontSize: settings.translationFontSize, lineHeight: settings.translationFontSize * 1.5 }]}>
+                  <Text style={[styles.translitText, { color: colors.textSecondary, fontSize: settings.translationFontSize, lineHeight: settings.translationFontSize * 1.5 }]}>
                     {item.englishTranslit}
                   </Text>
                 )}
@@ -437,7 +437,6 @@ const styles = StyleSheet.create({
     borderRadius: 20,
     overflow: 'hidden',
     borderWidth: 1,
-    borderColor: 'rgba(255,255,255,0.05)',
   },
   ayahCard: { padding: Spacing.five },
   ayahHeader: { flexDirection: 'row', justifyContent: 'space-between', marginBottom: Spacing.three },
@@ -469,7 +468,6 @@ const styles = StyleSheet.create({
     padding: Spacing.five,
     maxHeight: '80%',
     borderTopWidth: 1,
-    borderColor: 'rgba(255,255,255,0.1)',
     overflow: 'hidden',
   },
   modalHeader: {
@@ -496,7 +494,6 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     paddingVertical: Spacing.three,
     borderBottomWidth: StyleSheet.hairlineWidth,
-    borderBottomColor: 'rgba(255,255,255,0.1)'
   },
   settingLabel: { fontFamily: Fonts.outfit, fontSize: 16 },
   settingSub: { fontFamily: Fonts.outfit, fontSize: 12, marginTop: 2 },

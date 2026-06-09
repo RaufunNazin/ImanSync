@@ -73,7 +73,9 @@ export default function SpecialTimeCard({ item, colors, i18nLanguage, styles, t 
               </Animated.Text>
             ) : (
               <Animated.Text key="time" entering={FadeIn.duration(300)} exiting={FadeOut.duration(300)} style={{ position: 'absolute', fontFamily: Fonts.outfit, fontSize: 22, color: colors.accent, textAlign: 'center' }}>
-                {formatNumber(item.time, i18nLanguage)}
+                {formatNumber(item.time.replace(/ AM| PM/g, ''), i18nLanguage)}
+                {item.time.includes(' AM') && <Text style={{ fontSize: 13 }}> AM</Text>}
+                {item.time.includes(' PM') && <Text style={{ fontSize: 13 }}> PM</Text>}
               </Animated.Text>
             )}
           </View>

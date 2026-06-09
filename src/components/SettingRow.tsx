@@ -33,8 +33,8 @@ export default function SettingRow({ icon: Icon, title, value, type = 'navigate'
       }}
     >
       <View style={styles.settingLeft}>
-        <View style={[styles.iconBox, { backgroundColor: 'rgba(255,255,255,0.1)' }]}>
-          <Icon size={20} color={colors.highlight} />
+        <View style={[styles.iconBox, { backgroundColor: colors.textSecondary + '15' }]}>
+          <Icon size={20} color={colors.text} />
         </View>
         <Text style={[styles.settingTitle, { color: colors.text }]}>{title}</Text>
       </View>

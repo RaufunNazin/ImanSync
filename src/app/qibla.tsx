@@ -3,12 +3,11 @@ import { Fonts, Spacing, useThemeColors } from '@/constants/theme';
 import { formatNumber } from '@/utils/formatNumber';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import * as Location from 'expo-location';
-import { Magnetometer, Accelerometer } from 'expo-sensors';
-import React, { useEffect, useState, useRef } from 'react';
+import React, { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { StyleSheet, Text, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import Animated, { useSharedValue, useAnimatedStyle, withTiming, Easing } from 'react-native-reanimated';
+import Animated, { useSharedValue, useAnimatedStyle, withSpring } from 'react-native-reanimated';
 
 // Kaaba Coordinates
 const KAABA_LAT = 21.4225;
@@ -43,12 +42,11 @@ export default function QiblaScreen() {
   
   const heading = useSharedValue(0);
 
-  const lastHeadingRef = useRef(0);
-  const historyRef = useRef<number[]>([]);
-  const accelRef = useRef({ x: 0, y: 0, z: 1 });
-
   useEffect(() => {
-    // 1. Instant load cached location
+    let isMounted = true;
+    let headingSubscription: Location.LocationSubscription | null = null;
+    let lastStateUpdate = Date.now();
+
     AsyncStorage.getItem('imansync_location').then(val => {
       if (val) {
         try {
@@ -58,12 +56,18 @@ export default function QiblaScreen() {
           }
         } catch(e) {}
       } else {
-        setQiblaBearing(getQiblaBearing(23.8103, 90.4125)); // Default Dhaka
+        setQiblaBearing(getQiblaBearing(23.8103, 90.4125));
       }
     });
 
-    // 2. Background fetch fresh GPS
     (async () => {
+      // NEW COMMENT: Verify global device location services are switched on
+      const servicesEnabled = await Location.hasServicesEnabledAsync();
+      if (!servicesEnabled) {
+        setAccuracy('Poor');
+        return;
+      }
+
       let { status } = await Location.requestForegroundPermissionsAsync();
       if (status !== 'granted') return;
       
@@ -76,78 +80,54 @@ export default function QiblaScreen() {
             longitude: currentLoc.coords.longitude
           }));
         }
+
+        const sub = await Location.watchHeadingAsync((headingData) => {
+          const osHeading = headingData.trueHeading >= 0 ? headingData.trueHeading : headingData.magHeading;
+          
+          const deviation = headingData.accuracy;
+          if (deviation > 15 || deviation === 0) {
+            setInterference(true);
+            setAccuracy('Poor');
+          } else if (deviation > 10) {
+            setInterference(false);
+            setAccuracy('Good');
+          } else {
+            setInterference(false);
+            setAccuracy('High');
+          }
+
+          let currentShared = heading.value;
+          // NEW COMMENT: Handle JavaScript negative modulo behavior safely
+          let normalizedShared = ((currentShared % 360) + 360) % 360;
+          let diff = angleDifference(normalizedShared, osHeading);
+          let targetHeading = currentShared + diff;
+
+          heading.value = withSpring(targetHeading, { 
+            damping: 20,
+            stiffness: 200,
+          });
+          
+          const now = Date.now();
+          if (now - lastStateUpdate > 250) {
+            setHeadingState(osHeading);
+            lastStateUpdate = now;
+          }
+        });
+
+        // NEW COMMENT: Safely handle unmounting during asynchronous initialization
+        if (!isMounted) {
+          sub.remove();
+        } else {
+          headingSubscription = sub;
+        }
       } catch (e) {}
     })();
 
-    // 3. Sensor Setup
-    Magnetometer.setUpdateInterval(100);
-    Accelerometer.setUpdateInterval(100);
-
-    const accelSub = Accelerometer.addListener((data) => {
-      accelRef.current = data;
-    });
-
-    const magSub = Magnetometer.addListener((magData) => {
-      const { x: mx, y: my, z: mz } = magData;
-      const { x: ax, y: ay, z: az } = accelRef.current;
-
-      // Interference Check
-      const magnitude = Math.sqrt(mx * mx + my * my + mz * mz);
-      if (magnitude < 20 || magnitude > 80) {
-        setInterference(true);
-      } else {
-        setInterference(false);
-      }
-
-      // Tilt Compensation
-      let pitch = Math.atan2(ay, Math.sqrt(ax * ax + az * az));
-      let roll = Math.atan2(-ax, az);
-
-      let Yh = my * Math.cos(pitch) - mz * Math.sin(pitch);
-      let Xh = mx * Math.cos(roll) + my * Math.sin(roll) * Math.sin(pitch) + mz * Math.sin(roll) * Math.cos(pitch);
-
-      let rawHeading = Math.atan2(Xh, Yh) * (180 / Math.PI);
-      if (rawHeading < 0) rawHeading += 360;
-
-      // Low Pass Filter
-      const alpha = 0.1;
-      let newHeading = lastHeadingRef.current + alpha * angleDifference(lastHeadingRef.current, rawHeading);
-      newHeading = (newHeading + 360) % 360;
-      lastHeadingRef.current = newHeading;
-
-      // Accuracy Scoring (Variance over last 20 ticks)
-      historyRef.current.push(newHeading);
-      if (historyRef.current.length > 20) historyRef.current.shift();
-
-      if (historyRef.current.length === 20) {
-        const mean = historyRef.current[0];
-        let maxDiff = 0;
-        for (let v of historyRef.current) {
-          const diff = Math.abs(angleDifference(mean, v));
-          if (diff > maxDiff) maxDiff = diff;
-        }
-
-        if (maxDiff > 10) setAccuracy('Poor');
-        else if (maxDiff > 3) setAccuracy('Good');
-        else setAccuracy('High');
-      }
-
-      // Update Animated Value with Shortest Path
-      let currentShared = heading.value;
-      let diff = angleDifference(currentShared % 360, newHeading);
-      let targetHeading = currentShared + diff;
-
-      heading.value = withTiming(targetHeading, { 
-        duration: 200,
-        easing: Easing.out(Easing.quad)
-      });
-      
-      setHeadingState(newHeading);
-    });
-
     return () => {
-      accelSub.remove();
-      magSub.remove();
+      isMounted = false;
+      if (headingSubscription) {
+        headingSubscription.remove();
+      }
     };
   }, []);
 

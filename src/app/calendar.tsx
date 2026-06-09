@@ -393,7 +393,7 @@ export default function CalendarScreen() {
               <View style={styles.detailsContainer}>
                 {/* Date Card */}
                 <ThemeCard style={[styles.infoCard]}>
-                  <Text style={[styles.detailDateMain, { color: colors.highlight }]}>
+                  <Text style={[styles.detailDateMain, { color: colors.text }]}>
                     {formatNumber(adjustedHijri.day, i18n.language)} {getLocalizedHijriMonth(adjustedHijri.month.number)} {formatNumber(adjustedHijri.year, i18n.language)}
                   </Text>
                   <Text style={[styles.detailDateSub, { color: colors.textSecondary }]}>

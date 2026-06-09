@@ -116,7 +116,7 @@ const styles = StyleSheet.create({
   container: {
     position: 'absolute',
     bottom: (Platform.OS === 'ios' ? 88 : 70) + Spacing.four,
-    right: Spacing.four,
+    right: 0,
     zIndex: 1000,
   },
   card: {
@@ -124,8 +124,12 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     padding: Spacing.two,
     paddingVertical: Spacing.three,
-    borderRadius: 30,
+    borderTopLeftRadius: 30,
+    borderBottomLeftRadius: 30,
+    borderTopRightRadius: 0,
+    borderBottomRightRadius: 0,
     borderWidth: 1,
+    borderRightWidth: 0,
     overflow: 'hidden',
     elevation: 5,
     boxShadow: '0px 4px 8px rgba(0, 0, 0, 0.15)' as any,

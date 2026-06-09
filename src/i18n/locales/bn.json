@@ -88,7 +88,8 @@
     "timeLeft": "বাকি",
     "hadithOfTheDay": "আজকের হাদিস",
     "trivia": "ইসলামিক কুইজ",
-    "qadaBadge": "আপনার {{count}} ওয়াক্ত কাজা নামাজ রয়েছে"
+    "qadaBadge_one": "{{formatted}}টি কাজা নামাজ",
+    "qadaBadge_other": "{{formatted}}টি কাজা নামাজ"
   },
   "quran": {
     "titleEn": "আল-কুরআন",
@@ -199,7 +200,8 @@
     "prayers": "নামাজসমূহ",
     "fasting": "রোজা",
     "missedFasts": "ছুটে যাওয়া রোজা",
-    "kazaChip": "{{namaj}} ওয়াক্ত"
+    "kazaChip_one": "{{namaj}} টি নামাজ",
+    "kazaChip_other": "{{namaj}} টি নামাজ"
   },
   "dua": {
     "titleEn": "দোয়া ও জিকির",
