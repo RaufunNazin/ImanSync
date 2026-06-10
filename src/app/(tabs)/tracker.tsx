@@ -3,18 +3,18 @@ import SkeletonBox from '@/components/SkeletonBox';
 import PageHeader from '@/components/page-header';
 import { Fonts, Spacing, useThemeColors } from '@/constants/theme';
 import { formatNumber } from '@/utils/formatNumber';
-import AsyncStorage from '@react-native-async-storage/async-storage';
 import * as Haptics from 'expo-haptics';
 import { Activity, BookOpen, CheckCircle2, HandCoins, Heart, RotateCcw, X, History } from 'lucide-react-native';
-import { useFocusEffect, useRouter } from 'expo-router';
-import React, { useCallback, useEffect, useMemo, useState } from 'react';
+import { useRouter } from 'expo-router';
+import React, { useEffect, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { ScrollView, StyleSheet, Text, TouchableOpacity, View, AppState, Modal, Dimensions } from 'react-native';
-import Animated, { useAnimatedProps, useAnimatedStyle, useSharedValue, withSpring, withTiming } from 'react-native-reanimated';
+import Animated, { useAnimatedProps, useAnimatedStyle, useSharedValue, withSpring, withTiming, FadeInDown } from 'react-native-reanimated';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import Svg, { Circle } from 'react-native-svg';
 import AnimatedProgressBar from '@/components/AnimatedProgressBar';
 import { useQadaStore } from '@/store/qadaStore';
+import { useTrackerHistoryStore } from '@/store/trackerHistoryStore';
 // @ts-ignore
 import ConfettiCannon from 'react-native-confetti-cannon';
 
@@ -105,8 +105,9 @@ export default function TrackerScreen() {
   const router = useRouter();
 
   const [activeTab, setActiveTab] = useState<'Daily' | 'Weekly' | 'Monthly'>('Daily');
-  const [history, setHistory] = useState<Record<string, Record<string, boolean>>>({});
-  const [loading, setLoading] = useState(true);
+  const trackerHistoryStore = useTrackerHistoryStore();
+  const history = trackerHistoryStore.history;
+  const loading = !trackerHistoryStore.isLoaded;
 
   const [todayStr, setTodayStr] = useState(getLocalYYYYMMDD());
 
@@ -129,55 +130,23 @@ export default function TrackerScreen() {
     return () => sub.remove();
   }, []);
 
-  useFocusEffect(
-    useCallback(() => {
-      AsyncStorage.getItem('imansync_tracker_history').then(val => {
-        if (val) {
-          try {
-            setHistory(JSON.parse(val));
-          } catch (e) {
-            console.error('Corrupted tracker history, resetting', e);
-            setHistory({});
-          }
-        } else {
-          AsyncStorage.getItem('imansync_tracker_tasks').then(oldVal => {
-            if (oldVal) {
-              try {
-                const parsed = JSON.parse(oldVal);
-                setHistory({ [todayStr]: parsed });
-                AsyncStorage.setItem('imansync_tracker_history', JSON.stringify({ [todayStr]: parsed })).catch(console.error);
-              } catch (e) {
-                console.error('Corrupted legacy tracker data, ignoring', e);
-              }
-            }
-          });
-        }
-      }).catch(err => console.error('Error loading history', err))
-        .finally(() => setLoading(false));
-    }, [todayStr])
-  );
-
+  // History loading is handled by the Zustand store instantly via MMKV
   const toggleTask = (id: string) => {
     const currentDayStr = getLocalYYYYMMDD();
-    setHistory(prev => {
-      const todayData = prev[currentDayStr] || {};
-      const wasCompletedCount = DAILY_TASKS.filter(t => todayData[t.id]).length;
+    const todayData = history[currentDayStr] || {};
+    const wasCompletedCount = DAILY_TASKS.filter(t => todayData[t.id]).length;
 
-      const nextToday = { ...todayData, [id]: !todayData[id] };
-      const nextHistory = { ...prev, [currentDayStr]: nextToday };
-      AsyncStorage.setItem('imansync_tracker_history', JSON.stringify(nextHistory)).catch(console.error);
+    trackerHistoryStore.toggleTask(currentDayStr, id);
 
-      const newCompletedCount = DAILY_TASKS.filter(t => nextToday[t.id]).length;
+    const nextToday = { ...todayData, [id]: !todayData[id] };
+    const newCompletedCount = DAILY_TASKS.filter(t => nextToday[t.id]).length;
 
-      if (newCompletedCount === DAILY_TASKS.length && wasCompletedCount !== DAILY_TASKS.length) {
-        setTimeout(() => Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success), 300);
-        setShowConfetti(true);
-      } else {
-        Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-      }
-
-      return nextHistory;
-    });
+    if (newCompletedCount === DAILY_TASKS.length && wasCompletedCount !== DAILY_TASKS.length) {
+      setTimeout(() => Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success), 300);
+      setShowConfetti(true);
+    } else {
+      Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+    }
   };
 
   const completedTasks = history[todayStr] || {};
@@ -230,15 +199,16 @@ export default function TrackerScreen() {
     <View style={styles.gridSection}>
       <Text style={[styles.sectionTitle, { color: colors.textSecondary }]}>{t('tracker.checklist')}</Text>
       <View style={styles.taskGrid}>
-        {DAILY_TASKS.map((task) => (
+        {DAILY_TASKS.map((task, index) => (
+          <Animated.View key={task.id} entering={FadeInDown.delay(index * 50).springify().damping(24).stiffness(100)}>
           <TaskCard
-            key={task.id}
             task={task}
             isDone={!!completedTasks[task.id]}
             onToggle={toggleTask}
             colors={colors}
             t={t}
           />
+          </Animated.View>
         ))}
       </View>
     </View>

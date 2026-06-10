@@ -5,16 +5,18 @@ import { Fonts, Spacing, useThemeColors } from '@/constants/theme';
 import { usePreferencesStore } from '@/store/preferencesStore';
 import { useThemeStore } from '@/store/themeStore';
 import { useQadaStore } from '@/store/qadaStore';
-import { getDistrictName } from '@/utils/districts';
+import { getDistrictName, districtCoords } from '@/utils/districts';
+import { Coordinates, CalculationMethod, PrayerTimes, Madhab } from 'adhan';
 import { formatNumber } from '@/utils/formatNumber';
 import { getLocalYYYYMMDD } from '@/utils/dateUtils';
-import AsyncStorage from '@react-native-async-storage/async-storage';
+import { storage } from '@/store/mmkv';
 
+import { useTrackerHistoryStore } from '@/store/trackerHistoryStore';
 import * as Haptics from 'expo-haptics';
 import { LinearGradient } from 'expo-linear-gradient';
-import { useFocusEffect, useRouter } from 'expo-router';
-import { Book, BookOpen, CalendarDays, Compass, GraduationCap, MapPin, Share2, Brain, History } from 'lucide-react-native';
-import React, { useCallback, useEffect, useMemo, useState, useRef } from 'react';
+import { useRouter } from 'expo-router';
+import { Book, BookOpen, CalendarDays, Compass, MapPin, Share2, History } from 'lucide-react-native';
+import React, { useEffect, useMemo, useState, useRef } from 'react';
 import { useTranslation } from 'react-i18next';
 import {
   ScrollView,
@@ -25,6 +27,7 @@ import {
 } from 'react-native';
 import Animated, { useAnimatedStyle, withTiming } from 'react-native-reanimated';
 import { SafeAreaView } from 'react-native-safe-area-context';
+import AnimatedCard from '@/components/AnimatedCard';
 import ViewShot from 'react-native-view-shot';
 import * as Sharing from 'expo-sharing';
 
@@ -108,9 +111,16 @@ export default function HomeScreen() {
   const [currentTime, setCurrentTime] = useState(new Date());
   const [rawTimings, setRawTimings] = useState<Record<string, string>>({});
   const [hijriRaw, setHijriRaw] = useState<{day: string, monthEn: string, monthNumber: number, year: string} | null>(null);
-  const [dailyVerse, setDailyVerse] = useState<DailyVerse | null>(null);
-  const [dailyHadith, setDailyHadith] = useState<DailyHadith | null>(null);
-  const [trackerHistory, setTrackerHistory] = useState<Record<string, Record<string, boolean>>>({});
+  const [dailyVerse, setDailyVerse] = useState<DailyVerse | null>(() => {
+    const cached = storage.getString('cached_daily_verse');
+    return cached ? JSON.parse(cached) : null;
+  });
+  const [dailyHadith, setDailyHadith] = useState<DailyHadith | null>(() => {
+    const cached = storage.getString('cached_daily_hadith');
+    return cached ? JSON.parse(cached) : null;
+  });
+  const trackerHistoryStore = useTrackerHistoryStore();
+  const trackerHistory = trackerHistoryStore.history;
   const prefs = usePreferencesStore();
   const locationCity = prefs.manualCity || prefs.location?.city || 'Dhaka';
   const locationName = getDistrictName(locationCity, i18n.language);
@@ -128,29 +138,13 @@ export default function HomeScreen() {
     }
   };
 
-  // Load tracker history
-  useFocusEffect(
-    useCallback(() => {
-      AsyncStorage.getItem('imansync_tracker_history').then(val => {
-        if (val) {
-          try { setTrackerHistory(JSON.parse(val)); } catch (e) {}
-        }
-      });
-    }, [])
-  );
-
+  // No need for useFocusEffect to load tracker history as MMKV hydrates it instantly
   const todayStr = getLocalYYYYMMDD();
   const todayTasks = trackerHistory[todayStr] || {};
 
   const togglePrayerTask = (prayerId: string) => {
     const currentDayStr = getLocalYYYYMMDD();
-    setTrackerHistory(prev => {
-      const todayData = prev[currentDayStr] || {};
-      const nextToday = { ...todayData, [prayerId]: !todayData[prayerId] };
-      const nextHistory = { ...prev, [currentDayStr]: nextToday };
-      AsyncStorage.setItem('imansync_tracker_history', JSON.stringify(nextHistory)).catch(console.error);
-      return nextHistory;
-    });
+    trackerHistoryStore.toggleTask(currentDayStr, prayerId);
     Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
   };
 
@@ -164,30 +158,77 @@ export default function HomeScreen() {
 
   // Fetch prayer times
   useEffect(() => {
-    let lat = prefs.location?.latitude ?? 23.8103;
-    let lon = prefs.location?.longitude ?? 90.4125;
+    let lat = prefs.location?.latitude;
+    let lon = prefs.location?.longitude;
+    let city = prefs.manualCity || prefs.location?.city || 'Dhaka';
+    let isCityBased = !!prefs.manualCity || !prefs.location;
+    
+    if (isCityBased && districtCoords[city]) {
+      lat = districtCoords[city].lat;
+      lon = districtCoords[city].lon;
+    }
+    
+    // Default to Dhaka if nothing is found
+    if (!lat || !lon) {
+      lat = 23.8103;
+      lon = 90.4125;
+    }
+
     let method = prefs.calcMethod ?? 1;
     let madhab = prefs.madhab ?? 1;
-    let isCityBased = !!prefs.manualCity || !prefs.location;
-    let city = prefs.manualCity || prefs.location?.city || 'Dhaka';
-    let country = 'Bangladesh';
-    let adj = prefs.hijriOffset || 0;
-    
-    let url = isCityBased 
-      ? `https://api.aladhan.com/v1/timingsByCity?city=${city}&country=${country}&method=${method}&school=${madhab}&adj=${adj}`
-      : `https://api.aladhan.com/v1/timings?latitude=${lat}&longitude=${lon}&method=${method}&school=${madhab}&adj=${adj}`;
 
-    fetch(url)
-      .then((r) => r.json())
-      .then((json) => {
-        if (json.data) {
-          setRawTimings(json.data.timings);
-          const hj = json.data.date.hijri;
-          setHijriRaw({day: hj.day, monthEn: hj.month.en, monthNumber: hj.month.number, year: hj.year});
-        }
-      })
-      .catch((e) => console.error('Prayer fetch error:', e));
-  }, [prefs.calcMethod, prefs.madhab, prefs.location]);
+    let params = CalculationMethod.Karachi();
+    if (method === 2) params = CalculationMethod.NorthAmerica();
+    if (method === 3) params = CalculationMethod.MuslimWorldLeague();
+    
+    params.madhab = madhab === 1 ? Madhab.Hanafi : Madhab.Shafi;
+
+    const date = new Date();
+    const coordinates = new Coordinates(lat, lon);
+    const prayerTimes = new PrayerTimes(coordinates, date, params);
+
+    const formatTimeStr = (d: Date) => `${String(d.getHours()).padStart(2, '0')}:${String(d.getMinutes()).padStart(2, '0')}`;
+
+    setRawTimings({
+      Fajr: formatTimeStr(prayerTimes.fajr),
+      Sunrise: formatTimeStr(prayerTimes.sunrise),
+      Dhuhr: formatTimeStr(prayerTimes.dhuhr),
+      Asr: formatTimeStr(prayerTimes.asr),
+      Sunset: formatTimeStr(prayerTimes.maghrib),
+      Maghrib: formatTimeStr(prayerTimes.maghrib),
+      Isha: formatTimeStr(prayerTimes.isha),
+    });
+
+    // Calculate Hijri Date locally using Intl API
+    try {
+      const parts = new Intl.DateTimeFormat('en-US-u-ca-islamic', {day: 'numeric', month: 'numeric', year: 'numeric'}).formatToParts(date);
+      const hDay = parts.find(p => p.type === 'day')?.value || '1';
+      const hMonth = parts.find(p => p.type === 'month')?.value || '1';
+      const hYear = parts.find(p => p.type === 'year')?.value || '1445';
+      
+      const HIJRI_MONTHS = [
+        'Muharram', 'Safar', 'Rabi al-Awwal', 'Rabi al-Thani', 
+        'Jumada al-Awwal', 'Jumada al-Thani', 'Rajab', 'Sha\'ban', 
+        'Ramadan', 'Shawwal', 'Dhu al-Qi\'dah', 'Dhu al-Hijjah'
+      ];
+      
+      let monthNum = parseInt(hMonth, 10);
+      if (isNaN(monthNum)) monthNum = 1;
+      
+      // Apply offset
+      let adj = prefs.hijriOffset || 0;
+      let finalDay = parseInt(hDay, 10) + adj;
+      
+      setHijriRaw({
+        day: String(finalDay),
+        monthEn: HIJRI_MONTHS[monthNum - 1] || 'Muharram',
+        monthNumber: monthNum,
+        year: hYear.replace(' AH', '')
+      });
+    } catch (e) {
+      console.error('Hijri calculation error:', e);
+    }
+  }, [prefs.calcMethod, prefs.madhab, prefs.location, prefs.manualCity, prefs.hijriOffset]);
 
   // Fetch a random Quran verse (Arabic + English)
   useEffect(() => {
@@ -205,14 +246,16 @@ export default function HomeScreen() {
     ])
       .then(([arJson, enJson, bnJson]) => {
         if (arJson.data && enJson.data && bnJson.data) {
-          setDailyVerse({
+          const newVerse = {
             arabic: arJson.data.text,
             translation: `"${enJson.data.text}"`,
             translationBn: `"${bnJson.data.text}"`,
             surahId: enJson.data.surah.number,
             surahDefaultName: enJson.data.surah.englishName,
             ayahNum: enJson.data.numberInSurah,
-          });
+          };
+          setDailyVerse(newVerse);
+          storage.set('cached_daily_verse', JSON.stringify(newVerse));
         }
       })
       .catch((e) => console.error('Verse fetch error:', e));
@@ -234,12 +277,14 @@ export default function HomeScreen() {
     ])
       .then(([arJson, enJson, bnJson]) => {
         if (arJson.hadiths?.[0] && enJson.hadiths?.[0] && bnJson.hadiths?.[0]) {
-          setDailyHadith({
+          const newHadith = {
             arabic: arJson.hadiths[0].text,
             english: enJson.hadiths[0].text,
             bengali: bnJson.hadiths[0].text,
             reference: `Sahih al-Bukhari ${hadithNum}`
-          });
+          };
+          setDailyHadith(newHadith);
+          storage.set('cached_daily_hadith', JSON.stringify(newHadith));
         }
       })
       .catch((e) => console.error('Hadith fetch error:', e));
@@ -377,7 +422,7 @@ export default function HomeScreen() {
       }
     }
     
-    if (currentIdx === -1) return { left: 100, width: 0 };
+    if (currentIdx === -1) return { left: 100, width: 0, currentTimelineIndex: 4 };
     
     const segmentStart = timelinePrayers[currentIdx].date.getTime();
     const segmentEnd = timelinePrayers[currentIdx+1].date.getTime();
@@ -385,7 +430,8 @@ export default function HomeScreen() {
     
     return {
       left: currentIdx * 25,
-      width: segmentProgress * 25
+      width: segmentProgress * 25,
+      currentTimelineIndex: currentIdx
     };
   }, [fardPrayers, currentTime]);
 
@@ -692,72 +738,72 @@ export default function HomeScreen() {
           <Text style={[styles.sectionTitle, { color: colors.textSecondary }]}>{t('home.quickActions')}</Text>
           <View style={{ flexDirection: 'row', flexWrap: 'wrap', justifyContent: 'space-between' }}>
             <ThemeCard intensity={40} style={[styles.actionItemCard, { borderColor: colors.border }]}>
-              <TouchableOpacity activeOpacity={1}
+              <AnimatedCard
                 style={styles.actionItemBlur} 
                 onPress={() => router.push('/qibla')}
               >
-                <Compass size={20} color={colors.text} />
+                <Compass size={16} color={scheme === 'dark' ? colors.accent : colors.highlight} />
                 <Text style={[styles.actionText, { color: colors.text }]}>{t('home.qibla')}</Text>
-              </TouchableOpacity>
+              </AnimatedCard>
             </ThemeCard>
             
             <ThemeCard intensity={40} style={[styles.actionItemCard, { borderColor: colors.border }]}>
-              <TouchableOpacity activeOpacity={1}
+              <AnimatedCard
                 style={styles.actionItemBlur} 
                 onPress={() => router.push('/names')}
               >
-                <Book size={20} color={colors.text} />
+                <Book size={16} color={scheme === 'dark' ? colors.accent : colors.highlight} />
                 <Text style={[styles.actionText, { color: colors.text }]}>{t('home.names')}</Text>
-              </TouchableOpacity>
+              </AnimatedCard>
             </ThemeCard>
             
-            <ThemeCard intensity={40} style={[styles.actionItemCard, { borderColor: colors.border }]}>
+            {/* <ThemeCard intensity={40} style={[styles.actionItemCard, { borderColor: colors.border }]}>
               <TouchableOpacity activeOpacity={1}
                 style={styles.actionItemBlur} 
                 onPress={() => router.push('/quran-learn' as any)}
               >
-                <GraduationCap size={20} color={colors.text} />
+                <GraduationCap size={16} color={scheme === 'dark' ? colors.accent : colors.highlight} />
                 <Text style={[styles.actionText, { color: colors.text }]}>{t('home.learnQuran')}</Text>
               </TouchableOpacity>
-            </ThemeCard>
+            </ThemeCard> */}
 
             <ThemeCard intensity={40} style={[styles.actionItemCard, { borderColor: colors.border }]}>
-              <TouchableOpacity activeOpacity={1}
+              <AnimatedCard
                 style={styles.actionItemBlur} 
                 onPress={() => router.push('/calendar' as any)}
               >
-                <CalendarDays size={20} color={colors.text} />
+                <CalendarDays size={16} color={scheme === 'dark' ? colors.accent : colors.highlight} />
                 <Text style={[styles.actionText, { color: colors.text }]}>{t('calendar.titleEn', { defaultValue: 'Islamic Calendar' })}</Text>
-              </TouchableOpacity>
+              </AnimatedCard>
             </ThemeCard>
 
-            <ThemeCard intensity={40} style={[styles.actionItemCard, { borderColor: colors.border }]}>
+            {/* <ThemeCard intensity={40} style={[styles.actionItemCard, { borderColor: colors.border }]}>
               <TouchableOpacity activeOpacity={1}
                 style={styles.actionItemBlur} 
                 onPress={() => router.push('/trivia' as any)}
               >
-                <Brain size={20} color={colors.text} />
+                <Brain size={16} color={scheme === 'dark' ? colors.accent : colors.highlight} />
                 <Text style={[styles.actionText, { color: colors.text }]}>{t('home.trivia', { defaultValue: 'Islamic Trivia' })}</Text>
               </TouchableOpacity>
-            </ThemeCard>
+            </ThemeCard> */}
 
             <ThemeCard intensity={40} style={[styles.actionItemCard, { borderColor: totalQada > 0 ? colors.error + '40' : colors.border }]}>
-              <TouchableOpacity activeOpacity={1}
+              <AnimatedCard
                 style={[styles.actionItemBlur, totalQada > 0 && { backgroundColor: colors.error + '10' }]}
                 onPress={() => router.push('/qada-tracker' as any)}
               >
                 {totalQada > 0 ? (
                   <>
-                    <History size={20} color={colors.error} />
+                    <History size={16} color={colors.error} />
                     <Text style={[styles.actionText, { color: colors.error }]}>{qadaBadgeText}</Text>
                   </>
                 ) : (
                   <>
-                    <History size={20} color={colors.text} />
+                    <History size={16} color={scheme === 'dark' ? colors.accent : colors.highlight} />
                     <Text style={[styles.actionText, { color: colors.text }]}>{t('tracker.qadaTitle', { defaultValue: 'Qada Tracker' })}</Text>
                   </>
                 )}
-              </TouchableOpacity>
+              </AnimatedCard>
             </ThemeCard>
           </View>
         </View>
@@ -787,18 +833,19 @@ export default function HomeScreen() {
 
                 {/* Row 2: Dots & Lines */}
                 <View style={{ position: 'relative', flexDirection: 'row', width: '100%', justifyContent: 'space-between', alignItems: 'center', marginBottom: 6, zIndex: 2 }}>
-                  <View style={{ position: 'absolute', left: '10%', right: '10%', height: 2, backgroundColor: '#2d2d2dff', borderRadius: 1, zIndex: 0 }} />
+                  <View style={{ position: 'absolute', left: '10%', right: '10%', height: 2, backgroundColor: colors.textSecondary + '30', borderRadius: 1, zIndex: 0 }} />
                   <View style={{ position: 'absolute', left: '10%', right: '10%', height: 2, borderRadius: 1, zIndex: 1 }}>
-                    <Animated.View style={{ position: 'absolute', left: `${timelineProgress.left}%`, height: '100%', backgroundColor: colors.highlight, borderRadius: 1, width: `${timelineProgress.width}%` }} />
+                    <Animated.View style={{ position: 'absolute', left: `${timelineProgress.left}%`, height: '100%', backgroundColor: scheme === 'dark' ? colors.accent : colors.highlight, borderRadius: 1, width: `${timelineProgress.width}%` }} />
                   </View>
-                  {prayersWithStatus.filter(p => p.id !== 'sunrise').map((prayer) => {
-                    const isCurrent = prayer.status === 'current';
-                    let dotStyle: any = { backgroundColor: '#2d2d2dff' };
+                  {prayersWithStatus.filter(p => p.id !== 'sunrise').map((prayer, index) => {
+                    const isCurrent = index === timelineProgress.currentTimelineIndex;
+                    let dotStyle: any = { backgroundColor: colors.textSecondary + '50' };
                     if (isCurrent) {
-                      dotStyle = { backgroundColor: colors.highlight };
+                      dotStyle = { backgroundColor: scheme === 'dark' ? colors.accent : colors.highlight };
                     }
                     return (
-                      <View key={`dot-${prayer.id}`} style={{ width: '20%', alignItems: 'center' }}>
+                      <View key={`dot-${prayer.id}`} style={{ width: '20%', alignItems: 'center', zIndex: 2, elevation: 2 }}>
+                        <View style={[styles.timelineDot, { backgroundColor: colors.background, position: 'absolute' }]} />
                         <View style={[styles.timelineDot, dotStyle]} />
                       </View>
                     );
@@ -1248,15 +1295,17 @@ const styles = StyleSheet.create({
     overflow: 'hidden',
   },
   actionItemBlur: {
-    flexDirection: 'row',
+    flexDirection: 'column',
     alignItems: 'center',
-    paddingVertical: 12,
-    paddingHorizontal: 12,
+    justifyContent: 'center',
+    paddingVertical: 16,
+    paddingHorizontal: 8,
   },
   actionText: {
     fontFamily: Fonts.outfit,
     fontSize: 13,
-    marginLeft: 8,
+    marginTop: 8,
+    textAlign: 'center',
     flexShrink: 1,
   },
 

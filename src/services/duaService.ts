@@ -1,4 +1,4 @@
-import AsyncStorage from '@react-native-async-storage/async-storage';
+import { storage } from '@/store/mmkv';
 
 
 
@@ -58,11 +58,15 @@ export interface UnifiedDuaItem {
 class DuaService {
   private static readonly API_BASE = 'https://dua-api.hisnul.workers.dev/api';
 
+  static getCategoriesSync(): HisnulCategory[] {
+    const cached = storage.getString(CACHE_KEY_CATEGORIES);
+    return cached ? JSON.parse(cached) : [];
+  }
+
   static async getCategories(): Promise<HisnulCategory[]> {
     try {
-      const cached = await AsyncStorage.getItem(CACHE_KEY_CATEGORIES);
+      const cached = storage.getString(CACHE_KEY_CATEGORIES);
       if (cached) {
-        // Fetch in background to update cache
         this.fetchAndCacheCategories().catch(console.error);
         return JSON.parse(cached);
       }
@@ -77,16 +81,22 @@ class DuaService {
     const res = await fetch(`${this.API_BASE}/categories`);
     const json = await res.json();
     if (json.success && json.data) {
-      await AsyncStorage.setItem(CACHE_KEY_CATEGORIES, JSON.stringify(json.data));
+      storage.set(CACHE_KEY_CATEGORIES, JSON.stringify(json.data));
       return json.data;
     }
     return [];
   }
 
+  static getDuasByCategorySync(categoryId: number): UnifiedDuaItem[] {
+    const cacheKey = `${CACHE_KEY_DUAS}_cat_${categoryId}`;
+    const cached = storage.getString(cacheKey);
+    return cached ? JSON.parse(cached) : [];
+  }
+
   static async getDuasByCategory(categoryId: number): Promise<UnifiedDuaItem[]> {
     try {
       const cacheKey = `${CACHE_KEY_DUAS}_cat_${categoryId}`;
-      const cached = await AsyncStorage.getItem(cacheKey);
+      const cached = storage.getString(cacheKey);
       
       if (cached) {
         this.fetchAndCacheCategoryDuas(categoryId).catch(console.error);
@@ -105,7 +115,7 @@ class DuaService {
     const json = await res.json();
     if (json.success && json.data) {
       const unified = json.data.map(this.mapToUnified);
-      await AsyncStorage.setItem(`${CACHE_KEY_DUAS}_cat_${categoryId}`, JSON.stringify(unified));
+      storage.set(`${CACHE_KEY_DUAS}_cat_${categoryId}`, JSON.stringify(unified));
       return unified;
     }
     return [];
@@ -114,7 +124,7 @@ class DuaService {
   static async getDuaById(id: string | number): Promise<UnifiedDuaItem | null> {
     try {
       const cacheKey = `${CACHE_KEY_DUAS}_id_${id}`;
-      const cached = await AsyncStorage.getItem(cacheKey);
+      const cached = storage.getString(cacheKey);
       if (cached) {
         return JSON.parse(cached) as UnifiedDuaItem;
       }
@@ -123,7 +133,7 @@ class DuaService {
       const json = await res.json();
       if (json.success && json.data) {
         const unified = this.mapToUnified(json.data);
-        await AsyncStorage.setItem(cacheKey, JSON.stringify(unified));
+        storage.set(cacheKey, JSON.stringify(unified));
         return unified;
       }
       return null;
@@ -166,7 +176,7 @@ class DuaService {
       const results = await Promise.all(
         matchingIds.slice(0, 20).map(async (id) => {
           const cacheKey = `${CACHE_KEY_DUAS}_id_${id}`;
-          const cached = await AsyncStorage.getItem(cacheKey);
+          const cached = storage.getString(cacheKey);
           if (cached) return JSON.parse(cached) as UnifiedDuaItem;
           
           try {
@@ -174,7 +184,7 @@ class DuaService {
             const json = await res.json();
             if (json.success && json.data) {
               const unified = this.mapToUnified(json.data);
-              await AsyncStorage.setItem(cacheKey, JSON.stringify(unified));
+              storage.set(cacheKey, JSON.stringify(unified));
               return unified;
             }
           } catch(e) {}

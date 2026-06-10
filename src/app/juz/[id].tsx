@@ -9,6 +9,8 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { useTranslation } from 'react-i18next';
 import { formatNumber } from '@/utils/formatNumber';
 import { useAudioStore } from '@/store/audioStore';
+import { fetchOnce } from '@/utils/fetchWithCache';
+import { storage } from '@/store/mmkv';
 
 interface Ayah {
   numberInSurah: number;
@@ -46,15 +48,39 @@ export default function JuzScreen() {
 
   const { playJuzAyahs, pause, resume, isPlaying, isLoading: isAudioLoading, playbackMode, currentReciterId, setReciter, currentSurahId, juzAyahs: storeJuzAyahs, setHideGlobalBanner } = useAudioStore();
 
-  const [ayahs, setAyahs] = useState<Ayah[]>([]);
-  const [loading, setLoading] = useState(true);
-  
-  const [settings, setSettings] = useState<Settings>(() => ({
-    ...DEFAULT_SETTINGS,
-    showBangla: i18n.language === 'bn',
-    showEnglish: i18n.language === 'en',
-    showEnglishTranslit: i18n.language === 'en',
-  }));
+  const [settings, setSettings] = useState<Settings>(() => {
+    let initialSettings = {
+      ...DEFAULT_SETTINGS,
+      showBangla: i18n.language === 'bn',
+      showEnglish: i18n.language === 'en',
+      showEnglishTranslit: i18n.language === 'en',
+    };
+    const saved = storage.getString('imansync_quran_settings_sync');
+    if (saved) {
+      try { initialSettings = { ...initialSettings, ...JSON.parse(saved) }; } catch (e) {}
+    }
+    return initialSettings;
+  });
+
+  const getEditionsString = (s: Settings) => {
+    let editions = 'quran-uthmani';
+    if (s.showEnglish) editions += '-en.asad';
+    if (s.showBangla) editions += '-bn.bengali';
+    if (s.showEnglishTranslit) editions += '-en.transliteration';
+    return editions;
+  };
+
+  const [ayahs, setAyahs] = useState<Ayah[]>(() => {
+    if (!id) return [];
+    const cacheKey = `quran_juz_${id}_${getEditionsString(settings)}`;
+    const cached = storage.getString(cacheKey);
+    if (cached) {
+      const parsed = JSON.parse(cached);
+      return parsed.ayahs || [];
+    }
+    return [];
+  });
+  const [loading, setLoading] = useState(() => ayahs.length === 0);
   const [modalVisible, setModalVisible] = useState(false);
   const [bookmarkedAyahs, setBookmarkedAyahs] = useState<Record<string, boolean>>({});
 
@@ -79,11 +105,6 @@ export default function JuzScreen() {
 
   // Load Settings and Bookmarks
   useEffect(() => {
-    AsyncStorage.getItem('imansync_quran_settings').then(val => {
-      if (val) {
-        try { setSettings(prev => ({ ...prev, ...JSON.parse(val) })); } catch (e) { console.error('Corrupted quran settings', e); }
-      }
-    });
     loadBookmarks();
   }, []);
 
@@ -134,22 +155,30 @@ export default function JuzScreen() {
   const updateSetting = (key: keyof Settings, val: any) => {
     setSettings(prev => {
       const next = { ...prev, [key]: val };
-      AsyncStorage.setItem('imansync_quran_settings', JSON.stringify(next)).catch(console.error);
+      storage.set('imansync_quran_settings_sync', JSON.stringify(next));
       return next;
     });
   };
 
   useEffect(() => {
     if (!id) return;
-    setLoading(true);
+    
+    const editionsStr = getEditionsString(settings);
+    const cacheKey = `quran_juz_${id}_${editionsStr}`;
 
-    const urls = [`https://api.alquran.cloud/v1/juz/${id}/quran-uthmani`];
-    if (settings.showEnglish) urls.push(`https://api.alquran.cloud/v1/juz/${id}/en.asad`);
-    if (settings.showBangla) urls.push(`https://api.alquran.cloud/v1/juz/${id}/bn.bengali`);
-    if (settings.showEnglishTranslit) urls.push(`https://api.alquran.cloud/v1/juz/${id}/en.transliteration`);
+    fetchOnce({
+      key: cacheKey,
+      onStart: (isCached) => {
+        if (!isCached) setLoading(true);
+      },
+      fetcher: async () => {
+        const urls = [`https://api.alquran.cloud/v1/juz/${id}/quran-uthmani`];
+        if (settings.showEnglish) urls.push(`https://api.alquran.cloud/v1/juz/${id}/en.asad`);
+        if (settings.showBangla) urls.push(`https://api.alquran.cloud/v1/juz/${id}/bn.bengali`);
+        if (settings.showEnglishTranslit) urls.push(`https://api.alquran.cloud/v1/juz/${id}/en.transliteration`);
 
-    Promise.all(urls.map(u => fetch(u).then(res => res.json())))
-      .then(responses => {
+        const responses = await Promise.all(urls.map(u => fetch(u).then(res => res.json())));
+        
         const arabicJson = responses.find(r => r.data && r.data.edition.identifier === 'quran-uthmani');
         const englishJson = responses.find(r => r.data && r.data.edition.identifier === 'en.asad');
         const banglaJson = responses.find(r => r.data && r.data.edition.identifier === 'bn.bengali');
@@ -166,18 +195,27 @@ export default function JuzScreen() {
               numberInSurah: arAyah.numberInSurah,
               arabic: arabicText,
               english: englishJson ? englishJson.data.ayahs[index].text : undefined,
-            bangla: banglaJson ? banglaJson.data.ayahs[index].text : undefined,
-            englishTranslit: engTranslitJson ? engTranslitJson.data.ayahs[index].text : undefined,
-            surahName: arAyah.surah.englishName,
-            surahId: arAyah.surah.number,
+              bangla: banglaJson ? banglaJson.data.ayahs[index].text : undefined,
+              englishTranslit: engTranslitJson ? engTranslitJson.data.ayahs[index].text : undefined,
+              surahName: arAyah.surah.englishName,
+              surahId: arAyah.surah.number,
             };
           });
-          
-          setAyahs(mergedAyahs);
+          return { ayahs: mergedAyahs };
         }
-      })
-      .catch(err => console.error("Error fetching juz:", err))
-      .finally(() => setLoading(false));
+        return { ayahs: [] };
+      },
+      onData: (data) => {
+        if (data && data.ayahs) {
+          setAyahs(data.ayahs);
+          setLoading(false);
+        }
+      },
+      onError: (err) => {
+        console.error("Error fetching juz:", err);
+        setLoading(false);
+      }
+    });
   }, [id, settings.showEnglish, settings.showBangla, settings.showEnglishTranslit]);
 
 

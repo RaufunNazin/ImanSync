@@ -12,6 +12,8 @@ import { useAudioStore } from '@/store/audioStore';
 import { useDownloadStore } from '@/store/downloadStore';
 import DownloadProgressRing from '@/components/DownloadProgressRing';
 import ConfirmModal from '@/components/ConfirmModal';
+import { fetchOnce } from '@/utils/fetchWithCache';
+import { storage } from '@/store/mmkv';
 
 interface Ayah {
   numberInSurah: number;
@@ -50,17 +52,52 @@ export default function SurahScreen() {
   const { playSurah, playAyah, pause, resume, isPlaying, currentSurahId, currentAyahNumber, playbackMode, currentReciterId, setReciter, isLoading: isAudioLoading } = useAudioStore();
   const downloadStore = useDownloadStore();
 
-  const [surahName, setSurahName] = useState('Loading...');
-  const surahNameRef = useRef('Loading...');
-  const [ayahs, setAyahs] = useState<Ayah[]>([]);
-  const [loading, setLoading] = useState(true);
-  
-  const [settings, setSettings] = useState<Settings>(() => ({
-    ...DEFAULT_SETTINGS,
-    showBangla: i18n.language === 'bn',
-    showEnglish: i18n.language === 'en',
-    showEnglishTranslit: i18n.language === 'en',
-  }));
+  const [settings, setSettings] = useState<Settings>(() => {
+    let initialSettings = {
+      ...DEFAULT_SETTINGS,
+      showBangla: i18n.language === 'bn',
+      showEnglish: i18n.language === 'en',
+      showEnglishTranslit: i18n.language === 'en',
+    };
+    const saved = storage.getString('imansync_quran_settings_sync');
+    if (saved) {
+      try { initialSettings = { ...initialSettings, ...JSON.parse(saved) }; } catch (e) {}
+    }
+    return initialSettings;
+  });
+
+  const getEditionsString = (s: Settings) => {
+    let editions = 'quran-uthmani';
+    if (s.showEnglish) editions += ',en.asad';
+    if (s.showBangla) editions += ',bn.bengali';
+    if (s.showEnglishTranslit) editions += ',en.transliteration';
+    return editions;
+  };
+
+  const [surahName, setSurahName] = useState(() => {
+    if (!id) return 'Loading...';
+    const cacheKey = `quran_surah_${id}_${getEditionsString(settings)}`;
+    const cached = storage.getString(cacheKey);
+    if (cached) {
+      const parsed = JSON.parse(cached);
+      return parsed.surahName || 'Loading...';
+    }
+    return 'Loading...';
+  });
+
+  const surahNameRef = useRef(surahName);
+
+  const [ayahs, setAyahs] = useState<Ayah[]>(() => {
+    if (!id) return [];
+    const cacheKey = `quran_surah_${id}_${getEditionsString(settings)}`;
+    const cached = storage.getString(cacheKey);
+    if (cached) {
+      const parsed = JSON.parse(cached);
+      return parsed.ayahs || [];
+    }
+    return [];
+  });
+  const [loading, setLoading] = useState(() => ayahs.length === 0);
   const [modalVisible, setModalVisible] = useState(false);
   const [bookmarkedAyahs, setBookmarkedAyahs] = useState<Record<string, boolean>>({});
   const [deleteDownloadConfirm, setDeleteDownloadConfirm] = useState(false);
@@ -70,11 +107,6 @@ export default function SurahScreen() {
 
   // Load Settings and Bookmarks
   useEffect(() => {
-    AsyncStorage.getItem('imansync_quran_settings').then(val => {
-      if (val) {
-        try { setSettings(prev => ({ ...prev, ...JSON.parse(val) })); } catch (e) { console.error('Corrupted quran settings', e); }
-      }
-    });
     loadBookmarks();
   }, []);
 
@@ -124,23 +156,25 @@ export default function SurahScreen() {
   const updateSetting = (key: keyof Settings, val: any) => {
     setSettings(prev => {
       const next = { ...prev, [key]: val };
-      AsyncStorage.setItem('imansync_quran_settings', JSON.stringify(next)).catch(console.error);
+      storage.set('imansync_quran_settings_sync', JSON.stringify(next));
       return next;
     });
   };
 
   useEffect(() => {
     if (!id) return;
-    setLoading(true);
+    
+    const editions = getEditionsString(settings);
+    const cacheKey = `quran_surah_${id}_${editions}`;
 
-    let editions = 'quran-uthmani';
-    if (settings.showEnglish) editions += ',en.asad';
-    if (settings.showBangla) editions += ',bn.bengali';
-    if (settings.showEnglishTranslit) editions += ',en.transliteration';
-
-    fetch(`https://api.alquran.cloud/v1/surah/${id}/editions/${editions}`)
-      .then(res => res.json())
-      .then(async json => {
+    fetchOnce({
+      key: cacheKey,
+      onStart: (isCached) => {
+        if (!isCached) setLoading(true);
+      },
+      fetcher: async () => {
+        const res = await fetch(`https://api.alquran.cloud/v1/surah/${id}/editions/${editions}`);
+        const json = await res.json();
         if (json.data) {
           const arabicData = json.data.find((d: any) => d.edition.identifier === 'quran-uthmani');
           const englishData = json.data.find((d: any) => d.edition.identifier === 'en.asad');
@@ -148,9 +182,7 @@ export default function SurahScreen() {
           const engTranslitData = json.data.find((d: any) => d.edition.identifier === 'en.transliteration');
           
           const name = englishData ? englishData.englishName : arabicData.englishName;
-          surahNameRef.current = name;
-          setSurahName(name);
-
+          
           const mergedAyahs = arabicData.ayahs.map((arAyah: any, index: number) => {
             let arabicText = arAyah.text;
             if (arAyah.numberInSurah === 1 && Number(id) !== 1 && Number(id) !== 9) {
@@ -160,16 +192,28 @@ export default function SurahScreen() {
               numberInSurah: arAyah.numberInSurah,
               arabic: arabicText,
               english: englishData ? englishData.ayahs[index].text : undefined,
-            bangla: banglaData ? banglaData.ayahs[index].text : undefined,
-            englishTranslit: engTranslitData ? engTranslitData.ayahs[index].text : undefined,
+              bangla: banglaData ? banglaData.ayahs[index].text : undefined,
+              englishTranslit: engTranslitData ? engTranslitData.ayahs[index].text : undefined,
             };
           });
-          
-          setAyahs(mergedAyahs);
+
+          return { surahName: name, ayahs: mergedAyahs };
         }
-      })
-      .catch(err => console.error("Error fetching surah:", err))
-      .finally(() => setLoading(false));
+        return { surahName: 'Unknown', ayahs: [] };
+      },
+      onData: (data) => {
+        if (data) {
+          surahNameRef.current = data.surahName;
+          setSurahName(data.surahName);
+          setAyahs(data.ayahs);
+          setLoading(false);
+        }
+      },
+      onError: (err) => {
+        console.error("Error fetching surah:", err);
+        setLoading(false);
+      }
+    });
   }, [id, settings.showEnglish, settings.showBangla, settings.showEnglishTranslit]);
 
   // Scroll to targeted Ayah if provided

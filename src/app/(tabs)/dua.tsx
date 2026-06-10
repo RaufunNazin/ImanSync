@@ -5,7 +5,7 @@ import { Fonts, Spacing, useThemeColors } from '@/constants/theme';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useFocusEffect, useRouter } from 'expo-router';
 import { FolderLock, Search, X, CheckCircle2, AlertCircle, Plus } from 'lucide-react-native';
-import Animated, { FadeInDown, FadeOutDown } from 'react-native-reanimated';
+import Animated, { FadeInDown, FadeOutDown, FadeInRight } from 'react-native-reanimated';
 import React, { useEffect, useState, useCallback, useRef } from 'react';
 import { useTranslation } from 'react-i18next';
 import DuaService from '@/services/duaService';
@@ -38,9 +38,32 @@ export default function DuaScreen() {
   const { t, i18n } = useTranslation();
   const router = useRouter();
 
-  const [categories, setCategories] = useState<Category[]>([]);
+  const [categories, setCategories] = useState<Category[]>(() => {
+    let initialCats: Category[] = [];
+    if (prefs.showCuratedDuas) {
+      const curatedCats = (curatedDuasData as any[]).map((cat) => ({
+        id: `curated_cat_${cat.id}`,
+        name: i18n.language === 'bn' ? cat.category_bn : cat.category_en,
+        description: t('dua.customCategoryDesc', { defaultValue: 'Curated Category' }),
+        count: cat.duas.length,
+        isCustom: true
+      }));
+      initialCats = [...initialCats, ...curatedCats];
+    }
+    const apiCats = DuaService.getCategoriesSync();
+    if (apiCats.length > 0) {
+      const formattedApiCats = apiCats.map(c => ({
+        id: c.id.toString(),
+        name: c.name,
+        description: '',
+        count: c.dua_count
+      }));
+      initialCats = [...initialCats, ...formattedApiCats];
+    }
+    return initialCats;
+  });
   const [pinnedIds, setPinnedIds] = useState<string[]>([]);
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(() => categories.length === 0);
   const [myDuasCount, setMyDuasCount] = useState(0);
   const [bookmarksCount, setBookmarksCount] = useState(0);
   const prefs = usePreferencesStore();
@@ -341,8 +364,8 @@ export default function DuaScreen() {
         <View style={{ flex: 1 }}>
           {/* Pinned Section */}
             {(pinnedCategories.length > 0 || (loading && pinnedIds.length > 0)) && (
-              <View style={[styles.section, { paddingLeft: Spacing.four }]}>
-                <Text style={[styles.sectionTitle, { color: colors.textSecondary, marginVertical: Spacing.one }]}>{t('dua.pinned')}</Text>
+              <View style={[styles.section, { paddingLeft: Spacing.four, marginBottom: Spacing.four }]}>
+                <Text style={[styles.sectionTitle, { color: colors.textSecondary, marginBottom: Spacing.one }]}>{t('dua.pinned')}</Text>
                 <View>
                   <ScrollView
                     horizontal
@@ -361,10 +384,10 @@ export default function DuaScreen() {
                         </View>
                       ))
                     ) : (
-                      pinnedCategories.map((item) => (
+                      pinnedCategories.map((item, index) => (
+                        <Animated.View entering={FadeInRight.delay(index * 50).springify().damping(24).stiffness(100)} key={item.id} style={{ width: 160 }}>
                         <TouchableOpacity activeOpacity={1}
-                          key={item.id}
-                          style={{ width: 160 }}
+                          style={{ flex: 1 }}
                           onPress={() => handleCategoryPress(item)}
                           onLongPress={() => {
                             setSelectedCategory(item);
@@ -386,6 +409,7 @@ export default function DuaScreen() {
                             }}
                           />
                         </TouchableOpacity>
+                        </Animated.View>
                       ))
                     )}
                   </ScrollView>
@@ -410,7 +434,7 @@ export default function DuaScreen() {
             ) : (
               <>
                 {/* My Duas Tile - Always First */}
-                <View style={styles.gridItem}>
+                <Animated.View entering={FadeInDown.delay(0).springify().damping(24).stiffness(100)} style={styles.gridItem}>
                   <DuaCard
                     id="my_duas"
                     name={t('dua.myDuas')}
@@ -420,10 +444,10 @@ export default function DuaScreen() {
                     colors={colors}
                     onPress={handleMyDuasPress}
                   />
-                </View>
+                </Animated.View>
 
                 {/* Bookmarks Tile - Always Second */}
-                <View style={styles.gridItem}>
+                <Animated.View entering={FadeInDown.delay(50).springify().damping(24).stiffness(100)} style={styles.gridItem}>
                   <DuaCard
                     id="bookmarks"
                     name={t('dua.bookmarks')}
@@ -432,10 +456,10 @@ export default function DuaScreen() {
                     colors={colors}
                     onPress={handleBookmarksPress}
                   />
-                </View>
+                </Animated.View>
 
-                {unpinnedCategories.map(cat => (
-                  <View key={cat.id} style={styles.gridItem}>
+                {unpinnedCategories.map((cat, index) => (
+                  <Animated.View key={cat.id} entering={FadeInDown.delay((index + 2) * 50).springify().damping(24).stiffness(100)} style={styles.gridItem}>
                     <DuaCard
                       id={cat.id}
                       name={getCategoryName(cat)}
@@ -446,7 +470,7 @@ export default function DuaScreen() {
                       onPress={() => handleCategoryPress(cat)}
                       onLongPress={() => openPinSheet(cat)}
                     />
-                  </View>
+                  </Animated.View>
                 ))}
               </>
             )}

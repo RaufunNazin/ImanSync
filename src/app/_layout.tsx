@@ -25,10 +25,13 @@ import { usePreferencesStore } from '@/store/preferencesStore';
 import { useDownloadStore } from '@/store/downloadStore';
 import { scheduleAllNotifications } from '@/services/notificationService';
 import { AppState, AppStateStatus } from 'react-native';
+import { usePreloaders } from '@/hooks/usePreloaders';
 
 SplashScreen.preventAutoHideAsync();
 
 export default function RootLayout() {
+  usePreloaders(); // Run background preloaders
+
   const colorScheme = useThemeStore((s) => s.theme);
   const [i18nLoaded, setI18nLoaded] = React.useState(false);
   const [themeLoaded, setThemeLoaded] = React.useState(false);

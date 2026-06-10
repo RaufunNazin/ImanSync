@@ -116,7 +116,7 @@ export default function TriviaScreen() {
 
       <View style={styles.container}>
         {isFinished ? (
-          <Animated.View entering={FadeInDown.springify()} style={styles.resultContainer}>
+          <Animated.View entering={FadeInDown.springify().damping(24).stiffness(100)} style={styles.resultContainer}>
             <Brain size={64} color={colors.textSecondary} style={{ marginBottom: Spacing.four }} />
             <Text style={[styles.resultTitle, { color: colors.text }]}>{t('trivia.quizCompleted', { defaultValue: 'Quiz Completed!' })}</Text>
             <Text style={[styles.resultScore, { color: colors.highlight }]}>

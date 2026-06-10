@@ -9,9 +9,9 @@ import { StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { formatNumber } from '@/utils/formatNumber';
 import OptionsModal from '@/components/OptionsModal';
-import SkeletonBox from '@/components/SkeletonBox';
 import ThemeCard from '@/components/ThemeCard';
 import { getBanglaDate } from '@/utils/banglaCalendar';
+import { generateLocalCalendar } from '@/utils/localCalendar';
 import { Switch } from 'react-native';
 import Animated, { FadeIn, FadeOut, LinearTransition } from 'react-native-reanimated';
 
@@ -22,45 +22,27 @@ export default function CalendarScreen() {
   const prefs = usePreferencesStore();
 
   const [currentDate, setCurrentDate] = useState(new Date());
-  const [calendarData, setCalendarData] = useState<any[]>([]);
-  const [loading, setLoading] = useState(true);
+  const [calendarData, setCalendarData] = useState<any[]>(() => {
+    const year = currentDate.getFullYear();
+    const month = currentDate.getMonth() + 1;
+    const method = prefs.calcMethod || 1;
+    const madhab = prefs.madhab || 0;
+    const lat = prefs.location?.latitude || 23.8103;
+    const lon = prefs.location?.longitude || 90.4125;
+    return generateLocalCalendar(year, month, lat, lon, method, madhab);
+  });
   const [selectedDate, setSelectedDate] = useState<string | null>(null);
   const [optionsModalVisible, setOptionsModalVisible] = useState(false);
-  const requestRef = React.useRef(0);
-
-  const fetchCalendar = async (year: number, month: number) => {
-    const currentReq = ++requestRef.current;
-    setLoading(true);
-    try {
-      let isCityBased = !!prefs.manualCity || !prefs.location;
-      let city = prefs.manualCity || prefs.location?.city || 'Dhaka';
-      let country = 'Bangladesh';
-      let method = prefs.calcMethod || 1;
-      let madhab = prefs.madhab || 0;
-      let adj = prefs.hijriOffset || 0;
-
-      let url = isCityBased
-        ? `https://api.aladhan.com/v1/calendarByCity/${year}/${month}?city=${city}&country=${country}&method=${method}&school=${madhab}&adj=${adj}`
-        : `https://api.aladhan.com/v1/calendar/${year}/${month}?latitude=${prefs.location?.latitude}&longitude=${prefs.location?.longitude}&method=${method}&school=${madhab}&adj=${adj}`;
-
-      const res = await fetch(url);
-      const json = await res.json();
-      if (currentReq !== requestRef.current) return;
-      if (json.data) {
-        setCalendarData(json.data);
-      }
-    } catch (e) {
-      if (currentReq !== requestRef.current) return;
-      console.error('Calendar fetch error', e);
-    } finally {
-      if (currentReq === requestRef.current) {
-        setLoading(false);
-      }
-    }
-  };
 
   useEffect(() => {
-    fetchCalendar(currentDate.getFullYear(), currentDate.getMonth() + 1);
+    const year = currentDate.getFullYear();
+    const month = currentDate.getMonth() + 1;
+    const method = prefs.calcMethod || 1;
+    const madhab = prefs.madhab || 0;
+    const lat = prefs.location?.latitude || 23.8103;
+    const lon = prefs.location?.longitude || 90.4125;
+    
+    setCalendarData(generateLocalCalendar(year, month, lat, lon, method, madhab));
   }, [currentDate.getFullYear(), currentDate.getMonth(), prefs.calcMethod, prefs.madhab, prefs.manualCity, prefs.location]);
 
   // Set default selection to today if in current month, else 1st of month
@@ -263,7 +245,7 @@ export default function CalendarScreen() {
         }
       />
 
-      <Animated.View layout={LinearTransition.springify().damping(16).stiffness(120)} style={styles.container}>
+      <Animated.View layout={LinearTransition.springify().damping(24).stiffness(100)} style={styles.container}>
         
         {/* Month Selector */}
         <View style={styles.monthSelector}>
@@ -278,93 +260,6 @@ export default function CalendarScreen() {
           </TouchableOpacity>
         </View>
 
-        {loading ? (() => {
-          const firstDayDate = new Date(currentDate.getFullYear(), currentDate.getMonth(), 1);
-          const startDayOfWeek = firstDayDate.getDay();
-          const daysInMonth = new Date(currentDate.getFullYear(), currentDate.getMonth() + 1, 0).getDate();
-          
-          return (
-            <Animated.View key="loading" entering={FadeIn} exiting={FadeOut} style={{ flex: 1 }}>
-              <View style={{ flexShrink: 1, marginBottom: Spacing.four }}>
-                {/* Days Bar skeleton */}
-                <View style={[styles.daysBar, { backgroundColor: colors.backgroundElement, borderColor: colors.border }]}>
-                  {['sun', 'mon', 'tue', 'wed', 'thu', 'fri', 'sat'].map((day, idx) => (
-                    <View key={`header-${idx}`} style={styles.gridCellHeader}>
-                      <Text style={[styles.gridCellHeaderText, { color: colors.textSecondary }]}>
-                        {t(`calendar.${day}`)}
-                      </Text>
-                    </View>
-                  ))}
-                </View>
-                
-                {/* Grid Cells Skeleton */}
-                <View style={{ flexDirection: 'row', flexWrap: 'wrap' }}>
-                  {Array.from({length: startDayOfWeek}).map((_, i) => (
-                    <View key={`empty-${i}`} style={styles.gridCell} />
-                  ))}
-                  {Array.from({length: daysInMonth}).map((_, i) => {
-                    const today = new Date();
-                    const isToday = (i + 1) === today.getDate() &&
-                                    currentDate.getMonth() === today.getMonth() &&
-                                    currentDate.getFullYear() === today.getFullYear();
-
-                    return (
-                      <View key={`day-${i}`} style={[styles.gridCell, { 
-                        borderColor: isToday ? colors.accent : 'transparent',
-                        borderWidth: isToday ? 1 : 0,
-                      }]}>
-                        <Text style={[styles.gregorianText, { color: colors.text }]}>
-                          {formatNumber((i + 1).toString(), i18n.language)}
-                        </Text>
-                        {prefs.showBanglaCalendar ? (
-                          <View style={{ flexDirection: 'row', justifyContent: 'space-between', width: '100%', paddingHorizontal: 4, marginTop: 2 }}>
-                            <SkeletonBox borderRadius={4} color={colors.border} loaded={false}>
-                              <Text style={[styles.hijriText, { marginTop: 0, marginBottom: 0 }]}>12</Text>
-                            </SkeletonBox>
-                            <SkeletonBox borderRadius={4} color={colors.border} loaded={false}>
-                              <Text style={[styles.hijriText, { marginTop: 0, marginBottom: 0 }]}>12</Text>
-                            </SkeletonBox>
-                          </View>
-                        ) : (
-                          <SkeletonBox borderRadius={4} color={colors.border} loaded={false}>
-                            <Text style={styles.hijriText}>12</Text>
-                          </SkeletonBox>
-                        )}
-                      </View>
-                    );
-                  })}
-                </View>
-              </View>
-
-              {/* Details Skeletons */}
-              <View style={styles.detailsContainer}>
-                {/* Date Card */}
-                <ThemeCard style={[styles.infoCard]}>
-                  <SkeletonBox width={180} height={24} borderRadius={10} color={colors.border} style={{ marginBottom: 2 }} loaded={false} />
-                  <SkeletonBox width={120} height={18} borderRadius={7} color={colors.border} loaded={false} />
-                </ThemeCard>
-
-                {/* Times Cards */}
-                <View style={styles.timesRow}>
-                  <ThemeCard style={[styles.infoCard, styles.timeBoxHalf, { marginRight: 4, marginLeft: 0 }]}>
-                    <Text style={[styles.timeLabel, { color: colors.textSecondary }]}>{t('calendar.sahriEnd')}</Text>
-                    <SkeletonBox width={90} height={30} borderRadius={11} color={colors.border} loaded={false} />
-                  </ThemeCard>
-                  <ThemeCard style={[styles.infoCard, styles.timeBoxHalf, { marginLeft: 4, marginRight: 0 }]}>
-                    <Text style={[styles.timeLabel, { color: colors.textSecondary }]}>{t('calendar.iftarTime')}</Text>
-                    <SkeletonBox width={90} height={30} borderRadius={11} color={colors.border} loaded={false} />
-                  </ThemeCard>
-                </View>
-
-                {/* Events Card */}
-                <ThemeCard style={[styles.infoCard, { marginBottom: 0 }]}>
-                  <Text style={[styles.eventsLabel, { color: colors.textSecondary }]}>{t('calendar.events')}</Text>
-                  <SkeletonBox width={140} height={20} borderRadius={8} color={colors.border} loaded={false} />
-                </ThemeCard>
-              </View>
-            </Animated.View>
-          );
-        })() : (
           <Animated.View key="loaded" entering={FadeIn} exiting={FadeOut} style={{ flex: 1 }}>
             {/* Grid */}
             {renderGrid()}
@@ -398,7 +293,7 @@ export default function CalendarScreen() {
                   </Text>
                   <Text style={[styles.detailDateSub, { color: colors.textSecondary }]}>
                     {formatGregorianDate(selectedDayData.date.gregorian.date)}
-                    {prefs.showBanglaCalendar && ` • ${formatNumber(bDate.day.toString(), i18n.language)} ${t('banglaMonths.' + bDate.monthName, { defaultValue: bDate.monthName })} ${formatNumber(bDate.year.toString(), i18n.language)}`}
+                    {prefs.showBanglaCalendar ? ` • ${formatNumber(bDate.day.toString(), i18n.language)} ${t(`bangla.${bDate.month}`)}` : ''}
                   </Text>
                 </ThemeCard>
 
@@ -406,14 +301,14 @@ export default function CalendarScreen() {
                 <View style={styles.timesRow}>
                   <ThemeCard style={[styles.infoCard, styles.timeBoxHalf, { marginRight: 4, marginLeft: 0 }]}>
                     <Text style={[styles.timeLabel, { color: colors.textSecondary }]}>{t('calendar.sahriEnd')}</Text>
-                    <Text style={[styles.timeValue, { color: colors.highlight }]}>
-                      {formatTimeStr(selectedDayData.timings.Fajr)}
+                    <Text style={[styles.timeValue, { color: colors.text }]}>
+                      {formatTimeStr(selectedDayData.timings.Imsak)}
                     </Text>
                   </ThemeCard>
                   <ThemeCard style={[styles.infoCard, styles.timeBoxHalf, { marginLeft: 4, marginRight: 0 }]}>
                     <Text style={[styles.timeLabel, { color: colors.textSecondary }]}>{t('calendar.iftarTime')}</Text>
-                    <Text style={[styles.timeValue, { color: colors.accent }]}>
-                      {formatTimeStr(selectedDayData.timings.Maghrib)}
+                    <Text style={[styles.timeValue, { color: colors.text }]}>
+                      {formatTimeStr(selectedDayData.timings.Sunset)}
                     </Text>
                   </ThemeCard>
                 </View>
@@ -432,7 +327,6 @@ export default function CalendarScreen() {
               </View>
             )})()}
           </Animated.View>
-        )}
 
       </Animated.View>
 

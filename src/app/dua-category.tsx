@@ -23,8 +23,13 @@ export default function DuaCategoryScreen() {
   const { t, i18n } = useTranslation();
   const router = useRouter();
 
-  const [duas, setDuas] = useState<UnifiedDuaItem[]>([]);
-  const [loading, setLoading] = useState(true);
+  const [duas, setDuas] = useState<UnifiedDuaItem[]>(() => {
+    if (isCustom !== 'true') {
+      return DuaService.getDuasByCategorySync(Number(id));
+    }
+    return [];
+  });
+  const [loading, setLoading] = useState(() => duas.length === 0);
   const [pinnedDuaIds, setPinnedDuaIds] = useState<string[]>([]);
   const [selectedDua, setSelectedDua] = useState<UnifiedDuaItem | null>(null);
   const [pinSheetVisible, setPinSheetVisible] = useState(false);

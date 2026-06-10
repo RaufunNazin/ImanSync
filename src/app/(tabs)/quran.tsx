@@ -386,8 +386,9 @@ export default function QuranScreen() {
           )}
           {!loading && (
           <View style={styles.listContainer}>
-            {surahs.slice(0, renderCount).map((surah) => (
-              <ThemeCard intensity={30}  key={surah.id} style={[styles.surahRowWrapper, { borderColor: colors.border }]}>
+            {surahs.slice(0, renderCount).map((surah, index) => (
+              <Reanimated.View key={surah.id} entering={FadeInDown.delay(index * 50).springify().damping(24).stiffness(100)}>
+              <ThemeCard intensity={30} style={[styles.surahRowWrapper, { borderColor: colors.border }]}>
                 <TouchableOpacity activeOpacity={1} 
                   style={styles.surahRow}
                   onPress={() => router.push(`/surah/${surah.id}`)}
@@ -427,13 +428,15 @@ export default function QuranScreen() {
                   </View>
                 </TouchableOpacity>
               </ThemeCard>
+              </Reanimated.View>
             ))}
           </View>          )}
           </>
         ) : activeTab === 'juz' ? (
           <View style={styles.gridContainer}>
-            {Array.from({ length: 30 }).map((_, i) => (
-              <ThemeCard key={i} intensity={30}  style={[styles.juzCardWrapper, { borderColor: colors.border }]}>
+            {Array.from({ length: 30 }).map((_, index) => (
+              <Reanimated.View key={index} entering={FadeInDown.delay(index * 50).springify().damping(24).stiffness(100)} style={{ width: '47%' }}>
+              <ThemeCard intensity={30}  style={[styles.juzCardWrapper, { borderColor: colors.border, width: '100%' }]}>
                 <TouchableOpacity activeOpacity={1} 
                   style={styles.juzCard}
                   onPress={() => router.push(`/juz/${i + 1}`)}
@@ -454,6 +457,7 @@ export default function QuranScreen() {
                   <Text style={[styles.juzText, { color: colors.text }]}>{t('quran.juz', { id: formatNumber(i + 1, i18n.language) })}</Text>
                 </TouchableOpacity>
               </ThemeCard>
+              </Reanimated.View>
             ))}
           </View>
         ) : (
@@ -470,8 +474,9 @@ export default function QuranScreen() {
                   <View style={{ marginBottom: Spacing.four }}>
                     <Text style={[styles.sectionTitle, { color: colors.textSecondary, marginBottom: Spacing.three, paddingHorizontal: Spacing.one }]}>{t('quran.bookmarkedSurahs', { defaultValue: 'Bookmarked Surahs' })}</Text>
                     <View style={styles.listContainer}>
-                      {bookmarks.filter((b: any) => b.type === 'surah').map((surah: any, i: number) => (
-                        <ThemeCard intensity={30}  key={`surah-${i}`} style={[styles.surahRowWrapper, { borderColor: colors.border }]}>
+                      {bookmarks.filter((b: any) => b.type === 'surah').map((surah: any, index: number) => (
+                        <Reanimated.View key={`surah-${index}`} entering={FadeInDown.delay(index * 50).springify().damping(24).stiffness(100)}>
+                        <ThemeCard intensity={30} style={[styles.surahRowWrapper, { borderColor: colors.border }]}>
                           <TouchableOpacity activeOpacity={1} 
                             style={styles.surahRow}
                             onPress={() => router.push(`/surah/${surah.surahId}`)}
@@ -524,6 +529,7 @@ export default function QuranScreen() {
                             </View>
                           </TouchableOpacity>
                         </ThemeCard>
+                        </Reanimated.View>
                       ))}
                     </View>
                   </View>
@@ -534,8 +540,9 @@ export default function QuranScreen() {
                   <View style={{ marginBottom: Spacing.four }}>
                     <Text style={[styles.sectionTitle, { color: colors.textSecondary, marginBottom: Spacing.three, paddingHorizontal: Spacing.one }]}>{t('quran.bookmarkedJuz', { defaultValue: 'Bookmarked Juz' })}</Text>
                     <View style={styles.gridContainer}>
-                      {bookmarks.filter((b: any) => b.type === 'juz').map((juz: any, i: number) => (
-                        <ThemeCard key={`juz-${i}`} intensity={30}  style={[styles.juzCardWrapper, { borderColor: colors.border }]}>
+                      {bookmarks.filter((b: any) => b.type === 'juz').map((juz: any, index: number) => (
+                        <Reanimated.View key={`juz-${index}`} entering={FadeInDown.delay(index * 50).springify().damping(24).stiffness(100)} style={{ width: '47%' }}>
+                        <ThemeCard intensity={30} style={[styles.juzCardWrapper, { borderColor: colors.border, width: '100%' }]}>
                           <TouchableOpacity activeOpacity={1} 
                             style={styles.juzCard}
                             onPress={() => router.push(`/juz/${juz.juzId}`)}
@@ -547,6 +554,7 @@ export default function QuranScreen() {
                             <Text style={[styles.juzText, { color: colors.text }]}>{t('quran.juz', { id: formatNumber(juz.juzId, i18n.language) })}</Text>
                           </TouchableOpacity>
                         </ThemeCard>
+                        </Reanimated.View>
                       ))}
                     </View>
                   </View>
@@ -557,8 +565,9 @@ export default function QuranScreen() {
                   <View style={{ marginBottom: Spacing.four }}>
                     <Text style={[styles.sectionTitle, { color: colors.textSecondary, marginBottom: Spacing.three, paddingHorizontal: Spacing.one }]}>{t('quran.bookmarkedAyahs', { defaultValue: 'Bookmarked Ayahs' })}</Text>
                     <View style={styles.listContainer}>
-                      {bookmarks.filter((b: any) => !b.type || b.type === 'ayah').map((b: any, i: number) => (
-                        <ThemeCard intensity={30}  key={`ayah-${i}`} style={[styles.surahRowWrapper, { borderColor: colors.border }]}>
+                      {bookmarks.filter((b: any) => !b.type || b.type === 'ayah').map((b: any, index: number) => (
+                        <Reanimated.View key={`ayah-${index}`} entering={FadeInDown.delay(index * 50).springify().damping(24).stiffness(100)}>
+                        <ThemeCard intensity={30} style={[styles.surahRowWrapper, { borderColor: colors.border }]}>
                           <TouchableOpacity activeOpacity={1} 
                             style={[styles.surahRow, { paddingVertical: Spacing.four }]}
                             onPress={() => router.push(`/surah/${b.surahId}?ayah=${b.numberInSurah}`)}
@@ -580,6 +589,7 @@ export default function QuranScreen() {
                             </View>
                           </TouchableOpacity>
                         </ThemeCard>
+                        </Reanimated.View>
                       ))}
                     </View>
                   </View>

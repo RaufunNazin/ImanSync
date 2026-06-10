@@ -1,6 +1,8 @@
 import ThemeCard from '@/components/ThemeCard';
 import { Fonts, Spacing, useThemeColors } from '@/constants/theme';
 import { formatNumber } from '@/utils/formatNumber';
+import { fetchOnce } from '@/utils/fetchWithCache';
+import { storage } from '@/store/mmkv';
 import { useRouter } from 'expo-router';
 import { ChevronLeft, X } from 'lucide-react-native';
 import React, { useEffect, useState, useRef } from 'react';
@@ -43,8 +45,11 @@ export default function QuranSearchScreen() {
   const router = useRouter();
   const { t, i18n } = useTranslation();
   
-  const [surahs, setSurahs] = useState<Surah[]>([]);
-  const [loading, setLoading] = useState(true);
+  const [surahs, setSurahs] = useState<Surah[]>(() => {
+    const cached = storage.getString('quran_surahs_list');
+    return cached ? JSON.parse(cached) : [];
+  });
+  const [loading, setLoading] = useState(() => surahs.length === 0);
   const [searchQuery, setSearchQuery] = useState('');
   const inputRef = useRef<TextInput>(null);
 
@@ -59,22 +64,33 @@ export default function QuranSearchScreen() {
       inputRef.current?.focus();
     }, 150);
 
-    fetch('https://api.alquran.cloud/v1/surah')
-      .then(res => res.json())
-      .then(json => {
-        if (json.data) {
-          const formatted = json.data.map((item: any) => ({
-            id: item.number,
-            name: item.englishName,
-            nameAr: item.name,
-            verses: item.numberOfAyahs,
-            type: item.revelationType,
-          }));
-          setSurahs(formatted);
+    fetchOnce({
+      key: 'quran_surahs_list',
+      onStart: (isCached) => {
+        if (!isCached) setLoading(true);
+      },
+      fetcher: async () => {
+        const res = await fetch('https://api.alquran.cloud/v1/surah');
+        const json = await res.json();
+        return json.data.map((item: any) => ({
+          id: item.number,
+          name: item.englishName,
+          nameAr: item.name,
+          verses: item.numberOfAyahs,
+          type: item.revelationType,
+        }));
+      },
+      onData: (data) => {
+        if (data) {
+          setSurahs(data);
+          setLoading(false);
         }
-      })
-      .catch(err => console.error("Error fetching surahs:", err))
-      .finally(() => setLoading(false));
+      },
+      onError: (err) => {
+        console.error("Error fetching surahs:", err);
+        setLoading(false);
+      }
+    });
   }, []);
 
   const animatedSearchStyle = useAnimatedStyle(() => {

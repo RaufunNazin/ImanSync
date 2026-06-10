@@ -237,17 +237,17 @@ export default function SettingsScreen() {
     <SafeAreaView style={[styles.safeArea, { backgroundColor: colors.background }]}>
       <PageHeader titleEn={t('settings.titleEn')} titleAr={t('settings.titleAr')} />
       <ScrollView ref={scrollViewRef} showsVerticalScrollIndicator={false} contentContainerStyle={styles.container}>
-        <Animated.View layout={LinearTransition.springify().damping(16).stiffness(120)}>
+        <Animated.View layout={LinearTransition.springify().damping(24).stiffness(100)}>
 
         <Text style={[styles.sectionTitle, { color: colors.textSecondary }]}>{t('settings.preferences')}</Text>
-        <ThemeCard animated layout={LinearTransition.springify().damping(16).stiffness(120)} style={[styles.card]}>
+        <ThemeCard animated layout={LinearTransition.springify().damping(24).stiffness(100)} style={[styles.card]}>
           <SettingRow icon={Globe} title={t('settings.language')} value={i18n.language === 'bn' ? 'বাংলা' : 'English'} onPress={cycleLanguage} colors={colors} />
           <SettingRow icon={Palette} title={t('settings.theme')} value={scheme === 'dark'} type="toggle" onPress={toggleDarkMode} colors={colors} />
                     <SettingRow icon={BookOpen} title={t('settings.showCuratedDuas')} value={prefs.showCuratedDuas} type="toggle" isLast={true} onPress={(v) => prefs.setPreferences({ showCuratedDuas: v })} colors={colors} />
         </ThemeCard>
 
         <Text style={[styles.sectionTitle, { color: colors.textSecondary, marginTop: Spacing.four }]}>{t('settings.calendarSettings', { defaultValue: 'Calendar Settings' })}</Text>
-        <ThemeCard animated layout={LinearTransition.springify().damping(16).stiffness(120)} style={[styles.card]}>
+        <ThemeCard animated layout={LinearTransition.springify().damping(24).stiffness(100)} style={[styles.card]}>
           <SettingRow
             icon={CalendarDays}
             title={t('settings.hijriOffset', { defaultValue: 'Hijri Date Adjustment' })}
@@ -268,7 +268,7 @@ export default function SettingsScreen() {
             colors={colors}
           />
           {prefs.showBanglaCalendar && (
-            <Animated.View entering={FadeIn} exiting={FadeOut} layout={LinearTransition.springify()}>
+            <Animated.View entering={FadeIn} exiting={FadeOut} layout={LinearTransition.springify().damping(24).stiffness(100)}>
               <SettingRow
                 icon={CalendarDays}
                 title={t('settings.banglaOffset', { defaultValue: 'Bangla Date Adjustment' })}
@@ -285,10 +285,10 @@ export default function SettingsScreen() {
         </ThemeCard>
 
         <Text style={[styles.sectionTitle, { color: colors.textSecondary, marginTop: Spacing.four }]}>{t('settings.notificationsTitle', { defaultValue: 'Notifications Settings' })}</Text>
-        <ThemeCard animated layout={LinearTransition.springify().damping(16).stiffness(120)} style={[styles.card]}>
+        <ThemeCard animated layout={LinearTransition.springify().damping(24).stiffness(100)} style={[styles.card]}>
           <SettingRow icon={Bell} title={t('settings.masterToggle', { defaultValue: 'Master Toggle' })} value={prefs.notificationsEnabled} type="toggle" isLast={!prefs.notificationsEnabled} onPress={toggleNotifications} colors={colors} />
           {prefs.notificationsEnabled && (
-            <Animated.View entering={FadeIn} exiting={FadeOut} layout={LinearTransition.springify()}>
+            <Animated.View entering={FadeIn} exiting={FadeOut} layout={LinearTransition.springify().damping(24).stiffness(100)}>
               <SettingRow icon={Clock} title={t('settings.prayerStartAlerts', { defaultValue: 'Prayer Start Alerts' })} value={prefs.prayerStartAlerts} type="toggle" onPress={togglePrayerStartAlerts} colors={colors} />
               <SettingRow icon={Clock} title={t('settings.prayerEndAlerts', { defaultValue: 'Prayer End Alerts' })} value={prefs.prayerEndAlerts} type="toggle" onPress={togglePrayerEndAlerts} colors={colors} />
               <SettingRow icon={ListTodo} title={t('settings.dailyReminders', { defaultValue: 'Daily Reminders' })} value={prefs.taskRemindersEnabled} type="toggle" onPress={toggleTaskReminders} colors={colors} />
@@ -305,7 +305,7 @@ export default function SettingsScreen() {
                 colors={colors}
               />
               {prefs.quietHours.enabled && (
-                <Animated.View entering={FadeIn} exiting={FadeOut} layout={LinearTransition.springify()} style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', paddingBottom: Spacing.three, paddingLeft: 52 }}>
+                <Animated.View entering={FadeIn} exiting={FadeOut} layout={LinearTransition.springify().damping(24).stiffness(100)} style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', paddingBottom: Spacing.three, paddingLeft: 52 }}>
                   <Text style={[styles.settingTitle, { color: colors.textSecondary, fontSize: 13 }]}>
                     {t('settings.dndSchedule')}
                   </Text>
@@ -355,7 +355,7 @@ export default function SettingsScreen() {
         />
 
         <Text style={[styles.sectionTitle, { color: colors.textSecondary, marginTop: Spacing.four }]}>{t('settings.locationCalc')}</Text>
-        <ThemeCard animated layout={LinearTransition.springify().damping(16).stiffness(120)} style={[styles.card]}>
+        <ThemeCard animated layout={LinearTransition.springify().damping(24).stiffness(100)} style={[styles.card]}>
           <SettingRow
             icon={MapPin}
             title={t('settings.location')}
@@ -391,7 +391,7 @@ export default function SettingsScreen() {
           </ThemeCard>
 
         <Text style={[styles.sectionTitle, { color: colors.textSecondary, marginTop: Spacing.four }]}>{t('settings.system')}</Text>
-        <ThemeCard animated layout={LinearTransition.springify().damping(16).stiffness(120)} style={[styles.card]}>
+        <ThemeCard animated layout={LinearTransition.springify().damping(24).stiffness(100)} style={[styles.card]}>
           <SettingRow
             icon={FolderLock}
             title={t('settings.permanentStorage')}

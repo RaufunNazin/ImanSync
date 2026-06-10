@@ -44,9 +44,9 @@ export default function QadaTrackerScreen() {
             </SkeletonBox>
           </View>
 
-          <Animated.View layout={LinearTransition.springify()} style={[styles.cardActions, { width: 140 }]}>
+          <Animated.View layout={LinearTransition.springify().damping(24).stiffness(100)} style={[styles.cardActions, { width: 140 }]}>
             {count > 0 && (
-              <Animated.View layout={LinearTransition.springify()} entering={FadeIn} exiting={FadeOut} style={{ flex: 1 }}>
+              <Animated.View layout={LinearTransition.springify().damping(24).stiffness(100)} entering={FadeIn} exiting={FadeOut} style={{ flex: 1 }}>
                 <TouchableOpacity activeOpacity={1} 
                   style={[styles.btn, { backgroundColor: colors.backgroundElement, borderColor: colors.border }]}
                   onPress={() => handleUpdate(type, -1)}
@@ -55,7 +55,7 @@ export default function QadaTrackerScreen() {
                 </TouchableOpacity>
               </Animated.View>
             )}
-            <Animated.View layout={LinearTransition.springify()} style={{ flex: count > 0 ? 1 : 2 }}>
+            <Animated.View layout={LinearTransition.springify().damping(24).stiffness(100)} style={{ flex: count > 0 ? 1 : 2 }}>
               <TouchableOpacity activeOpacity={1} 
                 style={[styles.btn, { backgroundColor: colors.accent + '22', borderColor: colors.accent }]}
                 onPress={() => handleUpdate(type, 1)}
