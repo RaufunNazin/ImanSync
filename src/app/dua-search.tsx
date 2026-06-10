@@ -22,8 +22,6 @@ import {
 import { SafeAreaView } from 'react-native-safe-area-context';
 import DuaService, { UnifiedDuaItem } from '@/services/duaService';
 import Animated, { 
-  FadeIn, 
-  FadeOut, 
   useAnimatedStyle,
   useSharedValue,
   withTiming
@@ -209,7 +207,7 @@ export default function DuaSearchScreen() {
 
   return (
     <SafeAreaView style={[styles.safeArea, { backgroundColor: colors.background }]}>
-      <Animated.View entering={FadeIn.duration(150)} exiting={FadeOut.duration(100)} style={[styles.header, { borderBottomColor: colors.border }]}>
+      <View style={[styles.header, { borderBottomColor: colors.border }]}>
         <TouchableOpacity activeOpacity={1} onPress={handleBack} style={styles.backBtn} hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}>
           <ChevronLeft size={24} color={colors.textSecondary} />
         </TouchableOpacity>
@@ -235,7 +233,7 @@ export default function DuaSearchScreen() {
             </TouchableOpacity>
           )}
         </Animated.View>
-      </Animated.View>
+      </View>
 
       <KeyboardAvoidingView behavior={Platform.OS === 'ios' ? 'padding' : 'height'} style={{ flex: 1 }}>
         <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={styles.container} keyboardDismissMode="on-drag" keyboardShouldPersistTaps="handled">
@@ -248,7 +246,7 @@ export default function DuaSearchScreen() {
               if (!translation) translation = dua.name;
 
               return (
-                <Animated.View entering={FadeIn.duration(300)} key={dua.id}>
+                <View key={dua.id}>
                   <View style={[styles.itemWrapper, { borderColor: colors.border, backgroundColor: colors.glassTint === 'light' ? 'rgba(255,255,255,0.7)' : 'rgba(0,0,0,0.5)' }]}>
                     <TouchableOpacity activeOpacity={1}
                       style={styles.item}
@@ -281,7 +279,7 @@ export default function DuaSearchScreen() {
                       <ChevronRight size={20} color={colors.textSecondary} />
                     </TouchableOpacity>
                   </View>
-                </Animated.View>
+                </View>
               );
             })}
             {searchQuery.length > 0 && searchResults.length === 0 && !fetchingAll && (

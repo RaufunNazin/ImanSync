@@ -186,7 +186,7 @@ export default function QiblaScreen() {
                   style={[
                     styles.tickMark, 
                     { 
-                      backgroundColor: isQiblaPin ? colors.accent : isMajor ? colors.text : (isMedium ? colors.textSecondary : colors.border),
+                      backgroundColor: isQiblaPin ? colors.accent : isMajor ? colors.text : (isMedium ? colors.textSecondary : colors.textSecondary + '30'),
                       height: isQiblaPin ? 18 : isMajor ? 14 : (isMedium ? 10 : 6),
                       opacity: isQiblaPin ? 1 : isMajor ? 0.9 : 0.5,
                       transform: [{ rotate: `${deg}deg` }, { translateY: -130 }] 
@@ -212,7 +212,7 @@ export default function QiblaScreen() {
 
             {/* Qibla Fixed Indicator on the Dial */}
             <View style={[styles.qiblaFixedIndicator, { transform: [{ rotate: `${qiblaBearing}deg` }, { translateY: -130 }] }]}>
-              <View style={[styles.qiblaBadge, { backgroundColor: '#4c956c' }]}>
+              <View style={[styles.qiblaBadge, { backgroundColor: colors.highlight }]}>
                 <View style={styles.kaabaIcon}>
                   <View style={styles.kaabaGoldBand} />
                 </View>

@@ -1,5 +1,5 @@
 import React from 'react';
-import { Modal, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import { Modal, StyleSheet, Text, TouchableOpacity, View, TouchableWithoutFeedback } from 'react-native';
 import { Fonts } from '@/constants/theme';
 
 interface ConfirmModalProps {
@@ -23,36 +23,40 @@ export default function ConfirmModal({
   onConfirm,
   onCancel,
   colors,
-  confirmColor = '#EF4444', // Default to danger red
+  confirmColor = colors?.error,
 }: ConfirmModalProps) {
   if (!visible) return null;
 
   return (
     <Modal visible={visible} transparent animationType="fade" onRequestClose={onCancel}>
-      <View style={styles.overlay}>
-        <View style={[styles.container, { backgroundColor: colors.background, borderColor: colors.border }]}>
-          <Text style={[styles.title, { color: colors.text }]}>
-            {title}
-          </Text>
-          <Text style={[styles.message, { color: colors.textSecondary }]}>
-            {message}
-          </Text>
-          <View style={styles.buttonRow}>
-            <TouchableOpacity activeOpacity={1} 
-              style={[styles.btn, { backgroundColor: colors.backgroundElement }]} 
-              onPress={onCancel}
-            >
-              <Text style={[styles.btnText, { color: colors.text }]}>{cancelText}</Text>
-            </TouchableOpacity>
-            <TouchableOpacity activeOpacity={1} 
-              style={[styles.btn, { backgroundColor: confirmColor }]} 
-              onPress={onConfirm}
-            >
-              <Text style={[styles.btnText, { color: '#FFF' }]}>{confirmText}</Text>
-            </TouchableOpacity>
-          </View>
+      <TouchableWithoutFeedback onPress={onCancel}>
+        <View style={styles.overlay}>
+          <TouchableWithoutFeedback>
+            <View style={[styles.container, { backgroundColor: colors.background, borderColor: colors.border }]}>
+              <Text style={[styles.title, { color: colors.text }]}>
+                {title}
+              </Text>
+              <Text style={[styles.message, { color: colors.textSecondary }]}>
+                {message}
+              </Text>
+              <View style={styles.buttonRow}>
+                <TouchableOpacity activeOpacity={1} 
+                  style={[styles.btn, { backgroundColor: colors.backgroundElement }]} 
+                  onPress={onCancel}
+                >
+                  <Text style={[styles.btnText, { color: colors.text }]}>{cancelText}</Text>
+                </TouchableOpacity>
+                <TouchableOpacity activeOpacity={1} 
+                  style={[styles.btn, { backgroundColor: confirmColor }]} 
+                  onPress={onConfirm}
+                >
+                  <Text style={[styles.btnText, { color: '#FFF' }]}>{confirmText}</Text>
+                </TouchableOpacity>
+              </View>
+            </View>
+          </TouchableWithoutFeedback>
         </View>
-      </View>
+      </TouchableWithoutFeedback>
     </Modal>
   );
 }

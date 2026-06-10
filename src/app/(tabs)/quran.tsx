@@ -5,7 +5,7 @@ import { formatNumber } from '@/utils/formatNumber';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useFocusEffect, useRouter } from 'expo-router';
 import { Bookmark, BookOpen, Search, Target, DownloadCloud, CheckCircle, GraduationCap, ChevronRight, X } from 'lucide-react-native';
-import React, { useCallback, useEffect, useRef, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { StyleSheet, Text, TouchableOpacity, View, Animated } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
@@ -27,7 +27,8 @@ const SurahDownloadButton = React.memo(({ surahId, reciterId, colors, i18n_langu
   const progress = useDownloadStore((s) => s.downloadProgress[`${reciterId}_${surahId}`]);
   const downloadSurah = useDownloadStore((s) => s.downloadSurah);
   const deleteSurah = useDownloadStore((s) => s.deleteSurah);
-  const [confirmVisible, setConfirmVisible] = React.useState(false);
+  const isDark = colors.background === '#0c1618';
+  const activeColor = isDark ? colors.accent : colors.highlight;
 
   return (
     <>
@@ -49,7 +50,7 @@ const SurahDownloadButton = React.memo(({ surahId, reciterId, colors, i18n_langu
           <DownloadProgressRing
             size={22}
             progress={progress}
-            color={colors.accent}
+            color={activeColor}
             trackColor={colors.textSecondary + '30'}
             label={formatNumber(Math.round(progress), i18n_language)}
           />
@@ -68,17 +69,66 @@ const SurahDownloadButton = React.memo(({ surahId, reciterId, colors, i18n_langu
         onConfirm={() => { setConfirmVisible(false); deleteSurah(reciterId, surahId); }}
         onCancel={() => setConfirmVisible(false)}
         colors={colors}
-        confirmColor="#EF4444"
+        confirmColor={colors.error}
       />
     </>
   );
 });
 
+const SurahRow = React.memo(({ surah, colors, language, t, reciterId, isBookmarked, onPress, onBookmarkToggle }: any) => (
+  <ThemeCard intensity={30} style={[styles.surahRowWrapper, { borderColor: colors.border }]}>
+    <TouchableOpacity activeOpacity={1}
+      style={styles.surahRow}
+      onPress={onPress}
+    >
+      <View style={styles.surahLeft}>
+        <View style={[styles.numberBox, { backgroundColor: colors.textSecondary + '15', borderColor: colors.border, borderWidth: 1 }]}>
+          <Text style={[styles.numberText, { color: colors.textSecondary }]}>{formatNumber(surah.id, language)}</Text>
+        </View>
+        <View style={{ flex: 1 }}>
+          <Text style={[styles.surahNameEn, { color: colors.text }]}>{t('surahNames.' + surah.id, { defaultValue: surah.name })}</Text>
+          <Text style={[styles.surahMeta, { color: colors.textSecondary }]}>
+            {t('quran.' + surah.type, { defaultValue: surah.type })} • {t('surah.verses', { count: formatNumber(surah.verses, language) })}
+          </Text>
+        </View>
+      </View>
+      <View style={{ flexDirection: 'row', alignItems: 'center', gap: Spacing.three }}>
+        <SurahDownloadButton
+          surahId={surah.id}
+          reciterId={reciterId}
+          colors={colors}
+          i18n_language={language}
+          t={t}
+        />
+        <TouchableOpacity
+          activeOpacity={1}
+          hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
+          onPress={onBookmarkToggle}
+        >
+          {(() => {
+            const isDark = colors.background === '#0c1618';
+            const activeColor = isDark ? colors.accent : colors.highlight;
+            return (
+              <Bookmark
+                size={16}
+                color={isBookmarked ? activeColor : colors.textSecondary}
+                fill={isBookmarked ? activeColor : 'transparent'}
+                opacity={isBookmarked ? 1 : 0.5}
+              />
+            );
+          })()}
+        </TouchableOpacity>
+      </View>
+    </TouchableOpacity>
+  </ThemeCard>
+));
 
 
 export default function QuranScreen() {
 
   const colors = useThemeColors();
+  const isDark = colors.background === '#0c1618';
+  const activeQuranColor = isDark ? colors.accent : colors.highlight;
   const router = useRouter();
   const { t, i18n } = useTranslation();
   const audioStore = useAudioStore();
@@ -89,8 +139,8 @@ export default function QuranScreen() {
   const isGoalMet = pagesReadToday >= readingStore.dailyGoalPages;
   
   const [activeTab, setActiveTab] = useState<'surah' | 'juz' | 'bookmarks'>('surah');
-  const [surahs, setSurahs] = useState<any[]>([]);
-  const [loading, setLoading] = useState(true);
+  const surahs = surahsData.data;
+  const loading = false;
   const [lastReadSurah, setLastReadSurah] = useState({ id: '1', name: 'Al-Faatiha', ayah: 1 });
   const [lastReadJuz, setLastReadJuz] = useState({ id: '1', ayah: 1 });
   const [bookmarks, setBookmarks] = useState([]);
@@ -169,7 +219,6 @@ export default function QuranScreen() {
     }
   };
 
-  const isSurahBookmarked = (id: number) => bookmarks.some((b: any) => b.type === 'surah' && b.surahId === id);
   const isJuzBookmarked = (id: number) => bookmarks.some((b: any) => b.type === 'juz' && b.juzId === id);
 
   const scrollY = React.useRef(new Animated.Value(0)).current;
@@ -190,23 +239,13 @@ export default function QuranScreen() {
     return () => scrollY.removeListener(listenerId);
   }, [audioStore.currentSurahId]);
 
-  const [renderCount, setRenderCount] = useState(15);
 
-  useEffect(() => {
-    setSurahs(surahsData.data);
-    setLoading(false);
-  }, []);
 
-  useEffect(() => {
-    if (activeTab === 'surah') {
-      const timer = setTimeout(() => {
-        setRenderCount(114);
-      }, 100);
-      return () => clearTimeout(timer);
-    } else {
-      setRenderCount(15);
-    }
-  }, [activeTab]);
+  const bookmarkedSurahIds = useMemo(() => {
+    const set = new Set<number>();
+    bookmarks.forEach((b: any) => { if (b.type === 'surah') set.add(b.surahId); });
+    return set;
+  }, [bookmarks]);
 
   useEffect(() => {
     readingStore.initialize();
@@ -386,57 +425,25 @@ export default function QuranScreen() {
           )}
           {!loading && (
           <View style={styles.listContainer}>
-            {surahs.slice(0, renderCount).map((surah, index) => (
-              <Reanimated.View key={surah.id} entering={FadeInDown.delay(index * 50).springify().damping(24).stiffness(100)}>
-              <ThemeCard intensity={30} style={[styles.surahRowWrapper, { borderColor: colors.border }]}>
-                <TouchableOpacity activeOpacity={1} 
-                  style={styles.surahRow}
-                  onPress={() => router.push(`/surah/${surah.id}`)}
-                >
-                  <View style={styles.surahLeft}>
-                    <View style={[styles.numberBox, { backgroundColor: colors.textSecondary + '15', borderColor: colors.border, borderWidth: 1 }]}>
-                      <Text style={[styles.numberText, { color: colors.textSecondary }]}>{formatNumber(surah.id, i18n.language)}</Text>
-                    </View>
-                    <View style={{ flex: 1 }}>
-                      <Text style={[styles.surahNameEn, { color: colors.text }]}>{t('surahNames.' + surah.id, { defaultValue: surah.name })}</Text>
-                      <Text style={[styles.surahMeta, { color: colors.textSecondary }]}>
-                        {t('quran.' + surah.type, { defaultValue: surah.type })} • {t('surah.verses', { count: formatNumber(surah.verses, i18n.language) })}
-                      </Text>
-                    </View>
-                  </View>
-                  
-                  <View style={{ flexDirection: 'row', alignItems: 'center', gap: Spacing.three }}>
-                    <SurahDownloadButton 
-                      surahId={surah.id} 
-                      reciterId={audioStore.currentReciterId} 
-                      colors={colors} 
-                      i18n_language={i18n.language}
-                      t={t}
-                    />
-                    <TouchableOpacity
-                      activeOpacity={1}
-                      hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
-                      onPress={(e) => { e.stopPropagation(); toggleSurahBookmark(surah); }}
-                    >
-                      <Bookmark
-                        size={16}
-                        color={isSurahBookmarked(surah.id) ? colors.accent : colors.textSecondary}
-                        fill={isSurahBookmarked(surah.id) ? colors.accent : 'transparent'}
-                        opacity={isSurahBookmarked(surah.id) ? 1 : 0.5}
-                      />
-                    </TouchableOpacity>
-                  </View>
-                </TouchableOpacity>
-              </ThemeCard>
-              </Reanimated.View>
+            {surahs.map((surah) => (
+              <SurahRow
+                key={surah.id}
+                surah={surah}
+                colors={colors}
+                language={i18n.language}
+                t={t}
+                reciterId={audioStore.currentReciterId}
+                isBookmarked={bookmarkedSurahIds.has(surah.id)}
+                onPress={() => router.push(`/surah/${surah.id}`)}
+                onBookmarkToggle={() => toggleSurahBookmark(surah)}
+              />
             ))}
           </View>          )}
           </>
         ) : activeTab === 'juz' ? (
           <View style={styles.gridContainer}>
-            {Array.from({ length: 30 }).map((_, index) => (
-              <Reanimated.View key={index} entering={FadeInDown.delay(index * 50).springify().damping(24).stiffness(100)} style={{ width: '47%' }}>
-              <ThemeCard intensity={30}  style={[styles.juzCardWrapper, { borderColor: colors.border, width: '100%' }]}>
+            {Array.from({ length: 30 }).map((_, i) => (
+              <ThemeCard key={i} intensity={30}  style={[styles.juzCardWrapper, { borderColor: colors.border }]}>
                 <TouchableOpacity activeOpacity={1} 
                   style={styles.juzCard}
                   onPress={() => router.push(`/juz/${i + 1}`)}
@@ -449,15 +456,14 @@ export default function QuranScreen() {
                   >
                     <Bookmark
                       size={12}
-                      color={isJuzBookmarked(i + 1) ? colors.accent : colors.textSecondary}
-                      fill={isJuzBookmarked(i + 1) ? colors.accent : 'transparent'}
+                      color={isJuzBookmarked(i + 1) ? activeQuranColor : colors.textSecondary}
+                      fill={isJuzBookmarked(i + 1) ? activeQuranColor : 'transparent'}
                       opacity={isJuzBookmarked(i + 1) ? 1 : 0.4}
                     />
                   </TouchableOpacity>
                   <Text style={[styles.juzText, { color: colors.text }]}>{t('quran.juz', { id: formatNumber(i + 1, i18n.language) })}</Text>
                 </TouchableOpacity>
               </ThemeCard>
-              </Reanimated.View>
             ))}
           </View>
         ) : (
@@ -474,9 +480,8 @@ export default function QuranScreen() {
                   <View style={{ marginBottom: Spacing.four }}>
                     <Text style={[styles.sectionTitle, { color: colors.textSecondary, marginBottom: Spacing.three, paddingHorizontal: Spacing.one }]}>{t('quran.bookmarkedSurahs', { defaultValue: 'Bookmarked Surahs' })}</Text>
                     <View style={styles.listContainer}>
-                      {bookmarks.filter((b: any) => b.type === 'surah').map((surah: any, index: number) => (
-                        <Reanimated.View key={`surah-${index}`} entering={FadeInDown.delay(index * 50).springify().damping(24).stiffness(100)}>
-                        <ThemeCard intensity={30} style={[styles.surahRowWrapper, { borderColor: colors.border }]}>
+                      {bookmarks.filter((b: any) => b.type === 'surah').map((surah: any, i: number) => (
+                        <ThemeCard intensity={30}  key={`surah-${i}`} style={[styles.surahRowWrapper, { borderColor: colors.border }]}>
                           <TouchableOpacity activeOpacity={1} 
                             style={styles.surahRow}
                             onPress={() => router.push(`/surah/${surah.surahId}`)}
@@ -515,7 +520,7 @@ export default function QuranScreen() {
                                   <DownloadProgressRing
                                     size={22}
                                     progress={downloadStore.downloadProgress[`${audioStore.currentReciterId}_${surah.surahId}`]}
-                                    color={colors.accent}
+                                    color={activeQuranColor}
                                     trackColor={colors.textSecondary + '30'}
                                     label={formatNumber(Math.round(downloadStore.downloadProgress[`${audioStore.currentReciterId}_${surah.surahId}`]), i18n.language)}
                                   />
@@ -524,12 +529,11 @@ export default function QuranScreen() {
                                 )}
                               </TouchableOpacity>
 
-                              <Bookmark size={14} color={colors.accent} fill={colors.accent} />
+                              <Bookmark size={14} color={activeQuranColor} fill={activeQuranColor} />
                               <Text style={[styles.surahNameAr, { color: colors.text }]}>{surah.surahNameAr}</Text>
                             </View>
                           </TouchableOpacity>
                         </ThemeCard>
-                        </Reanimated.View>
                       ))}
                     </View>
                   </View>
@@ -540,21 +544,19 @@ export default function QuranScreen() {
                   <View style={{ marginBottom: Spacing.four }}>
                     <Text style={[styles.sectionTitle, { color: colors.textSecondary, marginBottom: Spacing.three, paddingHorizontal: Spacing.one }]}>{t('quran.bookmarkedJuz', { defaultValue: 'Bookmarked Juz' })}</Text>
                     <View style={styles.gridContainer}>
-                      {bookmarks.filter((b: any) => b.type === 'juz').map((juz: any, index: number) => (
-                        <Reanimated.View key={`juz-${index}`} entering={FadeInDown.delay(index * 50).springify().damping(24).stiffness(100)} style={{ width: '47%' }}>
-                        <ThemeCard intensity={30} style={[styles.juzCardWrapper, { borderColor: colors.border, width: '100%' }]}>
+                      {bookmarks.filter((b: any) => b.type === 'juz').map((juz: any, i: number) => (
+                        <ThemeCard key={`juz-${i}`} intensity={30}  style={[styles.juzCardWrapper, { borderColor: colors.border }]}>
                           <TouchableOpacity activeOpacity={1} 
                             style={styles.juzCard}
                             onPress={() => router.push(`/juz/${juz.juzId}`)}
                             onLongPress={() => toggleJuzBookmark(juz.juzId)}
                           >
                             <View style={{ position: 'absolute', top: 8, right: 8 }}>
-                              <Bookmark size={12} color={colors.accent} fill={colors.accent} />
+                              <Bookmark size={12} color={activeQuranColor} fill={activeQuranColor} />
                             </View>
                             <Text style={[styles.juzText, { color: colors.text }]}>{t('quran.juz', { id: formatNumber(juz.juzId, i18n.language) })}</Text>
                           </TouchableOpacity>
                         </ThemeCard>
-                        </Reanimated.View>
                       ))}
                     </View>
                   </View>
@@ -565,16 +567,15 @@ export default function QuranScreen() {
                   <View style={{ marginBottom: Spacing.four }}>
                     <Text style={[styles.sectionTitle, { color: colors.textSecondary, marginBottom: Spacing.three, paddingHorizontal: Spacing.one }]}>{t('quran.bookmarkedAyahs', { defaultValue: 'Bookmarked Ayahs' })}</Text>
                     <View style={styles.listContainer}>
-                      {bookmarks.filter((b: any) => !b.type || b.type === 'ayah').map((b: any, index: number) => (
-                        <Reanimated.View key={`ayah-${index}`} entering={FadeInDown.delay(index * 50).springify().damping(24).stiffness(100)}>
-                        <ThemeCard intensity={30} style={[styles.surahRowWrapper, { borderColor: colors.border }]}>
+                      {bookmarks.filter((b: any) => !b.type || b.type === 'ayah').map((b: any, i: number) => (
+                        <ThemeCard intensity={30}  key={`ayah-${i}`} style={[styles.surahRowWrapper, { borderColor: colors.border }]}>
                           <TouchableOpacity activeOpacity={1} 
                             style={[styles.surahRow, { paddingVertical: Spacing.four }]}
                             onPress={() => router.push(`/surah/${b.surahId}?ayah=${b.numberInSurah}`)}
                           >
                             <View style={{ flex: 1 }}>
                               <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6, marginBottom: 8 }}>
-                                <Bookmark size={16} color={colors.accent} fill={colors.accent} />
+                                <Bookmark size={16} color={activeQuranColor} fill={activeQuranColor} />
                                 <Text style={[styles.surahNameEn, { color: colors.text, fontSize: 16 }]}>{t('surahNames.' + b.surahId, { defaultValue: b.surahName })}</Text>
                                 <View style={[styles.numberBox, { backgroundColor: colors.textSecondary + '15', width: 24, height: 24, borderRadius: 12, borderColor: colors.border, borderWidth: 1 }]}>
                                   <Text style={[styles.numberText, { color: colors.textSecondary, fontSize: 10 }]}>{formatNumber(b.numberInSurah, i18n.language)}</Text>
@@ -589,7 +590,6 @@ export default function QuranScreen() {
                             </View>
                           </TouchableOpacity>
                         </ThemeCard>
-                        </Reanimated.View>
                       ))}
                     </View>
                   </View>

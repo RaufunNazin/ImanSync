@@ -27,6 +27,8 @@ const generatePastDays = (days: number) => {
 
 export default function QuranTrackerScreen() {
   const colors = useThemeColors();
+  const isDark = colors.background === '#0c1618';
+  const activeQuranColor = isDark ? colors.accent : colors.highlight;
   const { t, i18n } = useTranslation();
   const router = useRouter();
   const readingStore = useReadingStore();
@@ -63,7 +65,7 @@ export default function QuranTrackerScreen() {
           <ThemeCard style={styles.card}>
             <View style={styles.cardHeader}>
               <View style={{ flexDirection: 'row', alignItems: 'center', gap: Spacing.two }}>
-                <Target size={20} color={isGoalMet ? colors.highlight : colors.accent} />
+                <Target size={20} color={isGoalMet ? colors.highlight : activeQuranColor} />
                 <Text style={[styles.cardTitle, { color: colors.text }]}>{t('quran.todayProgress', { defaultValue: "Today's Progress" })}</Text>
               </View>
               {isGoalMet && (
@@ -81,7 +83,7 @@ export default function QuranTrackerScreen() {
               </View>
               <View style={[styles.statDivider, { backgroundColor: colors.textSecondary + '20' }]} />
               <View style={styles.statBox}>
-                <Text style={[styles.statValue, { color: '#ff9800' }]}>{formatNumber(readingStore.currentStreak, i18n.language)}</Text>
+                <Text style={[styles.statValue, { color: activeQuranColor }]}>{formatNumber(readingStore.currentStreak, i18n.language)}</Text>
                 <Text style={[styles.statLabel, { color: colors.textSecondary }]}>{t('quran.currentStreak', { defaultValue: 'Current Streak' })}</Text>
               </View>
               <View style={[styles.statDivider, { backgroundColor: colors.textSecondary + '20' }]} />
@@ -101,14 +103,14 @@ export default function QuranTrackerScreen() {
                 <Minus size={20} color={colors.text} />
               </TouchableOpacity>
               <TouchableOpacity activeOpacity={1} 
-                style={[styles.quickAddBtn, { backgroundColor: isGoalMet ? colors.highlight + '22' : colors.accent + '22', flex: 2, borderColor: isGoalMet ? colors.highlight : colors.accent, borderWidth: 1 }]}
+                style={[styles.quickAddBtn, { backgroundColor: isGoalMet ? colors.highlight + '22' : activeQuranColor + '22', flex: 2, borderColor: isGoalMet ? colors.highlight : activeQuranColor, borderWidth: 1 }]}
                 onPress={() => {
                   readingStore.addPagesRead(1);
                   Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
                 }}
               >
-                <Plus size={20} color={isGoalMet ? colors.highlight : colors.accent} />
-                <Text style={[styles.quickAddText, { color: isGoalMet ? colors.highlight : colors.accent }]}>{t('quran.addPage', { defaultValue: 'Add Page' })}</Text>
+                <Plus size={20} color={isGoalMet ? colors.highlight : activeQuranColor} />
+                <Text style={[styles.quickAddText, { color: isGoalMet ? colors.highlight : activeQuranColor }]}>{t('quran.addPage', { defaultValue: 'Add Page' })}</Text>
               </TouchableOpacity>
             </View>
           </ThemeCard>
@@ -118,7 +120,7 @@ export default function QuranTrackerScreen() {
             <View style={styles.cardHeader}>
               <Text style={[styles.cardTitle, { color: colors.text }]}>{t('quran.dailyGoal', { defaultValue: 'Daily Goal' })}</Text>
               <TouchableOpacity activeOpacity={1} onPress={() => setIsEditingGoal(!isEditingGoal)}>
-                <Text style={{ fontFamily: Fonts.outfit, fontSize: 14, color: colors.accent, fontWeight: '600' }}>
+                <Text style={{ fontFamily: Fonts.outfit, fontSize: 14, color: activeQuranColor, fontWeight: '600' }}>
                   {isEditingGoal ? t('common.done', { defaultValue: 'Done' }) : t('common.edit', { defaultValue: 'Edit' })}
                 </Text>
               </TouchableOpacity>
@@ -136,7 +138,7 @@ export default function QuranTrackerScreen() {
                   <Text style={{ fontFamily: Fonts.outfit, fontSize: 18, color: colors.text, fontWeight: '600', width: 24, textAlign: 'center' }}>
                     {formatNumber(readingStore.dailyGoalPages, i18n.language)}
                   </Text>
-                  <TouchableOpacity activeOpacity={1} onPress={() => handleGoalChange(1)} style={[styles.goalBtn, { backgroundColor: colors.accent }]}>
+                  <TouchableOpacity activeOpacity={1} onPress={() => handleGoalChange(1)} style={[styles.goalBtn, { backgroundColor: activeQuranColor }]}>
                     <Plus size={16} color="#FFF" />
                   </TouchableOpacity>
                 </View>
@@ -178,7 +180,7 @@ export default function QuranTrackerScreen() {
                   
                   if (pages > 0) {
                     const ratio = Math.min(pages / readingStore.dailyGoalPages, 1);
-                    bgColor = ratio >= 1 ? colors.highlight : colors.accent;
+                    bgColor = ratio >= 1 ? colors.highlight : activeQuranColor;
                     opacity = ratio >= 1 ? 1 : Math.max(0.4, ratio);
                   }
 
@@ -194,7 +196,7 @@ export default function QuranTrackerScreen() {
                         { backgroundColor: bgColor, opacity }
                       ]}
                     >
-                      {hasNote && <View style={[styles.noteDot, { backgroundColor: pages > 0 ? '#FFF' : colors.accent }]} />}
+                      {hasNote && <View style={[styles.noteDot, { backgroundColor: pages > 0 ? '#FFF' : activeQuranColor }]} />}
                     </TouchableOpacity>
                   );
                 })}

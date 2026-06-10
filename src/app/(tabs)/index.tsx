@@ -126,12 +126,24 @@ export default function HomeScreen() {
   const locationName = getDistrictName(locationCity, i18n.language);
 
   const hadithRef = useRef(null);
+  const verseRef = useRef(null);
 
   const shareHadith = async () => {
     try {
       if (hadithRef.current) {
         const uri = await (hadithRef.current as any).capture();
         await Sharing.shareAsync(uri, { dialogTitle: 'Share Hadith' });
+      }
+    } catch (error) {
+      console.error(error);
+    }
+  };
+
+  const shareVerse = async () => {
+    try {
+      if (verseRef.current) {
+        const uri = await (verseRef.current as any).capture();
+        await Sharing.shareAsync(uri, { dialogTitle: 'Share Verse' });
       }
     } catch (error) {
       console.error(error);
@@ -653,7 +665,7 @@ export default function HomeScreen() {
               {/* Animated red glow when it's Makruh time and not done */}
               <Animated.View style={[{ position: 'absolute', top: 0, left: 0, right: 0, bottom: 0 }, animatedRedGlowStyle]}>
                 <LinearGradient
-                  colors={['#dc604030', '#dc604008', 'transparent']}
+                  colors={[colors.error + '30', colors.error + '08', 'transparent']}
                   start={{ x: 0, y: 0 }}
                   end={{ x: 1, y: 1 }}
                   style={{ width: '100%', height: '100%' }}
@@ -676,7 +688,7 @@ export default function HomeScreen() {
                       style={[
                         styles.heroCountdown, 
                         { 
-                          color: (isMakruh && !isCurrentPrayerDone) ? '#dc6040' : (scheme === 'dark' ? colors.accent : colors.highlight),
+                          color: (isMakruh && !isCurrentPrayerDone) ? colors.error : (scheme === 'dark' ? colors.accent : colors.highlight),
                           fontSize: 36,
                           width: char === ':' || char === ' ' ? 14 : 22,
                           textAlign: 'center',
@@ -725,7 +737,7 @@ export default function HomeScreen() {
               {/* Full-width Dynamic Progress Bar */}
               <AnimatedProgressBar
                 progress={prayersWithStatus.length > 0 ? progressPercent : 0}
-                color={progressPercent < 50 ? colors.highlight : progressPercent < 75 ? colors.accent : '#dc6040'}
+                color={progressPercent < 50 ? colors.highlight : progressPercent < 75 ? colors.accent : colors.error}
                 trackColor={colors.border}
                 height={4}
                 duration={800}
@@ -930,15 +942,15 @@ export default function HomeScreen() {
               <Text style={[styles.subSectionLabelOuter, { color: colors.textSecondary }]}>{t('home.restrictedTimes')}</Text>
               <View style={styles.restrictedOuter}>
                 {restrictedTimes.map((rt) => (
-                  <ThemeCard key={rt.labelKey} intensity={30} style={[styles.restrictedCard, { borderColor: 'rgba(220,80,60,0.2)' }]}>
+                  <ThemeCard key={rt.labelKey} style={styles.restrictedCard}>
                     <View style={styles.restrictedNameCol}>
                       <Text style={[styles.restrictedLabel, { color: colors.text }]}>
                         {t('home.' + rt.labelKey)}
                       </Text>
                     </View>
-                    <View style={styles.restrictedDivider} />
+                    <View style={[styles.restrictedDivider, { backgroundColor: colors.border }]} />
                     <View style={styles.restrictedTimeCol}>
-                      <Text style={[styles.restrictedTime, { color: '#dc6040' }]}>
+                      <Text style={[styles.restrictedTime, { color: colors.error }]}>
                         {formatNumber(rt.time, i18n.language)}
                       </Text>
                     </View>
@@ -953,32 +965,39 @@ export default function HomeScreen() {
         {/* ── Daily Inspiration ─────────────────────────────────── */}
         {dailyVerse ? (
           <View>
-            <Text style={[styles.sectionTitle, { color: colors.textSecondary }]}>
-              {t('home.dailyInspiration')}
-            </Text>
-            <ThemeCard intensity={20} style={[styles.inspirationCard, { borderColor: colors.border }]}>
-              <View style={{ alignItems: 'center' }}>
-                <View style={styles.quoteIconContainer}>
-                  <BookOpen size={24} color={colors.textSecondary} />
+            <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: Spacing.two }}>
+              <Text style={[styles.sectionTitle, { color: colors.textSecondary, marginBottom: 0 }]}>
+                {t('home.dailyInspiration')}
+              </Text>
+              <TouchableOpacity activeOpacity={1} onPress={shareVerse} style={{ padding: 4 }}>
+                <Share2 size={18} color={colors.textSecondary} />
+              </TouchableOpacity>
+            </View>
+            <ViewShot ref={verseRef} options={{ format: 'png', quality: 1 }}>
+              <ThemeCard intensity={20} style={[styles.inspirationCard, { borderColor: colors.border }]}>
+                <View style={{ alignItems: 'center' }}>
+                  <View style={styles.quoteIconContainer}>
+                    <BookOpen size={24} color={colors.textSecondary} />
+                  </View>
+                  <Text style={[styles.inspirationArabic, { color: colors.text }]}>
+                    {dailyVerse.arabic}
+                  </Text>
+                  {i18n.language !== 'bn' && (
+                    <Text style={[styles.inspirationEnglish, { color: colors.text }]}>
+                      {dailyVerse.translation}
+                    </Text>
+                  )}
+                  {i18n.language === 'bn' && (
+                    <Text style={[styles.inspirationBangla, { color: colors.textSecondary }]}>
+                      {dailyVerse.translationBn}
+                    </Text>
+                  )}
+                  <Text style={[styles.inspirationRef, { color: colors.textSecondary }]}>
+                    — {t('surahNames.' + dailyVerse.surahId, { defaultValue: dailyVerse.surahDefaultName })} {formatNumber(dailyVerse.surahId, i18n.language)}:{formatNumber(dailyVerse.ayahNum, i18n.language)}
+                  </Text>
                 </View>
-                <Text style={[styles.inspirationArabic, { color: colors.text }]}>
-                  {dailyVerse.arabic}
-                </Text>
-                {i18n.language !== 'bn' && (
-                  <Text style={[styles.inspirationEnglish, { color: colors.text }]}>
-                    {dailyVerse.translation}
-                  </Text>
-                )}
-                {i18n.language === 'bn' && (
-                  <Text style={[styles.inspirationBangla, { color: colors.textSecondary }]}>
-                    {dailyVerse.translationBn}
-                  </Text>
-                )}
-                <Text style={[styles.inspirationRef, { color: colors.textSecondary }]}>
-                  — {t('surahNames.' + dailyVerse.surahId, { defaultValue: dailyVerse.surahDefaultName })} {formatNumber(dailyVerse.surahId, i18n.language)}:{formatNumber(dailyVerse.ayahNum, i18n.language)}
-                </Text>
-              </View>
-            </ThemeCard>
+              </ThemeCard>
+            </ViewShot>
           </View>
         ) : (
           <View>
@@ -1255,7 +1274,6 @@ const styles = StyleSheet.create({
   },
   restrictedCard: {
     borderRadius: 16,
-    borderWidth: 1,
     overflow: 'hidden',
     flexDirection: 'row',
     alignItems: 'center',
@@ -1274,10 +1292,8 @@ const styles = StyleSheet.create({
   restrictedDivider: {
     width: 1,
     height: 28,
-    backgroundColor: 'rgba(220,96,64,0.3)',
   },
   restrictedTimeCol: {
-    flex: 1,
     alignItems: 'flex-end',
   },
   restrictedTime: {

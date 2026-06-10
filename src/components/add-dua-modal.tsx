@@ -186,8 +186,10 @@ export default function AddDuaModal({ visible, onClose, onSave, initialData, col
         style={{ flex: 1 }} 
         behavior="padding"
       >
-        <View style={styles.overlay}>
-          <View style={[styles.modal, { backgroundColor: colors.background, borderColor: colors.border }]}>
+        <TouchableWithoutFeedback onPress={handleClose}>
+          <View style={styles.overlay}>
+            <TouchableWithoutFeedback>
+              <View style={[styles.modal, { backgroundColor: colors.background, borderColor: colors.border }]}>
             <View style={{ width: 40, height: 4, backgroundColor: colors.border, borderRadius: 2, alignSelf: 'center', marginBottom: Spacing.four }} />
             <View style={[styles.header, { borderBottomColor: colors.border }]}>
               <Text style={[styles.title, { color: colors.text }]}>{initialData ? t('dua.editDua', {defaultValue: 'Edit Dua'}) : t('dua.addDua')}</Text>
@@ -407,9 +409,10 @@ export default function AddDuaModal({ visible, onClose, onSave, initialData, col
               >
                 <Text style={[styles.saveBtnText, { color: isValid ? '#FFF' : colors.textSecondary }]}>{t('dua.save')}</Text>
               </TouchableOpacity>
-            </View>
+              </View>
+            </TouchableWithoutFeedback>
           </View>
-        </View>
+        </TouchableWithoutFeedback>
       </KeyboardAvoidingView>
     </Modal>
   );

@@ -12,10 +12,10 @@ export const Colors = {
     backgroundElement: '#FFFFFF', // Solid flat
     backgroundSelected: 'rgba(76, 149, 108, 0.2)', // Glassmorphism light green
     primary: '#0c1618', // Deep Charcoal
-    accent: '#4c956c', // Sage Green
-    highlight: '#4c956c', // Sage Green
+    accent: '#C8AA6E', // Dusty Golden (yellow/gold)
+    highlight: '#4c956c', // Sage Green (green)
     success: '#4c956c', // Sage Green for explicit success states
-    error: '#ef4444',
+    error: '#dc6040', // Terracotta Red (from restricted times)
     border: 'transparent',
     glassTint: 'light',
   },
@@ -26,10 +26,10 @@ export const Colors = {
     backgroundElement: '#1A2426', // Solid flat
     backgroundSelected: 'rgba(60, 64, 67, 0.8)',
     primary: '#f1f7ed', // Off-White
-    accent: '#C8AA6E', // Dusty Golden
-    highlight: '#C8AA6E', // Dusty Golden
+    accent: '#C8AA6E', // Dusty Golden (yellow/gold)
+    highlight: '#4c956c', // Sage Green (green)
     success: '#4c956c', // Sage Green for explicit success states
-    error: '#ef4444',
+    error: '#dc6040', // Terracotta Red (from restricted times)
     border: 'transparent',
     glassTint: 'dark',
   },
@@ -48,14 +48,21 @@ export function useThemeColors() {
 export function useThemeStyles() {
   const { theme } = useThemeStore();
   const currentTheme = theme === 'unspecified' ? 'light' : (theme ?? 'light');
+  const isDark = currentTheme === 'dark';
 
   return {
-    cardShadow: {
-      shadowColor: currentTheme === 'dark' ? '#000' : '#475569',
+    cardShadow: isDark ? {
+      shadowColor: '#000000',
       shadowOffset: { width: 0, height: 4 },
-      shadowOpacity: currentTheme === 'dark' ? 0.4 : 0.12,
-      shadowRadius: 16,
-      elevation: 5
+      shadowOpacity: 0.4,
+      shadowRadius: 8,
+      elevation: 4,
+    } : {
+      shadowColor: '#0c1618',
+      shadowOffset: { width: 0, height: 6 },
+      shadowOpacity: 0.06,
+      shadowRadius: 12,
+      elevation: 3,
     }
   };
 }

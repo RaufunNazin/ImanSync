@@ -1,4 +1,4 @@
-import Animated, { FadeIn, FadeOut, LinearTransition } from 'react-native-reanimated';
+import Animated, { LinearTransition } from 'react-native-reanimated';
 import ThemeCard from '@/components/ThemeCard';
 import OptionsModal from '@/components/OptionsModal';
 import PageHeader from '@/components/page-header';
@@ -25,7 +25,7 @@ import * as Updates from 'expo-updates';
 import { AlertCircle, Bell, BellOff, BookOpen, CalendarDays, Calculator, CheckCircle, Clock, FileText, FolderLock, Globe, Info, ListTodo, MapPin, Palette, RefreshCw, Scale, Shield, X} from 'lucide-react-native';
 import React, { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { ActivityIndicator, Alert, Linking, Modal, ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import { ActivityIndicator, Alert, Linking, Modal, ScrollView, StyleSheet, Text, TouchableOpacity, View, TouchableWithoutFeedback } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 const CALC_METHODS = [
@@ -64,6 +64,8 @@ export default function SettingsScreen() {
   const [highlightedRow, setHighlightedRow] = useState<string | null>(params.highlight || null);
   const scrollViewRef = React.useRef<ScrollView>(null);
 
+  const [locationY, setLocationY] = useState(0);
+
   useEffect(() => {
     if (params.highlight) {
       setHighlightedRow(params.highlight);
@@ -71,15 +73,15 @@ export default function SettingsScreen() {
       setTimeout(() => {
         if (params.highlight === 'storage') {
           scrollViewRef.current?.scrollToEnd({ animated: true });
-        } else if (params.highlight === 'location') {
-          scrollViewRef.current?.scrollTo({ y: 250, animated: true });
+        } else if (params.highlight === 'location' && locationY > 0) {
+          scrollViewRef.current?.scrollTo({ y: locationY - 20, animated: true });
         }
       }, 400);
 
       const timer = setTimeout(() => setHighlightedRow(null), 3000);
       return () => clearTimeout(timer);
     }
-  }, [params.highlight]);
+  }, [params.highlight, locationY]);
 
   // ── Permanent Storage ──────────────────────────────────────────────────────
   const [storageMode, setStorageMode] = useState<StorageMode>('internal');
@@ -237,17 +239,17 @@ export default function SettingsScreen() {
     <SafeAreaView style={[styles.safeArea, { backgroundColor: colors.background }]}>
       <PageHeader titleEn={t('settings.titleEn')} titleAr={t('settings.titleAr')} />
       <ScrollView ref={scrollViewRef} showsVerticalScrollIndicator={false} contentContainerStyle={styles.container}>
-        <Animated.View layout={LinearTransition.springify().damping(24).stiffness(100)}>
+        <Animated.View layout={LinearTransition.duration(200)}>
 
-        <Text style={[styles.sectionTitle, { color: colors.textSecondary }]}>{t('settings.preferences')}</Text>
-        <ThemeCard animated layout={LinearTransition.springify().damping(24).stiffness(100)} style={[styles.card]}>
+        <Animated.Text layout={LinearTransition.duration(200)} style={[styles.sectionTitle, { color: colors.textSecondary }]}>{t('settings.preferences')}</Animated.Text>
+        <ThemeCard animated layout={LinearTransition.duration(200)} style={[styles.card]}>
           <SettingRow icon={Globe} title={t('settings.language')} value={i18n.language === 'bn' ? 'বাংলা' : 'English'} onPress={cycleLanguage} colors={colors} />
           <SettingRow icon={Palette} title={t('settings.theme')} value={scheme === 'dark'} type="toggle" onPress={toggleDarkMode} colors={colors} />
                     <SettingRow icon={BookOpen} title={t('settings.showCuratedDuas')} value={prefs.showCuratedDuas} type="toggle" isLast={true} onPress={(v) => prefs.setPreferences({ showCuratedDuas: v })} colors={colors} />
         </ThemeCard>
 
-        <Text style={[styles.sectionTitle, { color: colors.textSecondary, marginTop: Spacing.four }]}>{t('settings.calendarSettings', { defaultValue: 'Calendar Settings' })}</Text>
-        <ThemeCard animated layout={LinearTransition.springify().damping(24).stiffness(100)} style={[styles.card]}>
+        <Animated.Text layout={LinearTransition.duration(200)} style={[styles.sectionTitle, { color: colors.textSecondary, marginTop: Spacing.four }]}>{t('settings.calendarSettings', { defaultValue: 'Calendar Settings' })}</Animated.Text>
+        <ThemeCard animated layout={LinearTransition.duration(200)} style={[styles.card]}>
           <SettingRow
             icon={CalendarDays}
             title={t('settings.hijriOffset', { defaultValue: 'Hijri Date Adjustment' })}
@@ -268,7 +270,7 @@ export default function SettingsScreen() {
             colors={colors}
           />
           {prefs.showBanglaCalendar && (
-            <Animated.View entering={FadeIn} exiting={FadeOut} layout={LinearTransition.springify().damping(24).stiffness(100)}>
+            <View>
               <SettingRow
                 icon={CalendarDays}
                 title={t('settings.banglaOffset', { defaultValue: 'Bangla Date Adjustment' })}
@@ -280,15 +282,15 @@ export default function SettingsScreen() {
                 isLast={true}
                 colors={colors}
               />
-            </Animated.View>
+            </View>
           )}
         </ThemeCard>
 
-        <Text style={[styles.sectionTitle, { color: colors.textSecondary, marginTop: Spacing.four }]}>{t('settings.notificationsTitle', { defaultValue: 'Notifications Settings' })}</Text>
-        <ThemeCard animated layout={LinearTransition.springify().damping(24).stiffness(100)} style={[styles.card]}>
+        <Animated.Text layout={LinearTransition.duration(200)} style={[styles.sectionTitle, { color: colors.textSecondary, marginTop: Spacing.four }]}>{t('settings.notificationsTitle', { defaultValue: 'Notifications Settings' })}</Animated.Text>
+        <ThemeCard animated layout={LinearTransition.duration(200)} style={[styles.card]}>
           <SettingRow icon={Bell} title={t('settings.masterToggle', { defaultValue: 'Master Toggle' })} value={prefs.notificationsEnabled} type="toggle" isLast={!prefs.notificationsEnabled} onPress={toggleNotifications} colors={colors} />
           {prefs.notificationsEnabled && (
-            <Animated.View entering={FadeIn} exiting={FadeOut} layout={LinearTransition.springify().damping(24).stiffness(100)}>
+            <View>
               <SettingRow icon={Clock} title={t('settings.prayerStartAlerts', { defaultValue: 'Prayer Start Alerts' })} value={prefs.prayerStartAlerts} type="toggle" onPress={togglePrayerStartAlerts} colors={colors} />
               <SettingRow icon={Clock} title={t('settings.prayerEndAlerts', { defaultValue: 'Prayer End Alerts' })} value={prefs.prayerEndAlerts} type="toggle" onPress={togglePrayerEndAlerts} colors={colors} />
               <SettingRow icon={ListTodo} title={t('settings.dailyReminders', { defaultValue: 'Daily Reminders' })} value={prefs.taskRemindersEnabled} type="toggle" onPress={toggleTaskReminders} colors={colors} />
@@ -305,7 +307,7 @@ export default function SettingsScreen() {
                 colors={colors}
               />
               {prefs.quietHours.enabled && (
-                <Animated.View entering={FadeIn} exiting={FadeOut} layout={LinearTransition.springify().damping(24).stiffness(100)} style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', paddingBottom: Spacing.three, paddingLeft: 52 }}>
+                <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', paddingBottom: Spacing.three, paddingLeft: 52 }}>
                   <Text style={[styles.settingTitle, { color: colors.textSecondary, fontSize: 13 }]}>
                     {t('settings.dndSchedule')}
                   </Text>
@@ -330,9 +332,9 @@ export default function SettingsScreen() {
                       </Text>
                     </TouchableOpacity>
                   </View>
-                </Animated.View>
+                </View>
               )}
-            </Animated.View>
+            </View>
           )}
         </ThemeCard>
 
@@ -354,8 +356,8 @@ export default function SettingsScreen() {
           }}
         />
 
-        <Text style={[styles.sectionTitle, { color: colors.textSecondary, marginTop: Spacing.four }]}>{t('settings.locationCalc')}</Text>
-        <ThemeCard animated layout={LinearTransition.springify().damping(24).stiffness(100)} style={[styles.card]}>
+        <Animated.Text layout={LinearTransition.duration(200)} onLayout={(e) => setLocationY(e.nativeEvent.layout.y)} style={[styles.sectionTitle, { color: colors.textSecondary, marginTop: Spacing.four }]}>{t('settings.locationCalc')}</Animated.Text>
+        <ThemeCard animated layout={LinearTransition.duration(200)} style={[styles.card]}>
           <SettingRow
             icon={MapPin}
             title={t('settings.location')}
@@ -390,8 +392,8 @@ export default function SettingsScreen() {
           />
           </ThemeCard>
 
-        <Text style={[styles.sectionTitle, { color: colors.textSecondary, marginTop: Spacing.four }]}>{t('settings.system')}</Text>
-        <ThemeCard animated layout={LinearTransition.springify().damping(24).stiffness(100)} style={[styles.card]}>
+        <Animated.Text layout={LinearTransition.duration(200)} style={[styles.sectionTitle, { color: colors.textSecondary, marginTop: Spacing.four }]}>{t('settings.system')}</Animated.Text>
+        <ThemeCard animated layout={LinearTransition.duration(200)} style={[styles.card]}>
           <SettingRow
             icon={FolderLock}
             title={t('settings.permanentStorage')}
@@ -486,92 +488,94 @@ export default function SettingsScreen() {
 
       {/* Update Modal */}
       {updateModal && (
-        <Modal visible={updateModal.visible} transparent animationType="fade">
-          <View style={StyleSheet.absoluteFill}>
-            <View   style={StyleSheet.absoluteFill} />
+        <Modal visible={updateModal.visible} transparent animationType="fade" onRequestClose={() => updateModal.type !== 'loading' && setUpdateModal(null)}>
+          <TouchableWithoutFeedback onPress={() => updateModal.type !== 'loading' && setUpdateModal(null)}>
             <View style={updateStyles.overlay}>
-              <View style={[updateStyles.card, { backgroundColor: colors.background, borderColor: colors.border }]}>
-                {updateModal.type !== 'loading' && (
-                  <TouchableOpacity activeOpacity={1} style={[updateStyles.closeBtn, { backgroundColor: colors.backgroundElement }]} onPress={() => setUpdateModal(null)}>
-                    <X size={20} color={colors.textSecondary} />
-                  </TouchableOpacity>
-                )}
-                
-                <View style={[updateStyles.iconWrap, { backgroundColor: updateModal.type === 'success' ? colors.accent + '20' : updateModal.type === 'error' ? '#ef444420' : colors.highlight + '20' }]}>
-                  {updateModal.type === 'success' ? (
-                    <CheckCircle size={32} color={colors.accent} />
-                  ) : updateModal.type === 'error' ? (
-                    <AlertCircle size={32} color="#ef4444" />
-                  ) : (
-                    <ActivityIndicator size="large" color={colors.highlight} />
+              <TouchableWithoutFeedback>
+                <View style={[updateStyles.card, { backgroundColor: colors.background, borderColor: colors.border }]}>
+                  {updateModal.type !== 'loading' && (
+                    <TouchableOpacity activeOpacity={1} style={[updateStyles.closeBtn, { backgroundColor: colors.backgroundElement }]} onPress={() => setUpdateModal(null)}>
+                      <X size={20} color={colors.textSecondary} />
+                    </TouchableOpacity>
+                  )}
+                  
+                  <View style={[updateStyles.iconWrap, { backgroundColor: updateModal.type === 'success' ? colors.accent + '20' : updateModal.type === 'error' ? colors.error + '20' : colors.highlight + '20' }]}>
+                    {updateModal.type === 'success' ? (
+                      <CheckCircle size={32} color={colors.accent} />
+                    ) : updateModal.type === 'error' ? (
+                      <AlertCircle size={32} color={colors.error} />
+                    ) : (
+                      <ActivityIndicator size="large" color={colors.highlight} />
+                    )}
+                  </View>
+                  
+                  <Text style={[updateStyles.title, { color: colors.text }]}>{updateModal.title}</Text>
+                  <Text style={[updateStyles.desc, { color: colors.textSecondary }]}>{updateModal.message}</Text>
+                  
+                  {updateModal.type !== 'loading' && (
+                    <TouchableOpacity activeOpacity={1} style={[updateStyles.btn, { backgroundColor: updateModal.type === 'success' ? colors.accent : colors.error }]} onPress={() => setUpdateModal(null)}>
+                      <Text style={updateStyles.btnText}>{t('system.gotIt', 'Got It')}</Text>
+                    </TouchableOpacity>
                   )}
                 </View>
-                
-                <Text style={[updateStyles.title, { color: colors.text }]}>{updateModal.title}</Text>
-                <Text style={[updateStyles.desc, { color: colors.textSecondary }]}>{updateModal.message}</Text>
-                
-                {updateModal.type !== 'loading' && (
-                  <TouchableOpacity activeOpacity={1} style={[updateStyles.btn, { backgroundColor: updateModal.type === 'success' ? colors.accent : '#ef4444' }]} onPress={() => setUpdateModal(null)}>
-                    <Text style={updateStyles.btnText}>{t('system.gotIt', 'Got It')}</Text>
-                  </TouchableOpacity>
-                )}
-              </View>
+              </TouchableWithoutFeedback>
             </View>
-          </View>
+          </TouchableWithoutFeedback>
         </Modal>
       )}
 
       {/* Storage Confirm Modal */}
       {storageConfirmModal && (
-        <Modal visible={true} transparent animationType="fade">
-          <View style={StyleSheet.absoluteFill}>
-            <View   style={StyleSheet.absoluteFill} />
+        <Modal visible={true} transparent animationType="fade" onRequestClose={() => setStorageConfirmModal(null)}>
+          <TouchableWithoutFeedback onPress={() => setStorageConfirmModal(null)}>
             <View style={updateStyles.overlay}>
-              <View style={[updateStyles.card, { backgroundColor: colors.background, borderColor: colors.border }]}>
-                <TouchableOpacity activeOpacity={1}
-                  style={[updateStyles.closeBtn, { backgroundColor: colors.backgroundElement }]}
-                  onPress={() => setStorageConfirmModal(null)}
-                >
-                  <X size={20} color={colors.textSecondary} />
-                </TouchableOpacity>
+              <TouchableWithoutFeedback>
+                <View style={[updateStyles.card, { backgroundColor: colors.background, borderColor: colors.border }]}>
+                  <TouchableOpacity activeOpacity={1}
+                    style={[updateStyles.closeBtn, { backgroundColor: colors.backgroundElement }]}
+                    onPress={() => setStorageConfirmModal(null)}
+                  >
+                    <X size={20} color={colors.textSecondary} />
+                  </TouchableOpacity>
 
-                <View style={[updateStyles.iconWrap, { backgroundColor: colors.textSecondary + '20' }]}>
-                  <FolderLock size={32} color={colors.textSecondary} />
-                </View>
+                  <View style={[updateStyles.iconWrap, { backgroundColor: colors.textSecondary + '20' }]}>
+                    <FolderLock size={32} color={colors.textSecondary} />
+                  </View>
 
-                <Text style={[updateStyles.title, { color: colors.text }]}>
-                  {storageConfirmModal === 'enable'
-                    ? t('settings.permanentStorageOn')
-                    : t('settings.permanentStorageOff')}
-                </Text>
-                <Text style={[updateStyles.desc, { color: colors.textSecondary }]}>
-                  {storageConfirmModal === 'enable'
-                    ? t('settings.permanentStorageOnDesc')
-                    : t('settings.permanentStorageOffDesc')}
-                </Text>
-
-                <TouchableOpacity activeOpacity={1}
-                  style={[updateStyles.btn, { backgroundColor: storageConfirmModal === 'enable' ? colors.highlight : '#ef4444' }]}
-                  onPress={confirmStorageChange}
-                >
-                  <Text style={updateStyles.btnText}>
+                  <Text style={[updateStyles.title, { color: colors.text }]}>
                     {storageConfirmModal === 'enable'
-                      ? t('settings.permanentStorageConfirmEnable')
-                      : t('settings.permanentStorageConfirmDisable')}
+                      ? t('settings.permanentStorageOn')
+                      : t('settings.permanentStorageOff')}
                   </Text>
-                </TouchableOpacity>
+                  <Text style={[updateStyles.desc, { color: colors.textSecondary }]}>
+                    {storageConfirmModal === 'enable'
+                      ? t('settings.permanentStorageOnDesc')
+                      : t('settings.permanentStorageOffDesc')}
+                  </Text>
 
-                <TouchableOpacity activeOpacity={1}
-                  style={[updateStyles.btn, { backgroundColor: colors.backgroundElement, marginTop: 8 }]}
-                  onPress={() => setStorageConfirmModal(null)}
-                >
-                  <Text style={[updateStyles.btnText, { color: colors.textSecondary }]}>
-                    {t('settings.cancel')}
-                  </Text>
-                </TouchableOpacity>
-              </View>
+                  <TouchableOpacity activeOpacity={1}
+                    style={[updateStyles.btn, { backgroundColor: storageConfirmModal === 'enable' ? colors.highlight : colors.error }]}
+                    onPress={confirmStorageChange}
+                  >
+                    <Text style={updateStyles.btnText}>
+                      {storageConfirmModal === 'enable'
+                        ? t('settings.permanentStorageConfirmEnable')
+                        : t('settings.permanentStorageConfirmDisable')}
+                    </Text>
+                  </TouchableOpacity>
+
+                  <TouchableOpacity activeOpacity={1}
+                    style={[updateStyles.btn, { backgroundColor: colors.backgroundElement, marginTop: 8 }]}
+                    onPress={() => setStorageConfirmModal(null)}
+                  >
+                    <Text style={[updateStyles.btnText, { color: colors.textSecondary }]}>
+                      {t('settings.cancel')}
+                    </Text>
+                  </TouchableOpacity>
+                </View>
+              </TouchableWithoutFeedback>
             </View>
-          </View>
+          </TouchableWithoutFeedback>
         </Modal>
       )}
     </SafeAreaView>

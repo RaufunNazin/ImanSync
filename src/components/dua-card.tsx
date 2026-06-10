@@ -19,10 +19,9 @@ interface DuaCardProps {
   colors: any;
 }
 
-export default function DuaCard({
+const DuaCard = React.memo(function DuaCard({
   id,
   name,
-
   count,
   isPinned,
   isMyDuas,
@@ -63,7 +62,9 @@ export default function DuaCard({
         </TouchableOpacity>
     </ThemeCard>
   );
-}
+});
+
+export default DuaCard;
 
 const styles = StyleSheet.create({
   wrapper: {

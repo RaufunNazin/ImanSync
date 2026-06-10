@@ -9,7 +9,7 @@ import { useRouter } from 'expo-router';
 import React, { useEffect, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { ScrollView, StyleSheet, Text, TouchableOpacity, View, AppState, Modal, Dimensions } from 'react-native';
-import Animated, { useAnimatedProps, useAnimatedStyle, useSharedValue, withSpring, withTiming, FadeInDown } from 'react-native-reanimated';
+import Animated, { useAnimatedProps, useAnimatedStyle, useSharedValue, withSpring, withTiming } from 'react-native-reanimated';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import Svg, { Circle } from 'react-native-svg';
 import AnimatedProgressBar from '@/components/AnimatedProgressBar';
@@ -199,16 +199,15 @@ export default function TrackerScreen() {
     <View style={styles.gridSection}>
       <Text style={[styles.sectionTitle, { color: colors.textSecondary }]}>{t('tracker.checklist')}</Text>
       <View style={styles.taskGrid}>
-        {DAILY_TASKS.map((task, index) => (
-          <Animated.View key={task.id} entering={FadeInDown.delay(index * 50).springify().damping(24).stiffness(100)}>
+        {DAILY_TASKS.map((task) => (
           <TaskCard
+            key={task.id}
             task={task}
             isDone={!!completedTasks[task.id]}
             onToggle={toggleTask}
             colors={colors}
             t={t}
           />
-          </Animated.View>
         ))}
       </View>
     </View>
@@ -301,9 +300,9 @@ export default function TrackerScreen() {
   const totalKazaNamaj = qadaStore.fajr + qadaStore.dhuhr + qadaStore.asr + qadaStore.maghrib + qadaStore.isha + qadaStore.witr;
 
   const isKazaFree = totalKazaNamaj === 0;
-  const chipColor = isKazaFree ? colors.textSecondary : '#ef4444';
-  const chipBg = isKazaFree ? 'transparent' : '#ef444422';
-  const chipBorder = isKazaFree ? colors.border : '#ef4444';
+  const chipColor = isKazaFree ? colors.textSecondary : colors.error;
+  const chipBg = isKazaFree ? 'transparent' : colors.error + '22';
+  const chipBorder = isKazaFree ? colors.border : colors.error;
 
   const kazaChip = (
     <TouchableOpacity activeOpacity={1}

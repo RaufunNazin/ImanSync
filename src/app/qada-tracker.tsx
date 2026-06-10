@@ -10,7 +10,7 @@ import * as Haptics from 'expo-haptics';
 import { Fonts, Spacing, useThemeColors,  } from '@/constants/theme';
 import { useQadaStore, QadaType } from '@/store/qadaStore';
 import { formatNumber } from '@/utils/formatNumber';
-import Animated, { LinearTransition, FadeIn, FadeOut } from 'react-native-reanimated';
+
 import SkeletonBox from '@/components/SkeletonBox';
 
 export default function QadaTrackerScreen() {
@@ -44,26 +44,26 @@ export default function QadaTrackerScreen() {
             </SkeletonBox>
           </View>
 
-          <Animated.View layout={LinearTransition.springify().damping(24).stiffness(100)} style={[styles.cardActions, { width: 140 }]}>
+          <View style={[styles.cardActions, { width: 140 }]}>
             {count > 0 && (
-              <Animated.View layout={LinearTransition.springify().damping(24).stiffness(100)} entering={FadeIn} exiting={FadeOut} style={{ flex: 1 }}>
+              <View style={{ flex: 1 }}>
                 <TouchableOpacity activeOpacity={1} 
                   style={[styles.btn, { backgroundColor: colors.backgroundElement, borderColor: colors.border }]}
                   onPress={() => handleUpdate(type, -1)}
                 >
                   <Minus size={18} color={colors.text} />
                 </TouchableOpacity>
-              </Animated.View>
+              </View>
             )}
-            <Animated.View layout={LinearTransition.springify().damping(24).stiffness(100)} style={{ flex: count > 0 ? 1 : 2 }}>
+            <View style={{ flex: count > 0 ? 1 : 2 }}>
               <TouchableOpacity activeOpacity={1} 
                 style={[styles.btn, { backgroundColor: colors.accent + '22', borderColor: colors.accent }]}
                 onPress={() => handleUpdate(type, 1)}
               >
                 <Plus size={18} color={colors.accent} />
               </TouchableOpacity>
-            </Animated.View>
-          </Animated.View>
+            </View>
+          </View>
 
         </View>
       </ThemeCard>

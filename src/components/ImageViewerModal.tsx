@@ -7,6 +7,7 @@ import {
   Dimensions,
   ImageSourcePropType,
   StatusBar,
+  TouchableWithoutFeedback,
 } from 'react-native';
 import { X } from 'lucide-react-native';
 import ZoomableImage from './ZoomableImage';
@@ -24,17 +25,23 @@ export default function ImageViewerModal({ visible, source, onClose }: ImageView
   return (
     <Modal visible={visible} transparent animationType="fade" onRequestClose={onClose} statusBarTranslucent>
       <StatusBar backgroundColor="rgba(0,0,0,0.95)" barStyle="light-content" />
-      <View style={styles.overlay}>
-        {/* Close button */}
-        <TouchableOpacity activeOpacity={1} style={styles.closeBtn} onPress={onClose} hitSlop={{ top: 12, bottom: 12, left: 12, right: 12 }}>
-          <X size={28} color="#FFFFFF" />
-        </TouchableOpacity>
+      <TouchableWithoutFeedback onPress={onClose}>
+        <View style={styles.overlay}>
+          {/* Close button */}
+          <TouchableOpacity activeOpacity={1} style={styles.closeBtn} onPress={onClose} hitSlop={{ top: 12, bottom: 12, left: 12, right: 12 }}>
+            <X size={28} color="#FFFFFF" />
+          </TouchableOpacity>
 
-        {/* Zoomable image */}
-        <GestureHandlerRootView style={styles.scrollContent}>
-          <ZoomableImage source={source} />
-        </GestureHandlerRootView>
-      </View>
+          {/* Zoomable image */}
+          <GestureHandlerRootView style={styles.scrollContent}>
+            <TouchableWithoutFeedback>
+              <View>
+                <ZoomableImage source={source} />
+              </View>
+            </TouchableWithoutFeedback>
+          </GestureHandlerRootView>
+        </View>
+      </TouchableWithoutFeedback>
     </Modal>
   );
 }

@@ -82,10 +82,10 @@ export default function PinSheet({
   if (isUserCreated) {
     actionOptions.push({
       id: 'delete',
-      icon: <Trash2 size={20} color="#EF4444" />,
+      icon: <Trash2 size={20} color={colors.error} />,
       label: isDua ? t('dua.deleteDua', { defaultValue: 'Delete Dua' }) : t('dua.deleteCategory', { defaultValue: 'Delete Category' }),
-      iconBgColor: '#EF444422',
-      labelColor: '#EF4444',
+      iconBgColor: colors.error + '22',
+      labelColor: colors.error,
       onPress: () => setShowDeleteModal(true),
       closeOnPress: false,
     });

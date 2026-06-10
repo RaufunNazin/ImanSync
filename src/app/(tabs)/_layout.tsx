@@ -57,6 +57,7 @@ export default function TabLayout() {
         tabBarActiveTintColor: activeColor,
         tabBarInactiveTintColor: colors.textSecondary,
         tabBarShowLabel: true,
+        sceneStyle: { backgroundColor: colors.background },
         tabBarStyle: {
           backgroundColor: colors.background,
           borderTopWidth: 1,
@@ -81,35 +82,35 @@ export default function TabLayout() {
         name="tracker"
         options={{
           title: t('tracker.titleEn'),
-          tabBarIcon: ({ color, focused }) => <Activity size={20} color={color} fill={focused ? color : 'none'} />,
+          tabBarIcon: ({ color, focused }) => <Activity size={20} color={color} fill={focused ? color + '40' : 'none'} />,
         }}
       />
       <Tabs.Screen
         name="quran"
         options={{
           title: t('quran.titleEn'),
-          tabBarIcon: ({ color, focused }) => <BookOpen size={20} color={color} fill={focused ? color : 'none'} />,
+          tabBarIcon: ({ color, focused }) => <BookOpen size={20} color={color} fill={focused ? color + '40' : 'none'} />,
         }}
       />
       <Tabs.Screen
         name="index"
         options={{
           title: t('home.tabTitle', { defaultValue: 'Home' }),
-          tabBarIcon: ({ color, focused }) => <Home size={20} color={color} fill={focused ? color : 'none'} />,
+          tabBarIcon: ({ color, focused }) => <Home size={20} color={color} fill={focused ? color + '40' : 'none'} />,
         }}
       />
       <Tabs.Screen
         name="dua"
         options={{
           title: t('dua.titleEn'),
-          tabBarIcon: ({ color, focused }) => <Book size={20} color={color} fill={focused ? color : 'none'} />,
+          tabBarIcon: ({ color, focused }) => <Book size={20} color={color} fill={focused ? color + '40' : 'none'} />,
         }}
       />
       <Tabs.Screen
         name="settings"
         options={{
           title: t('settings.titleEn'),
-          tabBarIcon: ({ color, focused }) => <Settings size={20} color={color} fill={focused ? color : 'none'} />,
+          tabBarIcon: ({ color, focused }) => <Settings size={20} color={color} fill={focused ? color + '40' : 'none'} />,
         }}
       />
     </Tabs>

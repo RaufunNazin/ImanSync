@@ -4,7 +4,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { useRouter } from 'expo-router';
 import { ArrowLeft, CheckCircle2, XCircle, Brain, RefreshCw, ArrowRight } from 'lucide-react-native';
 import * as Haptics from 'expo-haptics';
-import Animated, { useAnimatedStyle, withSpring, withTiming, runOnJS, useSharedValue, FadeInDown } from 'react-native-reanimated';
+import Animated, { useAnimatedStyle, withSpring, withTiming, runOnJS, useSharedValue } from 'react-native-reanimated';
 import ConfettiCannon from 'react-native-confetti-cannon';
 
 import { Fonts, Spacing, useThemeColors, useThemeStyles } from '@/constants/theme';
@@ -116,7 +116,7 @@ export default function TriviaScreen() {
 
       <View style={styles.container}>
         {isFinished ? (
-          <Animated.View entering={FadeInDown.springify().damping(24).stiffness(100)} style={styles.resultContainer}>
+          <View style={styles.resultContainer}>
             <Brain size={64} color={colors.textSecondary} style={{ marginBottom: Spacing.four }} />
             <Text style={[styles.resultTitle, { color: colors.text }]}>{t('trivia.quizCompleted', { defaultValue: 'Quiz Completed!' })}</Text>
             <Text style={[styles.resultScore, { color: colors.highlight }]}>
@@ -144,7 +144,7 @@ export default function TriviaScreen() {
                 <ConfettiCannon count={100} origin={{x: width/2, y: -20}} fallSpeed={2500} fadeOut autoStart />
               </View>
             )}
-          </Animated.View>
+          </View>
         ) : (
           <View style={{ flex: 1 }}>
             {/* Progress Bar */}
@@ -176,38 +176,38 @@ export default function TriviaScreen() {
                       style={[
                         styles.optionBtn,
                         { borderColor: colors.border, backgroundColor: colors.background },
-                        showCorrect && { borderColor: '#4caf50', backgroundColor: 'rgba(76, 175, 80, 0.1)' },
-                        showWrong && { borderColor: '#f44336', backgroundColor: 'rgba(244, 67, 54, 0.1)' }
+                        showCorrect && { borderColor: colors.highlight, backgroundColor: colors.highlight + '1a' },
+                        showWrong && { borderColor: colors.error, backgroundColor: colors.error + '1a' }
                       ]}
                     >
-                      <Text style={[styles.optionText, { color: colors.text }, showCorrect && { color: '#4caf50', fontWeight: '600' }, showWrong && { color: '#f44336' }]}>
+                      <Text style={[styles.optionText, { color: colors.text }, showCorrect && { color: colors.highlight, fontWeight: '600' }, showWrong && { color: colors.error }]}>
                         {opt}
                       </Text>
-                      {showCorrect && <CheckCircle2 size={20} color="#4caf50" />}
-                      {showWrong && <XCircle size={20} color="#f44336" />}
+                      {showCorrect && <CheckCircle2 size={20} color={colors.highlight} />}
+                      {showWrong && <XCircle size={20} color={colors.error} />}
                     </TouchableOpacity>
                   );
                 })}
               </View>
 
               {selectedOption !== null && (
-                <Animated.View entering={FadeInDown.duration(300)} style={[styles.explanationBox, { backgroundColor: colors.textSecondary + '10', borderColor: colors.textSecondary + '20' }]}>
+                <View style={[styles.explanationBox, { backgroundColor: colors.textSecondary + '10', borderColor: colors.textSecondary + '20' }]}>
                   <Text style={[styles.explanationText, { color: colors.textSecondary }]}>
                     {isBn && currentQ.explanation_bn ? currentQ.explanation_bn : currentQ.explanation}
                   </Text>
-                </Animated.View>
+                </View>
               )}
             </Animated.View>
 
             {selectedOption !== null && (
-              <Animated.View entering={FadeInDown.duration(300).delay(200)} style={styles.footer}>
+              <View style={styles.footer}>
                 <TouchableOpacity activeOpacity={1}
                   style={[styles.nextBtn, { backgroundColor: colors.highlight, width: 64, height: 64, borderRadius: 32, alignSelf: 'flex-end', justifyContent: 'center' }]}
                   onPress={nextQuestion}
                 >
                   <ArrowRight size={28} color="#FFF" />
                 </TouchableOpacity>
-              </Animated.View>
+              </View>
             )}
           </View>
         )}

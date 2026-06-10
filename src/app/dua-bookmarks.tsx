@@ -1,6 +1,6 @@
 import ThemeCard from '@/components/ThemeCard';
 import React, { useCallback, useState } from 'react';
-import { ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import { ScrollView, StyleSheet, Text, TouchableOpacity, View, TouchableWithoutFeedback } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Fonts, Spacing, useThemeColors } from '@/constants/theme';
 import PageHeader from '@/components/page-header';
@@ -178,55 +178,63 @@ export default function DuaBookmarksScreen() {
 
       {/* Create Folder Modal */}
       <Modal visible={createModalVisible} transparent animationType="fade">
-        <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center', backgroundColor: 'rgba(0,0,0,0.5)', padding: Spacing.four }}>
-          <View style={{ width: '100%', backgroundColor: colors.backgroundElement, borderRadius: 24, padding: Spacing.five, borderWidth: 1, borderColor: colors.border }}>
-            <Text style={{ fontFamily: Fonts.outfit, fontSize: 18, color: colors.text, marginBottom: Spacing.four }}>
-              {t('dua.createFolder', { defaultValue: 'Create New Folder' })}
-            </Text>
-            <TextInput
-              style={{ backgroundColor: colors.background, color: colors.text, padding: Spacing.four, borderRadius: 12, fontFamily: Fonts.outfit, fontSize: 16, marginBottom: Spacing.four }}
-              placeholder={t('dua.folderName', { defaultValue: 'Folder Name' })}
-              placeholderTextColor={colors.textSecondary}
-              value={newFolderName}
-              onChangeText={setNewFolderName}
-              autoFocus
-            />
-            <View style={{ flexDirection: 'row', gap: Spacing.three }}>
-              <TouchableOpacity activeOpacity={1} style={{ flex: 1, padding: Spacing.four, alignItems: 'center', borderRadius: 12, backgroundColor: colors.background }} onPress={() => setCreateModalVisible(false)}>
-                <Text style={{ fontFamily: Fonts.outfit, color: colors.text }}>{t('common.cancel', { defaultValue: 'Cancel' })}</Text>
-              </TouchableOpacity>
-              <TouchableOpacity activeOpacity={1} style={{ flex: 1, padding: Spacing.four, alignItems: 'center', borderRadius: 12, backgroundColor: colors.highlight }} onPress={handleCreateFolder}>
-                <Text style={{ fontFamily: Fonts.outfit, color: '#FFF' }}>{t('common.create', { defaultValue: 'Create' })}</Text>
-              </TouchableOpacity>
-            </View>
+        <TouchableWithoutFeedback onPress={() => setCreateModalVisible(false)}>
+          <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center', backgroundColor: 'rgba(0,0,0,0.5)', padding: Spacing.four }}>
+            <TouchableWithoutFeedback>
+              <View style={{ width: '100%', backgroundColor: colors.backgroundElement, borderRadius: 24, padding: Spacing.five, borderWidth: 1, borderColor: colors.border }}>
+                <Text style={{ fontFamily: Fonts.outfit, fontSize: 18, color: colors.text, marginBottom: Spacing.four }}>
+                  {t('dua.createFolder', { defaultValue: 'Create New Folder' })}
+                </Text>
+                <TextInput
+                  style={{ backgroundColor: colors.background, color: colors.text, padding: Spacing.four, borderRadius: 12, fontFamily: Fonts.outfit, fontSize: 16, marginBottom: Spacing.four }}
+                  placeholder={t('dua.folderName', { defaultValue: 'Folder Name' })}
+                  placeholderTextColor={colors.textSecondary}
+                  value={newFolderName}
+                  onChangeText={setNewFolderName}
+                  autoFocus
+                />
+                <View style={{ flexDirection: 'row', gap: Spacing.three }}>
+                  <TouchableOpacity activeOpacity={1} style={{ flex: 1, padding: Spacing.four, alignItems: 'center', borderRadius: 12, backgroundColor: colors.background }} onPress={() => setCreateModalVisible(false)}>
+                    <Text style={{ fontFamily: Fonts.outfit, color: colors.text }}>{t('common.cancel', { defaultValue: 'Cancel' })}</Text>
+                  </TouchableOpacity>
+                  <TouchableOpacity activeOpacity={1} style={{ flex: 1, padding: Spacing.four, alignItems: 'center', borderRadius: 12, backgroundColor: colors.highlight }} onPress={handleCreateFolder}>
+                    <Text style={{ fontFamily: Fonts.outfit, color: '#FFF' }}>{t('common.create', { defaultValue: 'Create' })}</Text>
+                  </TouchableOpacity>
+                </View>
+              </View>
+            </TouchableWithoutFeedback>
           </View>
-        </View>
+        </TouchableWithoutFeedback>
       </Modal>
 
       {/* Move Bookmark Modal */}
       <Modal visible={moveModalVisible} transparent animationType="slide">
-        <View style={{ flex: 1, justifyContent: 'flex-end', backgroundColor: 'rgba(0,0,0,0.5)' }}>
-          <View style={{ backgroundColor: colors.backgroundElement, borderTopLeftRadius: 24, borderTopRightRadius: 24, padding: Spacing.five, paddingBottom: 40, borderWidth: 1, borderColor: colors.border }}>
-            <Text style={{ fontFamily: Fonts.outfit, fontSize: 18, color: colors.text, marginBottom: Spacing.four }}>
-              {t('dua.moveToFolder', { defaultValue: 'Move to Folder' })}
-            </Text>
-            <ScrollView style={{ maxHeight: 300 }}>
-              <TouchableOpacity activeOpacity={1} style={{ flexDirection: 'row', alignItems: 'center', paddingVertical: Spacing.three, gap: Spacing.three }} onPress={() => moveBookmark(null)}>
-                <Folder size={20} color={colors.textSecondary} />
-                <Text style={{ fontFamily: Fonts.outfit, fontSize: 16, color: colors.text }}>{t('dua.noFolder', { defaultValue: 'No Folder' })}</Text>
-              </TouchableOpacity>
-              {folderStore.folders.map(folder => (
-                <TouchableOpacity activeOpacity={1} key={folder.id} style={{ flexDirection: 'row', alignItems: 'center', paddingVertical: Spacing.three, gap: Spacing.three }} onPress={() => moveBookmark(folder.id)}>
-                  <Folder size={20} color={colors.accent} />
-                  <Text style={{ fontFamily: Fonts.outfit, fontSize: 16, color: colors.text }}>{folder.name}</Text>
+        <TouchableWithoutFeedback onPress={() => setMoveModalVisible(false)}>
+          <View style={{ flex: 1, justifyContent: 'flex-end', backgroundColor: 'rgba(0,0,0,0.5)' }}>
+            <TouchableWithoutFeedback>
+              <View style={{ backgroundColor: colors.backgroundElement, borderTopLeftRadius: 24, borderTopRightRadius: 24, padding: Spacing.five, paddingBottom: 40, borderWidth: 1, borderColor: colors.border }}>
+                <Text style={{ fontFamily: Fonts.outfit, fontSize: 18, color: colors.text, marginBottom: Spacing.four }}>
+                  {t('dua.moveToFolder', { defaultValue: 'Move to Folder' })}
+                </Text>
+                <ScrollView style={{ maxHeight: 300 }}>
+                  <TouchableOpacity activeOpacity={1} style={{ flexDirection: 'row', alignItems: 'center', paddingVertical: Spacing.three, gap: Spacing.three }} onPress={() => moveBookmark(null)}>
+                    <Folder size={20} color={colors.textSecondary} />
+                    <Text style={{ fontFamily: Fonts.outfit, fontSize: 16, color: colors.text }}>{t('dua.noFolder', { defaultValue: 'No Folder' })}</Text>
+                  </TouchableOpacity>
+                  {folderStore.folders.map(folder => (
+                    <TouchableOpacity activeOpacity={1} key={folder.id} style={{ flexDirection: 'row', alignItems: 'center', paddingVertical: Spacing.three, gap: Spacing.three }} onPress={() => moveBookmark(folder.id)}>
+                      <Folder size={20} color={colors.accent} />
+                      <Text style={{ fontFamily: Fonts.outfit, fontSize: 16, color: colors.text }}>{folder.name}</Text>
+                    </TouchableOpacity>
+                  ))}
+                </ScrollView>
+                <TouchableOpacity activeOpacity={1} style={{ marginTop: Spacing.four, padding: Spacing.four, alignItems: 'center', borderRadius: 12, backgroundColor: colors.background }} onPress={() => setMoveModalVisible(false)}>
+                  <Text style={{ fontFamily: Fonts.outfit, color: colors.text }}>{t('common.cancel', { defaultValue: 'Cancel' })}</Text>
                 </TouchableOpacity>
-              ))}
-            </ScrollView>
-            <TouchableOpacity activeOpacity={1} style={{ marginTop: Spacing.four, padding: Spacing.four, alignItems: 'center', borderRadius: 12, backgroundColor: colors.background }} onPress={() => setMoveModalVisible(false)}>
-              <Text style={{ fontFamily: Fonts.outfit, color: colors.text }}>{t('common.cancel', { defaultValue: 'Cancel' })}</Text>
-            </TouchableOpacity>
+              </View>
+            </TouchableWithoutFeedback>
           </View>
-        </View>
+        </TouchableWithoutFeedback>
       </Modal>
     </SafeAreaView>
   );

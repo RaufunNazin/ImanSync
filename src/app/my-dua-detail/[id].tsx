@@ -391,10 +391,10 @@ export default function MyDuaDetailScreen() {
           },
           {
             id: 'delete',
-            icon: <Trash2 size={20} color="#EF4444" />,
+            icon: <Trash2 size={20} color={colors.error} />,
             label: t('dua.deleteDua', { defaultValue: 'Delete Dua' }),
-            iconBgColor: '#EF444422',
-            labelColor: '#EF4444',
+            iconBgColor: colors.error + '22',
+            labelColor: colors.error,
             onPress: () => setShowDeleteModal(true),
             closeOnPress: false,
           }

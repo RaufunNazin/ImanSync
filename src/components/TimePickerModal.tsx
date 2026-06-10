@@ -12,6 +12,7 @@ import {
   Text,
   TouchableOpacity,
   View,
+  TouchableWithoutFeedback,
 } from "react-native";
 
 interface TimePickerModalProps {
@@ -214,16 +215,18 @@ export default function TimePickerModal({
     20;
 
   return (
-    <Modal visible={visible} transparent animationType="fade">
-      <View style={styles.overlay}>
-        <ThemeCard intensity={20} style={StyleSheet.absoluteFill} />
+    <Modal visible={visible} transparent animationType="fade" onRequestClose={onClose}>
+      <TouchableWithoutFeedback onPress={onClose}>
+        <View style={styles.overlay}>
+          <ThemeCard intensity={20} style={StyleSheet.absoluteFill} />
 
-        <View
-          style={[
-            styles.container,
-            { backgroundColor: colors.background, borderColor: colors.border },
-          ]}
-        >
+          <TouchableWithoutFeedback>
+            <View
+              style={[
+                styles.container,
+                { backgroundColor: colors.background, borderColor: colors.border },
+              ]}
+            >
           <Text style={[styles.title, { color: colors.textSecondary }]}>
             {title}
           </Text>
@@ -439,9 +442,10 @@ export default function TimePickerModal({
                 {t("settings.save")}
               </Text>
             </TouchableOpacity>
-          </View>
+            </View>
+          </TouchableWithoutFeedback>
         </View>
-      </View>
+      </TouchableWithoutFeedback>
     </Modal>
   );
 }

@@ -1,5 +1,5 @@
 import ThemeCard from '@/components/ThemeCard';
-import { Fonts, Spacing, useThemeColors } from '@/constants/theme';
+import { Fonts, Spacing, useThemeColors, useThemeStyles } from '@/constants/theme';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { Bookmark, ChevronLeft, Minus, Plus, Settings2, X, Play, Pause } from 'lucide-react-native';
@@ -43,6 +43,9 @@ const DEFAULT_SETTINGS: Settings = {
 export default function JuzScreen() {
   const { id, ayah } = useLocalSearchParams();
   const colors = useThemeColors();
+  const themeStyles = useThemeStyles();
+  const isDark = colors.background === '#0c1618';
+  const activeQuranColor = isDark ? colors.accent : colors.highlight;
   const router = useRouter();
   const { t, i18n } = useTranslation();
 
@@ -322,19 +325,19 @@ export default function JuzScreen() {
             <Text style={[styles.sectionTitle, { color: colors.textSecondary, marginTop: Spacing.four }]}>{t('quranSettings.reciter', { defaultValue: 'Audio Reciter' })}</Text>
             <View style={{ flexDirection: 'column', alignItems: 'stretch', gap: 12, paddingBottom: Spacing.four }}>
               <TouchableOpacity activeOpacity={1} 
-                style={[{ padding: 12, borderRadius: 12, borderWidth: 1, borderColor: colors.border }, currentReciterId === 7 && { borderColor: colors.highlight, backgroundColor: colors.highlight + '15' }]} 
+                style={[{ padding: 12, borderRadius: 12, borderWidth: 1, borderColor: colors.border }, currentReciterId === 7 ? { borderColor: colors.highlight, backgroundColor: colors.highlight + '15' } : { backgroundColor: colors.backgroundElement, ...themeStyles.cardShadow }]} 
                 onPress={() => setReciter(7)}
               >
                 <Text style={[styles.settingLabel, { color: currentReciterId === 7 ? colors.highlight : colors.text }]}>{t("quran.reciters.mishary")}</Text>
               </TouchableOpacity>
               <TouchableOpacity activeOpacity={1} 
-                style={[{ padding: 12, borderRadius: 12, borderWidth: 1, borderColor: colors.border }, currentReciterId === 1 && { borderColor: colors.highlight, backgroundColor: colors.highlight + '15' }]} 
+                style={[{ padding: 12, borderRadius: 12, borderWidth: 1, borderColor: colors.border }, currentReciterId === 1 ? { borderColor: colors.highlight, backgroundColor: colors.highlight + '15' } : { backgroundColor: colors.backgroundElement, ...themeStyles.cardShadow }]} 
                 onPress={() => setReciter(1)}
               >
                 <Text style={[styles.settingLabel, { color: currentReciterId === 1 ? colors.highlight : colors.text }]}>{t("quran.reciters.abdulBaset")}</Text>
               </TouchableOpacity>
               <TouchableOpacity activeOpacity={1} 
-                style={[{ padding: 12, borderRadius: 12, borderWidth: 1, borderColor: colors.border }, currentReciterId === 3 && { borderColor: colors.highlight, backgroundColor: colors.highlight + '15' }]} 
+                style={[{ padding: 12, borderRadius: 12, borderWidth: 1, borderColor: colors.border }, currentReciterId === 3 ? { borderColor: colors.highlight, backgroundColor: colors.highlight + '15' } : { backgroundColor: colors.backgroundElement, ...themeStyles.cardShadow }]} 
                 onPress={() => setReciter(3)}
               >
                 <Text style={[styles.settingLabel, { color: currentReciterId === 3 ? colors.highlight : colors.text }]}>{t("quran.reciters.sudais")}</Text>
@@ -418,8 +421,8 @@ export default function JuzScreen() {
                   <TouchableOpacity activeOpacity={1} onPress={() => toggleBookmark(item)}>
                     <Bookmark 
                       size={20} 
-                      color={colors.accent} 
-                      fill={bookmarkedAyahs[`${item.surahId}-${item.numberInSurah}`] ? colors.accent : 'transparent'} 
+                      color={activeQuranColor} 
+                      fill={bookmarkedAyahs[`${item.surahId}-${item.numberInSurah}`] ? activeQuranColor : 'transparent'} 
                     />
                   </TouchableOpacity>
                 </View>
@@ -477,7 +480,7 @@ const styles = StyleSheet.create({
     borderWidth: 1,
   },
   ayahCard: { padding: Spacing.five },
-  ayahHeader: { flexDirection: 'row', justifyContent: 'space-between', marginBottom: Spacing.three },
+  ayahHeader: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: Spacing.three },
   numberCircle: {
     width: 28, height: 28, borderRadius: 14, borderWidth: 1,
     alignItems: 'center', justifyContent: 'center',

@@ -234,8 +234,8 @@ export default function LessonPlayerScreen() {
                 let borderColor: string = colors.border;
                 
                 if (isSelected) {
-                  bgColor = isTarget ? '#4CAF5030' : '#F4433630';
-                  borderColor = isTarget ? '#4CAF50' : '#F44336';
+                  bgColor = isTarget ? colors.highlight + '30' : colors.error + '30';
+                  borderColor = isTarget ? colors.highlight : colors.error;
                 }
 
                 return (

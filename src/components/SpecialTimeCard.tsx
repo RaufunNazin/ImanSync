@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { View, Text, TouchableOpacity } from 'react-native';
-import Animated, { FadeIn, FadeOut } from 'react-native-reanimated';
+
 import { Pointer } from 'lucide-react-native';
 import ThemeCard from '@/components/ThemeCard';
 import { Fonts } from '@/constants/theme';
@@ -68,15 +68,15 @@ export default function SpecialTimeCard({ item, colors, i18nLanguage, styles, t 
         <View style={[styles.specialCardInner, { alignItems: 'center', justifyContent: 'center', paddingVertical: 16 }]}>
           <View style={{ height: 42, width: '100%', justifyContent: 'center', alignItems: 'center', marginBottom: 4 }}>
             {showCountdown ? (
-              <Animated.Text key="countdown" entering={FadeIn.duration(300)} exiting={FadeOut.duration(300)} style={{ position: 'absolute', fontFamily: Fonts.outfit, fontSize: 16, lineHeight: 20, color: colors.highlight, textAlign: 'center' }}>
+              <Text style={{ position: 'absolute', fontFamily: Fonts.outfit, fontSize: 16, lineHeight: 20, color: colors.highlight, textAlign: 'center' }}>
                 {remainingStr}
-              </Animated.Text>
+              </Text>
             ) : (
-              <Animated.Text key="time" entering={FadeIn.duration(300)} exiting={FadeOut.duration(300)} style={{ position: 'absolute', fontFamily: Fonts.outfit, fontSize: 22, color: colors.accent, textAlign: 'center' }}>
+              <Text style={{ position: 'absolute', fontFamily: Fonts.outfit, fontSize: 22, color: colors.accent, textAlign: 'center' }}>
                 {formatNumber(item.time.replace(/ AM| PM/g, ''), i18nLanguage)}
                 {item.time.includes(' AM') && <Text style={{ fontSize: 13 }}> AM</Text>}
                 {item.time.includes(' PM') && <Text style={{ fontSize: 13 }}> PM</Text>}
-              </Animated.Text>
+              </Text>
             )}
           </View>
           <Text style={{ fontFamily: Fonts.outfit, fontSize: 10, color: colors.textSecondary, textTransform: 'uppercase', letterSpacing: 1, textAlign: 'center' }}>

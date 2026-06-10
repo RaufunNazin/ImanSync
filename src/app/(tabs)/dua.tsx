@@ -5,8 +5,8 @@ import { Fonts, Spacing, useThemeColors } from '@/constants/theme';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useFocusEffect, useRouter } from 'expo-router';
 import { FolderLock, Search, X, CheckCircle2, AlertCircle, Plus } from 'lucide-react-native';
-import Animated, { FadeInDown, FadeOutDown, FadeInRight } from 'react-native-reanimated';
-import React, { useEffect, useState, useCallback, useRef } from 'react';
+import Animated, { FadeInDown, FadeOutDown } from 'react-native-reanimated';
+import React, { useEffect, useState, useCallback, useRef, useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
 import DuaService from '@/services/duaService';
 import { Dimensions, StyleSheet, Text, TouchableOpacity, View, Animated as RNAnimated, ScrollView } from 'react-native';
@@ -37,6 +37,7 @@ export default function DuaScreen() {
   const colors = useThemeColors();
   const { t, i18n } = useTranslation();
   const router = useRouter();
+  const prefs = usePreferencesStore();
 
   const [categories, setCategories] = useState<Category[]>(() => {
     let initialCats: Category[] = [];
@@ -66,7 +67,6 @@ export default function DuaScreen() {
   const [loading, setLoading] = useState(() => categories.length === 0);
   const [myDuasCount, setMyDuasCount] = useState(0);
   const [bookmarksCount, setBookmarksCount] = useState(0);
-  const prefs = usePreferencesStore();
 
   const scrollY = useRef(new RNAnimated.Value(0)).current;
   const clampedScrollY = RNAnimated.diffClamp(scrollY, 0, 100);
@@ -202,38 +202,38 @@ export default function DuaScreen() {
     await AsyncStorage.setItem(PIN_STORAGE_KEY, JSON.stringify(updated));
   };
 
-  const openPinSheet = (cat: Category) => {
+  const openPinSheet = useCallback((cat: Category) => {
     setSelectedCategory(cat);
     setPinSheetVisible(true);
-  };
+  }, []);
 
-  const handleCategoryPress = (cat: Category) => {
-    router.push({
-      pathname: '/dua-category',
-      params: { id: cat.id, name: getCategoryName(cat), isCustom: cat.isCustom ? 'true' : 'false' }
-    });
-  };
-
-  const handleMyDuasPress = () => {
-    router.push('/my-duas');
-  };
-
-  const handleBookmarksPress = () => {
-    router.push('/dua-bookmarks');
-  };
-
-  const getCategoryName = (cat: Category) => {
+  const getCategoryName = useCallback((cat: Category) => {
     const key = `dua.category_${cat.id}`;
     const translated = t(key);
     // fallback if translation key is missing
     return translated === key ? cat.name : translated;
-  };
+  }, [t]);
 
-  const getCategoryDesc = (cat: Category) => {
+  const getCategoryDesc = useCallback((cat: Category) => {
     const key = `dua.categoryDesc_${cat.id}`;
     const translated = t(key);
     return translated === key ? cat.description : translated;
-  };
+  }, [t]);
+
+  const handleCategoryPress = useCallback((cat: Category) => {
+    router.push({
+      pathname: '/dua-category',
+      params: { id: cat.id, name: getCategoryName(cat), isCustom: cat.isCustom ? 'true' : 'false' }
+    });
+  }, [router, getCategoryName]);
+
+  const handleMyDuasPress = useCallback(() => {
+    router.push('/my-duas');
+  }, [router]);
+
+  const handleBookmarksPress = useCallback(() => {
+    router.push('/dua-bookmarks');
+  }, [router]);
 
   const pinnedCategories = pinnedIds
     .map(id => categories.find(c => c.id === id))
@@ -315,35 +315,88 @@ export default function DuaScreen() {
     }
   };
 
-  const dismissSuggestBanner = async () => {
+  const dismissSuggestBanner = useCallback(async () => {
     setShowSuggestBanner(false);
     await AsyncStorage.setItem(BANNER_DISMISSED_KEY, 'true');
-  };
+  }, []);
 
-  return (
-    <GestureHandlerRootView style={{ flex: 1 }}>
-      <SafeAreaView style={[styles.safeArea, { backgroundColor: colors.background }]}>
-        <PageHeader 
-          titleEn={t('dua.titleEn')} 
-          rightElement={
-            <TouchableOpacity activeOpacity={1} onPress={() => router.push('/dua-search' as any)} hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}>
-              <Search size={22} color={colors.textSecondary} />
-            </TouchableOpacity>
-          }
+  const listData = useMemo(() => {
+    if (loading) {
+      return [...Array(20)].map((_, i) => ({ id: `skeleton_${i}`, type: 'skeleton' }));
+    }
+    
+    return [
+      { id: 'my_duas', type: 'my_duas' },
+      { id: 'bookmarks', type: 'bookmarks' },
+      ...unpinnedCategories.map(cat => ({ id: cat.id, type: 'category', category: cat }))
+    ];
+  }, [loading, myDuasCount, bookmarksCount, unpinnedCategories]);
+
+  const renderItem = useCallback(({ item }: { item: any }) => {
+    if (item.type === 'skeleton') {
+      return (
+        <View style={styles.gridItem}>
+          <ThemeCard style={{ minHeight: 70, borderRadius: 20, padding: Spacing.two, paddingVertical: Spacing.two, alignItems: 'center', justifyContent: 'center' }}>
+            <View style={{ alignItems: 'center', justifyContent: 'center', gap: 2, paddingHorizontal: 8 }}>
+              <SkeletonBox width={110} height={20} borderRadius={8} color={colors.border} loaded={false} />
+              <SkeletonBox width={70} height={16} borderRadius={6} color={colors.border} loaded={false} />
+            </View>
+          </ThemeCard>
+        </View>
+      );
+    }
+    
+    if (item.type === 'my_duas') {
+      return (
+        <View style={styles.gridItem}>
+          <DuaCard
+            id="my_duas"
+            name={t('dua.myDuas')}
+            description={t('dua.myDuasDesc')}
+            count={myDuasCount}
+            isMyDuas={true}
+            colors={colors}
+            onPress={handleMyDuasPress}
+          />
+        </View>
+      );
+    }
+    
+    if (item.type === 'bookmarks') {
+      return (
+        <View style={styles.gridItem}>
+          <DuaCard
+            id="bookmarks"
+            name={t('dua.bookmarks')}
+            description={t('dua.bookmarksDesc')}
+            count={bookmarksCount}
+            colors={colors}
+            onPress={handleBookmarksPress}
+          />
+        </View>
+      );
+    }
+    
+    const cat = item.category;
+    return (
+      <View style={styles.gridItem}>
+        <DuaCard
+          id={cat.id}
+          name={getCategoryName(cat)}
+          description={getCategoryDesc(cat)}
+          count={cat.count}
+          isCustom={cat.isCustom}
+          colors={colors}
+          onPress={() => handleCategoryPress(cat)}
+          onLongPress={() => openPinSheet(cat)}
         />
-      
-      <RNAnimated.ScrollView 
-        showsVerticalScrollIndicator={false} 
-        contentContainerStyle={styles.container}
-        onScroll={RNAnimated.event(
-          [{ nativeEvent: { contentOffset: { y: scrollY } } }],
-          { useNativeDriver: true }
-        )}
-        scrollEventThrottle={16}
-        keyboardDismissMode="on-drag" 
-        keyboardShouldPersistTaps="handled"
-      >
+      </View>
+    );
+  }, [colors, myDuasCount, bookmarksCount, t, getCategoryName, getCategoryDesc, handleMyDuasPress, handleBookmarksPress, handleCategoryPress, openPinSheet]);
 
+  const renderHeader = useCallback(() => {
+    return (
+      <View>
         {/* Permanent Storage Suggestion Banner */}
         {showSuggestBanner && (
           <TouchableOpacity activeOpacity={1} 
@@ -360,124 +413,93 @@ export default function DuaScreen() {
           </TouchableOpacity>
         )}
 
-        {/* Main Content */}
-        <View style={{ flex: 1 }}>
-          {/* Pinned Section */}
-            {(pinnedCategories.length > 0 || (loading && pinnedIds.length > 0)) && (
-              <View style={[styles.section, { paddingLeft: Spacing.four, marginBottom: Spacing.four }]}>
-                <Text style={[styles.sectionTitle, { color: colors.textSecondary, marginBottom: Spacing.one }]}>{t('dua.pinned')}</Text>
-                <View>
-                  <ScrollView
-                    horizontal
-                    showsHorizontalScrollIndicator={false}
-                    contentContainerStyle={styles.pinnedScroll}
-                  >
-                    {loading ? (
-                      pinnedIds.map((_, i) => (
-                        <View key={`pin-skel-${i}`} style={{ width: 160 }}>
-                          <ThemeCard style={{ minHeight: 70, borderRadius: 20, padding: Spacing.two, paddingVertical: Spacing.two, alignItems: 'center', justifyContent: 'center' }}>
-                            <View style={{ alignItems: 'center', justifyContent: 'center', gap: 2, paddingHorizontal: 8 }}>
-                              <SkeletonBox width={110} height={20} borderRadius={8} color={colors.border} loaded={false} />
-                              <SkeletonBox width={70} height={16} borderRadius={6} color={colors.border} loaded={false} />
-                            </View>
-                          </ThemeCard>
+        {/* Pinned Section */}
+        {(pinnedCategories.length > 0 || (loading && pinnedIds.length > 0)) && (
+          <View style={[styles.section, { paddingLeft: Spacing.four, marginBottom: Spacing.four }]}>
+            <Text style={[styles.sectionTitle, { color: colors.textSecondary, marginBottom: Spacing.one }]}>{t('dua.pinned')}</Text>
+            <View>
+              <ScrollView
+                horizontal
+                showsHorizontalScrollIndicator={false}
+                contentContainerStyle={styles.pinnedScroll}
+              >
+                {loading ? (
+                  pinnedIds.map((_, i) => (
+                    <View key={`pin-skel-${i}`} style={{ width: 160 }}>
+                      <ThemeCard style={{ minHeight: 70, borderRadius: 20, padding: Spacing.two, paddingVertical: Spacing.two, alignItems: 'center', justifyContent: 'center' }}>
+                        <View style={{ alignItems: 'center', justifyContent: 'center', gap: 2, paddingHorizontal: 8 }}>
+                          <SkeletonBox width={110} height={20} borderRadius={8} color={colors.border} loaded={false} />
+                          <SkeletonBox width={70} height={16} borderRadius={6} color={colors.border} loaded={false} />
                         </View>
-                      ))
-                    ) : (
-                      pinnedCategories.map((item, index) => (
-                        <Animated.View entering={FadeInRight.delay(index * 50).springify().damping(24).stiffness(100)} key={item.id} style={{ width: 160 }}>
-                        <TouchableOpacity activeOpacity={1}
-                          style={{ flex: 1 }}
-                          onPress={() => handleCategoryPress(item)}
-                          onLongPress={() => {
-                            setSelectedCategory(item);
-                            setPinSheetVisible(true);
-                          }}
-                        >
-                          <DuaCard
-                            id={item.id.toString()}
-                            name={getCategoryName(item)}
-                            description={getCategoryDesc(item)}
-                            count={item.count}
-                            isPinned={true}
-                            isCustom={item.isCustom}
-                            colors={colors}
-                            onPress={() => handleCategoryPress(item)}
-                            onLongPress={() => {
-                              setSelectedCategory(item);
-                              setPinSheetVisible(true);
-                            }}
-                          />
-                        </TouchableOpacity>
-                        </Animated.View>
-                      ))
-                    )}
-                  </ScrollView>
-                </View>
-              </View>
-            )}
-
-        {/* Main Grid Section */}
-        <View style={[styles.section, { paddingHorizontal: Spacing.four }]}>
-          <View style={styles.grid}>
-            {loading ? (
-              [...Array(20)].map((_, i) => (
-                <View key={i} style={[styles.gridItem]}>
-                  <ThemeCard style={{ minHeight: 70, borderRadius: 20, padding: Spacing.two, paddingVertical: Spacing.two, alignItems: 'center', justifyContent: 'center' }}>
-                    <View style={{ alignItems: 'center', justifyContent: 'center', gap: 2, paddingHorizontal: 8 }}>
-                      <SkeletonBox width={110} height={20} borderRadius={8} color={colors.border} loaded={false} />
-                      <SkeletonBox width={70} height={16} borderRadius={6} color={colors.border} loaded={false} />
+                      </ThemeCard>
                     </View>
-                  </ThemeCard>
-                </View>
-              ))
-            ) : (
-              <>
-                {/* My Duas Tile - Always First */}
-                <Animated.View entering={FadeInDown.delay(0).springify().damping(24).stiffness(100)} style={styles.gridItem}>
-                  <DuaCard
-                    id="my_duas"
-                    name={t('dua.myDuas')}
-                    description={t('dua.myDuasDesc')}
-                    count={myDuasCount}
-                    isMyDuas={true}
-                    colors={colors}
-                    onPress={handleMyDuasPress}
-                  />
-                </Animated.View>
-
-                {/* Bookmarks Tile - Always Second */}
-                <Animated.View entering={FadeInDown.delay(50).springify().damping(24).stiffness(100)} style={styles.gridItem}>
-                  <DuaCard
-                    id="bookmarks"
-                    name={t('dua.bookmarks')}
-                    description={t('dua.bookmarksDesc')}
-                    count={bookmarksCount}
-                    colors={colors}
-                    onPress={handleBookmarksPress}
-                  />
-                </Animated.View>
-
-                {unpinnedCategories.map((cat, index) => (
-                  <Animated.View key={cat.id} entering={FadeInDown.delay((index + 2) * 50).springify().damping(24).stiffness(100)} style={styles.gridItem}>
-                    <DuaCard
-                      id={cat.id}
-                      name={getCategoryName(cat)}
-                      description={getCategoryDesc(cat)}
-                      count={cat.count}
-                      isCustom={cat.isCustom}
-                      colors={colors}
-                      onPress={() => handleCategoryPress(cat)}
-                      onLongPress={() => openPinSheet(cat)}
-                    />
-                  </Animated.View>
-                ))}
-              </>
-            )}
+                  ))
+                ) : (
+                  pinnedCategories.map((item) => (
+                    <TouchableOpacity activeOpacity={1}
+                      key={item.id}
+                      style={{ width: 160 }}
+                      onPress={() => handleCategoryPress(item)}
+                      onLongPress={() => {
+                        setSelectedCategory(item);
+                        setPinSheetVisible(true);
+                      }}
+                    >
+                      <DuaCard
+                        id={item.id.toString()}
+                        name={getCategoryName(item)}
+                        description={getCategoryDesc(item)}
+                        count={item.count}
+                        isPinned={true}
+                        isCustom={item.isCustom}
+                        colors={colors}
+                        onPress={() => handleCategoryPress(item)}
+                        onLongPress={() => {
+                          setSelectedCategory(item);
+                          setPinSheetVisible(true);
+                        }}
+                      />
+                    </TouchableOpacity>
+                  ))
+                )}
+              </ScrollView>
+            </View>
           </View>
-        </View>
-        </View>
-      </RNAnimated.ScrollView>
+        )}
+      </View>
+    );
+  }, [showSuggestBanner, colors, pinnedCategories, loading, pinnedIds, t, dismissSuggestBanner, handleCategoryPress, getCategoryName, getCategoryDesc]);
+
+  return (
+    <GestureHandlerRootView style={{ flex: 1 }}>
+      <SafeAreaView style={[styles.safeArea, { backgroundColor: colors.background }]}>
+        <PageHeader 
+          titleEn={t('dua.titleEn')} 
+          rightElement={
+            <TouchableOpacity activeOpacity={1} onPress={() => router.push('/dua-search' as any)} hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}>
+              <Search size={22} color={colors.textSecondary} />
+            </TouchableOpacity>
+          }
+        />
+      
+      <RNAnimated.FlatList 
+        data={listData}
+        keyExtractor={(item) => item.id}
+        renderItem={renderItem}
+        numColumns={2}
+        columnWrapperStyle={{ paddingHorizontal: Spacing.four, justifyContent: 'space-between', marginBottom: Spacing.three }}
+        ListHeaderComponent={renderHeader}
+        style={{ flex: 1 }}
+        showsVerticalScrollIndicator={false} 
+        contentContainerStyle={styles.container}
+        onScroll={RNAnimated.event(
+          [{ nativeEvent: { contentOffset: { y: scrollY } } }],
+          { useNativeDriver: true }
+        )}
+        scrollEventThrottle={16}
+        keyboardDismissMode="on-drag" 
+        keyboardShouldPersistTaps="handled"
+      />
 
         {/* Pin Action Sheet */}
         {selectedCategory && (
@@ -523,7 +545,7 @@ export default function DuaScreen() {
             position: 'absolute',
             bottom: 100,
             alignSelf: 'center',
-            backgroundColor: toast.type === 'success' ? colors.highlight : '#EF4444',
+            backgroundColor: toast.type === 'success' ? colors.highlight : colors.error,
             paddingHorizontal: 20,
             paddingVertical: 12,
             borderRadius: 24,

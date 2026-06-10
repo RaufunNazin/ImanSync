@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { Modal, StyleSheet, Text, TouchableOpacity, View, ScrollView } from 'react-native';
+import { Modal, StyleSheet, Text, TouchableOpacity, View, ScrollView, TouchableWithoutFeedback } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import * as Updates from 'expo-updates';
 import { useTranslation } from 'react-i18next';
@@ -131,51 +131,59 @@ export default function SystemAnnouncer() {
 
       {/* Changelog Modal */}
       <Modal visible={!!changelog && !updateReady} transparent animationType="slide">
-        <View style={styles.overlay}>
-          <View style={[styles.card, themeStyles.cardShadow, { backgroundColor: colors.background, borderColor: colors.border, maxHeight: '80%' }]}>
-            <TouchableOpacity activeOpacity={1} style={[styles.closeBtn, { backgroundColor: colors.backgroundElement }]} onPress={dismissChangelog}>
-              <X size={20} color={colors.textSecondary} />
-            </TouchableOpacity>
-            
-            <View style={[styles.iconWrap, { backgroundColor: colors.accent + '20' }]}>
-              <Info size={32} color={colors.accent} />
-            </View>
-            
-            <Text style={[styles.title, { color: colors.text }]}>{t('system.whatsNew', "What's New")}</Text>
-            <Text style={[styles.versionTag, { color: colors.textSecondary }]}>v{changelog?.version}</Text>
-
-            <ScrollView showsVerticalScrollIndicator={false} style={{ width: '100%', marginTop: Spacing.four }}>
-              {changelog && getLocalizedText(changelog).map((line: string, i: number) => (
-                <View key={i} style={styles.bulletRow}>
-                  <View style={[styles.bullet, { backgroundColor: colors.textSecondary }]} />
-                  <Text style={[styles.bulletText, { color: colors.text }]}>{line}</Text>
+        <TouchableWithoutFeedback onPress={dismissChangelog}>
+          <View style={styles.overlay}>
+            <TouchableWithoutFeedback>
+              <View style={[styles.card, themeStyles.cardShadow, { backgroundColor: colors.background, borderColor: colors.border, maxHeight: '80%' }]}>
+                <TouchableOpacity activeOpacity={1} style={[styles.closeBtn, { backgroundColor: colors.backgroundElement }]} onPress={dismissChangelog}>
+                  <X size={20} color={colors.textSecondary} />
+                </TouchableOpacity>
+                
+                <View style={[styles.iconWrap, { backgroundColor: colors.accent + '20' }]}>
+                  <Info size={32} color={colors.accent} />
                 </View>
-              ))}
-            </ScrollView>
+                
+                <Text style={[styles.title, { color: colors.text }]}>{t('system.whatsNew', "What's New")}</Text>
+                <Text style={[styles.versionTag, { color: colors.textSecondary }]}>v{changelog?.version}</Text>
 
-            <TouchableOpacity activeOpacity={1} style={[styles.btn, { backgroundColor: colors.accent, width: '100%', marginTop: Spacing.two }]} onPress={dismissChangelog}>
-              <Text style={styles.btnText}>{t('system.awesome', 'Awesome!')}</Text>
-            </TouchableOpacity>
+                <ScrollView showsVerticalScrollIndicator={false} style={{ width: '100%', marginTop: Spacing.four }}>
+                  {changelog && getLocalizedText(changelog).map((line: string, i: number) => (
+                    <View key={i} style={styles.bulletRow}>
+                      <View style={[styles.bullet, { backgroundColor: colors.textSecondary }]} />
+                      <Text style={[styles.bulletText, { color: colors.text }]}>{line}</Text>
+                    </View>
+                  ))}
+                </ScrollView>
+
+                <TouchableOpacity activeOpacity={1} style={[styles.btn, { backgroundColor: colors.accent, width: '100%', marginTop: Spacing.two }]} onPress={dismissChangelog}>
+                  <Text style={styles.btnText}>{t('system.awesome', 'Awesome!')}</Text>
+                </TouchableOpacity>
+              </View>
+            </TouchableWithoutFeedback>
           </View>
-        </View>
+        </TouchableWithoutFeedback>
       </Modal>
 
       {/* Notification Modal */}
       <Modal visible={!!notification && !updateReady && !changelog} transparent animationType="slide">
-        <View style={styles.overlay}>
-          <View style={[styles.card, themeStyles.cardShadow, { backgroundColor: colors.background, borderColor: colors.border }]}>
-            <View style={[styles.iconWrap, { backgroundColor: colors.highlight + '20' }]}>
-              <Bell size={16} color={colors.highlight} />
-            </View>
-            <Text style={[styles.title, { color: colors.text }]}>{t('system.notification', 'Notice')}</Text>
-            <Text style={[styles.desc, { color: colors.text, textAlign: 'center', fontSize: 16 }]}>
-              {notification && getLocalizedText(notification)}
-            </Text>
-            <TouchableOpacity activeOpacity={1} style={[styles.btn, { backgroundColor: colors.highlight, width: '100%', marginTop: Spacing.two }]} onPress={dismissNotification}>
-              <Text style={styles.btnText}>{t('system.gotIt', 'Got It')}</Text>
-            </TouchableOpacity>
+        <TouchableWithoutFeedback onPress={dismissNotification}>
+          <View style={styles.overlay}>
+            <TouchableWithoutFeedback>
+              <View style={[styles.card, themeStyles.cardShadow, { backgroundColor: colors.background, borderColor: colors.border }]}>
+                <View style={[styles.iconWrap, { backgroundColor: colors.highlight + '20' }]}>
+                  <Bell size={16} color={colors.highlight} />
+                </View>
+                <Text style={[styles.title, { color: colors.text }]}>{t('system.notification', 'Notice')}</Text>
+                <Text style={[styles.desc, { color: colors.text, textAlign: 'center', fontSize: 16 }]}>
+                  {notification && getLocalizedText(notification)}
+                </Text>
+                <TouchableOpacity activeOpacity={1} style={[styles.btn, { backgroundColor: colors.highlight, width: '100%', marginTop: Spacing.two }]} onPress={dismissNotification}>
+                  <Text style={styles.btnText}>{t('system.gotIt', 'Got It')}</Text>
+                </TouchableOpacity>
+              </View>
+            </TouchableWithoutFeedback>
           </View>
-        </View>
+        </TouchableWithoutFeedback>
       </Modal>
     </>
   );

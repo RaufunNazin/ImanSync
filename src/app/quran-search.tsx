@@ -42,6 +42,8 @@ interface Surah {
 export default function QuranSearchScreen() {
   const scheme = useThemeStore((s) => s.theme);
   const colors = useThemeColors();
+  const isDark = colors.background === '#0c1618';
+  const activeQuranColor = isDark ? colors.accent : colors.highlight;
   const router = useRouter();
   const { t, i18n } = useTranslation();
   
@@ -142,7 +144,7 @@ export default function QuranSearchScreen() {
         <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={styles.container} keyboardDismissMode="on-drag" keyboardShouldPersistTaps="handled">
           
           {loading && searchQuery.length > 0 ? (
-            <ActivityIndicator size="large" color={colors.accent} style={{ marginTop: 40 }} />
+            <ActivityIndicator size="large" color={activeQuranColor} style={{ marginTop: 40 }} />
           ) : (
             <View style={styles.listContainer}>
               {searchQuery.length > 0 && filteredSurahs.length === 0 ? (
@@ -169,7 +171,7 @@ export default function QuranSearchScreen() {
                           </View>
                         </View>
                         
-                        <Text style={[styles.surahNameAr, { color: scheme === 'dark' ? colors.accent : colors.highlight }]}>{surah.nameAr}</Text>
+                        <Text style={[styles.surahNameAr, { color: activeQuranColor }]}>{surah.nameAr}</Text>
                       </TouchableOpacity>
                     </ThemeCard>
                   </Animated.View>

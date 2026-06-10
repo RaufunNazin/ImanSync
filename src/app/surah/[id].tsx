@@ -1,10 +1,10 @@
 import ThemeCard from '@/components/ThemeCard';
-import { Fonts, Spacing, useThemeColors } from '@/constants/theme';
+import { Fonts, Spacing, useThemeColors, useThemeStyles } from '@/constants/theme';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useLocalSearchParams, useRouter } from 'expo-router';
-import { Bookmark, ChevronLeft, Minus, Plus, Settings2, X, Play, Pause, DownloadCloud, CheckCircle } from 'lucide-react-native';
+import { Bookmark, ChevronLeft, Minus, Plus, Settings2, X, Play, Pause, DownloadCloud, CheckCircle, Share2 } from 'lucide-react-native';
 import React, { useEffect, useRef, useState } from 'react';
-import { ActivityIndicator, FlatList, Modal, ScrollView, StyleSheet, Switch, Text, TouchableOpacity, View } from 'react-native';
+import { ActivityIndicator, FlatList, Modal, ScrollView, StyleSheet, Switch, Text, TouchableOpacity, View, Share } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useTranslation } from 'react-i18next';
 import { formatNumber } from '@/utils/formatNumber';
@@ -46,6 +46,9 @@ const DEFAULT_SETTINGS: Settings = {
 export default function SurahScreen() {
   const { id, ayah } = useLocalSearchParams();
   const colors = useThemeColors();
+  const themeStyles = useThemeStyles();
+  const isDark = colors.background === '#0c1618';
+  const activeQuranColor = isDark ? colors.accent : colors.highlight;
   const router = useRouter();
   const { t, i18n } = useTranslation();
   
@@ -150,6 +153,33 @@ export default function SurahScreen() {
       await AsyncStorage.setItem('imansync_quran_bookmarks', JSON.stringify(bookmarks));
     } catch (e) {
       console.error(e);
+    }
+  };
+
+  const shareAyah = async (ayahItem: Ayah) => {
+    try {
+      const parts = [
+        `${t('surahNames.' + id, { defaultValue: surahName })} (${formatNumber(id as string, i18n.language)}:${formatNumber(ayahItem.numberInSurah, i18n.language)})`,
+        ayahItem.arabic,
+      ];
+      
+      if (settings.showEnglishTranslit && ayahItem.englishTranslit) {
+        parts.push(ayahItem.englishTranslit);
+      }
+      if (settings.showBangla && ayahItem.bangla) {
+        parts.push(ayahItem.bangla);
+      }
+      if (settings.showEnglish && ayahItem.english) {
+        parts.push(ayahItem.english);
+      }
+      
+      parts.push(`Shared via ImanSync`);
+      
+      await Share.share({
+        message: parts.join('\n\n'),
+      });
+    } catch (e) {
+      console.error('Error sharing ayah:', e);
     }
   };
 
@@ -339,19 +369,19 @@ export default function SurahScreen() {
             </View>
             <View style={{ flexDirection: 'column', alignItems: 'stretch', gap: 12, paddingBottom: Spacing.four }}>
               <TouchableOpacity activeOpacity={1} 
-                style={[{ padding: 12, borderRadius: 12, borderWidth: 1, borderColor: colors.border }, currentReciterId === 7 && { borderColor: colors.highlight, backgroundColor: colors.highlight + '15' }]} 
+                style={[{ padding: 12, borderRadius: 12, borderWidth: 1, borderColor: colors.border }, currentReciterId === 7 ? { borderColor: colors.highlight, backgroundColor: colors.highlight + '15' } : { backgroundColor: colors.backgroundElement, ...themeStyles.cardShadow }]} 
                 onPress={() => setReciter(7)}
               >
                 <Text style={[styles.settingLabel, { color: currentReciterId === 7 ? colors.highlight : colors.text }]}>{t("quran.reciters.mishary")}</Text>
               </TouchableOpacity>
               <TouchableOpacity activeOpacity={1} 
-                style={[{ padding: 12, borderRadius: 12, borderWidth: 1, borderColor: colors.border }, currentReciterId === 1 && { borderColor: colors.highlight, backgroundColor: colors.highlight + '15' }]} 
+                style={[{ padding: 12, borderRadius: 12, borderWidth: 1, borderColor: colors.border }, currentReciterId === 1 ? { borderColor: colors.highlight, backgroundColor: colors.highlight + '15' } : { backgroundColor: colors.backgroundElement, ...themeStyles.cardShadow }]} 
                 onPress={() => setReciter(1)}
               >
                 <Text style={[styles.settingLabel, { color: currentReciterId === 1 ? colors.highlight : colors.text }]}>{t("quran.reciters.abdulBaset")}</Text>
               </TouchableOpacity>
               <TouchableOpacity activeOpacity={1} 
-                style={[{ padding: 12, borderRadius: 12, borderWidth: 1, borderColor: colors.border }, currentReciterId === 3 && { borderColor: colors.highlight, backgroundColor: colors.highlight + '15' }]} 
+                style={[{ padding: 12, borderRadius: 12, borderWidth: 1, borderColor: colors.border }, currentReciterId === 3 ? { borderColor: colors.highlight, backgroundColor: colors.highlight + '15' } : { backgroundColor: colors.backgroundElement, ...themeStyles.cardShadow }]} 
                 onPress={() => setReciter(3)}
               >
                 <Text style={[styles.settingLabel, { color: currentReciterId === 3 ? colors.highlight : colors.text }]}>{t("quran.reciters.sudais")}</Text>
@@ -424,7 +454,7 @@ export default function SurahScreen() {
               <DownloadProgressRing
                 size={22}
                 progress={downloadStore.downloadProgress[`${currentReciterId}_${id}`]}
-                color={colors.accent}
+                color={activeQuranColor}
                 trackColor={colors.textSecondary + '30'}
                 label={formatNumber(Math.round(downloadStore.downloadProgress[`${currentReciterId}_${id}`]), i18n.language)}
               />
@@ -460,6 +490,13 @@ export default function SurahScreen() {
                     <Text style={[styles.numberText, { color: colors.textSecondary }]}>{formatNumber(item.numberInSurah, i18n.language)}</Text>
                   </View>
                   <View style={{ flexDirection: 'row', gap: Spacing.two, alignItems: 'center' }}>
+                    <TouchableOpacity activeOpacity={1} onPress={() => shareAyah(item)} style={{ padding: Spacing.one }}>
+                      <Share2 
+                        size={20} 
+                        color={colors.textSecondary} 
+                        opacity={0.6}
+                      />
+                    </TouchableOpacity>
                     <TouchableOpacity activeOpacity={1} onPress={() => {
                       if (currentSurahId === Number(id) && currentAyahNumber === item.numberInSurah && playbackMode === 'ayah') {
                         isPlaying ? pause() : resume();
@@ -468,18 +505,18 @@ export default function SurahScreen() {
                       }
                     }} style={{ padding: Spacing.one }}>
                       {isAudioLoading && currentSurahId === Number(id) && currentAyahNumber === item.numberInSurah && playbackMode === 'ayah' ? (
-                        <ActivityIndicator size="small" color={colors.accent} />
+                        <ActivityIndicator size="small" color={activeQuranColor} />
                       ) : isPlaying && currentSurahId === Number(id) && currentAyahNumber === item.numberInSurah && playbackMode === 'ayah' ? (
-                        <Pause size={20} color={colors.accent} fill={colors.accent} />
+                        <Pause size={20} color={activeQuranColor} fill={activeQuranColor} />
                       ) : (
-                        <Play size={20} color={colors.accent} fill={colors.accent} />
+                        <Play size={20} color={activeQuranColor} fill={activeQuranColor} />
                       )}
                     </TouchableOpacity>
                     <TouchableOpacity activeOpacity={1} onPress={() => toggleBookmark(item)} style={{ padding: Spacing.one }}>
                       <Bookmark 
                         size={20} 
-                        color={colors.accent} 
-                        fill={bookmarkedAyahs[item.numberInSurah] ? colors.accent : 'transparent'} 
+                        color={activeQuranColor} 
+                        fill={bookmarkedAyahs[item.numberInSurah] ? activeQuranColor : 'transparent'} 
                       />
                     </TouchableOpacity>
                   </View>
@@ -522,7 +559,7 @@ export default function SurahScreen() {
         onConfirm={() => { setDeleteDownloadConfirm(false); downloadStore.deleteSurah(currentReciterId, Number(id)); }}
         onCancel={() => setDeleteDownloadConfirm(false)}
         colors={colors}
-        confirmColor="#EF4444"
+        confirmColor={colors.error}
       />
     </SafeAreaView>
   );
@@ -558,7 +595,7 @@ const styles = StyleSheet.create({
     borderWidth: 1,
   },
   ayahCard: { padding: Spacing.five },
-  ayahHeader: { flexDirection: 'row', justifyContent: 'space-between', marginBottom: Spacing.three },
+  ayahHeader: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: Spacing.three },
   numberCircle: {
     width: 28, height: 28, borderRadius: 14, borderWidth: 1,
     alignItems: 'center', justifyContent: 'center',
