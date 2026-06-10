@@ -325,8 +325,10 @@
     "enTranslit": "English Transliteration",
     "bnTranslit": "Bangla Transliteration",
     "searchPlaceholder": "Search by name or translation...",
-    "searchMyDuas": "Search My Duas",
-    "searchBookmarks": "Search Bookmarks",
+    "searchMyDuas": "Search My Duas...",
+    "searchBookmarks": "Search Bookmarks...",
+    "searchAllDuas": "Search all duas...",
+    "searchInCategory": "Search in {{categoryName}}...",
     "searchCategory": "Search Categories..."
   },
   "settings": {
@@ -1148,6 +1150,7 @@
   "calendar": {
     "titleEn": "Islamic Calendar",
     "titleAr": "التقويم الإسلامي",
+    "today": "Today",
     "sahriEnd": "Sahri Ends",
     "iftarTime": "Iftar Time",
     "events": "Special Events",
@@ -1162,8 +1165,12 @@
     "sat": "Sat"
   },
   "search": {
+    "titleEn": "Search Quran",
+    "titleAr": "البحث",
     "noMatchingDuas": "No matching duas found for \"{{query}}\"",
-    "noMatchingQuran": "No results found for \"{{query}}\""
+    "noMatchingAllDuas": "No duas found across all categories for \"{{query}}\"",
+    "noMatchingCategoryDuas": "No duas found in {{categoryName}} for \"{{query}}\"",
+    "noMatchingQuran": "No matching verses found for \"{{query}}\""
   },
   "noResults": "No results found",
   "trivia": {

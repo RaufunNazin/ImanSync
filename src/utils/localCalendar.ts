@@ -73,7 +73,7 @@ export const generateLocalCalendar = (
         hijri: {
           date: `${hijriDay}-${hijriMonthEn}-${hijriYear}`,
           day: hijriDay,
-          month: { number: 1, en: hijriMonthEn, ar: hijriMonthEn },
+          month: { number: hDate.getMonth(), en: hijriMonthEn, ar: hijriMonthEn },
           year: hijriYear,
           weekday: { en: date.toLocaleString('en-US', { weekday: 'long' }), ar: '' },
           holidays: []

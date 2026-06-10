@@ -229,7 +229,7 @@ export default function TrackerScreen() {
 
     return (
       <View style={styles.gridSection}>
-        <Text style={[styles.sectionTitle, { color: colors.textSecondary, marginTop: Spacing.four }]}>
+        <Text style={[styles.sectionTitle, { color: colors.textSecondary }]}>
           {t('tracker.consistency', { title })}
         </Text>
         <ThemeCard intensity={40}  style={[styles.chartCard, { borderColor: colors.border }]}>
@@ -486,7 +486,7 @@ const styles = StyleSheet.create({
   chartContainer: { flexDirection: 'row', height: 150, alignItems: 'flex-end', justifyContent: 'space-between' },
   chartBarWrapper: { flex: 1, height: '100%', justifyContent: 'flex-end', paddingHorizontal: 2 },
   chartBar: { borderRadius: 4, width: '100%' },
-  heatmapGrid: { flexDirection: 'row', flexWrap: 'wrap', justifyContent: 'center', alignItems: 'center', minHeight: 40, marginBottom: Spacing.four, marginTop: Spacing.four },
+  heatmapGrid: { flexDirection: 'row', flexWrap: 'wrap', justifyContent: 'center', alignItems: 'center', minHeight: 54, marginBottom: Spacing.four, marginTop: Spacing.four },
   heatmapWeekly: { gap: 12 },
   heatmapMonthly: { gap: 6 },
   heatmapCell: { width: 14, height: 14, borderRadius: 4 },

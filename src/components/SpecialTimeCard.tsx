@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { View, Text, TouchableOpacity } from 'react-native';
 import Animated, { useSharedValue, useAnimatedStyle, withTiming } from 'react-native-reanimated';
 
-import { Pointer } from 'lucide-react-native';
+
 import ThemeCard from '@/components/ThemeCard';
 import { Fonts } from '@/constants/theme';
 import { formatNumber } from '@/utils/formatNumber';
@@ -13,8 +13,24 @@ export interface SpecialTime {
   date: Date | null;
 }
 
-export default function SpecialTimeCard({ item, colors, i18nLanguage, styles, t, activeColor }: { item: SpecialTime, colors: any, i18nLanguage: string, styles: any, t: any, activeColor: string }) {
+export default function SpecialTimeCard({ item, colors, i18nLanguage, styles, t, activeColor, timeColor, disableInteractive }: { item: SpecialTime, colors: any, i18nLanguage: string, styles: any, t: any, activeColor: string, timeColor?: string, disableInteractive?: boolean }) {
   const [showCountdown, setShowCountdown] = useState(false);
+
+  // Initial sneak peek animation
+  useEffect(() => {
+    let peekTimeout: NodeJS.Timeout;
+    if (!disableInteractive && item.date && item.time !== '--:--') {
+      const diff = item.date.getTime() - Date.now();
+      if (diff > 0) {
+        peekTimeout = setTimeout(() => {
+          setShowCountdown(true);
+        }, 600);
+      }
+    }
+    return () => {
+      if (peekTimeout) clearTimeout(peekTimeout);
+    };
+  }, []); // Only run once on mount
   const [remainingStr, setRemainingStr] = useState('');
 
   const crossfade = useSharedValue(0);
@@ -55,7 +71,7 @@ export default function SpecialTimeCard({ item, colors, i18nLanguage, styles, t,
 
       timeout = setTimeout(() => {
         setShowCountdown(false);
-      }, 5000);
+      }, 3500);
     }
 
     return () => {
@@ -66,26 +82,24 @@ export default function SpecialTimeCard({ item, colors, i18nLanguage, styles, t,
 
   return (
     <TouchableOpacity activeOpacity={1} style={{ flex: 1 }} onPress={() => {
-      if (item.date && item.time !== '--:--') {
-        setShowCountdown(true);
+      if (!disableInteractive && item.date && item.time !== '--:--') {
+        const diff = item.date.getTime() - Date.now();
+        if (diff > 0) {
+          setShowCountdown(true);
+        }
       }
     }}>
       <ThemeCard
         intensity={30}
         style={[styles.specialCard, { borderColor: colors.border }]}
       >
-        {/* Subtle tap cue */}
-        {!showCountdown && item.date && item.time !== '--:--' && (
-          <View style={{ position: 'absolute', top: 6, right: 7, opacity: 0.3 }}>
-            <Pointer size={12} color={colors.textSecondary} />
-          </View>
-        )}
+        {/* The card content */}
         <View style={[styles.specialCardInner, { alignItems: 'center', justifyContent: 'center', paddingVertical: 16 }]}>
           <View style={{ height: 42, width: '100%', justifyContent: 'center', alignItems: 'center', marginBottom: 4 }}>
             <Animated.Text style={[countdownStyle, { position: 'absolute', fontFamily: Fonts.outfit, fontSize: 16, lineHeight: 20, color: activeColor, textAlign: 'center' }]}>
               {remainingStr}
             </Animated.Text>
-            <Animated.Text style={[timeStyle, { position: 'absolute', fontFamily: Fonts.outfit, fontSize: 22, color: colors.accent, textAlign: 'center' }]}>
+            <Animated.Text style={[timeStyle, { position: 'absolute', fontFamily: Fonts.outfit, fontSize: 22, color: timeColor || colors.accent, textAlign: 'center' }]}>
               {formatNumber(item.time.replace(/ AM| PM/g, ''), i18nLanguage)}
               {item.time.includes(' AM') && <Text style={{ fontSize: 13 }}> AM</Text>}
               {item.time.includes(' PM') && <Text style={{ fontSize: 13 }}> PM</Text>}

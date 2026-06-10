@@ -597,7 +597,7 @@ const styles = StyleSheet.create({
   safeArea: { flex: 1 },
   backBtn: { padding: 2 },
   loaderContainer: { flex: 1, justifyContent: 'center', alignItems: 'center' },
-  list: { padding: Spacing.four, gap: Spacing.four },
+  list: { paddingHorizontal: Spacing.four, paddingBottom: Spacing.four, gap: Spacing.four },
   
   contextCard: {
     padding: Spacing.four,

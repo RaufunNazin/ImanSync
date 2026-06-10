@@ -2,801 +2,1257 @@
   "data": [
     {
       "id": 1,
-      "name": "Al-Faatiha",
+      "nameEn": "Al-Faatiha",
       "nameAr": "سُورَةُ ٱلْفَاتِحَةِ",
+      "nameBn": "আল-ফাতিহা",
+      "typeEn": "Meccan",
+      "typeBn": "মাক্কী",
       "verses": 7,
-      "type": "Meccan"
+      "versesEn": "7 Verses",
+      "versesBn": "৭ আয়াত"
     },
     {
       "id": 2,
-      "name": "Al-Baqara",
+      "nameEn": "Al-Baqara",
       "nameAr": "سُورَةُ البَقَرَةِ",
+      "nameBn": "আল-বাকারাহ",
+      "typeEn": "Medinan",
+      "typeBn": "মাদানী",
       "verses": 286,
-      "type": "Medinan"
+      "versesEn": "286 Verses",
+      "versesBn": "২৮৬ আয়াত"
     },
     {
       "id": 3,
-      "name": "Aal-i-Imraan",
+      "nameEn": "Aal-i-Imraan",
       "nameAr": "سُورَةُ آلِ عِمۡرَانَ",
+      "nameBn": "আলে-ইমরান",
+      "typeEn": "Medinan",
+      "typeBn": "মাদানী",
       "verses": 200,
-      "type": "Medinan"
+      "versesEn": "200 Verses",
+      "versesBn": "২০০ আয়াত"
     },
     {
       "id": 4,
-      "name": "An-Nisaa",
+      "nameEn": "An-Nisaa",
       "nameAr": "سُورَةُ النِّسَاءِ",
+      "nameBn": "আন-নিসা",
+      "typeEn": "Medinan",
+      "typeBn": "মাদানী",
       "verses": 176,
-      "type": "Medinan"
+      "versesEn": "176 Verses",
+      "versesBn": "১৭৬ আয়াত"
     },
     {
       "id": 5,
-      "name": "Al-Maaida",
+      "nameEn": "Al-Maaida",
       "nameAr": "سُورَةُ المَائـِدَةِ",
+      "nameBn": "আল-মায়িদাহ",
+      "typeEn": "Medinan",
+      "typeBn": "মাদানী",
       "verses": 120,
-      "type": "Medinan"
+      "versesEn": "120 Verses",
+      "versesBn": "১২০ আয়াত"
     },
     {
       "id": 6,
-      "name": "Al-An'aam",
+      "nameEn": "Al-An'aam",
       "nameAr": "سُورَةُ الأَنۡعَامِ",
+      "nameBn": "আল-আনআম",
+      "typeEn": "Meccan",
+      "typeBn": "মাক্কী",
       "verses": 165,
-      "type": "Meccan"
+      "versesEn": "165 Verses",
+      "versesBn": "১৬৫ আয়াত"
     },
     {
       "id": 7,
-      "name": "Al-A'raaf",
+      "nameEn": "Al-A'raaf",
       "nameAr": "سُورَةُ الأَعۡرَافِ",
+      "nameBn": "আল-আরাফ",
+      "typeEn": "Meccan",
+      "typeBn": "মাক্কী",
       "verses": 206,
-      "type": "Meccan"
+      "versesEn": "206 Verses",
+      "versesBn": "২০৬ আয়াত"
     },
     {
       "id": 8,
-      "name": "Al-Anfaal",
+      "nameEn": "Al-Anfaal",
       "nameAr": "سُورَةُ الأَنفَالِ",
+      "nameBn": "আল-আনফাল",
+      "typeEn": "Medinan",
+      "typeBn": "মাদানী",
       "verses": 75,
-      "type": "Medinan"
+      "versesEn": "75 Verses",
+      "versesBn": "৭৫ আয়াত"
     },
     {
       "id": 9,
-      "name": "At-Tawba",
+      "nameEn": "At-Tawba",
       "nameAr": "سُورَةُ التَّوۡبَةِ",
+      "nameBn": "আত-তাওবাহ",
+      "typeEn": "Medinan",
+      "typeBn": "মাদানী",
       "verses": 129,
-      "type": "Medinan"
+      "versesEn": "129 Verses",
+      "versesBn": "১২৯ আয়াত"
     },
     {
       "id": 10,
-      "name": "Yunus",
+      "nameEn": "Yunus",
       "nameAr": "سُورَةُ يُونُسَ",
+      "nameBn": "ইউনুস",
+      "typeEn": "Meccan",
+      "typeBn": "মাক্কী",
       "verses": 109,
-      "type": "Meccan"
+      "versesEn": "109 Verses",
+      "versesBn": "১০৯ আয়াত"
     },
     {
       "id": 11,
-      "name": "Hud",
+      "nameEn": "Hud",
       "nameAr": "سُورَةُ هُودٍ",
+      "nameBn": "হুদ",
+      "typeEn": "Meccan",
+      "typeBn": "মাক্কী",
       "verses": 123,
-      "type": "Meccan"
+      "versesEn": "123 Verses",
+      "versesBn": "১২৩ আয়াত"
     },
     {
       "id": 12,
-      "name": "Yusuf",
+      "nameEn": "Yusuf",
       "nameAr": "سُورَةُ يُوسُفَ",
+      "nameBn": "ইউসুফ",
+      "typeEn": "Meccan",
+      "typeBn": "মাক্কী",
       "verses": 111,
-      "type": "Meccan"
+      "versesEn": "111 Verses",
+      "versesBn": "১১১ আয়াত"
     },
     {
       "id": 13,
-      "name": "Ar-Ra'd",
+      "nameEn": "Ar-Ra'd",
       "nameAr": "سُورَةُ الرَّعۡدِ",
+      "nameBn": "আর-রাদ",
+      "typeEn": "Medinan",
+      "typeBn": "মাদানী",
       "verses": 43,
-      "type": "Medinan"
+      "versesEn": "43 Verses",
+      "versesBn": "৪৩ আয়াত"
     },
     {
       "id": 14,
-      "name": "Ibrahim",
+      "nameEn": "Ibrahim",
       "nameAr": "سُورَةُ إِبۡرَاهِيمَ",
+      "nameBn": "ইব্রাহীম",
+      "typeEn": "Meccan",
+      "typeBn": "মাক্কী",
       "verses": 52,
-      "type": "Meccan"
+      "versesEn": "52 Verses",
+      "versesBn": "৫২ আয়াত"
     },
     {
       "id": 15,
-      "name": "Al-Hijr",
+      "nameEn": "Al-Hijr",
       "nameAr": "سُورَةُ الحِجۡرِ",
+      "nameBn": "আল-হিজর",
+      "typeEn": "Meccan",
+      "typeBn": "মাক্কী",
       "verses": 99,
-      "type": "Meccan"
+      "versesEn": "99 Verses",
+      "versesBn": "৯৯ আয়াত"
     },
     {
       "id": 16,
-      "name": "An-Nahl",
+      "nameEn": "An-Nahl",
       "nameAr": "سُورَةُ النَّحۡلِ",
+      "nameBn": "আন-নাহল",
+      "typeEn": "Meccan",
+      "typeBn": "মাক্কী",
       "verses": 128,
-      "type": "Meccan"
+      "versesEn": "128 Verses",
+      "versesBn": "১২৮ আয়াত"
     },
     {
       "id": 17,
-      "name": "Al-Israa",
+      "nameEn": "Al-Israa",
       "nameAr": "سُورَةُ الإِسۡرَاءِ",
+      "nameBn": "আল-ইসরা",
+      "typeEn": "Meccan",
+      "typeBn": "মাক্কী",
       "verses": 111,
-      "type": "Meccan"
+      "versesEn": "111 Verses",
+      "versesBn": "১১১ আয়াত"
     },
     {
       "id": 18,
-      "name": "Al-Kahf",
+      "nameEn": "Al-Kahf",
       "nameAr": "سُورَةُ الكَهۡفِ",
+      "nameBn": "আল-কাহফ",
+      "typeEn": "Meccan",
+      "typeBn": "মাক্কী",
       "verses": 110,
-      "type": "Meccan"
+      "versesEn": "110 Verses",
+      "versesBn": "১১০ আয়াত"
     },
     {
       "id": 19,
-      "name": "Maryam",
+      "nameEn": "Maryam",
       "nameAr": "سُورَةُ مَرۡيَمَ",
+      "nameBn": "মারইয়াম",
+      "typeEn": "Meccan",
+      "typeBn": "মাক্কী",
       "verses": 98,
-      "type": "Meccan"
+      "versesEn": "98 Verses",
+      "versesBn": "৯৮ আয়াত"
     },
     {
       "id": 20,
-      "name": "Taa-Haa",
+      "nameEn": "Taa-Haa",
       "nameAr": "سُورَةُ طه",
+      "nameBn": "ত্বাহা",
+      "typeEn": "Meccan",
+      "typeBn": "মাক্কী",
       "verses": 135,
-      "type": "Meccan"
+      "versesEn": "135 Verses",
+      "versesBn": "১৩৫ আয়াত"
     },
     {
       "id": 21,
-      "name": "Al-Anbiyaa",
+      "nameEn": "Al-Anbiyaa",
       "nameAr": "سُورَةُ الأَنبِيَاءِ",
+      "nameBn": "আল-আম্বিয়া",
+      "typeEn": "Meccan",
+      "typeBn": "মাক্কী",
       "verses": 112,
-      "type": "Meccan"
+      "versesEn": "112 Verses",
+      "versesBn": "১১২ আয়াত"
     },
     {
       "id": 22,
-      "name": "Al-Hajj",
+      "nameEn": "Al-Hajj",
       "nameAr": "سُورَةُ الحَجِّ",
+      "nameBn": "আল-হাজ্জ",
+      "typeEn": "Medinan",
+      "typeBn": "মাদানী",
       "verses": 78,
-      "type": "Medinan"
+      "versesEn": "78 Verses",
+      "versesBn": "৭৮ আয়াত"
     },
     {
       "id": 23,
-      "name": "Al-Muminoon",
+      "nameEn": "Al-Muminoon",
       "nameAr": "سُورَةُ المُؤۡمِنُونَ",
+      "nameBn": "আল-মুমিনুন",
+      "typeEn": "Meccan",
+      "typeBn": "মাক্কী",
       "verses": 118,
-      "type": "Meccan"
+      "versesEn": "118 Verses",
+      "versesBn": "১১৮ আয়াত"
     },
     {
       "id": 24,
-      "name": "An-Noor",
+      "nameEn": "An-Noor",
       "nameAr": "سُورَةُ النُّورِ",
+      "nameBn": "আন-নূর",
+      "typeEn": "Medinan",
+      "typeBn": "মাদানী",
       "verses": 64,
-      "type": "Medinan"
+      "versesEn": "64 Verses",
+      "versesBn": "৬৪ আয়াত"
     },
     {
       "id": 25,
-      "name": "Al-Furqaan",
+      "nameEn": "Al-Furqaan",
       "nameAr": "سُورَةُ الفُرۡقَانِ",
+      "nameBn": "আল-ফুরকান",
+      "typeEn": "Meccan",
+      "typeBn": "মাক্কী",
       "verses": 77,
-      "type": "Meccan"
+      "versesEn": "77 Verses",
+      "versesBn": "৭৭ আয়াত"
     },
     {
       "id": 26,
-      "name": "Ash-Shu'araa",
+      "nameEn": "Ash-Shu'araa",
       "nameAr": "سُورَةُ الشُّعَرَاءِ",
+      "nameBn": "আশ-শুআরা",
+      "typeEn": "Meccan",
+      "typeBn": "মাক্কী",
       "verses": 227,
-      "type": "Meccan"
+      "versesEn": "227 Verses",
+      "versesBn": "২২৭ আয়াত"
     },
     {
       "id": 27,
-      "name": "An-Naml",
+      "nameEn": "An-Naml",
       "nameAr": "سُورَةُ النَّمۡلِ",
+      "nameBn": "আন-নামল",
+      "typeEn": "Meccan",
+      "typeBn": "মাক্কী",
       "verses": 93,
-      "type": "Meccan"
+      "versesEn": "93 Verses",
+      "versesBn": "৯৩ আয়াত"
     },
     {
       "id": 28,
-      "name": "Al-Qasas",
+      "nameEn": "Al-Qasas",
       "nameAr": "سُورَةُ القَصَصِ",
+      "nameBn": "আল-কাসাস",
+      "typeEn": "Meccan",
+      "typeBn": "মাক্কী",
       "verses": 88,
-      "type": "Meccan"
+      "versesEn": "88 Verses",
+      "versesBn": "৮৮ আয়াত"
     },
     {
       "id": 29,
-      "name": "Al-Ankaboot",
+      "nameEn": "Al-Ankaboot",
       "nameAr": "سُورَةُ العَنكَبُوتِ",
+      "nameBn": "আল-আনকাবুত",
+      "typeEn": "Meccan",
+      "typeBn": "মাক্কী",
       "verses": 69,
-      "type": "Meccan"
+      "versesEn": "69 Verses",
+      "versesBn": "৬৯ আয়াত"
     },
     {
       "id": 30,
-      "name": "Ar-Room",
+      "nameEn": "Ar-Room",
       "nameAr": "سُورَةُ الرُّومِ",
+      "nameBn": "আর-রূম",
+      "typeEn": "Meccan",
+      "typeBn": "মাক্কী",
       "verses": 60,
-      "type": "Meccan"
+      "versesEn": "60 Verses",
+      "versesBn": "৬০ আয়াত"
     },
     {
       "id": 31,
-      "name": "Luqman",
+      "nameEn": "Luqman",
       "nameAr": "سُورَةُ لُقۡمَانَ",
+      "nameBn": "লুকমান",
+      "typeEn": "Meccan",
+      "typeBn": "মাক্কী",
       "verses": 34,
-      "type": "Meccan"
+      "versesEn": "34 Verses",
+      "versesBn": "৩৪ আয়াত"
     },
     {
       "id": 32,
-      "name": "As-Sajda",
+      "nameEn": "As-Sajda",
       "nameAr": "سُورَةُ السَّجۡدَةِ",
+      "nameBn": "আস-সাজদাহ",
+      "typeEn": "Meccan",
+      "typeBn": "মাক্কী",
       "verses": 30,
-      "type": "Meccan"
+      "versesEn": "30 Verses",
+      "versesBn": "৩০ আয়াত"
     },
     {
       "id": 33,
-      "name": "Al-Ahzaab",
+      "nameEn": "Al-Ahzaab",
       "nameAr": "سُورَةُ الأَحۡزَابِ",
+      "nameBn": "আল-আহযাব",
+      "typeEn": "Medinan",
+      "typeBn": "মাদানী",
       "verses": 73,
-      "type": "Medinan"
+      "versesEn": "73 Verses",
+      "versesBn": "৭৩ আয়াত"
     },
     {
       "id": 34,
-      "name": "Saba",
+      "nameEn": "Saba",
       "nameAr": "سُورَةُ سَبَإٍ",
+      "nameBn": "সাবা",
+      "typeEn": "Meccan",
+      "typeBn": "মাক্কী",
       "verses": 54,
-      "type": "Meccan"
+      "versesEn": "54 Verses",
+      "versesBn": "৫৪ আয়াত"
     },
     {
       "id": 35,
-      "name": "Faatir",
+      "nameEn": "Faatir",
       "nameAr": "سُورَةُ فَاطِرٍ",
+      "nameBn": "ফাতির",
+      "typeEn": "Meccan",
+      "typeBn": "মাক্কী",
       "verses": 45,
-      "type": "Meccan"
+      "versesEn": "45 Verses",
+      "versesBn": "৪৫ আয়াত"
     },
     {
       "id": 36,
-      "name": "Yaseen",
+      "nameEn": "Yaseen",
       "nameAr": "سُورَةُ يسٓ",
+      "nameBn": "ইয়াসীন",
+      "typeEn": "Meccan",
+      "typeBn": "মাক্কী",
       "verses": 83,
-      "type": "Meccan"
+      "versesEn": "83 Verses",
+      "versesBn": "৮৩ আয়াত"
     },
     {
       "id": 37,
-      "name": "As-Saaffaat",
+      "nameEn": "As-Saaffaat",
       "nameAr": "سُورَةُ الصَّافَّاتِ",
+      "nameBn": "আস-সাফফাত",
+      "typeEn": "Meccan",
+      "typeBn": "মাক্কী",
       "verses": 182,
-      "type": "Meccan"
+      "versesEn": "182 Verses",
+      "versesBn": "১৮২ আয়াত"
     },
     {
       "id": 38,
-      "name": "Saad",
+      "nameEn": "Saad",
       "nameAr": "سُورَةُ صٓ",
+      "nameBn": "সাদ",
+      "typeEn": "Meccan",
+      "typeBn": "মাক্কী",
       "verses": 88,
-      "type": "Meccan"
+      "versesEn": "88 Verses",
+      "versesBn": "৮৮ আয়াত"
     },
     {
       "id": 39,
-      "name": "Az-Zumar",
+      "nameEn": "Az-Zumar",
       "nameAr": "سُورَةُ الزُّمَرِ",
+      "nameBn": "আয-যুমার",
+      "typeEn": "Meccan",
+      "typeBn": "মাক্কী",
       "verses": 75,
-      "type": "Meccan"
+      "versesEn": "75 Verses",
+      "versesBn": "৭৫ আয়াত"
     },
     {
       "id": 40,
-      "name": "Ghafir",
+      "nameEn": "Ghafir",
       "nameAr": "سُورَةُ غَافِرٍ",
+      "nameBn": "গাফির",
+      "typeEn": "Meccan",
+      "typeBn": "মাক্কী",
       "verses": 85,
-      "type": "Meccan"
+      "versesEn": "85 Verses",
+      "versesBn": "৮৫ আয়াত"
     },
     {
       "id": 41,
-      "name": "Fussilat",
+      "nameEn": "Fussilat",
       "nameAr": "سُورَةُ فُصِّلَتۡ",
+      "nameBn": "ফুসসিলাত",
+      "typeEn": "Meccan",
+      "typeBn": "মাক্কী",
       "verses": 54,
-      "type": "Meccan"
+      "versesEn": "54 Verses",
+      "versesBn": "৫৪ আয়াত"
     },
     {
       "id": 42,
-      "name": "Ash-Shura",
+      "nameEn": "Ash-Shura",
       "nameAr": "سُورَةُ الشُّورَىٰ",
+      "nameBn": "আশ-শূরা",
+      "typeEn": "Meccan",
+      "typeBn": "মাক্কী",
       "verses": 53,
-      "type": "Meccan"
+      "versesEn": "53 Verses",
+      "versesBn": "৫৩ আয়াত"
     },
     {
       "id": 43,
-      "name": "Az-Zukhruf",
+      "nameEn": "Az-Zukhruf",
       "nameAr": "سُورَةُ الزُّخۡرُفِ",
+      "nameBn": "আয-যুখরুফ",
+      "typeEn": "Meccan",
+      "typeBn": "মাক্কী",
       "verses": 89,
-      "type": "Meccan"
+      "versesEn": "89 Verses",
+      "versesBn": "৮৯ আয়াত"
     },
     {
       "id": 44,
-      "name": "Ad-Dukhaan",
+      "nameEn": "Ad-Dukhaan",
       "nameAr": "سُورَةُ الدُّخَانِ",
+      "nameBn": "আদ-দুখান",
+      "typeEn": "Meccan",
+      "typeBn": "মাক্কী",
       "verses": 59,
-      "type": "Meccan"
+      "versesEn": "59 Verses",
+      "versesBn": "৫৯ আয়াত"
     },
     {
       "id": 45,
-      "name": "Al-Jaathiya",
+      "nameEn": "Al-Jaathiya",
       "nameAr": "سُورَةُ الجَاثِيَةِ",
+      "nameBn": "আল-জাসিয়াহ",
+      "typeEn": "Meccan",
+      "typeBn": "মাক্কী",
       "verses": 37,
-      "type": "Meccan"
+      "versesEn": "37 Verses",
+      "versesBn": "৩৭ আয়াত"
     },
     {
       "id": 46,
-      "name": "Al-Ahqaf",
+      "nameEn": "Al-Ahqaf",
       "nameAr": "سُورَةُ الأَحۡقَافِ",
+      "nameBn": "আল-আহক্বাফ",
+      "typeEn": "Meccan",
+      "typeBn": "মাক্কী",
       "verses": 35,
-      "type": "Meccan"
+      "versesEn": "35 Verses",
+      "versesBn": "৩৫ আয়াত"
     },
     {
       "id": 47,
-      "name": "Muhammad",
+      "nameEn": "Muhammad",
       "nameAr": "سُورَةُ مُحَمَّدٍ",
+      "nameBn": "মুহাম্মদ",
+      "typeEn": "Medinan",
+      "typeBn": "মাদানী",
       "verses": 38,
-      "type": "Medinan"
+      "versesEn": "38 Verses",
+      "versesBn": "৩৮ আয়াত"
     },
     {
       "id": 48,
-      "name": "Al-Fath",
+      "nameEn": "Al-Fath",
       "nameAr": "سُورَةُ الفَتۡحِ",
+      "nameBn": "আল-ফাতহ",
+      "typeEn": "Medinan",
+      "typeBn": "মাদানী",
       "verses": 29,
-      "type": "Medinan"
+      "versesEn": "29 Verses",
+      "versesBn": "২৯ আয়াত"
     },
     {
       "id": 49,
-      "name": "Al-Hujuraat",
+      "nameEn": "Al-Hujuraat",
       "nameAr": "سُورَةُ الحُجُرَاتِ",
+      "nameBn": "আল-হুজুরাত",
+      "typeEn": "Medinan",
+      "typeBn": "মাদানী",
       "verses": 18,
-      "type": "Medinan"
+      "versesEn": "18 Verses",
+      "versesBn": "১৮ আয়াত"
     },
     {
       "id": 50,
-      "name": "Qaaf",
+      "nameEn": "Qaaf",
       "nameAr": "سُورَةُ قٓ",
+      "nameBn": "ক্বাফ",
+      "typeEn": "Meccan",
+      "typeBn": "মাক্কী",
       "verses": 45,
-      "type": "Meccan"
+      "versesEn": "45 Verses",
+      "versesBn": "৪৫ আয়াত"
     },
     {
       "id": 51,
-      "name": "Adh-Dhaariyat",
+      "nameEn": "Adh-Dhaariyat",
       "nameAr": "سُورَةُ الذَّارِيَاتِ",
+      "nameBn": "আয-যারিয়াত",
+      "typeEn": "Meccan",
+      "typeBn": "মাক্কী",
       "verses": 60,
-      "type": "Meccan"
+      "versesEn": "60 Verses",
+      "versesBn": "৬০ আয়াত"
     },
     {
       "id": 52,
-      "name": "At-Tur",
+      "nameEn": "At-Tur",
       "nameAr": "سُورَةُ الطُّورِ",
+      "nameBn": "আত-তূর",
+      "typeEn": "Meccan",
+      "typeBn": "মাক্কী",
       "verses": 49,
-      "type": "Meccan"
+      "versesEn": "49 Verses",
+      "versesBn": "৪৯ আয়াত"
     },
     {
       "id": 53,
-      "name": "An-Najm",
+      "nameEn": "An-Najm",
       "nameAr": "سُورَةُ النَّجۡمِ",
+      "nameBn": "আন-নাজম",
+      "typeEn": "Meccan",
+      "typeBn": "মাক্কী",
       "verses": 62,
-      "type": "Meccan"
+      "versesEn": "62 Verses",
+      "versesBn": "৬২ আয়াত"
     },
     {
       "id": 54,
-      "name": "Al-Qamar",
+      "nameEn": "Al-Qamar",
       "nameAr": "سُورَةُ القَمَرِ",
+      "nameBn": "আল-কামার",
+      "typeEn": "Meccan",
+      "typeBn": "মাক্কী",
       "verses": 55,
-      "type": "Meccan"
+      "versesEn": "55 Verses",
+      "versesBn": "৫৫ আয়াত"
     },
     {
       "id": 55,
-      "name": "Ar-Rahmaan",
+      "nameEn": "Ar-Rahmaan",
       "nameAr": "سُورَةُ الرَّحۡمَٰن",
+      "nameBn": "আর-রহমান",
+      "typeEn": "Medinan",
+      "typeBn": "মাদানী",
       "verses": 78,
-      "type": "Medinan"
+      "versesEn": "78 Verses",
+      "versesBn": "৭৮ আয়াত"
     },
     {
       "id": 56,
-      "name": "Al-Waaqia",
+      "nameEn": "Al-Waaqia",
       "nameAr": "سُورَةُ الوَاقِعَةِ",
+      "nameBn": "আল-ওয়াকিয়াহ",
+      "typeEn": "Meccan",
+      "typeBn": "মাক্কী",
       "verses": 96,
-      "type": "Meccan"
+      "versesEn": "96 Verses",
+      "versesBn": "৯৬ আয়াত"
     },
     {
       "id": 57,
-      "name": "Al-Hadid",
+      "nameEn": "Al-Hadid",
       "nameAr": "سُورَةُ الحَدِيدِ",
+      "nameBn": "আল-হাদীদ",
+      "typeEn": "Medinan",
+      "typeBn": "মাদানী",
       "verses": 29,
-      "type": "Medinan"
+      "versesEn": "29 Verses",
+      "versesBn": "২৯ আয়াত"
     },
     {
       "id": 58,
-      "name": "Al-Mujaadila",
+      "nameEn": "Al-Mujaadila",
       "nameAr": "سُورَةُ المُجَادلَةِ",
+      "nameBn": "আল-মুজাদিলাহ",
+      "typeEn": "Medinan",
+      "typeBn": "মাদানী",
       "verses": 22,
-      "type": "Medinan"
+      "versesEn": "22 Verses",
+      "versesBn": "২২ আয়াত"
     },
     {
       "id": 59,
-      "name": "Al-Hashr",
+      "nameEn": "Al-Hashr",
       "nameAr": "سُورَةُ الحَشۡرِ",
+      "nameBn": "আল-হাশর",
+      "typeEn": "Medinan",
+      "typeBn": "মাদানী",
       "verses": 24,
-      "type": "Medinan"
+      "versesEn": "24 Verses",
+      "versesBn": "২৪ আয়াত"
     },
     {
       "id": 60,
-      "name": "Al-Mumtahana",
+      "nameEn": "Al-Mumtahana",
       "nameAr": "سُورَةُ المُمۡتَحنَةِ",
+      "nameBn": "আল-মুমতাহিনাহ",
+      "typeEn": "Medinan",
+      "typeBn": "মাদানী",
       "verses": 13,
-      "type": "Medinan"
+      "versesEn": "13 Verses",
+      "versesBn": "১৩ আয়াত"
     },
     {
       "id": 61,
-      "name": "As-Saff",
+      "nameEn": "As-Saff",
       "nameAr": "سُورَةُ الصَّفِّ",
+      "nameBn": "আস-সাফ",
+      "typeEn": "Medinan",
+      "typeBn": "মাদানী",
       "verses": 14,
-      "type": "Medinan"
+      "versesEn": "14 Verses",
+      "versesBn": "১৪ আয়াত"
     },
     {
       "id": 62,
-      "name": "Al-Jumu'a",
+      "nameEn": "Al-Jumu'a",
       "nameAr": "سُورَةُ الجُمُعَةِ",
+      "nameBn": "আল-জুমুআহ",
+      "typeEn": "Medinan",
+      "typeBn": "মাদানী",
       "verses": 11,
-      "type": "Medinan"
+      "versesEn": "11 Verses",
+      "versesBn": "১১ আয়াত"
     },
     {
       "id": 63,
-      "name": "Al-Munaafiqoon",
+      "nameEn": "Al-Munaafiqoon",
       "nameAr": "سُورَةُ المُنَافِقُونَ",
+      "nameBn": "আল-মুনাফিকুন",
+      "typeEn": "Medinan",
+      "typeBn": "মাদানী",
       "verses": 11,
-      "type": "Medinan"
+      "versesEn": "11 Verses",
+      "versesBn": "১১ আয়াত"
     },
     {
       "id": 64,
-      "name": "At-Taghaabun",
+      "nameEn": "At-Taghaabun",
       "nameAr": "سُورَةُ التَّغَابُنِ",
+      "nameBn": "আত-তাগাবুন",
+      "typeEn": "Medinan",
+      "typeBn": "মাদানী",
       "verses": 18,
-      "type": "Medinan"
+      "versesEn": "18 Verses",
+      "versesBn": "১৮ আয়াত"
     },
     {
       "id": 65,
-      "name": "At-Talaaq",
+      "nameEn": "At-Talaaq",
       "nameAr": "سُورَةُ الطَّلَاقِ",
+      "nameBn": "আত-তালাক",
+      "typeEn": "Medinan",
+      "typeBn": "মাদানী",
       "verses": 12,
-      "type": "Medinan"
+      "versesEn": "12 Verses",
+      "versesBn": "১২ আয়াত"
     },
     {
       "id": 66,
-      "name": "At-Tahrim",
+      "nameEn": "At-Tahrim",
       "nameAr": "سُورَةُ التَّحۡرِيمِ",
+      "nameBn": "আত-তাহরীম",
+      "typeEn": "Medinan",
+      "typeBn": "মাদানী",
       "verses": 12,
-      "type": "Medinan"
+      "versesEn": "12 Verses",
+      "versesBn": "১২ আয়াত"
     },
     {
       "id": 67,
-      "name": "Al-Mulk",
+      "nameEn": "Al-Mulk",
       "nameAr": "سُورَةُ المُلۡكِ",
+      "nameBn": "আল-মুলক",
+      "typeEn": "Meccan",
+      "typeBn": "মাক্কী",
       "verses": 30,
-      "type": "Meccan"
+      "versesEn": "30 Verses",
+      "versesBn": "৩০ আয়াত"
     },
     {
       "id": 68,
-      "name": "Al-Qalam",
+      "nameEn": "Al-Qalam",
       "nameAr": "سُورَةُ القَلَمِ",
+      "nameBn": "আল-ক্বলম",
+      "typeEn": "Meccan",
+      "typeBn": "মাক্কী",
       "verses": 52,
-      "type": "Meccan"
+      "versesEn": "52 Verses",
+      "versesBn": "৫২ আয়াত"
     },
     {
       "id": 69,
-      "name": "Al-Haaqqa",
+      "nameEn": "Al-Haaqqa",
       "nameAr": "سُورَةُ الحَاقَّةِ",
+      "nameBn": "আল-হাক্কাহ",
+      "typeEn": "Meccan",
+      "typeBn": "মাক্কী",
       "verses": 52,
-      "type": "Meccan"
+      "versesEn": "52 Verses",
+      "versesBn": "৫২ আয়াত"
     },
     {
       "id": 70,
-      "name": "Al-Ma'aarij",
+      "nameEn": "Al-Ma'aarij",
       "nameAr": "سُورَةُ المَعَارِجِ",
+      "nameBn": "আল-মাআরিজ",
+      "typeEn": "Meccan",
+      "typeBn": "মাক্কী",
       "verses": 44,
-      "type": "Meccan"
+      "versesEn": "44 Verses",
+      "versesBn": "৪৪ আয়াত"
     },
     {
       "id": 71,
-      "name": "Nooh",
+      "nameEn": "Nooh",
       "nameAr": "سُورَةُ نُوحٍ",
+      "nameBn": "নূহ",
+      "typeEn": "Meccan",
+      "typeBn": "মাক্কী",
       "verses": 28,
-      "type": "Meccan"
+      "versesEn": "28 Verses",
+      "versesBn": "২৮ আয়াত"
     },
     {
       "id": 72,
-      "name": "Al-Jinn",
+      "nameEn": "Al-Jinn",
       "nameAr": "سُورَةُ الجِنِّ",
+      "nameBn": "আল-জ্বিন",
+      "typeEn": "Meccan",
+      "typeBn": "মাক্কী",
       "verses": 28,
-      "type": "Meccan"
+      "versesEn": "28 Verses",
+      "versesBn": "২৮ আয়াত"
     },
     {
       "id": 73,
-      "name": "Al-Muzzammil",
+      "nameEn": "Al-Muzzammil",
       "nameAr": "سُورَةُ المُزَّمِّلِ",
+      "nameBn": "আল-মুযযাম্মিল",
+      "typeEn": "Meccan",
+      "typeBn": "মাক্কী",
       "verses": 20,
-      "type": "Meccan"
+      "versesEn": "20 Verses",
+      "versesBn": "২০ আয়াত"
     },
     {
       "id": 74,
-      "name": "Al-Muddaththir",
+      "nameEn": "Al-Muddaththir",
       "nameAr": "سُورَةُ المُدَّثِّرِ",
+      "nameBn": "আল-মুদ্দাসসির",
+      "typeEn": "Meccan",
+      "typeBn": "মাক্কী",
       "verses": 56,
-      "type": "Meccan"
+      "versesEn": "56 Verses",
+      "versesBn": "৫৬ আয়াত"
     },
     {
       "id": 75,
-      "name": "Al-Qiyaama",
+      "nameEn": "Al-Qiyaama",
       "nameAr": "سُورَةُ القِيَامَةِ",
+      "nameBn": "আল-ক্বিয়ামাহ",
+      "typeEn": "Meccan",
+      "typeBn": "মাক্কী",
       "verses": 40,
-      "type": "Meccan"
+      "versesEn": "40 Verses",
+      "versesBn": "৪০ আয়াত"
     },
     {
       "id": 76,
-      "name": "Al-Insaan",
+      "nameEn": "Al-Insaan",
       "nameAr": "سُورَةُ الإِنسَانِ",
+      "nameBn": "আল-ইনসান",
+      "typeEn": "Medinan",
+      "typeBn": "মাদানী",
       "verses": 31,
-      "type": "Medinan"
+      "versesEn": "31 Verses",
+      "versesBn": "৩১ আয়াত"
     },
     {
       "id": 77,
-      "name": "Al-Mursalaat",
+      "nameEn": "Al-Mursalaat",
       "nameAr": "سُورَةُ المُرۡسَلَاتِ",
+      "nameBn": "আল-মুরসালাত",
+      "typeEn": "Meccan",
+      "typeBn": "মাক্কী",
       "verses": 50,
-      "type": "Meccan"
+      "versesEn": "50 Verses",
+      "versesBn": "৫০ আয়াত"
     },
     {
       "id": 78,
-      "name": "An-Naba",
+      "nameEn": "An-Naba",
       "nameAr": "سُورَةُ النَّبَإِ",
+      "nameBn": "আন-নাবা",
+      "typeEn": "Meccan",
+      "typeBn": "মাক্কী",
       "verses": 40,
-      "type": "Meccan"
+      "versesEn": "40 Verses",
+      "versesBn": "৪০ আয়াত"
     },
     {
       "id": 79,
-      "name": "An-Naazi'aat",
+      "nameEn": "An-Naazi'aat",
       "nameAr": "سُورَةُ النَّازِعَاتِ",
+      "nameBn": "আন-নাযিয়াত",
+      "typeEn": "Meccan",
+      "typeBn": "মাক্কী",
       "verses": 46,
-      "type": "Meccan"
+      "versesEn": "46 Verses",
+      "versesBn": "৪৬ আয়াত"
     },
     {
       "id": 80,
-      "name": "Abasa",
+      "nameEn": "Abasa",
       "nameAr": "سُورَةُ عَبَسَ",
+      "nameBn": "আবাসা",
+      "typeEn": "Meccan",
+      "typeBn": "মাক্কী",
       "verses": 42,
-      "type": "Meccan"
+      "versesEn": "42 Verses",
+      "versesBn": "৪২ আয়াত"
     },
     {
       "id": 81,
-      "name": "At-Takwir",
+      "nameEn": "At-Takwir",
       "nameAr": "سُورَةُ التَّكۡوِيرِ",
+      "nameBn": "আত-তাকভীর",
+      "typeEn": "Meccan",
+      "typeBn": "মাক্কী",
       "verses": 29,
-      "type": "Meccan"
+      "versesEn": "29 Verses",
+      "versesBn": "২৯ আয়াত"
     },
     {
       "id": 82,
-      "name": "Al-Infitaar",
+      "nameEn": "Al-Infitaar",
       "nameAr": "سُورَةُ الانفِطَارِ",
+      "nameBn": "আল-ইনফিতার",
+      "typeEn": "Meccan",
+      "typeBn": "মাক্কী",
       "verses": 19,
-      "type": "Meccan"
+      "versesEn": "19 Verses",
+      "versesBn": "১৯ আয়াত"
     },
     {
       "id": 83,
-      "name": "Al-Mutaffifin",
+      "nameEn": "Al-Mutaffifin",
       "nameAr": "سُورَةُ المُطَفِّفِينَ",
+      "nameBn": "আল-মুতাফফিফীন",
+      "typeEn": "Meccan",
+      "typeBn": "মাক্কী",
       "verses": 36,
-      "type": "Meccan"
+      "versesEn": "36 Verses",
+      "versesBn": "৩৬ আয়াত"
     },
     {
       "id": 84,
-      "name": "Al-Inshiqaaq",
+      "nameEn": "Al-Inshiqaaq",
       "nameAr": "سُورَةُ الانشِقَاقِ",
+      "nameBn": "আল-ইনশিকাক",
+      "typeEn": "Meccan",
+      "typeBn": "মাক্কী",
       "verses": 25,
-      "type": "Meccan"
+      "versesEn": "25 Verses",
+      "versesBn": "২৫ আয়াত"
     },
     {
       "id": 85,
-      "name": "Al-Burooj",
+      "nameEn": "Al-Burooj",
       "nameAr": "سُورَةُ البُرُوجِ",
+      "nameBn": "আল-বুরূজ",
+      "typeEn": "Meccan",
+      "typeBn": "মাক্কী",
       "verses": 22,
-      "type": "Meccan"
+      "versesEn": "22 Verses",
+      "versesBn": "২২ আয়াত"
     },
     {
       "id": 86,
-      "name": "At-Taariq",
+      "nameEn": "At-Taariq",
       "nameAr": "سُورَةُ الطَّارِقِ",
+      "nameBn": "আত-তারিক",
+      "typeEn": "Meccan",
+      "typeBn": "মাক্কী",
       "verses": 17,
-      "type": "Meccan"
+      "versesEn": "17 Verses",
+      "versesBn": "১৭ আয়াত"
     },
     {
       "id": 87,
-      "name": "Al-A'laa",
+      "nameEn": "Al-A'laa",
       "nameAr": "سُورَةُ الأَعۡلَىٰ",
+      "nameBn": "আল-আলা",
+      "typeEn": "Meccan",
+      "typeBn": "মাক্কী",
       "verses": 19,
-      "type": "Meccan"
+      "versesEn": "19 Verses",
+      "versesBn": "১৯ আয়াত"
     },
     {
       "id": 88,
-      "name": "Al-Ghaashiya",
+      "nameEn": "Al-Ghaashiya",
       "nameAr": "سُورَةُ الغَاشِيَةِ",
+      "nameBn": "আল-গাশিয়াহ",
+      "typeEn": "Meccan",
+      "typeBn": "মাক্কী",
       "verses": 26,
-      "type": "Meccan"
+      "versesEn": "26 Verses",
+      "versesBn": "২৬ আয়াত"
     },
     {
       "id": 89,
-      "name": "Al-Fajr",
+      "nameEn": "Al-Fajr",
       "nameAr": "سُورَةُ الفَجۡرِ",
+      "nameBn": "আল-ফজর",
+      "typeEn": "Meccan",
+      "typeBn": "মাক্কী",
       "verses": 30,
-      "type": "Meccan"
+      "versesEn": "30 Verses",
+      "versesBn": "৩০ আয়াত"
     },
     {
       "id": 90,
-      "name": "Al-Balad",
+      "nameEn": "Al-Balad",
       "nameAr": "سُورَةُ البَلَدِ",
+      "nameBn": "আল-বালাদ",
+      "typeEn": "Meccan",
+      "typeBn": "মাক্কী",
       "verses": 20,
-      "type": "Meccan"
+      "versesEn": "20 Verses",
+      "versesBn": "২০ আয়াত"
     },
     {
       "id": 91,
-      "name": "Ash-Shams",
+      "nameEn": "Ash-Shams",
       "nameAr": "سُورَةُ الشَّمۡسِ",
+      "nameBn": "আশ-শামস",
+      "typeEn": "Meccan",
+      "typeBn": "মাক্কী",
       "verses": 15,
-      "type": "Meccan"
+      "versesEn": "15 Verses",
+      "versesBn": "১৫ আয়াত"
     },
     {
       "id": 92,
-      "name": "Al-Lail",
+      "nameEn": "Al-Lail",
       "nameAr": "سُورَةُ اللَّيۡلِ",
+      "nameBn": "আল-লাইল",
+      "typeEn": "Meccan",
+      "typeBn": "মাক্কী",
       "verses": 21,
-      "type": "Meccan"
+      "versesEn": "21 Verses",
+      "versesBn": "২১ আয়াত"
     },
     {
       "id": 93,
-      "name": "Ad-Dhuhaa",
+      "nameEn": "Ad-Dhuhaa",
       "nameAr": "سُورَةُ الضُّحَىٰ",
+      "nameBn": "আদ-দুহা",
+      "typeEn": "Meccan",
+      "typeBn": "মাক্কী",
       "verses": 11,
-      "type": "Meccan"
+      "versesEn": "11 Verses",
+      "versesBn": "১১ আয়াত"
     },
     {
       "id": 94,
-      "name": "Ash-Sharh",
+      "nameEn": "Ash-Sharh",
       "nameAr": "سُورَةُ الشَّرۡحِ",
+      "nameBn": "আশ-শারহ",
+      "typeEn": "Meccan",
+      "typeBn": "মাক্কী",
       "verses": 8,
-      "type": "Meccan"
+      "versesEn": "8 Verses",
+      "versesBn": "৮ আয়াত"
     },
     {
       "id": 95,
-      "name": "At-Tin",
+      "nameEn": "At-Tin",
       "nameAr": "سُورَةُ التِّينِ",
+      "nameBn": "আত-তীন",
+      "typeEn": "Meccan",
+      "typeBn": "মাক্কী",
       "verses": 8,
-      "type": "Meccan"
+      "versesEn": "8 Verses",
+      "versesBn": "৮ আয়াত"
     },
     {
       "id": 96,
-      "name": "Al-Alaq",
+      "nameEn": "Al-Alaq",
       "nameAr": "سُورَةُ العَلَقِ",
+      "nameBn": "আল-আলাক",
+      "typeEn": "Meccan",
+      "typeBn": "মাক্কী",
       "verses": 19,
-      "type": "Meccan"
+      "versesEn": "19 Verses",
+      "versesBn": "১৯ আয়াত"
     },
     {
       "id": 97,
-      "name": "Al-Qadr",
+      "nameEn": "Al-Qadr",
       "nameAr": "سُورَةُ القَدۡرِ",
+      "nameBn": "আল-কদর",
+      "typeEn": "Meccan",
+      "typeBn": "মাক্কী",
       "verses": 5,
-      "type": "Meccan"
+      "versesEn": "5 Verses",
+      "versesBn": "৫ আয়াত"
     },
     {
       "id": 98,
-      "name": "Al-Bayyina",
+      "nameEn": "Al-Bayyina",
       "nameAr": "سُورَةُ البَيِّنَةِ",
+      "nameBn": "আল-বাইয়্যিনাহ",
+      "typeEn": "Medinan",
+      "typeBn": "মাদানী",
       "verses": 8,
-      "type": "Medinan"
+      "versesEn": "8 Verses",
+      "versesBn": "৮ আয়াত"
     },
     {
       "id": 99,
-      "name": "Az-Zalzala",
+      "nameEn": "Az-Zalzala",
       "nameAr": "سُورَةُ الزَّلۡزَلَةِ",
+      "nameBn": "আয-যালযালাহ",
+      "typeEn": "Medinan",
+      "typeBn": "মাদানী",
       "verses": 8,
-      "type": "Medinan"
+      "versesEn": "8 Verses",
+      "versesBn": "৮ আয়াত"
     },
     {
       "id": 100,
-      "name": "Al-Aadiyaat",
+      "nameEn": "Al-Aadiyaat",
       "nameAr": "سُورَةُ العَادِيَاتِ",
+      "nameBn": "আল-আদিয়াত",
+      "typeEn": "Meccan",
+      "typeBn": "মাক্কী",
       "verses": 11,
-      "type": "Meccan"
+      "versesEn": "11 Verses",
+      "versesBn": "১১ আয়াত"
     },
     {
       "id": 101,
-      "name": "Al-Qaari'a",
+      "nameEn": "Al-Qaari'a",
       "nameAr": "سُورَةُ القَارِعَةِ",
+      "nameBn": "আল-ক্বারিয়াহ",
+      "typeEn": "Meccan",
+      "typeBn": "মাক্কী",
       "verses": 11,
-      "type": "Meccan"
+      "versesEn": "11 Verses",
+      "versesBn": "১১ আয়াত"
     },
     {
       "id": 102,
-      "name": "At-Takaathur",
+      "nameEn": "At-Takaathur",
       "nameAr": "سُورَةُ التَّكَاثُرِ",
+      "nameBn": "আত-তাকাসুর",
+      "typeEn": "Meccan",
+      "typeBn": "মাক্কী",
       "verses": 8,
-      "type": "Meccan"
+      "versesEn": "8 Verses",
+      "versesBn": "৮ আয়াত"
     },
     {
       "id": 103,
-      "name": "Al-Asr",
+      "nameEn": "Al-Asr",
       "nameAr": "سُورَةُ العَصۡرِ",
+      "nameBn": "আল-আসর",
+      "typeEn": "Meccan",
+      "typeBn": "মাক্কী",
       "verses": 3,
-      "type": "Meccan"
+      "versesEn": "3 Verses",
+      "versesBn": "৩ আয়াত"
     },
     {
       "id": 104,
-      "name": "Al-Humaza",
+      "nameEn": "Al-Humaza",
       "nameAr": "سُورَةُ الهُمَزَةِ",
+      "nameBn": "আল-হুমাযাহ",
+      "typeEn": "Meccan",
+      "typeBn": "মাক্কী",
       "verses": 9,
-      "type": "Meccan"
+      "versesEn": "9 Verses",
+      "versesBn": "৯ আয়াত"
     },
     {
       "id": 105,
-      "name": "Al-Fil",
+      "nameEn": "Al-Fil",
       "nameAr": "سُورَةُ الفِيلِ",
+      "nameBn": "আল-ফীল",
+      "typeEn": "Meccan",
+      "typeBn": "মাক্কী",
       "verses": 5,
-      "type": "Meccan"
+      "versesEn": "5 Verses",
+      "versesBn": "৫ আয়াত"
     },
     {
       "id": 106,
-      "name": "Quraish",
+      "nameEn": "Quraish",
       "nameAr": "سُورَةُ قُرَيۡشٍ",
+      "nameBn": "কুরাইশ",
+      "typeEn": "Meccan",
+      "typeBn": "মাক্কী",
       "verses": 4,
-      "type": "Meccan"
+      "versesEn": "4 Verses",
+      "versesBn": "৪ আয়াত"
     },
     {
       "id": 107,
-      "name": "Al-Maa'un",
+      "nameEn": "Al-Maa'un",
       "nameAr": "سُورَةُ المَاعُونِ",
+      "nameBn": "আল-মাউন",
+      "typeEn": "Meccan",
+      "typeBn": "মাক্কী",
       "verses": 7,
-      "type": "Meccan"
+      "versesEn": "7 Verses",
+      "versesBn": "৭ আয়াত"
     },
     {
       "id": 108,
-      "name": "Al-Kawthar",
+      "nameEn": "Al-Kawthar",
       "nameAr": "سُورَةُ الكَوۡثَرِ",
+      "nameBn": "আল-কাউসার",
+      "typeEn": "Meccan",
+      "typeBn": "মাক্কী",
       "verses": 3,
-      "type": "Meccan"
+      "versesEn": "3 Verses",
+      "versesBn": "৩ আয়াত"
     },
     {
       "id": 109,
-      "name": "Al-Kaafiroon",
+      "nameEn": "Al-Kaafiroon",
       "nameAr": "سُورَةُ الكَافِرُونَ",
+      "nameBn": "আল-কাফিরুন",
+      "typeEn": "Meccan",
+      "typeBn": "মাক্কী",
       "verses": 6,
-      "type": "Meccan"
+      "versesEn": "6 Verses",
+      "versesBn": "৬ আয়াত"
     },
     {
       "id": 110,
-      "name": "An-Nasr",
+      "nameEn": "An-Nasr",
       "nameAr": "سُورَةُ النَّصۡرِ",
+      "nameBn": "আন-নাসর",
+      "typeEn": "Medinan",
+      "typeBn": "মাদানী",
       "verses": 3,
-      "type": "Medinan"
+      "versesEn": "3 Verses",
+      "versesBn": "৩ আয়াত"
     },
     {
       "id": 111,
-      "name": "Al-Masad",
+      "nameEn": "Al-Masad",
       "nameAr": "سُورَةُ المَسَدِ",
+      "nameBn": "আল-মাসাদ",
+      "typeEn": "Meccan",
+      "typeBn": "মাক্কী",
       "verses": 5,
-      "type": "Meccan"
+      "versesEn": "5 Verses",
+      "versesBn": "৫ আয়াত"
     },
     {
       "id": 112,
-      "name": "Al-Ikhlaas",
+      "nameEn": "Al-Ikhlaas",
       "nameAr": "سُورَةُ الإِخۡلَاصِ",
+      "nameBn": "আল-ইখলাস",
+      "typeEn": "Meccan",
+      "typeBn": "মাক্কী",
       "verses": 4,
-      "type": "Meccan"
+      "versesEn": "4 Verses",
+      "versesBn": "৪ আয়াত"
     },
     {
       "id": 113,
-      "name": "Al-Falaq",
+      "nameEn": "Al-Falaq",
       "nameAr": "سُورَةُ الفَلَقِ",
+      "nameBn": "আল-ফালাক",
+      "typeEn": "Meccan",
+      "typeBn": "মাক্কী",
       "verses": 5,
-      "type": "Meccan"
+      "versesEn": "5 Verses",
+      "versesBn": "৫ আয়াত"
     },
     {
       "id": 114,
-      "name": "An-Naas",
+      "nameEn": "An-Naas",
       "nameAr": "سُورَةُ النَّاسِ",
+      "nameBn": "আন-নাস",
+      "typeEn": "Meccan",
+      "typeBn": "মাক্কী",
       "verses": 6,
-      "type": "Meccan"
+      "versesEn": "6 Verses",
+      "versesBn": "৬ আয়াত"
     }
   ]
 }

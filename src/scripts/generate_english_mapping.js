@@ -29,7 +29,16 @@ async function run() {
   const rawEnglishPath = path.join(__dirname, '../data/raw_english.json');
   let englishSource = {};
   if (fs.existsSync(rawEnglishPath)) {
-    englishSource = JSON.parse(fs.readFileSync(rawEnglishPath, 'utf8'));
+    let rawData = fs.readFileSync(rawEnglishPath, 'utf8');
+    if (rawData.charCodeAt(0) === 0xFEFF) {
+      rawData = rawData.slice(1);
+    }
+    const raw = JSON.parse(rawData);
+    if (raw.English) {
+      for (const chapter of raw.English) {
+        englishSource[chapter.ID] = chapter.TEXT;
+      }
+    }
     console.log("Loaded raw open-source English JSON.");
   } else {
     console.log("No raw_english.json found. Generating structure only.");
@@ -54,11 +63,13 @@ async function run() {
       for (let i = 0; i < duasRes.data.length; i++) {
         const dua = duasRes.data[i];
         
-        // ID-Based Mapping Strategy:
-        // We look up the exact chapter ID and dua index in the raw English JSON
         let englishTrans = '';
-        if (englishSource[dua.chap_id] && englishSource[dua.chap_id][i]) {
-            englishTrans = englishSource[dua.chap_id][i].translation_en || '';
+        const chapterIndex = dua.dua_id ? dua.dua_id - 1 : 0;
+        if (englishSource[dua.chap_id] && englishSource[dua.chap_id][chapterIndex]) {
+            englishTrans = englishSource[dua.chap_id][chapterIndex].TRANSLATED_TEXT || '';
+            
+            // Try to extract transliteration if available (some sources might have it, but for wafaaelmaandy it's usually just TRANSLATED_TEXT)
+            // But we can fallback to TRANSLATED_TEXT
         }
         
         if (englishTrans) {

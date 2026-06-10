@@ -104,9 +104,11 @@ export default function QuranSearchScreen() {
   const filteredSurahs = surahs.filter(s => {
     if (!searchQuery) return false; // Only show results if there's a query
     const q = searchQuery.toLowerCase();
+    const translatedName = t('surahNames.' + s.id, { defaultValue: s.name }).toLowerCase();
     return (
       s.name.toLowerCase().includes(q) || 
       s.nameAr.toLowerCase().includes(q) || 
+      translatedName.includes(q) ||
       String(s.id).includes(q)
     );
   });
@@ -171,8 +173,6 @@ export default function QuranSearchScreen() {
                 ))
               )}
             </View>
-
-          <View style={{ height: Spacing.six + 20 }} />
         </ScrollView>
       </KeyboardAvoidingView>
     </SafeAreaView>

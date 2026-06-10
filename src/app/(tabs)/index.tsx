@@ -1,9 +1,8 @@
 import PageHeader from '@/components/page-header';
 
 import AnimatedProgressBar from '@/components/AnimatedProgressBar';
-import { Fonts, Spacing, useThemeColors, useActiveColor } from '@/constants/theme';
+import { Fonts, Spacing, useThemeColors } from '@/constants/theme';
 import { usePreferencesStore } from '@/store/preferencesStore';
-import { useThemeStore } from '@/store/themeStore';
 import { useQadaStore } from '@/store/qadaStore';
 import { getDistrictName, districtCoords } from '@/utils/districts';
 import { Coordinates, CalculationMethod, PrayerTimes, Madhab } from 'adhan';
@@ -94,9 +93,8 @@ import SpecialTimeCard, { SpecialTime } from '@/components/SpecialTimeCard';
 import ThemeCard from '@/components/ThemeCard';
 
 export default function HomeScreen() {
-  const scheme = useThemeStore((s) => s.theme);
   const colors = useThemeColors();
-  const activeColor = useActiveColor();
+  const activeColor = colors.background === '#0c1618' ? colors.accent : colors.highlight;
   const router = useRouter();
   const { t, i18n } = useTranslation();
 
@@ -416,16 +414,18 @@ export default function HomeScreen() {
     }, [fardPrayers, currentTime]);
 
   const timelineProgress = useMemo(() => {
-    if (fardPrayers.length === 0) return { left: 0, width: 0 };
+    if (fardPrayers.length === 0) return { left: 0, width: 0, currentTimelineIndex: 0 };
     const timelinePrayers = fardPrayers.filter(p => p.id !== 'sunrise');
-    if (timelinePrayers.length < 5) return { left: 0, width: 0 };
+    const sunrisePrayer = fardPrayers.find(p => p.id === 'sunrise');
+    if (timelinePrayers.length < 5) return { left: 0, width: 0, currentTimelineIndex: 0 };
     
     const now = currentTime.getTime();
     const fajrTime = timelinePrayers[0].date.getTime();
     const ishaTime = timelinePrayers[4].date.getTime();
     
-    if (now <= fajrTime) return { left: 0, width: 0 };
-    if (now >= ishaTime) return { left: 100, width: 0 };
+    if (now < fajrTime || now >= ishaTime) {
+      return { left: 100, width: 0, currentTimelineIndex: 4 }; // Isha
+    }
     
     let currentIdx = -1;
     for (let i = 0; i < timelinePrayers.length - 1; i++) {
@@ -438,8 +438,21 @@ export default function HomeScreen() {
     if (currentIdx === -1) return { left: 100, width: 0, currentTimelineIndex: 4 };
     
     const segmentStart = timelinePrayers[currentIdx].date.getTime();
-    const segmentEnd = timelinePrayers[currentIdx+1].date.getTime();
-    const segmentProgress = (now - segmentStart) / (segmentEnd - segmentStart);
+    let segmentEnd = timelinePrayers[currentIdx+1].date.getTime();
+
+    // Special rule for Fajr -> Dhuhr: progress line reaches Dhuhr exactly at Sunrise
+    if (currentIdx === 0 && sunrisePrayer) {
+       segmentEnd = sunrisePrayer.date.getTime();
+    }
+
+    let segmentProgress = 0;
+    if (now >= segmentEnd) {
+       segmentProgress = 1;
+    } else {
+       segmentProgress = (now - segmentStart) / (segmentEnd - segmentStart);
+    }
+    
+    segmentProgress = Math.max(0, segmentProgress);
     
     return {
       left: currentIdx * 25,
@@ -647,7 +660,7 @@ export default function HomeScreen() {
         {/* ── Current Prayer Card ────────────────────── */}
         <TouchableOpacity activeOpacity={1}
             onPress={() => prayersWithStatus.length > 0 ? togglePrayerTask(currentPrayer.id) : undefined}
-            style={{ marginBottom: Spacing.four }}
+            style={styles.section}
           >
             <ThemeCard intensity={30} style={[styles.heroCard, { borderColor: colors.border, paddingVertical: 20, paddingHorizontal: 24, overflow: 'hidden', marginBottom: 0 }]}
             >
@@ -687,7 +700,7 @@ export default function HomeScreen() {
                       style={[
                         styles.heroCountdown, 
                         { 
-                          color: (isMakruh && !isCurrentPrayerDone) ? colors.error : (scheme === 'dark' ? colors.accent : colors.highlight),
+                          color: (isMakruh && !isCurrentPrayerDone) ? colors.error : (activeColor),
                           fontSize: 36,
                           width: char === ':' || char === ' ' ? 14 : 22,
                           textAlign: 'center',
@@ -739,13 +752,13 @@ export default function HomeScreen() {
         {/* ── Quick Actions (2x2 Grid) ──────────────── */}
         <View style={styles.section}>
           <Text style={[styles.sectionTitle, { color: colors.textSecondary }]}>{t('home.quickActions')}</Text>
-          <View style={{ flexDirection: 'row', flexWrap: 'wrap', justifyContent: 'space-between' }}>
+          <View style={{ flexDirection: 'row', flexWrap: 'wrap', justifyContent: 'space-between', rowGap: 12 }}>
             <ThemeCard intensity={40} style={[styles.actionItemCard, { borderColor: colors.border }]}>
               <AnimatedCard
                 style={styles.actionItemBlur} 
                 onPress={() => router.push('/qibla')}
               >
-                <Compass size={16} color={scheme === 'dark' ? colors.accent : colors.highlight} />
+                <Compass size={16} color={activeColor} />
                 <Text style={[styles.actionText, { color: colors.text }]}>{t('home.qibla')}</Text>
               </AnimatedCard>
             </ThemeCard>
@@ -755,7 +768,7 @@ export default function HomeScreen() {
                 style={styles.actionItemBlur} 
                 onPress={() => router.push('/names')}
               >
-                <Book size={16} color={scheme === 'dark' ? colors.accent : colors.highlight} />
+                <Book size={16} color={activeColor} />
                 <Text style={[styles.actionText, { color: colors.text }]}>{t('home.names')}</Text>
               </AnimatedCard>
             </ThemeCard>
@@ -765,7 +778,7 @@ export default function HomeScreen() {
                 style={styles.actionItemBlur} 
                 onPress={() => router.push('/quran-learn' as any)}
               >
-                <GraduationCap size={16} color={scheme === 'dark' ? colors.accent : colors.highlight} />
+                <GraduationCap size={16} color={activeColor} />
                 <Text style={[styles.actionText, { color: colors.text }]}>{t('home.learnQuran')}</Text>
               </TouchableOpacity>
             </ThemeCard> */}
@@ -775,7 +788,7 @@ export default function HomeScreen() {
                 style={styles.actionItemBlur} 
                 onPress={() => router.push('/calendar' as any)}
               >
-                <CalendarDays size={16} color={scheme === 'dark' ? colors.accent : colors.highlight} />
+                <CalendarDays size={16} color={activeColor} />
                 <Text style={[styles.actionText, { color: colors.text }]}>{t('calendar.titleEn', { defaultValue: 'Islamic Calendar' })}</Text>
               </AnimatedCard>
             </ThemeCard>
@@ -785,7 +798,7 @@ export default function HomeScreen() {
                 style={styles.actionItemBlur} 
                 onPress={() => router.push('/trivia' as any)}
               >
-                <Brain size={16} color={scheme === 'dark' ? colors.accent : colors.highlight} />
+                <Brain size={16} color={activeColor} />
                 <Text style={[styles.actionText, { color: colors.text }]}>{t('home.trivia', { defaultValue: 'Islamic Trivia' })}</Text>
               </TouchableOpacity>
             </ThemeCard> */}
@@ -802,7 +815,7 @@ export default function HomeScreen() {
                   </>
                 ) : (
                   <>
-                    <History size={16} color={scheme === 'dark' ? colors.accent : colors.highlight} />
+                    <History size={16} color={activeColor} />
                     <Text style={[styles.actionText, { color: colors.text }]}>{t('tracker.qadaTitle', { defaultValue: 'Qada Tracker' })}</Text>
                   </>
                 )}
@@ -822,11 +835,11 @@ export default function HomeScreen() {
               <View style={{ position: 'relative', width: '100%', alignItems: 'center' }}>
                 {/* Row 1: Names */}
                 <View style={{ flexDirection: 'row', width: '100%', justifyContent: 'space-between', marginBottom: 6 }}>
-                  {prayersWithStatus.filter(p => p.id !== 'sunrise').map((prayer) => {
-                    const isCurrent = prayer.status === 'current';
+                  {prayersWithStatus.filter(p => p.id !== 'sunrise').map((prayer, index) => {
+                    const isCurrent = index === timelineProgress.currentTimelineIndex;
                     return (
                       <View key={`name-${prayer.id}`} style={{ width: '20%', alignItems: 'center' }}>
-                        <Text style={[styles.timelineName, { marginBottom: 0, color: isCurrent ? activeColor : colors.text, opacity: isCurrent ? 1 : 0.5 }]}>
+                        <Text style={[styles.timelineName, { marginBottom: 0, color: isCurrent ? '#FFFFFF' : colors.text, opacity: isCurrent ? 1 : 0.5 }]}>
                           {prayer.name}
                         </Text>
                       </View>
@@ -838,13 +851,13 @@ export default function HomeScreen() {
                 <View style={{ position: 'relative', flexDirection: 'row', width: '100%', justifyContent: 'space-between', alignItems: 'center', marginBottom: 6, zIndex: 2 }}>
                   <View style={{ position: 'absolute', left: '10%', right: '10%', height: 2, backgroundColor: colors.textSecondary + '30', borderRadius: 1, zIndex: 0 }} />
                   <View style={{ position: 'absolute', left: '10%', right: '10%', height: 2, borderRadius: 1, zIndex: 1 }}>
-                    <Animated.View style={{ position: 'absolute', left: `${timelineProgress.left}%`, height: '100%', backgroundColor: scheme === 'dark' ? colors.accent : colors.highlight, borderRadius: 1, width: `${timelineProgress.width}%` }} />
+                    <Animated.View style={{ position: 'absolute', left: `${timelineProgress.left}%`, height: '100%', backgroundColor: activeColor, borderRadius: 1, width: `${timelineProgress.width}%` }} />
                   </View>
                   {prayersWithStatus.filter(p => p.id !== 'sunrise').map((prayer, index) => {
                     const isCurrent = index === timelineProgress.currentTimelineIndex;
                     let dotStyle: any = { backgroundColor: colors.textSecondary + '50' };
                     if (isCurrent) {
-                      dotStyle = { backgroundColor: scheme === 'dark' ? colors.accent : colors.highlight };
+                      dotStyle = { backgroundColor: activeColor };
                     }
                     return (
                       <View key={`dot-${prayer.id}`} style={{ width: '20%', alignItems: 'center', zIndex: 2, elevation: 2 }}>
@@ -857,11 +870,11 @@ export default function HomeScreen() {
 
                 {/* Row 3: Times */}
                 <View style={{ flexDirection: 'row', width: '100%', justifyContent: 'space-between' }}>
-                  {prayersWithStatus.filter(p => p.id !== 'sunrise').map((prayer) => {
-                    const isCurrent = prayer.status === 'current';
+                  {prayersWithStatus.filter(p => p.id !== 'sunrise').map((prayer, index) => {
+                    const isCurrent = index === timelineProgress.currentTimelineIndex;
                     return (
                       <View key={`time-${prayer.id}`} style={{ width: '20%', alignItems: 'center' }}>
-                        <Text style={[styles.timelineTime, { color: isCurrent ? activeColor : colors.text, opacity: 1 }]}>
+                        <Text style={[styles.timelineTime, { color: isCurrent ? '#FFFFFF' : colors.text, opacity: isCurrent ? 1 : 0.5 }]}>
                           {formatNumber(prayer.time.replace(/ AM| PM/g, ''), i18n.language)}
                         </Text>
                       </View>
@@ -952,7 +965,7 @@ export default function HomeScreen() {
         )}
 
         {/* ── Hadith of the Day ─────────────────────────────────── */}
-        <View style={{ marginTop: Spacing.four }}>
+        <View style={{ marginTop: Spacing.three }}>
           <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: Spacing.two }}>
             <Text style={[styles.sectionTitle, { color: colors.textSecondary, marginBottom: 0 }]}>
               {t('home.hadithOfTheDay', { defaultValue: 'Hadith of the Day' })}
@@ -1071,7 +1084,7 @@ const styles = StyleSheet.create({
 
   // Section
   section: {
-    marginBottom: Spacing.four,
+    marginBottom: Spacing.three,
   },
   sectionTitle: {
     fontFamily: Fonts.outfit,
@@ -1229,7 +1242,6 @@ const styles = StyleSheet.create({
   // Quick actions (2x2 Grid Layout)
   actionItemCard: {
     width: '48%',
-    marginBottom: 12,
     borderRadius: 16,
     borderWidth: 1,
     overflow: 'hidden',

@@ -5,11 +5,12 @@ import { usePreferencesStore } from '@/store/preferencesStore';
 import { useThemeStore } from '@/store/themeStore';
 import { ChevronLeft, ChevronRight } from 'lucide-react-native';
 import { useTranslation } from 'react-i18next';
-import { StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import { StyleSheet, Text, TouchableOpacity, View, ScrollView, useWindowDimensions } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { formatNumber } from '@/utils/formatNumber';
 import OptionsModal from '@/components/OptionsModal';
 import ThemeCard from '@/components/ThemeCard';
+import SpecialTimeCard from '@/components/SpecialTimeCard';
 import { getBanglaDate } from '@/utils/banglaCalendar';
 import { generateLocalCalendar } from '@/utils/localCalendar';
 import { Switch } from 'react-native';
@@ -22,6 +23,8 @@ export default function CalendarScreen() {
   const themeStyles = useThemeStyles();
   const activeColor = useActiveColor();
   const prefs = usePreferencesStore();
+  const { width: screenWidth } = useWindowDimensions();
+  const cellWidth = Math.floor((screenWidth - Spacing.four * 2 - 6) / 7);
 
   const [currentDate, setCurrentDate] = useState(new Date());
   const [calendarData, setCalendarData] = useState<any[]>(() => {
@@ -81,22 +84,18 @@ export default function CalendarScreen() {
     const firstDayDate = new Date(parseInt(parts[2]), parseInt(parts[1]) - 1, parseInt(parts[0]));
     const startDayOfWeek = firstDayDate.getDay(); // 0 is Sunday
 
-    const days = ['sun', 'mon', 'tue', 'wed', 'thu', 'fri', 'sat'];
-
     const cells = [];
     
     // Header row
-    const headerCells = days.map((day, idx) => (
-      <View key={`header-${idx}`} style={styles.gridCellHeader}>
-        <Text style={[styles.gridCellHeaderText, { color: colors.textSecondary }]}>
-          {t(`calendar.${day}`)}
-        </Text>
+    const headerCells = ['sun', 'mon', 'tue', 'wed', 'thu', 'fri', 'sat'].map((day) => (
+      <View key={`header-${day}`} style={[styles.gridCellHeader, { width: cellWidth }]}>
+        <Text style={[styles.gridCellHeaderText, { color: colors.textSecondary }]}>{t(`calendar.${day}`)}</Text>
       </View>
     ));
 
     // Empty cells
     for (let i = 0; i < startDayOfWeek; i++) {
-      cells.push(<View key={`empty-${i}`} style={styles.gridCell} />);
+      cells.push(<View key={`empty-${i}`} style={[styles.gridCell, { width: cellWidth }]} />);
     }
 
     const getAdjustedHijriDate = (idx: number, offset: number) => {
@@ -130,6 +129,7 @@ export default function CalendarScreen() {
           style={[
             styles.gridCell,
             { 
+              width: cellWidth,
               backgroundColor: isSelected ? colors.backgroundSelected : 'transparent',
               borderColor: isSelected ? activeColor : (isToday ? colors.accent : 'transparent'),
               borderWidth: isSelected ? 1 : (isToday ? 1 : 0),
@@ -171,7 +171,7 @@ export default function CalendarScreen() {
         <View style={[styles.daysBar, { backgroundColor: colors.backgroundElement, borderColor: colors.border }]}>
           {headerCells}
         </View>
-        <View style={{ flexDirection: 'row', flexWrap: 'wrap' }}>
+        <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 1, justifyContent: 'flex-start' }}>
           {cells}
         </View>
       </View>
@@ -202,14 +202,7 @@ export default function CalendarScreen() {
     return t(key);
   };
 
-  const formatGregorianDate = (dateStr: string) => {
-    if (!dateStr) return '';
-    const parts = dateStr.split('-');
-    if (parts.length !== 3) return formatNumber(dateStr, i18n.language);
-    const [d, m, y] = parts;
-    const date = new Date(parseInt(y, 10), parseInt(m, 10) - 1, parseInt(d, 10));
-    return formatNumber(date.toLocaleDateString(i18n.language === 'bn' ? 'bn-BD' : 'en-US', { day: '2-digit', month: 'long', year: 'numeric' }), i18n.language);
-  };
+
 
   // Convert "03:45 (+06)" to "03:45"
   const formatTimeStr = (timeStr: string) => {
@@ -220,6 +213,17 @@ export default function CalendarScreen() {
     date.setHours(h, m, 0, 0);
     const timeEn = date.toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit', hour12: true });
     return formatNumber(timeEn, i18n.language);
+  };
+
+  const getFullDate = (timeStr: string, dateStr: string) => {
+    if (!timeStr || !dateStr) return null;
+    const clean = timeStr.split(' ')[0];
+    const [h, m] = clean.split(':').map(Number);
+    const parts = dateStr.split('-');
+    if (parts.length !== 3) return null;
+    const date = new Date(parseInt(parts[2], 10), parseInt(parts[1], 10) - 1, parseInt(parts[0], 10));
+    date.setHours(h, m, 0, 0);
+    return date;
   };
 
   return (
@@ -262,7 +266,7 @@ export default function CalendarScreen() {
           </TouchableOpacity>
         </View>
 
-          <View style={{ flex: 1 }}>
+        <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={{ flexGrow: 1 }} style={{ flex: 1 }}>
             {/* Grid */}
             {calendarGrid}
 
@@ -289,46 +293,79 @@ export default function CalendarScreen() {
               return (
               <View style={styles.detailsContainer}>
                 {/* Date Card */}
-                <ThemeCard style={[styles.infoCard]}>
-                  <Text style={[styles.detailDateMain, { color: colors.text }]}>
+                <ThemeCard style={[styles.infoCard, { position: 'relative' }]}>
+                  <Text style={[styles.detailDateMain, { color: colors.text, textAlign: 'center' }]}>
                     {formatNumber(adjustedHijri.day, i18n.language)} {getLocalizedHijriMonth(adjustedHijri.month.number)} {formatNumber(adjustedHijri.year, i18n.language)}
                   </Text>
-                  <Text style={[styles.detailDateSub, { color: colors.textSecondary }]}>
-                    {formatGregorianDate(selectedDayData.date.gregorian.date)}
-                    {prefs.showBanglaCalendar ? ` • ${formatNumber(bDate.day.toString(), i18n.language)} ${t(`bangla.${bDate.month}`)}` : ''}
-                  </Text>
+                  {prefs.showBanglaCalendar && (
+                    <Text style={[styles.detailDateSub, { color: colors.textSecondary }]}>
+                      {formatNumber(bDate.day.toString(), i18n.language)} {t(`banglaMonths.${bDate.monthName}`)} {formatNumber(bDate.year.toString(), i18n.language)}
+                    </Text>
+                  )}
+
+                  <TouchableOpacity
+                    activeOpacity={1}
+                    onPress={() => {
+                      const today = new Date();
+                      setCurrentDate(today);
+                      const y = today.getFullYear();
+                      const m = String(today.getMonth() + 1).padStart(2, '0');
+                      const d = String(today.getDate()).padStart(2, '0');
+                      setSelectedDate(`${d}-${m}-${y}`);
+                    }}
+                    style={{
+                      position: 'absolute',
+                      top: 8,
+                      right: 8,
+                      backgroundColor: activeColor + '20',
+                      paddingHorizontal: 8,
+                      paddingVertical: 4,
+                      borderRadius: 8
+                    }}
+                  >
+                    <Text style={{ color: activeColor, fontFamily: Fonts.outfit, fontSize: 10, fontWeight: '600' }}>
+                      {t('calendar.today', { defaultValue: 'Today' })}
+                    </Text>
+                  </TouchableOpacity>
                 </ThemeCard>
 
                 {/* Times Cards */}
                 <View style={styles.timesRow}>
-                  <ThemeCard style={[styles.infoCard, styles.timeBoxHalf, { marginRight: 4, marginLeft: 0 }]}>
-                    <Text style={[styles.timeLabel, { color: colors.textSecondary }]}>{t('calendar.sahriEnd')}</Text>
-                    <Text style={[styles.timeValue, { color: colors.text }]}>
-                      {formatTimeStr(selectedDayData.timings.Imsak)}
-                    </Text>
-                  </ThemeCard>
-                  <ThemeCard style={[styles.infoCard, styles.timeBoxHalf, { marginLeft: 4, marginRight: 0 }]}>
-                    <Text style={[styles.timeLabel, { color: colors.textSecondary }]}>{t('calendar.iftarTime')}</Text>
-                    <Text style={[styles.timeValue, { color: colors.text }]}>
-                      {formatTimeStr(selectedDayData.timings.Sunset)}
-                    </Text>
-                  </ThemeCard>
+                  <SpecialTimeCard
+                    key={`sahri-${selectedDayData.date.gregorian.date}`}
+                    item={{
+                      label: t('calendar.sahriEnd'),
+                      time: formatTimeStr(selectedDayData.timings.Imsak),
+                      date: getFullDate(selectedDayData.timings.Imsak, selectedDayData.date.gregorian.date)
+                    }}
+                    colors={colors}
+                    activeColor={activeColor}
+                    i18nLanguage={i18n.language}
+                    styles={styles}
+                    t={t}
+                    timeColor="#FFF"
+                    disableInteractive={true}
+                  />
+                  <SpecialTimeCard
+                    key={`iftar-${selectedDayData.date.gregorian.date}`}
+                    item={{
+                      label: t('calendar.iftarTime'),
+                      time: formatTimeStr(selectedDayData.timings.Sunset),
+                      date: getFullDate(selectedDayData.timings.Sunset, selectedDayData.date.gregorian.date)
+                    }}
+                    colors={colors}
+                    activeColor={activeColor}
+                    i18nLanguage={i18n.language}
+                    styles={styles}
+                    t={t}
+                    timeColor="#FFF"
+                    disableInteractive={true}
+                  />
                 </View>
 
-                {/* Events Card */}
-                <ThemeCard style={[styles.infoCard, { marginBottom: 0 }]}>
-                  <Text style={[styles.eventsLabel, { color: colors.textSecondary }]}>{t('calendar.events')}</Text>
-                  {adjustedHijri.holidays && adjustedHijri.holidays.length > 0 ? (
-                    adjustedHijri.holidays.map((h: string, i: number) => (
-                      <Text key={i} style={[styles.eventText, { color: colors.accent }]}>{h}</Text>
-                    ))
-                  ) : (
-                    <Text style={[styles.eventText, { color: colors.textSecondary }]}>{t('calendar.noEvents')}</Text>
-                  )}
-                </ThemeCard>
               </View>
             )})()}
-          </View>
+          </ScrollView>
 
       </View>
 
@@ -401,12 +438,13 @@ const styles = StyleSheet.create({
     flex: 1,
     paddingHorizontal: Spacing.four,
     paddingBottom: Spacing.four,
+    paddingTop: Spacing.three,
   },
   monthSelector: {
     flexDirection: 'row',
-    alignItems: 'center',
+    alignItems: 'flex-start',
     justifyContent: 'space-between',
-    marginBottom: Spacing.three,
+    marginBottom: 0,
   },
   monthTitle: {
     fontFamily: Fonts.outfit,
@@ -416,7 +454,8 @@ const styles = StyleSheet.create({
     width: 44,
     height: 44,
     alignItems: 'center',
-    justifyContent: 'center',
+    justifyContent: 'flex-start',
+    paddingTop: 4,
   },
   daysBar: {
     flexDirection: 'row',
@@ -426,7 +465,6 @@ const styles = StyleSheet.create({
     marginBottom: 8,
   },
   gridCellHeader: {
-    width: '14.28%',
     alignItems: 'center',
     justifyContent: 'center',
   },
@@ -436,7 +474,6 @@ const styles = StyleSheet.create({
     textTransform: 'uppercase',
   },
   gridCell: {
-    width: '14.28%',
     aspectRatio: 1,
     alignItems: 'center',
     justifyContent: 'center',
@@ -478,25 +515,18 @@ const styles = StyleSheet.create({
   },
   timesRow: {
     flexDirection: 'row',
-    justifyContent: 'space-between',
+    gap: Spacing.two,
     marginBottom: Spacing.three,
   },
-  timeBoxHalf: {
+  specialCard: {
     flex: 1,
-    marginBottom: 0,
+    borderRadius: 18,
+    borderWidth: 1,
+    overflow: 'hidden',
   },
-  timeLabel: {
-    fontFamily: Fonts.outfit,
-    fontSize: 12,
-    textTransform: 'uppercase',
-    letterSpacing: 1,
-    marginBottom: 4,
-    textAlign: 'center',
-  },
-  timeValue: {
-    fontFamily: Fonts.outfit,
-    fontSize: 24,
-    textAlign: 'center',
+  specialCardInner: {
+    flex: 1,
+    justifyContent: 'space-between',
   },
   eventsLabel: {
     fontFamily: Fonts.outfit,

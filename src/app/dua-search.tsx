@@ -8,6 +8,7 @@ import curatedDuasData from '@/data/curated-duas.json';
 import React, { useEffect, useState, useRef } from 'react';
 import { useTranslation } from 'react-i18next';
 import PageHeader from '@/components/page-header';
+import ThemeCard from '@/components/ThemeCard';
 import { 
 
   ScrollView, 
@@ -64,12 +65,16 @@ export default function DuaSearchScreen() {
             const val = await AsyncStorage.getItem('imansync_dua_bookmarks');
             if (val) {
               const bms = JSON.parse(val);
-              results = bms.filter((dua: any) => {
+              const resultsFiltered = bms.filter((dua: any) => {
                 const titleEn = (dua.translationEn || '').toLowerCase();
                 const titleBn = (dua.translationBn || '').toLowerCase();
                 const arabic = (dua.arabic || '').toLowerCase();
-                return titleEn.includes(q) || titleBn.includes(q) || arabic.includes(q);
+                const latin = (dua.latin || '').toLowerCase();
+                const transliterationBn = (dua.transliterationBn || '').toLowerCase();
+                const name = (dua.name || '').toLowerCase();
+                return titleEn.includes(q) || titleBn.includes(q) || arabic.includes(q) || latin.includes(q) || transliterationBn.includes(q) || name.includes(q);
               });
+              results = resultsFiltered;
             }
           } else if (categoryId === 'my_duas') {
             const allDuas = await loadMyDuas();
@@ -90,7 +95,9 @@ export default function DuaSearchScreen() {
               (dua.name || '').toLowerCase().includes(q) ||
               (dua.translationEn || '').toLowerCase().includes(q) ||
               (dua.translationBn || '').toLowerCase().includes(q) ||
-              (dua.arabic || '').toLowerCase().includes(q)
+              (dua.arabic || '').toLowerCase().includes(q) ||
+              (dua.latin || '').toLowerCase().includes(q) ||
+              (dua.transliterationBn || '').toLowerCase().includes(q)
             );
           } else if (isCustom === 'true' && categoryId?.startsWith('curated_cat_')) {
             const catKey = categoryId.replace('curated_cat_', '');
@@ -111,7 +118,9 @@ export default function DuaSearchScreen() {
               (dua.name || '').toLowerCase().includes(q) ||
               (dua.translationEn || '').toLowerCase().includes(q) ||
               (dua.translationBn || '').toLowerCase().includes(q) ||
-              (dua.arabic || '').toLowerCase().includes(q)
+              (dua.arabic || '').toLowerCase().includes(q) ||
+              (dua.latin || '').toLowerCase().includes(q) ||
+              (dua.transliterationBn || '').toLowerCase().includes(q)
             );
           } else if (isCustom === 'true') {
             const allDuas = await loadMyDuas();
@@ -132,7 +141,9 @@ export default function DuaSearchScreen() {
               (dua.name || '').toLowerCase().includes(q) ||
               (dua.translationEn || '').toLowerCase().includes(q) ||
               (dua.translationBn || '').toLowerCase().includes(q) ||
-              (dua.arabic || '').toLowerCase().includes(q)
+              (dua.arabic || '').toLowerCase().includes(q) ||
+              (dua.latin || '').toLowerCase().includes(q) ||
+              (dua.transliterationBn || '').toLowerCase().includes(q)
             );
           } else if (categoryId) {
             const apiDuas = await DuaService.getDuasByCategory(Number(categoryId));
@@ -140,7 +151,9 @@ export default function DuaSearchScreen() {
               (dua.name || '').toLowerCase().includes(q) ||
               (dua.translationEn || '').toLowerCase().includes(q) ||
               (dua.translationBn || '').toLowerCase().includes(q) ||
-              (dua.arabic || '').toLowerCase().includes(q)
+              (dua.arabic || '').toLowerCase().includes(q) ||
+              (dua.latin || '').toLowerCase().includes(q) ||
+              (dua.transliterationBn || '').toLowerCase().includes(q)
             );
           } else {
             const apiResults = await DuaService.searchHybrid(searchQuery);
@@ -173,7 +186,9 @@ export default function DuaSearchScreen() {
               (dua.name || '').toLowerCase().includes(q) ||
               (dua.translationEn || '').toLowerCase().includes(q) ||
               (dua.translationBn || '').toLowerCase().includes(q) ||
-              (dua.arabic || '').toLowerCase().includes(q)
+              (dua.arabic || '').toLowerCase().includes(q) ||
+              (dua.latin || '').toLowerCase().includes(q) ||
+              (dua.transliterationBn || '').toLowerCase().includes(q)
             );
             
             results = [...localFiltered, ...apiResults];
@@ -214,10 +229,10 @@ export default function DuaSearchScreen() {
               ref={inputRef}
               style={[styles.searchInput, { color: colors.text }]}
               placeholder={
-                categoryId === 'my_duas' ? t('duaSettings.searchMyDuas', { defaultValue: 'Search My Duas' }) :
-                categoryId === 'bookmarks' ? t('duaSettings.searchBookmarks', { defaultValue: 'Search Bookmarks' }) :
-                categoryName ? t('duaSettings.searchCategory', { defaultValue: `Search in ${categoryName}` }) :
-                t('duaSettings.searchPlaceholder', { defaultValue: 'Search Duas' })
+                categoryId === 'my_duas' ? t('duaSettings.searchMyDuas', { defaultValue: 'Search My Duas...' }) :
+                categoryId === 'bookmarks' ? t('duaSettings.searchBookmarks', { defaultValue: 'Search Bookmarks...' }) :
+                categoryName ? t('duaSettings.searchInCategory', { defaultValue: `Search in ${categoryName}...`, categoryName }) :
+                t('duaSettings.searchAllDuas', { defaultValue: 'Search all duas...' })
               }
               placeholderTextColor={colors.textSecondary}
               value={searchQuery}
@@ -243,7 +258,7 @@ export default function DuaSearchScreen() {
 
               return (
                 <View key={dua.id}>
-                  <View style={[styles.itemWrapper, { borderColor: colors.border, backgroundColor: colors.glassTint === 'light' ? 'rgba(255,255,255,0.7)' : 'rgba(0,0,0,0.5)' }]}>
+                  <ThemeCard intensity={40} style={[styles.itemWrapper, { borderColor: colors.border }]}>
                     <TouchableOpacity activeOpacity={1}
                       style={styles.item}
                       onPress={() => {
@@ -274,13 +289,13 @@ export default function DuaSearchScreen() {
                       </View>
                       <ChevronRight size={20} color={colors.textSecondary} />
                     </TouchableOpacity>
-                  </View>
+                  </ThemeCard>
                 </View>
               );
             })}
             {searchQuery.length > 0 && searchResults.length === 0 && (
               <Text style={[styles.emptyText, { color: colors.textSecondary }]}>
-                {t('search.noMatchingDuas', { query: searchQuery })}
+                {categoryId ? t('search.noMatchingCategoryDuas', { query: searchQuery, categoryName: categoryName || '' }) : t('search.noMatchingAllDuas', { query: searchQuery })}
               </Text>
             )}
           </View>
@@ -306,8 +321,10 @@ const styles = StyleSheet.create({
     padding: 0,
   },
   container: { 
-      },
+    paddingVertical: Spacing.four,
+  },
   list: {
+    flexDirection: 'column',
     gap: Spacing.three,
     paddingHorizontal: Spacing.four,
   },

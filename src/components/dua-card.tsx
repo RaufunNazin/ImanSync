@@ -3,7 +3,7 @@ import { StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import ThemeCard from '@/components/ThemeCard';
 import { Fonts, Spacing, useActiveColor } from '@/constants/theme';
 import { useTranslation } from 'react-i18next';
-import { Bookmark } from 'lucide-react-native';
+import { Pin } from 'lucide-react-native';
 import { formatNumber } from '@/utils/formatNumber';
 
 interface DuaCardProps {
@@ -36,26 +36,18 @@ const DuaCard = React.memo(function DuaCard({
   const activeColor = useActiveColor();
   
   return (
-    <ThemeCard intensity={40} style={[styles.wrapper, 
-          (isMyDuas || id === 'bookmarks') && { borderColor: colors.accent },
-          isCustom && { borderColor: activeColor }
-    ]}>
-      <TouchableOpacity activeOpacity={1}
-        style={[styles.card, isOneColumn && styles.cardOneColumn]}
-        onPress={onPress}
-        onLongPress={onLongPress}
-        delayLongPress={300}
-      >
-          {isPinned && !isOneColumn && (
-            <View style={styles.pinBadge}>
-              <Bookmark size={14} color={isCustom ? activeColor : colors.accent} fill={isCustom ? activeColor : colors.accent} />
-            </View>
-          )}
-
+    <View style={{ flex: 1 }}>
+      <ThemeCard intensity={40} style={[styles.wrapper, 
+            (isMyDuas || id === 'bookmarks') && { borderColor: colors.accent },
+            isCustom && { borderColor: activeColor }
+      ]}>
+        <TouchableOpacity activeOpacity={1}
+          style={[styles.card, isOneColumn && styles.cardOneColumn]}
+          onPress={onPress}
+          onLongPress={onLongPress}
+          delayLongPress={300}
+        >
           <View style={[styles.content, isOneColumn && styles.contentOneColumn]}>
-            {isOneColumn && isPinned && (
-              <Bookmark size={18} color={colors.accent} fill={colors.accent} style={{ marginRight: Spacing.two }} />
-            )}
             <Text style={[styles.name, isOneColumn && styles.nameOneColumn, { color: colors.text }]} numberOfLines={2}>
               {name}
             </Text>
@@ -71,8 +63,15 @@ const DuaCard = React.memo(function DuaCard({
               )
             )}
           </View>
-        </TouchableOpacity>
-    </ThemeCard>
+          </TouchableOpacity>
+      </ThemeCard>
+
+      {isPinned && (
+        <View style={styles.pinBadge} pointerEvents="none">
+          <Pin size={14} color={isCustom ? activeColor : colors.accent} fill={isCustom ? activeColor : colors.accent} />
+        </View>
+      )}
+    </View>
   );
 });
 
@@ -97,10 +96,10 @@ const styles = StyleSheet.create({
   },
   pinBadge: {
     position: 'absolute',
-    top: Spacing.three,
-    left: Spacing.three,
-    paddingHorizontal: 4,
-    zIndex: 2,
+    top: 0,
+    right: 0,
+    zIndex: 99,
+    transform: [{ rotate: '45deg' }],
   },
   content: {
     alignItems: 'center',
@@ -119,7 +118,6 @@ const styles = StyleSheet.create({
   name: {
     fontFamily: Fonts.outfit,
     fontSize: 16,
-    fontWeight: '600',
     textAlign: 'center',
   },
   nameOneColumn: {

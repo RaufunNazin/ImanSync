@@ -151,7 +151,7 @@ export default function QuranTrackerScreen() {
           </ThemeCard>
 
           {/* Daily Reflection / Notes */}
-          <View style={{ marginTop: Spacing.two }}>
+          <View>
             <Text style={[styles.sectionTitle, { color: colors.textSecondary }]}>{t('quran.dailyReflection', { defaultValue: "Today's Reflection" })}</Text>
             <ThemeCard  style={styles.noteContainer}>
               <TextInput
@@ -168,7 +168,7 @@ export default function QuranTrackerScreen() {
           </View>
 
           {/* Reading History (Heatmap) */}
-          <View style={{ marginTop: Spacing.four }}>
+          <View>
             <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', marginBottom: Spacing.three }}>
               <Text style={[styles.sectionTitle, { color: colors.textSecondary, marginBottom: 0 }]}>{t('quran.history', { defaultValue: 'Reading History (30 Days)' })}</Text>
               <History size={16} color={colors.textSecondary} />
@@ -273,11 +273,10 @@ export default function QuranTrackerScreen() {
 
 const styles = StyleSheet.create({
   safeArea: { flex: 1 },
-  container: { padding: Spacing.four },
+  container: { padding: Spacing.four, flexDirection: 'column', gap: Spacing.four },
   card: {
     borderRadius: 20,
     padding: Spacing.four,
-    marginBottom: Spacing.three,
     overflow: 'hidden',
   },
   cardHeader: {

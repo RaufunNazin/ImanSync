@@ -325,8 +325,10 @@
     "enTranslit": "ইংরেজি উচ্চারণ",
     "bnTranslit": "বাংলা উচ্চারণ",
     "searchPlaceholder": "নাম বা অনুবাদ দিয়ে খুঁজুন...",
-    "searchMyDuas": "আমার দোয়া খুঁজুন",
-    "searchBookmarks": "বুকমার্ক করা দোয়া খুঁজুন",
+    "searchMyDuas": "আমার দোয়া খুঁজুন...",
+    "searchBookmarks": "বুকমার্ক করা দোয়া খুঁজুন...",
+    "searchAllDuas": "সব দোয়া খুঁজুন...",
+    "searchInCategory": "{{categoryName}} এ খুঁজুন...",
     "searchCategory": "ক্যাটাগরি খুঁজুন..."
   },
   "settings": {
@@ -1264,6 +1266,7 @@
   "calendar": {
     "titleEn": "ইসলামিক ক্যালেন্ডার",
     "titleAr": "التقويم الإسلامي",
+    "today": "আজ",
     "sahriEnd": "সাহরি শেষ",
     "iftarTime": "ইফতারের সময়",
     "events": "বিশেষ দিন",
@@ -1279,6 +1282,8 @@
   },
   "search": {
     "noMatchingDuas": "\"{{query}}\" এর জন্য কোনো দোয়া পাওয়া যায়নি",
+    "noMatchingAllDuas": "\"{{query}}\" এর জন্য কোনো ক্যাটাগরিতে দোয়া পাওয়া যায়নি",
+    "noMatchingCategoryDuas": "{{categoryName}} এ \"{{query}}\" এর জন্য কোনো দোয়া পাওয়া যায়নি",
     "noMatchingQuran": "\"{{query}}\" এর জন্য কোনো ফলাফল পাওয়া যায়নি"
   },
   "noResults": "কোন ফলাফল পাওয়া যায়নি",

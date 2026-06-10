@@ -130,7 +130,6 @@ export default function DuaDetailScreen() {
     });
   };
 
-  const isBanglaMode = i18n.language === 'bn';
 
   // Helper for font size controls
   const renderSizeControl = (label: string, value: number, onChange: (val: number) => void) => (
@@ -191,13 +190,13 @@ export default function DuaDetailScreen() {
 
                 <Text style={[styles.sectionTitle, { color: colors.textSecondary }]}>{t('duaSettings.translations')}</Text>
                 {renderToggle(t('duaSettings.enTrans'), settings.showEnTrans, v => updateSetting('showEnTrans', v))}
-                {isBanglaMode && renderToggle(t('duaSettings.bnTrans'), settings.showBnTrans, v => updateSetting('showBnTrans', v))}
+                {renderToggle(t('duaSettings.bnTrans'), settings.showBnTrans, v => updateSetting('showBnTrans', v))}
 
                 <View style={[styles.divider, { backgroundColor: colors.border }]} />
 
                 <Text style={[styles.sectionTitle, { color: colors.textSecondary }]}>{t('duaSettings.translit')}</Text>
                 {renderToggle(t('duaSettings.enTranslit'), settings.showEnTranslit, v => updateSetting('showEnTranslit', v))}
-                {isBanglaMode && renderToggle(t('duaSettings.bnTranslit'), settings.showBnTranslit, v => updateSetting('showBnTranslit', v))}
+                {renderToggle(t('duaSettings.bnTranslit'), settings.showBnTranslit, v => updateSetting('showBnTranslit', v))}
               </ScrollView>
             </View>
           </TouchableWithoutFeedback>
@@ -208,9 +207,9 @@ export default function DuaDetailScreen() {
 
 
   const showArabic = !!duaData.arabic;
-  const showBnTranslit = isBanglaMode && settings.showBnTranslit && !!duaData.transliterationBn;
+  const showBnTranslit = settings.showBnTranslit && !!duaData.transliterationBn;
   const showEnTranslit = settings.showEnTranslit && !!duaData.latin;
-  const showBnTrans = isBanglaMode && settings.showBnTrans && !!duaData.translationBn;
+  const showBnTrans = settings.showBnTrans && !!duaData.translationBn;
   const showEnTrans = settings.showEnTrans && !!duaData.translationEn;
 
   const hasTextContent = showArabic || showBnTranslit || showEnTranslit || showBnTrans || showEnTrans || !!duaData.source;

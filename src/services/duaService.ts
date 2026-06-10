@@ -67,14 +67,14 @@ class DuaService {
     try {
       const cached = storage.getString(CACHE_KEY_CATEGORIES);
       if (cached) {
-        this.fetchAndCacheCategories().catch(console.error);
-        return JSON.parse(cached);
-      }
-      return await this.fetchAndCacheCategories();
-    } catch (e) {
-      console.error('Error in getCategories:', e);
-      return [];
+      this.fetchAndCacheCategories().catch(console.warn);
+      return JSON.parse(cached);
     }
+    return await this.fetchAndCacheCategories();
+  } catch (e) {
+    console.warn('Error in getCategories:', e);
+    return [];
+  }
   }
 
   private static async fetchAndCacheCategories(): Promise<HisnulCategory[]> {
@@ -99,14 +99,14 @@ class DuaService {
       const cached = storage.getString(cacheKey);
       
       if (cached) {
-        this.fetchAndCacheCategoryDuas(categoryId).catch(console.error);
-        return JSON.parse(cached);
-      }
-      return await this.fetchAndCacheCategoryDuas(categoryId);
-    } catch (e) {
-      console.error(`Error in getDuasByCategory(${categoryId}):`, e);
-      return [];
+      this.fetchAndCacheCategoryDuas(categoryId).catch(console.warn);
+      return JSON.parse(cached);
     }
+    return await this.fetchAndCacheCategoryDuas(categoryId);
+  } catch (e) {
+    console.warn(`Error in getDuasByCategory(${categoryId}):`, e);
+    return [];
+  }
   }
 
   private static async fetchAndCacheCategoryDuas(categoryId: number): Promise<UnifiedDuaItem[]> {
@@ -138,7 +138,7 @@ class DuaService {
       }
       return null;
     } catch (e) {
-      console.error(`Error fetching dua ${id}:`, e);
+      console.warn(`Error fetching dua ${id}:`, e);
       return null;
     }
   }
@@ -150,12 +150,12 @@ class DuaService {
       const json = await res.json();
       if (json.success && json.data) {
         return json.data.map(this.mapToUnified);
-      }
-      return [];
-    } catch (e) {
-      console.error('Error in searchNative:', e);
-      return [];
     }
+    return [];
+  } catch (e) {
+    console.warn('Error in searchNative:', e);
+    return [];
+  }
   }
 
   static async searchHybrid(query: string): Promise<UnifiedDuaItem[]> {

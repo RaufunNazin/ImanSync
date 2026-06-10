@@ -2,7 +2,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import { Modal, StyleSheet, Text, TouchableOpacity, View, TextInput, KeyboardAvoidingView } from 'react-native';
 import { Fonts, Spacing } from '@/constants/theme';
 import { useTranslation } from 'react-i18next';
-import { Bookmark, BookmarkMinus, Trash2, Edit3 } from 'lucide-react-native';
+import { Pin, PinOff, Trash2, Edit3 } from 'lucide-react-native';
 
 
 
@@ -61,7 +61,7 @@ export default function PinSheet({
   const actionOptions: ActionOption[] = [
     {
       id: 'pin',
-      icon: isPinned ? <BookmarkMinus size={20} color={colors.accent} /> : <Bookmark size={20} color={colors.accent} />,
+      icon: isPinned ? <PinOff size={20} color={colors.accent} /> : <Pin size={20} color={colors.accent} />,
       label: isPinned ? t('dua.unpin') : t('dua.pin'),
       iconBgColor: colors.accent + '22',
       onPress: onTogglePin,

@@ -17,6 +17,8 @@ interface NameItem {
 export default function NamesScreen() {
   const colors = useThemeColors();
   const themeStyles = useThemeStyles();
+  const isDark = colors.background === '#0c1618';
+  const activeColor = isDark ? colors.accent : colors.highlight;
 
   const { t, i18n } = useTranslation();
 
@@ -40,7 +42,7 @@ export default function NamesScreen() {
                 <Text style={[styles.englishText, { color: colors.text }]}>{item.english}</Text>
                 <Text style={[styles.meaningText, { color: colors.textSecondary }]}>{item.meaning}</Text>
               </View>
-              <Text style={[styles.arabicText, { color: colors.text }]}>{item.arabic}</Text>
+              <Text style={[styles.arabicText, { color: activeColor }]}>{item.arabic}</Text>
             </View>
           </ThemeCard>
         )}
