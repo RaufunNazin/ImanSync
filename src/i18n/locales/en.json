@@ -133,6 +133,12 @@
       "mishary": "Mishary Rashid Alafasy",
       "abdulBaset": "AbdulBaset AbdulSamad",
       "sudais": "Abdur-Rahman as-Sudais"
+    },
+    "download": {
+      "title": "Download Options",
+      "pause": "Pause Download",
+      "resume": "Resume Download",
+      "stop": "Stop Download"
     }
   },
   "quranSettings": {

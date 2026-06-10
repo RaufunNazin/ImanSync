@@ -4,7 +4,7 @@ import { Fonts, Spacing, useThemeColors } from '@/constants/theme';
 import { formatNumber } from '@/utils/formatNumber';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useFocusEffect, useRouter } from 'expo-router';
-import { Bookmark, BookOpen, Search, Target, DownloadCloud, CheckCircle, GraduationCap, ChevronRight, X } from 'lucide-react-native';
+import { Bookmark, BookOpen, Search, Target, DownloadCloud, CheckCircle, GraduationCap, ChevronRight, X, Play, Pause, Square } from 'lucide-react-native';
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { StyleSheet, Text, TouchableOpacity, View, Animated } from 'react-native';
@@ -16,6 +16,7 @@ import { useDownloadStore } from '@/store/downloadStore';
 
 import DownloadProgressRing from '@/components/DownloadProgressRing';
 import ConfirmModal from '@/components/ConfirmModal';
+import ActionSheet from '@/components/ActionSheet';
 import Reanimated, { FadeInDown, FadeOutDown } from 'react-native-reanimated';
 import ConfettiCannon from 'react-native-confetti-cannon';
 import { getLocalYYYYMMDD } from '@/utils/dateUtils';
@@ -29,6 +30,7 @@ const SurahDownloadButton = React.memo(({ surahId, reciterId, colors, i18n_langu
   const downloadSurah = downloadStore.downloadSurah;
   const deleteSurah = downloadStore.deleteSurah;
   const [confirmVisible, setConfirmVisible] = useState(false);
+  const [downloadModalVisible, setDownloadModalVisible] = useState(false);
   const isDark = colors.background === '#0c1618';
   const activeColor = isDark ? colors.accent : colors.highlight;
 
@@ -38,7 +40,9 @@ const SurahDownloadButton = React.memo(({ surahId, reciterId, colors, i18n_langu
         onPress={() => {
           if (isDownloaded) {
             setConfirmVisible(true);
-          } else if (progress === undefined) {
+          } else if (progress !== undefined) {
+            setDownloadModalVisible(true);
+          } else {
             downloadSurah(reciterId, surahId);
           }
         }}
@@ -55,6 +59,7 @@ const SurahDownloadButton = React.memo(({ surahId, reciterId, colors, i18n_langu
             color={activeColor}
             trackColor={colors.textSecondary + '30'}
             label={formatNumber(Math.round(progress), i18n_language)}
+            isPaused={!!downloadStore.pausedDownloads[`${reciterId}_${surahId}`]}
           />
         ) : (
           <Reanimated.View entering={FadeInDown.duration(300)}>
@@ -72,6 +77,37 @@ const SurahDownloadButton = React.memo(({ surahId, reciterId, colors, i18n_langu
         onCancel={() => setConfirmVisible(false)}
         colors={colors}
         confirmColor={colors.error}
+      />
+      <ActionSheet
+        visible={downloadModalVisible}
+        title={t('quran.download.title', { defaultValue: 'Download Options' })}
+        options={[
+          ...(downloadStore.pausedDownloads[`${reciterId}_${surahId}`]
+            ? [{
+                id: 'resume',
+                icon: <Play size={20} color={activeColor} />,
+                label: t('quran.download.resume', { defaultValue: 'Resume Download' }),
+                onPress: () => downloadStore.resumeDownload(reciterId, surahId),
+                iconBgColor: activeColor + '22',
+              }]
+            : [{
+                id: 'pause',
+                icon: <Pause size={20} color={colors.accent} />,
+                label: t('quran.download.pause', { defaultValue: 'Pause Download' }),
+                onPress: () => downloadStore.pauseDownload(reciterId, surahId),
+                iconBgColor: colors.accent + '22',
+              }]),
+          {
+            id: 'stop',
+            icon: <Square size={20} color={colors.error} fill={colors.error} />,
+            label: t('quran.download.stop', { defaultValue: 'Stop Download' }),
+            onPress: () => downloadStore.cancelDownload(reciterId, surahId),
+            iconBgColor: colors.error + '22',
+            labelColor: colors.error,
+          },
+        ]}
+        onClose={() => setDownloadModalVisible(false)}
+        colors={colors}
       />
     </>
   );
@@ -462,61 +498,28 @@ export default function QuranScreen() {
                   <View style={{ marginBottom: Spacing.four }}>
                     <Text style={[styles.sectionTitle, { color: colors.textSecondary, marginBottom: Spacing.three, paddingHorizontal: Spacing.one }]}>{t('quran.bookmarkedSurahs', { defaultValue: 'Bookmarked Surahs' })}</Text>
                     <View style={styles.listContainer}>
-                      {bookmarks.filter((b: any) => b.type === 'surah').map((surah: any, i: number) => (
-                        <ThemeCard intensity={30}  key={`surah-${i}`} style={[styles.surahRowWrapper, { borderColor: colors.border }]}>
-                          <TouchableOpacity activeOpacity={1} 
-                            style={styles.surahRow}
+                      {bookmarks.filter((b: any) => b.type === 'surah').map((surah: any, i: number) => {
+                        const surahData = {
+                          id: surah.surahId,
+                          name: surah.surahName,
+                          nameAr: surah.surahNameAr,
+                          type: surah.revelationType,
+                          verses: surah.verses
+                        };
+                        return (
+                          <SurahRow
+                            key={`surah-${i}`}
+                            surah={surahData}
+                            colors={colors}
+                            language={i18n.language}
+                            t={t}
+                            reciterId={audioStore.currentReciterId}
+                            isBookmarked={true}
                             onPress={() => router.push(`/surah/${surah.surahId}`)}
-                            onLongPress={() => toggleSurahBookmark({ id: surah.surahId })}
-                          >
-                            <View style={styles.surahLeft}>
-                              <View style={[styles.numberBox, { backgroundColor: colors.textSecondary + '15', borderColor: colors.border, borderWidth: 1 }]}>
-                                <Text style={[styles.numberText, { color: colors.textSecondary }]}>{formatNumber(surah.surahId, i18n.language)}</Text>
-                              </View>
-                              <View style={{ flex: 1 }}>
-                                <Text style={[styles.surahNameEn, { color: colors.text }]}>{t('surahNames.' + surah.surahId, { defaultValue: surah.surahName })}</Text>
-                                <Text style={[styles.surahMeta, { color: colors.textSecondary }]}>
-                                  {t('quran.' + surah.revelationType, { defaultValue: surah.revelationType })} • {t('surah.verses', { count: formatNumber(surah.verses, i18n.language) })}
-                                </Text>
-                              </View>
-                            </View>
-                            <View style={{ flexDirection: 'row', alignItems: 'center', gap: Spacing.three }}>
-                              <TouchableOpacity activeOpacity={1} 
-                                onPress={() => {
-                                  const reciterId = audioStore.currentReciterId;
-                                  const key = `${reciterId}_${surah.surahId}`;
-                                  const isDownloaded = downloadStore.downloadedFiles[key];
-                                  const progress = downloadStore.downloadProgress[key];
-                                  
-                                  if (isDownloaded) {
-                                    downloadStore.deleteSurah(reciterId, surah.surahId);
-                                  } else if (progress === undefined) {
-                                    downloadStore.downloadSurah(reciterId, surah.surahId);
-                                  }
-                                }}
-                                hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
-                              >
-                                {downloadStore.downloadedFiles[`${audioStore.currentReciterId}_${surah.surahId}`] ? (
-                                  <CheckCircle size={16} color={activeQuranColor} />
-                                ) : downloadStore.downloadProgress[`${audioStore.currentReciterId}_${surah.surahId}`] !== undefined ? (
-                                  <DownloadProgressRing
-                                    size={22}
-                                    progress={downloadStore.downloadProgress[`${audioStore.currentReciterId}_${surah.surahId}`]}
-                                    color={activeQuranColor}
-                                    trackColor={colors.textSecondary + '30'}
-                                    label={formatNumber(Math.round(downloadStore.downloadProgress[`${audioStore.currentReciterId}_${surah.surahId}`]), i18n.language)}
-                                  />
-                                ) : (
-                                  <DownloadCloud size={18} color={colors.textSecondary} opacity={0.6} />
-                                )}
-                              </TouchableOpacity>
-
-                              <Bookmark size={14} color={activeQuranColor} fill={activeQuranColor} />
-                              <Text style={[styles.surahNameAr, { color: colors.text }]}>{surah.surahNameAr}</Text>
-                            </View>
-                          </TouchableOpacity>
-                        </ThemeCard>
-                      ))}
+                            onBookmarkToggle={() => toggleSurahBookmark({ id: surah.surahId })}
+                          />
+                        );
+                      })}
                     </View>
                   </View>
                 )}
@@ -550,26 +553,32 @@ export default function QuranScreen() {
                     <Text style={[styles.sectionTitle, { color: colors.textSecondary, marginBottom: Spacing.three, paddingHorizontal: Spacing.one }]}>{t('quran.bookmarkedAyahs', { defaultValue: 'Bookmarked Ayahs' })}</Text>
                     <View style={styles.listContainer}>
                       {bookmarks.filter((b: any) => !b.type || b.type === 'ayah').map((b: any, i: number) => (
-                        <ThemeCard intensity={30}  key={`ayah-${i}`} style={[styles.surahRowWrapper, { borderColor: colors.border }]}>
+                        <ThemeCard intensity={30}  key={`ayah-${i}`} style={[styles.ayahCardWrapper, { borderColor: colors.border }]}>
                           <TouchableOpacity activeOpacity={1} 
-                            style={[styles.surahRow, { paddingVertical: Spacing.four }]}
+                            style={styles.ayahCard}
                             onPress={() => router.push(`/surah/${b.surahId}?ayah=${b.numberInSurah}`)}
                           >
-                            <View style={{ flex: 1 }}>
-                              <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6, marginBottom: 8 }}>
-                                <Bookmark size={16} color={activeQuranColor} fill={activeQuranColor} />
-                                <Text style={[styles.surahNameEn, { color: colors.text, fontSize: 16 }]}>{t('surahNames.' + b.surahId, { defaultValue: b.surahName })}</Text>
-                                <View style={[styles.numberBox, { backgroundColor: colors.textSecondary + '15', width: 24, height: 24, borderRadius: 12, borderColor: colors.border, borderWidth: 1 }]}>
-                                  <Text style={[styles.numberText, { color: colors.textSecondary, fontSize: 10 }]}>{formatNumber(b.numberInSurah, i18n.language)}</Text>
-                                </View>
+                            <View style={styles.ayahHeader}>
+                              <View style={[styles.numberCircle, { borderColor: colors.textSecondary + '20', backgroundColor: colors.textSecondary + '15' }]}>
+                                <Text style={[styles.numberText, { color: colors.textSecondary }]}>{formatNumber(b.numberInSurah, i18n.language)}</Text>
                               </View>
-                              <Text style={[styles.surahNameAr, { color: colors.text, fontSize: 20, textAlign: 'right', marginBottom: 4 }]} numberOfLines={1}>
-                                {b.arabic}
-                              </Text>
-                              <Text style={[styles.surahMeta, { color: colors.textSecondary }]} numberOfLines={2}>
+                              <View style={{ flexDirection: 'row', gap: Spacing.two, alignItems: 'center' }}>
+                                <Text style={[{ color: colors.textSecondary, fontFamily: Fonts.outfit, fontSize: 14 }]}>
+                                  {t('surahNames.' + b.surahId, { defaultValue: b.surahName })}
+                                </Text>
+                                <Bookmark size={20} color={activeQuranColor} fill={activeQuranColor} />
+                              </View>
+                            </View>
+
+                            <Text style={[styles.arabicText, { color: colors.text, fontSize: 24, lineHeight: 24 * 1.8 }]} >
+                              {b.arabic}
+                            </Text>
+
+                            {!!b.translation && (
+                              <Text style={[styles.englishText, { color: colors.textSecondary, fontSize: 16, lineHeight: 16 * 1.5 }]} >
                                 {b.translation}
                               </Text>
-                            </View>
+                            )}
                           </TouchableOpacity>
                         </ThemeCard>
                       ))}
@@ -807,5 +816,36 @@ const styles = StyleSheet.create({
     textTransform: 'uppercase',
     letterSpacing: 1.2,
     opacity: 0.6,
+  },
+  ayahCardWrapper: {
+    borderRadius: 24,
+    overflow: 'hidden',
+    borderWidth: 1,
+  },
+  ayahCard: {
+    padding: Spacing.five,
+  },
+  ayahHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: Spacing.four,
+  },
+  numberCircle: {
+    width: 32,
+    height: 32,
+    borderRadius: 16,
+    borderWidth: 1,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  arabicText: {
+    fontFamily: Fonts.arabic,
+    textAlign: 'right',
+    marginBottom: Spacing.three,
+  },
+  englishText: {
+    fontFamily: Fonts.outfit,
+    marginTop: Spacing.two,
   }
 });

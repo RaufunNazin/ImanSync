@@ -3,7 +3,7 @@ import React, { useEffect, useState } from 'react';
 import { View, Text, StyleSheet, ScrollView, TouchableOpacity } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useLocalSearchParams } from 'expo-router';
-import { Fonts, Spacing, useThemeColors } from '@/constants/theme';
+import { Fonts, Spacing, useThemeColors, useActiveColor } from '@/constants/theme';
 import PageHeader from '@/components/page-header';
 import { useTranslation } from 'react-i18next';
 import { useAudioPlayer } from '@/hooks/useAudioPlayer';
@@ -24,6 +24,7 @@ interface Word {
 
 export default function QuranLearnScreen() {
   const colors = useThemeColors();
+  const activeColor = useActiveColor();
 
   const { surahId = '1', ayahId = '1' } = useLocalSearchParams<{ surahId: string, ayahId: string }>();
   const [words, setWords] = useState<Word[]>([]);
@@ -112,7 +113,7 @@ export default function QuranLearnScreen() {
                 playAudio(fullUrl);
               }
             }}
-            style={[styles.playAyahBtn, { backgroundColor: colors.highlight }]}
+            style={[styles.playAyahBtn, { backgroundColor: activeColor }]}
           >
             <Volume2 size={24} color={colors.background} />
           </TouchableOpacity>
@@ -141,7 +142,7 @@ export default function QuranLearnScreen() {
         <View style={{ minHeight: 80, marginBottom: Spacing.three }}>
           {selectedWord ? (
             <ThemeCard intensity={50}  style={[styles.translationBox, { borderColor: colors.accent }]}>
-              <Text style={[styles.selectedArabic, { color: colors.highlight }]}>
+              <Text style={[styles.selectedArabic, { color: activeColor }]}>
                 {selectedWord.text_uthmani}
               </Text>
               <Text style={[styles.selectedTranslit, { color: colors.textSecondary }]}>

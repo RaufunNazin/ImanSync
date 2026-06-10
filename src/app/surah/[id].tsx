@@ -2,18 +2,20 @@ import ThemeCard from '@/components/ThemeCard';
 import { Fonts, Spacing, useThemeColors, useThemeStyles } from '@/constants/theme';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useLocalSearchParams, useRouter } from 'expo-router';
-import { Bookmark, ChevronLeft, Minus, Plus, Settings2, X, Play, Pause, DownloadCloud, CheckCircle, Share2 } from 'lucide-react-native';
+import { Bookmark, Minus, Plus, Settings2, X, Play, Pause, DownloadCloud, CheckCircle, Share2, Square } from 'lucide-react-native';
 import React, { useEffect, useRef, useState } from 'react';
 import { ActivityIndicator, FlatList, Modal, ScrollView, StyleSheet, Switch, Text, TouchableOpacity, View, Share } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useTranslation } from 'react-i18next';
 import { formatNumber } from '@/utils/formatNumber';
 import { useAudioStore } from '@/store/audioStore';
-import { useDownloadStore } from '@/store/downloadStore';
-import DownloadProgressRing from '@/components/DownloadProgressRing';
-import ConfirmModal from '@/components/ConfirmModal';
+import ActionSheet from '@/components/ActionSheet';
+import PageHeader from '@/components/page-header';
 import { fetchOnce } from '@/utils/fetchWithCache';
 import { storage } from '@/store/mmkv';
+import ConfirmModal from '@/components/ConfirmModal';
+import DownloadProgressRing from '@/components/DownloadProgressRing';
+import { useDownloadStore } from '@/store/downloadStore';
 
 interface Ayah {
   numberInSurah: number;
@@ -104,6 +106,7 @@ export default function SurahScreen() {
   const [modalVisible, setModalVisible] = useState(false);
   const [bookmarkedAyahs, setBookmarkedAyahs] = useState<Record<string, boolean>>({});
   const [deleteDownloadConfirm, setDeleteDownloadConfirm] = useState(false);
+  const [downloadModalVisible, setDownloadModalVisible] = useState(false);
 
   const flatListRef = useRef<FlatList>(null);
   const isInitialScrollDone = useRef(false);
@@ -400,70 +403,72 @@ export default function SurahScreen() {
 
   return (
     <SafeAreaView style={[styles.safeArea, { backgroundColor: colors.background }]}>
-      <View style={styles.header}>
-        <TouchableOpacity activeOpacity={1} onPress={handleBack} style={styles.backBtn}>
-          <ChevronLeft size={22} color={colors.textSecondary} />
-        </TouchableOpacity>
-        <View style={{ flex: 1, alignItems: 'center' }}>
-          <Text style={[styles.title, { color: colors.text }]}>{t('surahNames.' + id, { defaultValue: surahName })}</Text>
-          {ayahs.length > 0 && <Text style={{ color: colors.textSecondary, fontFamily: Fonts.outfit, fontSize: 12 }}>{t('surah.verses', { count: formatNumber(ayahs.length, i18n.language) })}</Text>}
-        </View>
-        <View style={{ flexDirection: 'row', gap: Spacing.three, alignItems: 'center' }}>
-          <TouchableOpacity activeOpacity={1} 
-            onPress={() => {
-              if (currentSurahId === Number(id)) {
-                isPlaying ? pause() : resume();
-              } else {
-                playSurah(Number(id), surahName);
-              }
-            }} 
-            style={styles.backBtn}
-          >
-            {isAudioLoading && currentSurahId === Number(id) ? (
-              <ActivityIndicator size="small" color={colors.highlight} />
-            ) : isPlaying && currentSurahId === Number(id) ? (
-              <Pause size={20} color={colors.highlight} fill={colors.highlight} />
-            ) : (
-              <Play size={20} color={colors.highlight} fill={colors.highlight} />
-            )}
-          </TouchableOpacity>
-          <TouchableOpacity activeOpacity={1} 
-            onPress={() => {
-              const reciterId = currentReciterId;
-              const surahId = Number(id);
-              const key = `${reciterId}_${surahId}`;
-              const isDownloaded = downloadStore.downloadedFiles[key];
-              const progress = downloadStore.downloadProgress[key];
-              
-              if (isDownloaded) {
-                setDeleteDownloadConfirm(true);
-              } else if (progress === undefined) {
-                downloadStore.downloadSurah(reciterId, surahId);
-              }
-            }}
-            style={styles.backBtn}
-          >
-            {downloadStore.downloadedFiles[`${currentReciterId}_${id}`] ? (
-              <View style={{ flexDirection: 'row', alignItems: 'center', gap: 4 }}>
-                <CheckCircle size={18} color={colors.highlight} />
-              </View>
-            ) : downloadStore.downloadProgress[`${currentReciterId}_${id}`] !== undefined ? (
-              <DownloadProgressRing
-                size={22}
-                progress={downloadStore.downloadProgress[`${currentReciterId}_${id}`]}
-                color={activeQuranColor}
-                trackColor={colors.textSecondary + '30'}
-                label={formatNumber(Math.round(downloadStore.downloadProgress[`${currentReciterId}_${id}`]), i18n.language)}
-              />
-            ) : (
-              <DownloadCloud size={20} color={colors.textSecondary} opacity={0.6} />
-            )}
-          </TouchableOpacity>
-          <TouchableOpacity activeOpacity={1} onPress={() => setModalVisible(true)} style={styles.backBtn}>
-            <Settings2 size={20} color={colors.textSecondary} />
-          </TouchableOpacity>
-        </View>
-      </View>
+      <PageHeader
+        titleEn={t('surahNames.' + id, { defaultValue: surahName })}
+        subtitle={ayahs.length > 0 ? t('surah.verses', { count: formatNumber(ayahs.length, i18n.language) }) : undefined}
+        showBack={true}
+        onBack={handleBack}
+        rightElement={
+          <View style={{ flexDirection: 'row', gap: Spacing.three, alignItems: 'center' }}>
+            <TouchableOpacity activeOpacity={1} 
+              onPress={() => {
+                if (currentSurahId === Number(id)) {
+                  isPlaying ? pause() : resume();
+                } else {
+                  playSurah(Number(id), surahName);
+                }
+              }} 
+              style={styles.backBtn}
+            >
+              {isAudioLoading && currentSurahId === Number(id) ? (
+                <ActivityIndicator size="small" color={activeQuranColor} />
+              ) : isPlaying && currentSurahId === Number(id) ? (
+                <Pause size={20} color={activeQuranColor} fill={activeQuranColor} />
+              ) : (
+                <Play size={20} color={activeQuranColor} fill={activeQuranColor} />
+              )}
+            </TouchableOpacity>
+            <TouchableOpacity activeOpacity={1} 
+              onPress={() => {
+                const reciterId = currentReciterId;
+                const surahId = Number(id);
+                const key = `${reciterId}_${surahId}`;
+                const isDownloaded = downloadStore.downloadedFiles[key];
+                const progress = downloadStore.downloadProgress[key];
+                
+                if (isDownloaded) {
+                  setDeleteDownloadConfirm(true);
+                } else if (progress !== undefined) {
+                  setDownloadModalVisible(true);
+                } else {
+                  downloadStore.downloadSurah(reciterId, surahId);
+                }
+              }}
+              style={styles.backBtn}
+            >
+              {downloadStore.downloadedFiles[`${currentReciterId}_${id}`] ? (
+                <View style={{ flexDirection: 'row', alignItems: 'center', gap: 4 }}>
+                  <CheckCircle size={18} color={activeQuranColor} />
+                </View>
+              ) : downloadStore.downloadProgress[`${currentReciterId}_${id}`] !== undefined ? (
+                <DownloadProgressRing
+                  size={22}
+                  progress={downloadStore.downloadProgress[`${currentReciterId}_${id}`]}
+                  color={activeQuranColor}
+                  trackColor={colors.textSecondary + '30'}
+                  label={formatNumber(Math.round(downloadStore.downloadProgress[`${currentReciterId}_${id}`]), i18n.language)}
+                  isPaused={!!downloadStore.pausedDownloads[`${currentReciterId}_${id}`]}
+                />
+              ) : (
+                <DownloadCloud size={20} color={colors.textSecondary} opacity={0.6} />
+              )}
+            </TouchableOpacity>
+            <TouchableOpacity activeOpacity={1} onPress={() => setModalVisible(true)} style={styles.backBtn}>
+              <Settings2 size={20} color={colors.textSecondary} />
+            </TouchableOpacity>
+          </View>
+        }
+      />
       
 
         <FlatList
@@ -553,22 +558,44 @@ export default function SurahScreen() {
         colors={colors}
         confirmColor={colors.error}
       />
+      <ActionSheet
+        visible={downloadModalVisible}
+        title={t('quran.download.title', { defaultValue: 'Download Options' })}
+        options={[
+          ...(downloadStore.pausedDownloads[`${currentReciterId}_${id}`]
+            ? [{
+                id: 'resume',
+                icon: <Play size={20} color={activeQuranColor} />,
+                label: t('quran.download.resume', { defaultValue: 'Resume Download' }),
+                onPress: () => downloadStore.resumeDownload(currentReciterId, Number(id)),
+                iconBgColor: activeQuranColor + '22',
+              }]
+            : [{
+                id: 'pause',
+                icon: <Pause size={20} color={colors.accent} />,
+                label: t('quran.download.pause', { defaultValue: 'Pause Download' }),
+                onPress: () => downloadStore.pauseDownload(currentReciterId, Number(id)),
+                iconBgColor: colors.accent + '22',
+              }]),
+          {
+            id: 'stop',
+            icon: <Square size={20} color={colors.error} fill={colors.error} />,
+            label: t('quran.download.stop', { defaultValue: 'Stop Download' }),
+            onPress: () => downloadStore.cancelDownload(currentReciterId, Number(id)),
+            iconBgColor: colors.error + '22',
+            labelColor: colors.error,
+          },
+        ]}
+        onClose={() => setDownloadModalVisible(false)}
+        colors={colors}
+      />
     </SafeAreaView>
   );
 }
 
 const styles = StyleSheet.create({
   safeArea: { flex: 1 },
-  header: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    paddingHorizontal: Spacing.four,
-    height: 51,
-    borderBottomWidth: StyleSheet.hairlineWidth,
-  },
   backBtn: { padding: 2 },
-  title: { fontFamily: Fonts.outfit, fontSize: 14 },
   loaderContainer: { flex: 1, justifyContent: 'center', alignItems: 'center' },
   list: { padding: Spacing.four, gap: Spacing.four },
   

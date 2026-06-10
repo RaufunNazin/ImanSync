@@ -29,22 +29,22 @@ export const generateLocalCalendar = (
   const daysInMonth = new Date(year, month, 0).getDate();
   const calendarData = [];
 
-  const hijriFormatter = new Intl.DateTimeFormat('en-US-u-ca-islamic-umalqura', {
-    day: 'numeric',
-    month: 'long',
-    year: 'numeric'
-  });
+  const HIJRI_MONTHS_EN = [
+    'Muharram', 'Safar', 'Rabi al-Awwal', 'Rabi al-Thani',
+    'Jumada al-Awwal', 'Jumada al-Thani', 'Rajab', 'Sha\'ban',
+    'Ramadan', 'Shawwal', 'Dhu al-Qi\'dah', 'Dhu al-Hijjah'
+  ];
+
+  const { toHijri } = require('hijri-date/lib/safe');
 
   for (let day = 1; day <= daysInMonth; day++) {
     const date = new Date(year, month - 1, day);
     const prayerTimes = new PrayerTimes(coords, date, params);
 
-    const hijriStr = hijriFormatter.format(date); // e.g. "Muharram 14, 1446 AH"
-    const parts = hijriStr.replace(' AH', '').split(' ');
-    // e.g. ["Muharram", "14,", "1446"]
-    const hijriMonthEn = parts[0];
-    const hijriDay = parts[1].replace(',', '');
-    const hijriYear = parts[2];
+    const hDate = toHijri(date);
+    const hijriMonthEn = HIJRI_MONTHS_EN[hDate.getMonth() - 1] || 'Muharram';
+    const hijriDay = hDate.getDate().toString();
+    const hijriYear = hDate.getFullYear().toString();
 
     const gregorianDate = `${String(day).padStart(2, '0')}-${String(month).padStart(2, '0')}-${year}`;
 

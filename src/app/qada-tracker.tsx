@@ -3,21 +3,18 @@ import React, { useEffect } from 'react';
 import { View, Text, StyleSheet, ScrollView, TouchableOpacity } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useTranslation } from 'react-i18next';
-import { useRouter } from 'expo-router';
-import { Plus, Minus, ArrowLeft } from 'lucide-react-native';
+import { Plus, Minus } from 'lucide-react-native';
 import * as Haptics from 'expo-haptics';
 
 import { Fonts, Spacing, useThemeColors, useActiveColor } from '@/constants/theme';
 import { useQadaStore, QadaType } from '@/store/qadaStore';
 import { formatNumber } from '@/utils/formatNumber';
-
-
+import PageHeader from '@/components/page-header';
 
 export default function QadaTrackerScreen() {
   const { t, i18n } = useTranslation();
   const colors = useThemeColors();
   const activeColor = useActiveColor();
-    const router = useRouter();
   const qadaStore = useQadaStore();
 
   useEffect(() => {
@@ -73,15 +70,10 @@ export default function QadaTrackerScreen() {
 
   return (
     <SafeAreaView style={[styles.safeArea, { backgroundColor: colors.background }]}>
-      <View style={[styles.header, { borderBottomColor: colors.border }]}>
-        <TouchableOpacity activeOpacity={1} onPress={() => router.back()} style={styles.backBtn}>
-          <ArrowLeft size={24} color={colors.text} />
-        </TouchableOpacity>
-        <Text style={[styles.headerTitle, { color: colors.text }]}>
-          {t('tracker.qadaTitle', { defaultValue: 'Missed Prayers' })}
-        </Text>
-        <View style={{ width: 40 }} />
-      </View>
+      <PageHeader 
+        titleEn={t('tracker.qadaTitle', { defaultValue: 'Missed Prayers' })} 
+        showBack={true} 
+      />
 
       <ScrollView contentContainerStyle={styles.container} showsVerticalScrollIndicator={false}>
         
@@ -128,7 +120,6 @@ export default function QadaTrackerScreen() {
           {renderTrackerCard('fasts', 'tracker.missedFasts')}
         </View>
 
-        <View style={{ height: 100 }} />
       </ScrollView>
     </SafeAreaView>
   );
@@ -137,23 +128,6 @@ export default function QadaTrackerScreen() {
 const styles = StyleSheet.create({
   safeArea: {
     flex: 1,
-  },
-  header: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    paddingHorizontal: Spacing.four,
-    paddingVertical: Spacing.three,
-    borderBottomWidth: 1,
-  },
-  backBtn: {
-    padding: 8,
-    marginLeft: -8,
-  },
-  headerTitle: {
-    fontFamily: Fonts.outfit,
-    fontSize: 18,
-    fontWeight: '600',
   },
   container: {
     padding: Spacing.four,

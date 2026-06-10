@@ -1,8 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { View, Text, StyleSheet, TouchableOpacity, Dimensions } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { useRouter } from 'expo-router';
-import { ArrowLeft, CheckCircle2, XCircle, Brain, RefreshCw, ArrowRight } from 'lucide-react-native';
+import { CheckCircle2, XCircle, Brain, RefreshCw, ArrowRight } from 'lucide-react-native';
 import * as Haptics from 'expo-haptics';
 import Animated, { useAnimatedStyle, withSpring, withTiming, runOnJS, useSharedValue } from 'react-native-reanimated';
 import ConfettiCannon from 'react-native-confetti-cannon';
@@ -11,6 +10,7 @@ import { Fonts, Spacing, useThemeColors, useThemeStyles, useActiveColor } from '
 import { useTranslation } from 'react-i18next';
 import { formatNumber } from '@/utils/formatNumber';
 import triviaData from '@/data/trivia.json';
+import PageHeader from '@/components/page-header';
 
 const { width } = Dimensions.get('window');
 
@@ -28,7 +28,6 @@ export default function TriviaScreen() {
   const colors = useThemeColors();
   const themeStyles = useThemeStyles();
   const activeColor = useActiveColor();
-  const router = useRouter();
   const { t, i18n } = useTranslation();
   const isBn = i18n.language === 'bn';
 
@@ -107,13 +106,10 @@ export default function TriviaScreen() {
 
   return (
     <SafeAreaView style={[styles.safeArea, { backgroundColor: colors.background }]}>
-      <View style={[styles.header, { borderBottomColor: colors.border }]}>
-        <TouchableOpacity activeOpacity={1} onPress={() => router.back()} style={styles.backBtn} hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}>
-          <ArrowLeft size={24} color={colors.text} />
-        </TouchableOpacity>
-        <Text style={[styles.headerTitle, { color: colors.text }]}>{t('trivia.title', { defaultValue: 'Islamic Trivia' })}</Text>
-        <View style={{ width: 40 }} />
-      </View>
+      <PageHeader 
+        titleEn={t('trivia.title', { defaultValue: 'Islamic Trivia' })} 
+        showBack={true} 
+      />
 
       <View style={styles.container}>
         {isFinished ? (
@@ -219,16 +215,6 @@ export default function TriviaScreen() {
 
 const styles = StyleSheet.create({
   safeArea: { flex: 1 },
-  header: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    paddingHorizontal: Spacing.four,
-    paddingVertical: Spacing.three,
-    borderBottomWidth: 1,
-  },
-  backBtn: { padding: 8, marginLeft: -8 },
-  headerTitle: { fontFamily: Fonts.outfit, fontSize: 18, fontWeight: '600' },
   container: { flex: 1, padding: Spacing.four },
   
   progressHeader: { flexDirection: 'row', justifyContent: 'space-between', marginBottom: Spacing.two },

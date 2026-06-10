@@ -2,13 +2,14 @@ import ThemeCard from '@/components/ThemeCard';
 import { Fonts, Spacing, useThemeColors, useThemeStyles } from '@/constants/theme';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useLocalSearchParams, useRouter } from 'expo-router';
-import { Bookmark, ChevronLeft, Minus, Plus, Settings2, X, Play, Pause } from 'lucide-react-native';
+import { Bookmark, Minus, Plus, Settings2, X, Play, Pause } from 'lucide-react-native';
 import React, { useEffect, useRef, useState } from 'react';
 import { ActivityIndicator, FlatList, Modal, ScrollView, StyleSheet, Switch, Text, TouchableOpacity, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useTranslation } from 'react-i18next';
 import { formatNumber } from '@/utils/formatNumber';
 import { useAudioStore } from '@/store/audioStore';
+import PageHeader from '@/components/page-header';
 import { fetchOnce } from '@/utils/fetchWithCache';
 import { storage } from '@/store/mmkv';
 
@@ -304,40 +305,40 @@ export default function JuzScreen() {
             <Text style={[styles.sectionTitle, { color: colors.textSecondary, marginTop: Spacing.four }]}>{t('quranSettings.translations')}</Text>
             <View style={[styles.settingRow, { borderBottomColor: colors.textSecondary + '20' }]}>
               <Text style={[styles.settingLabel, { color: colors.text }]}>{t('quranSettings.enTrans')}</Text>
-              <Switch value={settings.showEnglish} onValueChange={(v) => updateSetting('showEnglish', v)} trackColor={{ true: colors.highlight }} />
+              <Switch value={settings.showEnglish} onValueChange={(v) => updateSetting('showEnglish', v)} trackColor={{ true: activeQuranColor }} />
             </View>
             <View style={[styles.settingRow, { borderBottomColor: colors.textSecondary + '20' }]}>
               <Text style={[styles.settingLabel, { color: colors.text }]}>{t('quranSettings.bnTrans')}</Text>
-              <Switch value={settings.showBangla} onValueChange={(v) => updateSetting('showBangla', v)} trackColor={{ true: colors.highlight }} />
+              <Switch value={settings.showBangla} onValueChange={(v) => updateSetting('showBangla', v)} trackColor={{ true: activeQuranColor }} />
             </View>
 
             {/* Transliterations */}
             <Text style={[styles.sectionTitle, { color: colors.textSecondary, marginTop: Spacing.four }]}>{t('quranSettings.translit', { defaultValue: 'Transliteration' })}</Text>
             <View style={[styles.settingRow, { borderBottomColor: colors.textSecondary + '20' }]}>
               <Text style={[styles.settingLabel, { color: colors.text }]}>{t('quranSettings.enTranslit', { defaultValue: 'Show Transliteration' })}</Text>
-              <Switch value={settings.showEnglishTranslit} onValueChange={(v) => updateSetting('showEnglishTranslit', v)} trackColor={{ true: colors.highlight }} />
+              <Switch value={settings.showEnglishTranslit} onValueChange={(v) => updateSetting('showEnglishTranslit', v)} trackColor={{ true: activeQuranColor }} />
             </View>
 
             {/* Audio Reciter */}
             <Text style={[styles.sectionTitle, { color: colors.textSecondary, marginTop: Spacing.four }]}>{t('quranSettings.reciter', { defaultValue: 'Audio Reciter' })}</Text>
             <View style={{ flexDirection: 'column', alignItems: 'stretch', gap: 12, paddingBottom: Spacing.four }}>
               <TouchableOpacity activeOpacity={1} 
-                style={[{ padding: 12, borderRadius: 12, borderWidth: 1, borderColor: colors.border }, currentReciterId === 7 ? { borderColor: colors.highlight, backgroundColor: colors.highlight + '15' } : { backgroundColor: colors.backgroundElement, ...themeStyles.cardShadow }]} 
+                style={[{ padding: 12, borderRadius: 12, borderWidth: 1, borderColor: colors.border }, currentReciterId === 7 ? { borderColor: activeQuranColor, backgroundColor: activeQuranColor + '15' } : { backgroundColor: colors.backgroundElement, ...themeStyles.cardShadow }]} 
                 onPress={() => setReciter(7)}
               >
-                <Text style={[styles.settingLabel, { color: currentReciterId === 7 ? colors.highlight : colors.text }]}>{t("quran.reciters.mishary")}</Text>
+                <Text style={[styles.settingLabel, { color: currentReciterId === 7 ? activeQuranColor : colors.text }]}>{t("quran.reciters.mishary")}</Text>
               </TouchableOpacity>
               <TouchableOpacity activeOpacity={1} 
-                style={[{ padding: 12, borderRadius: 12, borderWidth: 1, borderColor: colors.border }, currentReciterId === 1 ? { borderColor: colors.highlight, backgroundColor: colors.highlight + '15' } : { backgroundColor: colors.backgroundElement, ...themeStyles.cardShadow }]} 
+                style={[{ padding: 12, borderRadius: 12, borderWidth: 1, borderColor: colors.border }, currentReciterId === 1 ? { borderColor: activeQuranColor, backgroundColor: activeQuranColor + '15' } : { backgroundColor: colors.backgroundElement, ...themeStyles.cardShadow }]} 
                 onPress={() => setReciter(1)}
               >
-                <Text style={[styles.settingLabel, { color: currentReciterId === 1 ? colors.highlight : colors.text }]}>{t("quran.reciters.abdulBaset")}</Text>
+                <Text style={[styles.settingLabel, { color: currentReciterId === 1 ? activeQuranColor : colors.text }]}>{t("quran.reciters.abdulBaset")}</Text>
               </TouchableOpacity>
               <TouchableOpacity activeOpacity={1} 
-                style={[{ padding: 12, borderRadius: 12, borderWidth: 1, borderColor: colors.border }, currentReciterId === 3 ? { borderColor: colors.highlight, backgroundColor: colors.highlight + '15' } : { backgroundColor: colors.backgroundElement, ...themeStyles.cardShadow }]} 
+                style={[{ padding: 12, borderRadius: 12, borderWidth: 1, borderColor: colors.border }, currentReciterId === 3 ? { borderColor: activeQuranColor, backgroundColor: activeQuranColor + '15' } : { backgroundColor: colors.backgroundElement, ...themeStyles.cardShadow }]} 
                 onPress={() => setReciter(3)}
               >
-                <Text style={[styles.settingLabel, { color: currentReciterId === 3 ? colors.highlight : colors.text }]}>{t("quran.reciters.sudais")}</Text>
+                <Text style={[styles.settingLabel, { color: currentReciterId === 3 ? activeQuranColor : colors.text }]}>{t("quran.reciters.sudais")}</Text>
               </TouchableOpacity>
             </View>
           </ScrollView>
@@ -356,39 +357,40 @@ export default function JuzScreen() {
 
   return (
     <SafeAreaView style={[styles.safeArea, { backgroundColor: colors.background }]}>
-      <View style={styles.header}>
-        <TouchableOpacity activeOpacity={1} onPress={handleBack} style={styles.backBtn}>
-          <ChevronLeft size={22} color={colors.textSecondary} />
-        </TouchableOpacity>
-        <Text style={[styles.title, { color: colors.text, flex: 1, textAlign: 'center' }]}>{t('quran.juz', { id: formatNumber(id as string, i18n.language) })}</Text>
-        <View style={{ flexDirection: 'row', gap: Spacing.three, alignItems: 'center' }}>
-          <TouchableOpacity activeOpacity={1} 
-            onPress={() => {
-              const isThisJuz = playbackMode === 'juz' && storeJuzAyahs.length > 0 && ayahs.length > 0 && 
-                                storeJuzAyahs[0].surahId === ayahs[0].surahId && 
-                                storeJuzAyahs[0].ayahNumber === ayahs[0].numberInSurah;
-              
-              if (isThisJuz && currentSurahId !== null) {
-                isPlaying ? pause() : resume();
-              } else if (ayahs.length > 0) {
-                playJuzAyahs(ayahs.map(a => ({ ...a, ayahNumber: a.numberInSurah })));
-              }
-            }} 
-            style={styles.backBtn}
-          >
-            {isAudioLoading && playbackMode === 'juz' && storeJuzAyahs.length > 0 && ayahs.length > 0 && storeJuzAyahs[0].surahId === ayahs[0].surahId && storeJuzAyahs[0].ayahNumber === ayahs[0].numberInSurah ? (
-              <ActivityIndicator size="small" color={colors.highlight} />
-            ) : isPlaying && playbackMode === 'juz' && storeJuzAyahs.length > 0 && ayahs.length > 0 && storeJuzAyahs[0].surahId === ayahs[0].surahId && storeJuzAyahs[0].ayahNumber === ayahs[0].numberInSurah ? (
-              <Pause size={20} color={colors.highlight} fill={colors.highlight} />
-            ) : (
-              <Play size={20} color={colors.highlight} fill={colors.highlight} />
-            )}
-          </TouchableOpacity>
-          <TouchableOpacity activeOpacity={1} onPress={() => setModalVisible(true)} style={styles.backBtn}>
-            <Settings2 size={20} color={colors.textSecondary} />
-          </TouchableOpacity>
-        </View>
-      </View>
+      <PageHeader
+        titleEn={t('quran.juz', { id: formatNumber(id as string, i18n.language) })}
+        showBack={true}
+        onBack={handleBack}
+        rightElement={
+          <View style={{ flexDirection: 'row', gap: Spacing.three, alignItems: 'center' }}>
+            <TouchableOpacity activeOpacity={1} 
+              onPress={() => {
+                const isThisJuz = playbackMode === 'juz' && storeJuzAyahs.length > 0 && ayahs.length > 0 && 
+                                  storeJuzAyahs[0].surahId === ayahs[0].surahId && 
+                                  storeJuzAyahs[0].ayahNumber === ayahs[0].numberInSurah;
+                
+                if (isThisJuz && currentSurahId !== null) {
+                  isPlaying ? pause() : resume();
+                } else if (ayahs.length > 0) {
+                  playJuzAyahs(ayahs.map(a => ({ ...a, ayahNumber: a.numberInSurah })));
+                }
+              }} 
+              style={styles.backBtn}
+            >
+              {isAudioLoading && playbackMode === 'juz' && storeJuzAyahs.length > 0 && ayahs.length > 0 && storeJuzAyahs[0].surahId === ayahs[0].surahId && storeJuzAyahs[0].ayahNumber === ayahs[0].numberInSurah ? (
+                <ActivityIndicator size="small" color={activeQuranColor} />
+              ) : isPlaying && playbackMode === 'juz' && storeJuzAyahs.length > 0 && ayahs.length > 0 && storeJuzAyahs[0].surahId === ayahs[0].surahId && storeJuzAyahs[0].ayahNumber === ayahs[0].numberInSurah ? (
+                <Pause size={20} color={activeQuranColor} fill={activeQuranColor} />
+              ) : (
+                <Play size={20} color={activeQuranColor} fill={activeQuranColor} />
+              )}
+            </TouchableOpacity>
+            <TouchableOpacity activeOpacity={1} onPress={() => setModalVisible(true)} style={styles.backBtn}>
+              <Settings2 size={20} color={colors.textSecondary} />
+            </TouchableOpacity>
+          </View>
+        }
+      />
       
 
         <FlatList
@@ -453,16 +455,7 @@ export default function JuzScreen() {
 
 const styles = StyleSheet.create({
   safeArea: { flex: 1 },
-  header: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    paddingHorizontal: Spacing.four,
-    height: 51,
-    borderBottomWidth: StyleSheet.hairlineWidth,
-  },
   backBtn: { padding: 2 },
-  title: { fontFamily: Fonts.outfit, fontSize: 14 },
   loaderContainer: { flex: 1, justifyContent: 'center', alignItems: 'center' },
   list: { padding: Spacing.four, gap: Spacing.four },
   

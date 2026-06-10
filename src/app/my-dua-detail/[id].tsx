@@ -5,7 +5,7 @@ import { Trash2, Edit2, Bookmark, Settings2, Minus, Plus, X } from 'lucide-react
 import { saveMyDuas } from '@/utils/my-duas-storage';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { Fonts, Spacing, useThemeColors, useThemeStyles } from '@/constants/theme';
+import { Fonts, Spacing, useThemeColors, useThemeStyles, useActiveColor } from '@/constants/theme';
 import { useTranslation } from 'react-i18next';
 import PageHeader from '@/components/page-header';
 import { loadMyDuas, UserDua, getMediaUri } from '@/utils/my-duas-storage';
@@ -40,6 +40,7 @@ const DEFAULT_SETTINGS: DuaSettings = {
 export default function MyDuaDetailScreen() {
   const { id } = useLocalSearchParams<{ id: string }>();
   const colors = useThemeColors();
+  const activeColor = useActiveColor();
   const themeStyles = useThemeStyles();
   const { t, i18n } = useTranslation();
   const router = useRouter();
@@ -200,7 +201,7 @@ export default function MyDuaDetailScreen() {
     <View style={styles.settingRow}>
       <Text style={[styles.settingLabel, { color: colors.text }]}>{label}</Text>
       <TouchableOpacity activeOpacity={1} 
-        style={[styles.toggleWrap, value ? { backgroundColor: colors.highlight } : { backgroundColor: colors.border }]}
+        style={[styles.toggleWrap, value ? { backgroundColor: activeColor } : { backgroundColor: colors.border }]}
         onPress={() => { Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light); onChange(!value); }}
       >
         <View style={[styles.toggleThumb, value ? styles.toggleThumbOn : styles.toggleThumbOff]} />

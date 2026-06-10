@@ -1,12 +1,13 @@
 import { Fonts, Spacing, useThemeColors } from '@/constants/theme';
 
 import { useRouter, useLocalSearchParams } from 'expo-router';
-import { ChevronLeft, ChevronRight, X } from 'lucide-react-native';
+import { ChevronRight, X } from 'lucide-react-native';
 import { loadMyDuas } from '@/utils/my-duas-storage';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import curatedDuasData from '@/data/curated-duas.json';
 import React, { useEffect, useState, useRef } from 'react';
 import { useTranslation } from 'react-i18next';
+import PageHeader from '@/components/page-header';
 import { 
 
   ScrollView, 
@@ -204,33 +205,33 @@ export default function DuaSearchScreen() {
 
   return (
     <SafeAreaView style={[styles.safeArea, { backgroundColor: colors.background }]}>
-      <View style={[styles.header, { borderBottomColor: colors.border }]}>
-        <TouchableOpacity activeOpacity={1} onPress={handleBack} style={styles.backBtn} hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}>
-          <ChevronLeft size={24} color={colors.textSecondary} />
-        </TouchableOpacity>
-        
-        <Animated.View style={[styles.searchContainer, animatedSearchStyle]}>
-          <TextInput
-            ref={inputRef}
-            style={[styles.searchInput, { color: colors.text }]}
-            placeholder={
-              categoryId === 'my_duas' ? t('duaSettings.searchMyDuas', { defaultValue: 'Search My Duas' }) :
-              categoryId === 'bookmarks' ? t('duaSettings.searchBookmarks', { defaultValue: 'Search Bookmarks' }) :
-              categoryName ? t('duaSettings.searchCategory', { defaultValue: `Search in ${categoryName}` }) :
-              t('duaSettings.searchPlaceholder', { defaultValue: 'Search Duas' })
-            }
-            placeholderTextColor={colors.textSecondary}
-            value={searchQuery}
-            onChangeText={setSearchQuery}
-            autoCorrect={false}
-          />
-          {searchQuery.length > 0 && (
-            <TouchableOpacity activeOpacity={1} onPress={() => setSearchQuery('')} hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}>
-              <X size={18} color={colors.textSecondary} />
-            </TouchableOpacity>
-          )}
-        </Animated.View>
-      </View>
+      <PageHeader
+        showBack={true}
+        onBack={handleBack}
+        rightElement={
+          <Animated.View style={[styles.searchContainer, animatedSearchStyle]}>
+            <TextInput
+              ref={inputRef}
+              style={[styles.searchInput, { color: colors.text }]}
+              placeholder={
+                categoryId === 'my_duas' ? t('duaSettings.searchMyDuas', { defaultValue: 'Search My Duas' }) :
+                categoryId === 'bookmarks' ? t('duaSettings.searchBookmarks', { defaultValue: 'Search Bookmarks' }) :
+                categoryName ? t('duaSettings.searchCategory', { defaultValue: `Search in ${categoryName}` }) :
+                t('duaSettings.searchPlaceholder', { defaultValue: 'Search Duas' })
+              }
+              placeholderTextColor={colors.textSecondary}
+              value={searchQuery}
+              onChangeText={setSearchQuery}
+              autoCorrect={false}
+            />
+            {searchQuery.length > 0 && (
+              <TouchableOpacity activeOpacity={1} onPress={() => setSearchQuery('')} hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}>
+                <X size={18} color={colors.textSecondary} />
+              </TouchableOpacity>
+            )}
+          </Animated.View>
+        }
+      />
 
       <KeyboardAvoidingView behavior={Platform.OS === 'ios' ? 'padding' : 'height'} style={{ flex: 1 }}>
         <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={styles.container} keyboardDismissMode="on-drag" keyboardShouldPersistTaps="handled">
@@ -293,17 +294,6 @@ export default function DuaSearchScreen() {
 
 const styles = StyleSheet.create({
   safeArea: { flex: 1 },
-  header: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    paddingHorizontal: Spacing.four,
-    height: 51,
-    borderBottomWidth: StyleSheet.hairlineWidth,
-    marginBottom: Spacing.four,
-  },
-  backBtn: {
-    marginRight: Spacing.three,
-  },
   searchContainer: {
     flexDirection: 'row',
     alignItems: 'center',

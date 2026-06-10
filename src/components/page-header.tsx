@@ -5,7 +5,7 @@ import React from 'react';
 import { StyleSheet, Text, TouchableOpacity, View, Image } from 'react-native';
 
 interface PageHeaderProps {
-  titleEn: string;
+  titleEn?: string;
   titleAr?: string; // Kept for backwards compatibility but not rendered
   /** Show a muted chevron-left that routes back to home */
   showBack?: boolean;
@@ -45,21 +45,23 @@ export default function PageHeader({
       )}
 
       {/* English title left */}
-      <View style={styles.titleEnWrapper}>
-        <View style={{ flexDirection: 'row', alignItems: 'center' }}>
-          {icon && (
-            <Image source={icon} style={{ width: 22, height: 22, marginRight: 8, borderRadius: 6 }} />
-          )}
-          <Text style={[styles.titleEn, { color: colors.text }]} numberOfLines={1}>
-            {titleEn}
-          </Text>
+      {titleEn ? (
+        <View style={styles.titleEnWrapper}>
+          <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+            {icon && (
+              <Image source={icon} style={{ width: 22, height: 22, marginRight: 8, borderRadius: 6 }} />
+            )}
+            <Text style={[styles.titleEn, { color: colors.text }]} numberOfLines={1}>
+              {titleEn}
+            </Text>
+          </View>
+          {subtitle ? (
+            <Text style={[styles.subtitle, { color: colors.textSecondary }]} numberOfLines={1}>
+              {subtitle}
+            </Text>
+          ) : null}
         </View>
-        {subtitle ? (
-          <Text style={[styles.subtitle, { color: colors.textSecondary }]} numberOfLines={1}>
-            {subtitle}
-          </Text>
-        ) : null}
-      </View>
+      ) : null}
 
       {/* Optional right element */}
       {rightElement ? rightElement : null}

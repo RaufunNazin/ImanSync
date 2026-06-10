@@ -1,6 +1,7 @@
 import React from 'react';
 import { View, Text } from 'react-native';
 import Svg, { Circle } from 'react-native-svg';
+import { Pause } from 'lucide-react-native';
 import { Fonts } from '@/constants/theme';
 
 interface DownloadProgressRingProps {
@@ -9,6 +10,7 @@ interface DownloadProgressRingProps {
   color: string;          // arc color
   trackColor: string;     // muted background ring color
   label: string;          // pre-formatted number string to display inside
+  isPaused?: boolean;     // show pause icon instead of label
 }
 
 export default function DownloadProgressRing({
@@ -17,6 +19,7 @@ export default function DownloadProgressRing({
   color,
   trackColor,
   label,
+  isPaused,
 }: DownloadProgressRingProps) {
   const strokeWidth = 2.5;
   const r = (size - strokeWidth) / 2;
@@ -53,18 +56,22 @@ export default function DownloadProgressRing({
           origin={`${cx}, ${cy}`}
         />
       </Svg>
-      <Text
-        style={{
-          fontFamily: Fonts.outfit,
-          fontSize: size <= 20 ? 7 : 8,
-          color: color,
-          fontWeight: '700',
-          textAlign: 'center',
-          includeFontPadding: false,
-        }}
-      >
-        {label}
-      </Text>
+      {isPaused ? (
+        <Pause size={size <= 20 ? 8 : 10} color={color} fill={color} />
+      ) : (
+        <Text
+          style={{
+            fontFamily: Fonts.outfit,
+            fontSize: size <= 20 ? 7 : 8,
+            color: color,
+            fontWeight: '700',
+            textAlign: 'center',
+            includeFontPadding: false,
+          }}
+        >
+          {label}
+        </Text>
+      )}
     </View>
   );
 }

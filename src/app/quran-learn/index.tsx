@@ -3,7 +3,7 @@ import React, { useEffect, useState } from 'react';
 import { View, Text, StyleSheet, ScrollView, TouchableOpacity } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useRouter } from 'expo-router';
-import { Fonts, Spacing, useThemeColors } from '@/constants/theme';
+import { Fonts, Spacing, useThemeColors, useActiveColor } from '@/constants/theme';
 import PageHeader from '@/components/page-header';
 import { useTranslation } from 'react-i18next';
 import { QURAN_CURRICULUM } from '@/data/quran-curriculum';
@@ -12,6 +12,7 @@ import { BookOpen, CheckCircle, ChevronRight } from 'lucide-react-native';
 
 export default function LearnQuranHubScreen() {
   const colors = useThemeColors();
+  const activeColor = useActiveColor();
   const { t } = useTranslation();
   const router = useRouter();
   
@@ -70,7 +71,7 @@ export default function LearnQuranHubScreen() {
                     <View style={styles.lessonRow}>
                       <View style={[
                         styles.timelineDot, 
-                        { backgroundColor: isCompleted ? colors.highlight : colors.backgroundElement, borderColor: isCompleted ? colors.highlight : colors.border }
+                        { backgroundColor: isCompleted ? activeColor : colors.backgroundElement, borderColor: isCompleted ? activeColor : colors.border }
                       ]}>
                         {isCompleted && <CheckCircle size={16} color={colors.background} />}
                       </View>
@@ -78,7 +79,7 @@ export default function LearnQuranHubScreen() {
                       <ThemeCard 
                         intensity={40} 
                          
-                        style={[styles.lessonCard, { borderColor: isCompleted ? colors.highlight + '50' : colors.border }]}
+                        style={[styles.lessonCard, { borderColor: isCompleted ? activeColor + '50' : colors.border }]}
                       >
                         <View style={styles.lessonInfo}>
                           <Text style={[styles.lessonTitle, { color: colors.text }]}>

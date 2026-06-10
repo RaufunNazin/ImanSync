@@ -321,18 +321,33 @@ export default function DuaScreen() {
   }, []);
 
   const listData = useMemo(() => {
-    return [
+    const customCats = unpinnedCategories.filter(cat => cat.isCustom);
+    const apiCats = unpinnedCategories.filter(cat => !cat.isCustom);
+
+    const topItems = [
       { id: 'my_duas', type: 'my_duas' },
       { id: 'bookmarks', type: 'bookmarks' },
-      ...unpinnedCategories.map(cat => ({ id: cat.id, type: 'category', category: cat }))
+      ...customCats.map(cat => ({ id: cat.id, type: 'category', category: cat }))
     ];
+
+    const pairedTopItems = [];
+    for (let i = 0; i < topItems.length; i += 2) {
+      pairedTopItems.push({
+        id: `pair_${i}`,
+        type: 'row',
+        items: topItems.slice(i, i + 2)
+      });
+    }
+
+    const singleItems = apiCats.map(cat => ({ id: cat.id, type: 'category', category: cat, isOneColumn: true }));
+
+    return [...pairedTopItems, ...singleItems];
   }, [loading, myDuasCount, bookmarksCount, unpinnedCategories]);
 
-  const renderItem = useCallback(({ item }: { item: any }) => {
-
-    if (item.type === 'my_duas') {
+  const renderInnerItem = (innerItem: any) => {
+    if (innerItem.type === 'my_duas') {
       return (
-        <View style={styles.gridItem}>
+        <View key={innerItem.id} style={styles.gridItem}>
           <DuaCard
             id="my_duas"
             name={t('dua.myDuas')}
@@ -346,9 +361,9 @@ export default function DuaScreen() {
       );
     }
     
-    if (item.type === 'bookmarks') {
+    if (innerItem.type === 'bookmarks') {
       return (
-        <View style={styles.gridItem}>
+        <View key={innerItem.id} style={styles.gridItem}>
           <DuaCard
             id="bookmarks"
             name={t('dua.bookmarks')}
@@ -361,21 +376,34 @@ export default function DuaScreen() {
       );
     }
     
-    const cat = item.category;
+    const cat = innerItem.category;
     return (
-      <View style={styles.gridItem}>
+      <View key={innerItem.id} style={innerItem.isOneColumn ? { width: '100%' } : styles.gridItem}>
         <DuaCard
           id={cat.id}
           name={getCategoryName(cat)}
           description={getCategoryDesc(cat)}
           count={cat.count}
           isCustom={cat.isCustom}
+          isOneColumn={innerItem.isOneColumn}
           colors={colors}
           onPress={() => handleCategoryPress(cat)}
           onLongPress={() => openPinSheet(cat)}
         />
       </View>
     );
+  };
+
+  const renderItem = useCallback(({ item }: { item: any }) => {
+    if (item.type === 'row') {
+      return (
+        <View style={{ flexDirection: 'row', justifyContent: 'space-between' }}>
+          {item.items.map((innerItem: any) => renderInnerItem(innerItem))}
+        </View>
+      );
+    }
+    
+    return renderInnerItem(item);
   }, [colors, myDuasCount, bookmarksCount, t, getCategoryName, getCategoryDesc, handleMyDuasPress, handleBookmarksPress, handleCategoryPress, openPinSheet]);
 
   const renderHeader = useCallback(() => {
@@ -457,12 +485,11 @@ export default function DuaScreen() {
         data={listData}
         keyExtractor={(item) => item.id}
         renderItem={renderItem}
-        numColumns={2}
-        columnWrapperStyle={{ paddingHorizontal: Spacing.four, justifyContent: 'space-between', marginBottom: Spacing.three }}
+        numColumns={1}
         ListHeaderComponent={renderHeader}
         style={{ flex: 1 }}
         showsVerticalScrollIndicator={false} 
-        contentContainerStyle={styles.container}
+        contentContainerStyle={[styles.container, { gap: Spacing.three, paddingHorizontal: Spacing.four }]}
         onScroll={RNAnimated.event(
           [{ nativeEvent: { contentOffset: { y: scrollY } } }],
           { useNativeDriver: true }

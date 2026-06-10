@@ -14,6 +14,7 @@ interface DuaCardProps {
   isPinned?: boolean;
   isMyDuas?: boolean;
   isCustom?: boolean;
+  isOneColumn?: boolean;
   onPress: () => void;
   onLongPress?: () => void;
   colors: any;
@@ -26,6 +27,7 @@ const DuaCard = React.memo(function DuaCard({
   isPinned,
   isMyDuas,
   isCustom,
+  isOneColumn,
   onPress,
   onLongPress,
   colors,
@@ -39,27 +41,36 @@ const DuaCard = React.memo(function DuaCard({
           isCustom && { borderColor: activeColor }
     ]}>
       <TouchableOpacity activeOpacity={1}
-        style={[styles.card]}
+        style={[styles.card, isOneColumn && styles.cardOneColumn]}
         onPress={onPress}
         onLongPress={onLongPress}
         delayLongPress={300}
       >
-          {isPinned && (
+          {isPinned && !isOneColumn && (
             <View style={styles.pinBadge}>
               <Bookmark size={14} color={isCustom ? activeColor : colors.accent} fill={isCustom ? activeColor : colors.accent} />
             </View>
           )}
 
-          <View style={styles.content}>
-            <Text style={[styles.name, { color: colors.text }]} numberOfLines={2}>
+          <View style={[styles.content, isOneColumn && styles.contentOneColumn]}>
+            {isOneColumn && isPinned && (
+              <Bookmark size={18} color={colors.accent} fill={colors.accent} style={{ marginRight: Spacing.two }} />
+            )}
+            <Text style={[styles.name, isOneColumn && styles.nameOneColumn, { color: colors.text }]} numberOfLines={2}>
               {name}
             </Text>
-            {count !== undefined && (
-              <Text style={[styles.countText, { color: colors.textSecondary }]}>{t('dua.duaCount', { count: formatNumber(count, i18n.language) })}</Text>
+            {isOneColumn ? (
+              <View style={{ flexDirection: 'row', alignItems: 'center', gap: Spacing.three }}>
+                {count !== undefined && (
+                  <Text style={[styles.countText, { color: colors.textSecondary }]}>{t('dua.duaCount', { count: formatNumber(count, i18n.language) })}</Text>
+                )}
+              </View>
+            ) : (
+              count !== undefined && (
+                <Text style={[styles.countText, { color: colors.textSecondary }]}>{t('dua.duaCount', { count: formatNumber(count, i18n.language) })}</Text>
+              )
             )}
           </View>
-
-
         </TouchableOpacity>
     </ThemeCard>
   );
@@ -70,7 +81,6 @@ export default DuaCard;
 const styles = StyleSheet.create({
   wrapper: {
     borderRadius: 20,
-    
     borderWidth: 1,
     flex: 1,
   },
@@ -80,6 +90,10 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
     minHeight: 70,
+  },
+  cardOneColumn: {
+    paddingVertical: Spacing.four,
+    paddingHorizontal: Spacing.four,
   },
   pinBadge: {
     position: 'absolute',
@@ -95,10 +109,22 @@ const styles = StyleSheet.create({
     zIndex: 2,
     paddingHorizontal: Spacing.two,
   },
+  contentOneColumn: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    paddingHorizontal: 0,
+    width: '100%',
+  },
   name: {
     fontFamily: Fonts.outfit,
     fontSize: 16,
+    fontWeight: '600',
     textAlign: 'center',
+  },
+  nameOneColumn: {
+    textAlign: 'left',
+    flex: 1,
   },
 
   bgIconBox: {

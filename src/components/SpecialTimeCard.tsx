@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { View, Text, TouchableOpacity } from 'react-native';
+import Animated, { useSharedValue, useAnimatedStyle, withTiming } from 'react-native-reanimated';
 
 import { Pointer } from 'lucide-react-native';
 import ThemeCard from '@/components/ThemeCard';
@@ -15,6 +16,20 @@ export interface SpecialTime {
 export default function SpecialTimeCard({ item, colors, i18nLanguage, styles, t, activeColor }: { item: SpecialTime, colors: any, i18nLanguage: string, styles: any, t: any, activeColor: string }) {
   const [showCountdown, setShowCountdown] = useState(false);
   const [remainingStr, setRemainingStr] = useState('');
+
+  const crossfade = useSharedValue(0);
+
+  useEffect(() => {
+    crossfade.value = withTiming(showCountdown ? 1 : 0, { duration: 300 });
+  }, [showCountdown]);
+
+  const countdownStyle = useAnimatedStyle(() => ({
+    opacity: crossfade.value,
+  }));
+
+  const timeStyle = useAnimatedStyle(() => ({
+    opacity: 1 - crossfade.value,
+  }));
 
   useEffect(() => {
     let interval: NodeJS.Timeout;
@@ -67,21 +82,24 @@ export default function SpecialTimeCard({ item, colors, i18nLanguage, styles, t,
         )}
         <View style={[styles.specialCardInner, { alignItems: 'center', justifyContent: 'center', paddingVertical: 16 }]}>
           <View style={{ height: 42, width: '100%', justifyContent: 'center', alignItems: 'center', marginBottom: 4 }}>
-            {showCountdown ? (
-              <Text style={{ position: 'absolute', fontFamily: Fonts.outfit, fontSize: 16, lineHeight: 20, color: activeColor, textAlign: 'center' }}>
-                {remainingStr}
-              </Text>
-            ) : (
-              <Text style={{ position: 'absolute', fontFamily: Fonts.outfit, fontSize: 22, color: colors.accent, textAlign: 'center' }}>
-                {formatNumber(item.time.replace(/ AM| PM/g, ''), i18nLanguage)}
-                {item.time.includes(' AM') && <Text style={{ fontSize: 13 }}> AM</Text>}
-                {item.time.includes(' PM') && <Text style={{ fontSize: 13 }}> PM</Text>}
-              </Text>
-            )}
+            <Animated.Text style={[countdownStyle, { position: 'absolute', fontFamily: Fonts.outfit, fontSize: 16, lineHeight: 20, color: activeColor, textAlign: 'center' }]}>
+              {remainingStr}
+            </Animated.Text>
+            <Animated.Text style={[timeStyle, { position: 'absolute', fontFamily: Fonts.outfit, fontSize: 22, color: colors.accent, textAlign: 'center' }]}>
+              {formatNumber(item.time.replace(/ AM| PM/g, ''), i18nLanguage)}
+              {item.time.includes(' AM') && <Text style={{ fontSize: 13 }}> AM</Text>}
+              {item.time.includes(' PM') && <Text style={{ fontSize: 13 }}> PM</Text>}
+            </Animated.Text>
           </View>
-          <Text style={{ fontFamily: Fonts.outfit, fontSize: 10, color: colors.textSecondary, textTransform: 'uppercase', letterSpacing: 1, textAlign: 'center' }}>
-            {showCountdown ? t('home.timeLeft') : item.label}
-          </Text>
+          
+          <View style={{ height: 14, width: '100%', justifyContent: 'center', alignItems: 'center' }}>
+            <Animated.Text style={[countdownStyle, { position: 'absolute', fontFamily: Fonts.outfit, fontSize: 10, color: colors.textSecondary, textTransform: 'uppercase', letterSpacing: 1, textAlign: 'center' }]}>
+              {t('home.timeLeft')}
+            </Animated.Text>
+            <Animated.Text style={[timeStyle, { position: 'absolute', fontFamily: Fonts.outfit, fontSize: 10, color: colors.textSecondary, textTransform: 'uppercase', letterSpacing: 1, textAlign: 'center' }]}>
+              {item.label}
+            </Animated.Text>
+          </View>
         </View>
       </ThemeCard>
     </TouchableOpacity>

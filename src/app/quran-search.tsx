@@ -4,11 +4,11 @@ import { formatNumber } from '@/utils/formatNumber';
 import { fetchOnce } from '@/utils/fetchWithCache';
 import { storage } from '@/store/mmkv';
 import { useRouter } from 'expo-router';
-import { ChevronLeft, X } from 'lucide-react-native';
+import { X } from 'lucide-react-native';
 import React, { useEffect, useState, useRef } from 'react';
 import { useTranslation } from 'react-i18next';
+import PageHeader from '@/components/page-header';
 import { 
-
   ScrollView, 
   StyleSheet, 
   Text, 
@@ -22,11 +22,10 @@ import {
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 import Animated, { 
-  FadeIn, 
-  FadeOut, 
-  useAnimatedStyle,
-  useSharedValue,
-  withTiming
+  useSharedValue, 
+  useAnimatedStyle, 
+  withTiming, 
+  FadeIn
 } from 'react-native-reanimated';
 
 const { width } = Dimensions.get('window');
@@ -114,28 +113,28 @@ export default function QuranSearchScreen() {
 
   return (
     <SafeAreaView style={[styles.safeArea, { backgroundColor: colors.background }]}>
-      <Animated.View entering={FadeIn.duration(150)} exiting={FadeOut.duration(100)} style={[styles.header, { borderBottomColor: colors.border }]}>
-        <TouchableOpacity activeOpacity={1} onPress={handleBack} style={styles.backBtn} hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}>
-          <ChevronLeft size={24} color={colors.textSecondary} />
-        </TouchableOpacity>
-        
-        <Animated.View style={[styles.searchContainer, animatedSearchStyle]}>
-          <TextInput
-            ref={inputRef}
-            style={[styles.searchInput, { color: colors.text }]}
-            placeholder={t('quran.searchPlaceholder', { defaultValue: 'Search Surah' })}
-            placeholderTextColor={colors.textSecondary}
-            value={searchQuery}
-            onChangeText={setSearchQuery}
-            autoCorrect={false}
-          />
-          {searchQuery.length > 0 && (
-            <TouchableOpacity activeOpacity={1} onPress={() => setSearchQuery('')} hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}>
-              <X size={18} color={colors.textSecondary} />
-            </TouchableOpacity>
-          )}
-        </Animated.View>
-      </Animated.View>
+      <PageHeader
+        showBack={true}
+        onBack={handleBack}
+        rightElement={
+          <Animated.View style={[styles.searchContainer, animatedSearchStyle]}>
+            <TextInput
+              ref={inputRef}
+              style={[styles.searchInput, { color: colors.text }]}
+              placeholder={t('quran.searchPlaceholder', { defaultValue: 'Search Surah Name...' })}
+              placeholderTextColor={colors.textSecondary}
+              value={searchQuery}
+              onChangeText={setSearchQuery}
+              autoCorrect={false}
+            />
+            {searchQuery.length > 0 && (
+              <TouchableOpacity activeOpacity={1} onPress={() => setSearchQuery('')} hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}>
+                <X size={18} color={colors.textSecondary} />
+              </TouchableOpacity>
+            )}
+          </Animated.View>
+        }
+      />
 
       <KeyboardAvoidingView behavior={Platform.OS === 'ios' ? 'padding' : 'height'} style={{ flex: 1 }}>
         <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={styles.container} keyboardDismissMode="on-drag" keyboardShouldPersistTaps="handled">
@@ -182,17 +181,6 @@ export default function QuranSearchScreen() {
 
 const styles = StyleSheet.create({
   safeArea: { flex: 1 },
-  header: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    paddingHorizontal: Spacing.four,
-    height: 51,
-    borderBottomWidth: StyleSheet.hairlineWidth,
-    marginBottom: Spacing.four,
-  },
-  backBtn: {
-    marginRight: Spacing.three,
-  },
   searchContainer: {
     flexDirection: 'row',
     alignItems: 'center',

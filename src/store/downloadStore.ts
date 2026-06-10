@@ -6,15 +6,22 @@ import { Platform } from 'react-native';
 interface DownloadState {
   downloadedFiles: Record<string, string>; // key: `${reciterId}_${surahId}`, value: local file URI
   downloadProgress: Record<string, number>; // key: `${reciterId}_${surahId}`, value: 0-100 progress
+  pausedDownloads: Record<string, boolean>; // key: `${reciterId}_${surahId}`, value: true if paused
 
   initialize: () => Promise<void>;
   getDownloadedUri: (reciterId: number, surahId: number) => string | null;
   downloadSurah: (reciterId: number, surahId: number) => Promise<void>;
   deleteSurah: (reciterId: number, surahId: number) => Promise<void>;
+  pauseDownload: (reciterId: number, surahId: number) => Promise<void>;
+  resumeDownload: (reciterId: number, surahId: number) => Promise<void>;
+  cancelDownload: (reciterId: number, surahId: number) => Promise<void>;
 }
 
 const STORAGE_KEY = 'imansync_downloaded_audio';
 const AUDIO_DIR = Platform.OS === 'web' ? '' : ((FileSystem as any).documentDirectory || (FileSystem as any).cacheDirectory) + 'quran_audio';
+
+// Module-level map to hold active DownloadResumable references (not serializable, so kept outside zustand)
+const activeDownloads: Record<string, FileSystem.DownloadResumable> = {};
 
 async function ensureDirExists() {
   if (Platform.OS === 'web') return;
@@ -24,9 +31,29 @@ async function ensureDirExists() {
   }
 }
 
+// Helper to handle download completion for both initial download and resume
+function handleDownloadResult(key: string, result: FileSystem.FileSystemDownloadResult | undefined, set: any) {
+  if (result && result.uri) {
+    delete activeDownloads[key];
+    set((state: any) => {
+      const newFiles = { ...state.downloadedFiles, [key]: result.uri };
+      AsyncStorage.setItem(STORAGE_KEY, JSON.stringify(newFiles)).catch(console.error);
+
+      const newProgress = { ...state.downloadProgress };
+      delete newProgress[key];
+
+      const newPaused = { ...state.pausedDownloads };
+      delete newPaused[key];
+
+      return { downloadedFiles: newFiles, downloadProgress: newProgress, pausedDownloads: newPaused };
+    });
+  }
+}
+
 export const useDownloadStore = create<DownloadState>((set, get) => ({
   downloadedFiles: {},
   downloadProgress: {},
+  pausedDownloads: {},
 
   initialize: async () => {
     if (Platform.OS === 'web') return;
@@ -100,28 +127,91 @@ export const useDownloadStore = create<DownloadState>((set, get) => ({
         }
       );
 
+      // Store the reference so we can pause/resume/cancel later
+      activeDownloads[key] = downloadResumable;
+
       const result = await downloadResumable.downloadAsync();
-      
-      if (result && result.uri) {
-        set((state) => {
-          const newFiles = { ...state.downloadedFiles, [key]: result.uri };
-          AsyncStorage.setItem(STORAGE_KEY, JSON.stringify(newFiles)).catch(console.error);
-          
-          const newProgress = { ...state.downloadProgress };
-          delete newProgress[key];
-          
-          return { downloadedFiles: newFiles, downloadProgress: newProgress };
-        });
-      }
+      handleDownloadResult(key, result, set);
 
     } catch (e) {
       console.error(`Failed to download surah ${surahId}`, e);
+      delete activeDownloads[key];
       set((state) => {
         const newProgress = { ...state.downloadProgress };
         delete newProgress[key];
-        return { downloadProgress: newProgress };
+        const newPaused = { ...state.pausedDownloads };
+        delete newPaused[key];
+        return { downloadProgress: newProgress, pausedDownloads: newPaused };
       });
     }
+  },
+
+  pauseDownload: async (reciterId: number, surahId: number) => {
+    const key = `${reciterId}_${surahId}`;
+    const resumable = activeDownloads[key];
+    if (!resumable) return;
+
+    try {
+      await resumable.pauseAsync();
+      set((state) => ({ pausedDownloads: { ...state.pausedDownloads, [key]: true } }));
+    } catch (e) {
+      console.error(`Failed to pause download for surah ${surahId}`, e);
+    }
+  },
+
+  resumeDownload: async (reciterId: number, surahId: number) => {
+    const key = `${reciterId}_${surahId}`;
+    const resumable = activeDownloads[key];
+    if (!resumable) return;
+
+    try {
+      set((state) => ({ pausedDownloads: { ...state.pausedDownloads, [key]: false } }));
+      const result = await resumable.resumeAsync();
+      handleDownloadResult(key, result, set);
+    } catch (e) {
+      console.error(`Failed to resume download for surah ${surahId}`, e);
+      delete activeDownloads[key];
+      set((state) => {
+        const newProgress = { ...state.downloadProgress };
+        delete newProgress[key];
+        const newPaused = { ...state.pausedDownloads };
+        delete newPaused[key];
+        return { downloadProgress: newProgress, pausedDownloads: newPaused };
+      });
+    }
+  },
+
+  cancelDownload: async (reciterId: number, surahId: number) => {
+    const key = `${reciterId}_${surahId}`;
+    const resumable = activeDownloads[key];
+
+    if (resumable) {
+      try {
+        await resumable.cancelAsync();
+      } catch (e) {
+        // Ignore cancel errors
+      }
+    }
+
+    // Clean up the partial file
+    const localUri = AUDIO_DIR + `/reciter_${reciterId}_surah_${surahId}.mp3`;
+    try {
+      const info = await FileSystem.getInfoAsync(localUri);
+      if (info.exists) {
+        await FileSystem.deleteAsync(localUri);
+      }
+    } catch (e) {
+      // Ignore cleanup errors
+    }
+
+    delete activeDownloads[key];
+    set((state) => {
+      const newProgress = { ...state.downloadProgress };
+      delete newProgress[key];
+      const newPaused = { ...state.pausedDownloads };
+      delete newPaused[key];
+      return { downloadProgress: newProgress, pausedDownloads: newPaused };
+    });
   },
 
   deleteSurah: async (reciterId: number, surahId: number) => {

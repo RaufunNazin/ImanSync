@@ -235,8 +235,8 @@ export default function LessonPlayerScreen() {
                 let borderColor: string = colors.border;
                 
                 if (isSelected) {
-                  bgColor = isTarget ? colors.highlight + '30' : colors.error + '30';
-                  borderColor = isTarget ? colors.highlight : colors.error;
+                  bgColor = isTarget ? activeColor + '30' : colors.error + '30';
+                  borderColor = isTarget ? activeColor : colors.error;
                 }
 
                 return (
