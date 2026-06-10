@@ -7,7 +7,7 @@ import { Fonts, Spacing, useThemeColors } from '@/constants/theme';
 import PageHeader from '@/components/page-header';
 import { useTranslation } from 'react-i18next';
 import { ChevronRight } from 'lucide-react-native';
-import SkeletonBox from '@/components/SkeletonBox';
+
 import DuaService, { UnifiedDuaItem } from '@/services/duaService';
 import { loadMyDuas, saveMyDuas, saveMediaFile, UserDua } from '@/utils/my-duas-storage';
 import curatedDuasData from '@/data/curated-duas.json';
@@ -29,7 +29,7 @@ export default function DuaCategoryScreen() {
     }
     return [];
   });
-  const [loading, setLoading] = useState(() => duas.length === 0);
+
   const [pinnedDuaIds, setPinnedDuaIds] = useState<string[]>([]);
   const [selectedDua, setSelectedDua] = useState<UnifiedDuaItem | null>(null);
   const [pinSheetVisible, setPinSheetVisible] = useState(false);
@@ -96,7 +96,7 @@ export default function DuaCategoryScreen() {
           image: d.image || undefined,
         }));
         setDuas(formatted);
-        setLoading(false);
+
       } else {
         loadMyDuas()
           .then((allCustom) => {
@@ -114,16 +114,14 @@ export default function DuaCategoryScreen() {
             }));
             setDuas(categoryDuas);
           })
-          .catch(console.error)
-          .finally(() => setLoading(false));
+          .catch(console.error);
       }
     } else {
       DuaService.getDuasByCategory(Number(id))
         .then((data) => {
           setDuas(data);
         })
-        .catch((err) => console.error(err))
-        .finally(() => setLoading(false));
+        .catch((err) => console.error(err));
     }
   };
 
@@ -186,7 +184,7 @@ export default function DuaCategoryScreen() {
   };
 
   const renderEmpty = () => {
-    if (loading) return null;
+    
     return (
       <View style={{ alignItems: 'center', marginTop: 80 }}>
         <FolderOpen size={48} color={colors.textSecondary} style={{ marginBottom: 16, opacity: 0.5 }} />
@@ -221,20 +219,7 @@ export default function DuaCategoryScreen() {
         }
       />
       
-      {loading ? (
-        <View style={[styles.list, { gap: Spacing.three, padding: Spacing.four }]}>
-          {[...Array(5)].map((_, i) => (
-            <ThemeCard key={i} intensity={40}  style={[styles.itemWrapper, { borderColor: colors.border }]}>
-              <View style={[styles.item]}>
-                <View style={[styles.itemContent]}>
-                  <SkeletonBox width={`${50 + (i % 3) * 15}%` as any} height={16} borderRadius={4} color={colors.border} />
-                </View>
-                <ChevronRight size={20} color={colors.border} />
-              </View>
-            </ThemeCard>
-          ))}
-        </View>
-      ) : (
+
         <Animated.FlatList
           data={sortedDuas}
           keyExtractor={(item: any) => item.id.toString()}
@@ -249,7 +234,6 @@ export default function DuaCategoryScreen() {
           )}
           scrollEventThrottle={16}
         />
-      )}
 
 
       {selectedDua && (

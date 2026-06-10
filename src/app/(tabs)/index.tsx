@@ -1,7 +1,7 @@
 import PageHeader from '@/components/page-header';
-import SkeletonBox from '@/components/SkeletonBox';
+
 import AnimatedProgressBar from '@/components/AnimatedProgressBar';
-import { Fonts, Spacing, useThemeColors } from '@/constants/theme';
+import { Fonts, Spacing, useThemeColors, useActiveColor } from '@/constants/theme';
 import { usePreferencesStore } from '@/store/preferencesStore';
 import { useThemeStore } from '@/store/themeStore';
 import { useQadaStore } from '@/store/qadaStore';
@@ -96,6 +96,7 @@ import ThemeCard from '@/components/ThemeCard';
 export default function HomeScreen() {
   const scheme = useThemeStore((s) => s.theme);
   const colors = useThemeColors();
+  const activeColor = useActiveColor();
   const router = useRouter();
   const { t, i18n } = useTranslation();
 
@@ -636,11 +637,9 @@ export default function HomeScreen() {
             {t('home.greeting')}
           </Text>
           <TouchableOpacity activeOpacity={1} onPress={() => router.push('/calendar' as any)} disabled={!hijriDisplay}>
-            <SkeletonBox loaded={!!hijriDisplay} width={180} height={14} borderRadius={7} color={colors.border}>
-              <Text style={[styles.hijriLabel, { color: colors.textSecondary }]}>
-                {hijriDisplay}
-              </Text>
-            </SkeletonBox>
+            <Text style={[styles.hijriLabel, { color: colors.textSecondary }]}>
+              {hijriDisplay}
+            </Text>
           </TouchableOpacity>
         </View>
 
@@ -655,7 +654,7 @@ export default function HomeScreen() {
               {/* Animated green glow from top-left when prayer is marked done */}
               <Animated.View style={[{ position: 'absolute', top: 0, left: 0, right: 0, bottom: 0 }, animatedGlowStyle]}>
                 <LinearGradient
-                  colors={[colors.highlight + '30', colors.highlight + '08', 'transparent']}
+                  colors={[activeColor + '30', activeColor + '08', 'transparent']}
                   start={{ x: 0, y: 0 }}
                   end={{ x: 1, y: 1 }}
                   style={{ width: '100%', height: '100%' }}
@@ -674,7 +673,7 @@ export default function HomeScreen() {
 
               {/* Tiny text indicator — top right */}
               <View style={{ position: 'absolute', top: 10, right: 14 }}>
-                <Text style={{ fontFamily: Fonts.outfit, fontSize: 9, color: isCurrentPrayerDone ? colors.highlight : colors.textSecondary, opacity: 0.7 }}>
+                <Text style={{ fontFamily: Fonts.outfit, fontSize: 9, color: isCurrentPrayerDone ? activeColor : colors.textSecondary, opacity: 0.7 }}>
                   {isCurrentPrayerDone ? t('home.prayerDone') : t('home.tapToMark')}
                 </Text>
               </View>
@@ -705,39 +704,31 @@ export default function HomeScreen() {
               {/* Current + Next prayer labels above progress bar */}
               <View style={{ flexDirection: 'row', justifyContent: 'space-between', marginBottom: 6, marginTop: 32 }}>
                 <View>
-                  <SkeletonBox loaded={prayersWithStatus.length > 0} width={60} height={14} borderRadius={6} color={colors.border} style={{ marginBottom: 2 }}>
-                    <Text style={{ fontFamily: Fonts.outfit, fontSize: 11, color: colors.textSecondary, textTransform: 'uppercase', letterSpacing: 1 }}>
-                      {currentPrayer.name}
-                    </Text>
-                  </SkeletonBox>
-                  <SkeletonBox loaded={prayersWithStatus.length > 0} width={45} height={16} borderRadius={5} color={colors.border} style={{ marginTop: 2 }}>
-                    <Text style={{ fontFamily: Fonts.outfit, fontSize: 12, color: colors.textSecondary, marginTop: 1 }}>
-                      {currentPrayer.time.replace(/ AM| PM/g, '')}
-                      {currentPrayer.time.includes(' AM') && <Text style={{ fontSize: 8 }}> AM</Text>}
-                      {currentPrayer.time.includes(' PM') && <Text style={{ fontSize: 8 }}> PM</Text>}
-                    </Text>
-                  </SkeletonBox>
+                  <Text style={{ fontFamily: Fonts.outfit, fontSize: 11, color: colors.textSecondary, textTransform: 'uppercase', letterSpacing: 1, marginBottom: 2 }}>
+                    {currentPrayer.name}
+                  </Text>
+                  <Text style={{ fontFamily: Fonts.outfit, fontSize: 12, color: colors.textSecondary, marginTop: 1 }}>
+                    {currentPrayer.time.replace(/ AM| PM/g, '')}
+                    {currentPrayer.time.includes(' AM') && <Text style={{ fontSize: 8 }}> AM</Text>}
+                    {currentPrayer.time.includes(' PM') && <Text style={{ fontSize: 8 }}> PM</Text>}
+                  </Text>
                 </View>
                 <View style={{ alignItems: 'flex-end' }}>
-                  <SkeletonBox loaded={prayersWithStatus.length > 0} width={60} height={14} borderRadius={6} color={colors.border} style={{ marginBottom: 2 }}>
-                    <Text style={{ fontFamily: Fonts.outfit, fontSize: 11, color: colors.textSecondary, textTransform: 'uppercase', letterSpacing: 1 }}>
-                      {nextPrayer.name}
-                    </Text>
-                  </SkeletonBox>
-                  <SkeletonBox loaded={prayersWithStatus.length > 0} width={45} height={16} borderRadius={5} color={colors.border} style={{ marginTop: 2 }}>
-                    <Text style={{ fontFamily: Fonts.outfit, fontSize: 12, color: colors.textSecondary, marginTop: 1 }}>
-                      {nextPrayer.time.replace(/ AM| PM/g, '')}
-                      {nextPrayer.time.includes(' AM') && <Text style={{ fontSize: 8 }}> AM</Text>}
-                      {nextPrayer.time.includes(' PM') && <Text style={{ fontSize: 8 }}> PM</Text>}
-                    </Text>
-                  </SkeletonBox>
+                  <Text style={{ fontFamily: Fonts.outfit, fontSize: 11, color: colors.textSecondary, textTransform: 'uppercase', letterSpacing: 1, marginBottom: 2 }}>
+                    {nextPrayer.name}
+                  </Text>
+                  <Text style={{ fontFamily: Fonts.outfit, fontSize: 12, color: colors.textSecondary, marginTop: 1 }}>
+                    {nextPrayer.time.replace(/ AM| PM/g, '')}
+                    {nextPrayer.time.includes(' AM') && <Text style={{ fontSize: 8 }}> AM</Text>}
+                    {nextPrayer.time.includes(' PM') && <Text style={{ fontSize: 8 }}> PM</Text>}
+                  </Text>
                 </View>
               </View>
 
               {/* Full-width Dynamic Progress Bar */}
               <AnimatedProgressBar
                 progress={prayersWithStatus.length > 0 ? progressPercent : 0}
-                color={progressPercent < 50 ? colors.highlight : progressPercent < 75 ? colors.accent : colors.error}
+                color={progressPercent < 50 ? activeColor : progressPercent < 75 ? colors.accent : colors.error}
                 trackColor={colors.border}
                 height={4}
                 duration={800}
@@ -835,7 +826,7 @@ export default function HomeScreen() {
                     const isCurrent = prayer.status === 'current';
                     return (
                       <View key={`name-${prayer.id}`} style={{ width: '20%', alignItems: 'center' }}>
-                        <Text style={[styles.timelineName, { marginBottom: 0, color: isCurrent ? colors.highlight : colors.text, opacity: isCurrent ? 1 : 0.5 }]}>
+                        <Text style={[styles.timelineName, { marginBottom: 0, color: isCurrent ? activeColor : colors.text, opacity: isCurrent ? 1 : 0.5 }]}>
                           {prayer.name}
                         </Text>
                       </View>
@@ -870,7 +861,7 @@ export default function HomeScreen() {
                     const isCurrent = prayer.status === 'current';
                     return (
                       <View key={`time-${prayer.id}`} style={{ width: '20%', alignItems: 'center' }}>
-                        <Text style={[styles.timelineTime, { color: isCurrent ? colors.highlight : colors.text, opacity: 1 }]}>
+                        <Text style={[styles.timelineTime, { color: isCurrent ? activeColor : colors.text, opacity: 1 }]}>
                           {formatNumber(prayer.time.replace(/ AM| PM/g, ''), i18n.language)}
                         </Text>
                       </View>
@@ -880,34 +871,7 @@ export default function HomeScreen() {
               </View>
             </ThemeCard>
           ) : null}
-          {prayersWithStatus.length === 0 && (
-            <ThemeCard intensity={30} style={[styles.timelineCard, { borderColor: colors.border }]}>
-              <View style={{ position: 'relative', width: '100%', alignItems: 'center' }}>
-                <View style={{ flexDirection: 'row', width: '100%', justifyContent: 'space-between', marginBottom: 6 }}>
-                  {["Fajr","Dhuhr","Asr","Maghrib","Isha"].map((_, i) => (
-                    <View key={`name-skel-${i}`} style={{ width: '20%', alignItems: 'center' }}>
-                      <SkeletonBox width={38} height={20} borderRadius={6} color={colors.border} loaded={false} />
-                    </View>
-                  ))}
-                </View>
-                <View style={{ position: 'relative', flexDirection: 'row', width: '100%', justifyContent: 'space-between', alignItems: 'center', marginBottom: 6, zIndex: 2 }}>
-                  <View style={{ position: 'absolute', left: '10%', right: '10%', height: 2, backgroundColor: colors.background, borderRadius: 1, zIndex: 0 }} />
-                  {["Fajr","Dhuhr","Asr","Maghrib","Isha"].map((_, i) => (
-                    <View key={`dot-skel-${i}`} style={{ width: '20%', alignItems: 'center' }}>
-                      <View style={[styles.timelineDot, { backgroundColor: colors.background }]} />
-                    </View>
-                  ))}
-                </View>
-                <View style={{ flexDirection: 'row', width: '100%', justifyContent: 'space-between' }}>
-                  {["Fajr","Dhuhr","Asr","Maghrib","Isha"].map((_, i) => (
-                    <View key={`time-skel-${i}`} style={{ width: '20%', alignItems: 'center' }}>
-                      <SkeletonBox width={44} height={20} borderRadius={5} color={colors.border} loaded={false} />
-                    </View>
-                  ))}
-                </View>
-              </View>
-            </ThemeCard>
-          )}
+
 
           {/* Suhur · Iftar · Tahajjud */}
           {specialTimes.length > 0 ? (
@@ -915,26 +879,12 @@ export default function HomeScreen() {
               <Text style={[styles.subSectionLabelOuter, { color: colors.textSecondary }]}>{t('home.specialTimes')}</Text>
               <View style={styles.specialGrid}>
                 {specialTimes.map((item) => (
-                  <SpecialTimeCard key={item.label} item={item} colors={colors} i18nLanguage={i18n.language} styles={styles} t={t} />
+                  <SpecialTimeCard key={item.label} item={item} colors={colors} activeColor={activeColor} i18nLanguage={i18n.language} styles={styles} t={t} />
                 ))}
               </View>
             </View>
           ) : null}
-          {specialTimes.length === 0 && (
-            <View style={{ marginTop: Spacing.three }}>
-              <Text style={[styles.subSectionLabelOuter, { color: colors.textSecondary }]}>{t('home.specialTimes')}</Text>
-              <View style={styles.specialGrid}>
-                {['Suhur','Iftar','Tahajjud'].map((label, i) => (
-                  <ThemeCard key={i} style={[styles.specialCard]}>
-                    <View style={[styles.specialCardInner, { alignItems: 'center', justifyContent: 'center', paddingVertical: 16 }]}>
-                      <SkeletonBox width={70} height={42} borderRadius={6} color={colors.border} style={{ marginBottom: 4 }} loaded={false} />
-                      <Text style={{ fontFamily: Fonts.outfit, fontSize: 10, color: colors.textSecondary, textTransform: 'uppercase', letterSpacing: 1 }}>{label}</Text>
-                    </View>
-                  </ThemeCard>
-                ))}
-              </View>
-            </View>
-          )}
+
 
           {/* Restricted Prayer Times */}
           {restrictedTimes.length > 0 && (
@@ -963,7 +913,7 @@ export default function HomeScreen() {
 
 
         {/* ── Daily Inspiration ─────────────────────────────────── */}
-        {dailyVerse ? (
+        {dailyVerse && (
           <View>
             <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: Spacing.two }}>
               <Text style={[styles.sectionTitle, { color: colors.textSecondary, marginBottom: 0 }]}>
@@ -999,23 +949,6 @@ export default function HomeScreen() {
               </ThemeCard>
             </ViewShot>
           </View>
-        ) : (
-          <View>
-            <Text style={[styles.sectionTitle, { color: colors.textSecondary }]}>
-              {t('home.dailyInspiration')}
-            </Text>
-            <ThemeCard style={[styles.inspirationCard, { borderColor: colors.border, paddingHorizontal: Spacing.four, paddingVertical: Spacing.six }]}>
-              <View style={{ alignItems: 'center', gap: 12 }}>
-                <SkeletonBox width={24} height={24} borderRadius={12} color={colors.border} loaded={false} />
-                <SkeletonBox width={200} height={32} borderRadius={8} color={colors.border} loaded={false} />
-                <SkeletonBox width={260} height={32} borderRadius={8} color={colors.border} loaded={false} />
-                <SkeletonBox width={180} height={32} borderRadius={8} color={colors.border} loaded={false} />
-                <SkeletonBox width={240} height={20} borderRadius={7} color={colors.border} style={{ marginTop: 4 }} loaded={false} />
-                <SkeletonBox width={200} height={20} borderRadius={7} color={colors.border} loaded={false} />
-                <SkeletonBox width={120} height={16} borderRadius={6} color={colors.border} style={{ marginTop: 4 }} loaded={false} />
-              </View>
-            </ThemeCard>
-          </View>
         )}
 
         {/* ── Hadith of the Day ─────────────────────────────────── */}
@@ -1028,7 +961,7 @@ export default function HomeScreen() {
               <Share2 size={18} color={colors.textSecondary} />
             </TouchableOpacity>
           </View>
-          {dailyHadith ? (
+          {dailyHadith && (
             <ViewShot ref={hadithRef} options={{ format: 'png', quality: 1 }}>
               <ThemeCard intensity={20} style={[styles.inspirationCard, { borderColor: colors.border, padding: Spacing.six }]}>
                 <View style={{ alignItems: 'center' }}>
@@ -1041,15 +974,6 @@ export default function HomeScreen() {
                 </View>
               </ThemeCard>
             </ViewShot>
-          ) : (
-            <ThemeCard style={[styles.inspirationCard, { borderColor: colors.border, paddingHorizontal: Spacing.four, paddingVertical: Spacing.six }]}>
-              <View style={{ alignItems: 'center', gap: 12 }}>
-                <SkeletonBox width={260} height={24} borderRadius={8} color={colors.border} loaded={false} />
-                <SkeletonBox width={220} height={24} borderRadius={8} color={colors.border} loaded={false} />
-                <SkeletonBox width={150} height={24} borderRadius={8} color={colors.border} loaded={false} />
-                <SkeletonBox width={100} height={16} borderRadius={6} color={colors.border} style={{ marginTop: 8 }} loaded={false} />
-              </View>
-            </ThemeCard>
           )}
         </View>
 

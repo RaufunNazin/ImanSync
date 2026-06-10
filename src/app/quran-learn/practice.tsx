@@ -1,6 +1,6 @@
 import ThemeCard from '@/components/ThemeCard';
 import React, { useEffect, useState } from 'react';
-import { View, Text, StyleSheet, ScrollView, TouchableOpacity, ActivityIndicator } from 'react-native';
+import { View, Text, StyleSheet, ScrollView, TouchableOpacity } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useLocalSearchParams } from 'expo-router';
 import { Fonts, Spacing, useThemeColors } from '@/constants/theme';
@@ -27,7 +27,7 @@ export default function QuranLearnScreen() {
 
   const { surahId = '1', ayahId = '1' } = useLocalSearchParams<{ surahId: string, ayahId: string }>();
   const [words, setWords] = useState<Word[]>([]);
-  const [loading, setLoading] = useState(true);
+
   const [selectedWord, setSelectedWord] = useState<Word | null>(null);
   
   const [currentSurahId] = useState(parseInt(surahId, 10) || 1);
@@ -39,7 +39,6 @@ export default function QuranLearnScreen() {
   const { t, i18n } = useTranslation();
 
   const fetchAyah = async (sId: number, aId: number) => {
-    setLoading(true);
     setSelectedWord(null);
     try {
       const res = await fetch(`https://api.quran.com/api/v4/verses/by_key/${sId}:${aId}?language=${i18n.language}&words=true&word_fields=text_uthmani,text_uthmani_tajweed,audio_url&audio=1`);
@@ -54,8 +53,6 @@ export default function QuranLearnScreen() {
       }
     } catch (e) {
       console.error(e);
-    } finally {
-      setLoading(false);
     }
   };
 
@@ -161,10 +158,7 @@ export default function QuranLearnScreen() {
 
         {/* Word by Word Flow */}
         <View style={styles.wordsContainer}>
-          {loading ? (
-            <ActivityIndicator size="large" color={colors.accent} style={{ marginTop: 40, alignSelf: 'center' }} />
-          ) : (
-            words.map((word) => {
+          {words.map((word) => {
               const isSelected = selectedWord?.id === word.id;
               
               if (word.char_type_name === 'end') {
@@ -189,8 +183,7 @@ export default function QuranLearnScreen() {
                   </Text>
                 </TouchableOpacity>
               );
-            })
-          )}
+            })}
         </View>
 
       </ScrollView>

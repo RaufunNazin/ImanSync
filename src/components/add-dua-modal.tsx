@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { Modal, StyleSheet, Text, TextInput, TouchableOpacity, View, KeyboardAvoidingView, Platform, ScrollView, Image } from 'react-native';
+import { Modal, StyleSheet, Text, TextInput, TouchableOpacity, View, KeyboardAvoidingView, Platform, ScrollView, Image, TouchableWithoutFeedback } from 'react-native';
 import { Fonts, Spacing } from '@/constants/theme';
 import { useTranslation } from 'react-i18next';
 import { X, Image as ImageIcon, Video, Type, Plus } from 'lucide-react-native';
@@ -410,7 +410,8 @@ export default function AddDuaModal({ visible, onClose, onSave, initialData, col
                 <Text style={[styles.saveBtnText, { color: isValid ? '#FFF' : colors.textSecondary }]}>{t('dua.save')}</Text>
               </TouchableOpacity>
               </View>
-            </TouchableWithoutFeedback>
+              </View>
+          </TouchableWithoutFeedback>
           </View>
         </TouchableWithoutFeedback>
       </KeyboardAvoidingView>

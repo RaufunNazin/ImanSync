@@ -107,7 +107,27 @@ export async function setupChannels() {
   });
 }
 
+let isScheduling = false;
+let pendingSchedule = false;
+
 export async function scheduleAllNotifications() {
+  if (isScheduling) {
+    pendingSchedule = true;
+    return;
+  }
+  isScheduling = true;
+
+  try {
+    do {
+      pendingSchedule = false;
+      await performScheduling();
+    } while (pendingSchedule);
+  } finally {
+    isScheduling = false;
+  }
+}
+
+async function performScheduling() {
   const state = usePreferencesStore.getState();
   if (!state.notificationsEnabled) {
     await notifee.cancelAllNotifications();

@@ -1,6 +1,6 @@
 import React from 'react';
 import { Platform, Pressable, Text } from 'react-native';
-import { useThemeColors } from '@/constants/theme';
+import { useActiveColor, useThemeColors } from '@/constants/theme';
 import { Home, BookOpen, Book, Activity, Settings } from 'lucide-react-native';
 import { useTranslation } from 'react-i18next';
 import { Tabs } from 'expo-router';
@@ -47,8 +47,7 @@ const TabBarButton = (props: BottomTabBarButtonProps) => {
 export default function TabLayout() {
   const colors = useThemeColors();
   const { t } = useTranslation();
-
-  const activeColor = colors.accent;
+  const activeColor = useActiveColor();
 
   return (
     <Tabs

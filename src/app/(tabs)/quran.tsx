@@ -13,7 +13,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { useAudioStore } from '@/store/audioStore';
 import { useReadingStore } from '@/store/readingStore';
 import { useDownloadStore } from '@/store/downloadStore';
-import SkeletonBox from '@/components/SkeletonBox';
+
 import DownloadProgressRing from '@/components/DownloadProgressRing';
 import ConfirmModal from '@/components/ConfirmModal';
 import Reanimated, { FadeInDown, FadeOutDown } from 'react-native-reanimated';
@@ -25,8 +25,10 @@ import surahsData from '@/data/surahs.json';
 const SurahDownloadButton = React.memo(({ surahId, reciterId, colors, i18n_language, t }: any) => {
   const isDownloaded = useDownloadStore((s) => s.downloadedFiles[`${reciterId}_${surahId}`]);
   const progress = useDownloadStore((s) => s.downloadProgress[`${reciterId}_${surahId}`]);
-  const downloadSurah = useDownloadStore((s) => s.downloadSurah);
-  const deleteSurah = useDownloadStore((s) => s.deleteSurah);
+  const downloadStore = useDownloadStore();
+  const downloadSurah = downloadStore.downloadSurah;
+  const deleteSurah = downloadStore.deleteSurah;
+  const [confirmVisible, setConfirmVisible] = useState(false);
   const isDark = colors.background === '#0c1618';
   const activeColor = isDark ? colors.accent : colors.highlight;
 
@@ -44,7 +46,7 @@ const SurahDownloadButton = React.memo(({ surahId, reciterId, colors, i18n_langu
       >
         {isDownloaded ? (
           <Reanimated.View entering={FadeInDown.duration(300)}>
-            <CheckCircle size={16} color={colors.highlight} />
+            <CheckCircle size={16} color={activeColor} />
           </Reanimated.View>
         ) : progress !== undefined ? (
           <DownloadProgressRing
@@ -140,7 +142,6 @@ export default function QuranScreen() {
   
   const [activeTab, setActiveTab] = useState<'surah' | 'juz' | 'bookmarks'>('surah');
   const surahs = surahsData.data;
-  const loading = false;
   const [lastReadSurah, setLastReadSurah] = useState({ id: '1', name: 'Al-Faatiha', ayah: 1 });
   const [lastReadJuz, setLastReadJuz] = useState({ id: '1', ayah: 1 });
   const [bookmarks, setBookmarks] = useState([]);
@@ -383,47 +384,28 @@ export default function QuranScreen() {
         {/* Tab Selection */}
         <View style={[styles.tabsContainer, { borderBottomColor: colors.border }]}>
           <TouchableOpacity activeOpacity={1} 
-            style={[styles.tabBtn, activeTab === 'surah' && { borderBottomWidth: 2, borderBottomColor: colors.highlight }]}
+            style={[styles.tabBtn, activeTab === 'surah' && { borderBottomWidth: 2, borderBottomColor: activeQuranColor }]}
             onPress={() => setActiveTab('surah')}
           >
-            <Text style={[styles.tabText, { color: activeTab === 'surah' ? colors.highlight : colors.textSecondary }]}>{t('quran.tabSurah')}</Text>
+            <Text style={[styles.tabText, { color: activeTab === 'surah' ? activeQuranColor : colors.textSecondary }]}>{t('quran.tabSurah')}</Text>
           </TouchableOpacity>
           <TouchableOpacity activeOpacity={1} 
-            style={[styles.tabBtn, activeTab === 'juz' && { borderBottomWidth: 2, borderBottomColor: colors.highlight }]}
+            style={[styles.tabBtn, activeTab === 'juz' && { borderBottomWidth: 2, borderBottomColor: activeQuranColor }]}
             onPress={() => setActiveTab('juz')}
           >
-            <Text style={[styles.tabText, { color: activeTab === 'juz' ? colors.highlight : colors.textSecondary }]}>{t('quran.tabJuz')}</Text>
+            <Text style={[styles.tabText, { color: activeTab === 'juz' ? activeQuranColor : colors.textSecondary }]}>{t('quran.tabJuz')}</Text>
           </TouchableOpacity>
           <TouchableOpacity activeOpacity={1} 
-            style={[styles.tabBtn, activeTab === 'bookmarks' && { borderBottomWidth: 2, borderBottomColor: colors.highlight }]}
+            style={[styles.tabBtn, activeTab === 'bookmarks' && { borderBottomWidth: 2, borderBottomColor: activeQuranColor }]}
             onPress={() => setActiveTab('bookmarks')}
           >
-            <Text style={[styles.tabText, { color: activeTab === 'bookmarks' ? colors.highlight : colors.textSecondary }]}>{t('quran.tabBookmarks')}</Text>
+            <Text style={[styles.tabText, { color: activeTab === 'bookmarks' ? activeQuranColor : colors.textSecondary }]}>{t('quran.tabBookmarks')}</Text>
           </TouchableOpacity>
         </View>
 
         {/* Tab Content */}
         {activeTab === 'surah' ? (
           <>
-          {loading && (
-            <View style={[styles.listContainer]}>
-              {[...Array(8)].map((_, i) => (
-                <ThemeCard key={i} style={[styles.surahRowWrapper, { borderColor: colors.border }]}>
-                  <View style={[styles.surahRow]}>
-                    <View style={styles.surahLeft}>
-                      <SkeletonBox width={28} height={28} borderRadius={8} color={colors.border} loaded={false} />
-                      <View style={{ flex: 1, gap: 6 }}>
-                        <SkeletonBox width={110} height={20} borderRadius={7} color={colors.border} loaded={false} />
-                        <SkeletonBox width={70} height={16} borderRadius={6} color={colors.border} loaded={false} />
-                      </View>
-                    </View>
-                    <SkeletonBox width={56} height={28} borderRadius={8} color={colors.border} loaded={false} />
-                  </View>
-                </ThemeCard>
-              ))}
-            </View>
-          )}
-          {!loading && (
           <View style={styles.listContainer}>
             {surahs.map((surah) => (
               <SurahRow
@@ -438,7 +420,7 @@ export default function QuranScreen() {
                 onBookmarkToggle={() => toggleSurahBookmark(surah)}
               />
             ))}
-          </View>          )}
+          </View>
           </>
         ) : activeTab === 'juz' ? (
           <View style={styles.gridContainer}>
@@ -515,7 +497,7 @@ export default function QuranScreen() {
                                 hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
                               >
                                 {downloadStore.downloadedFiles[`${audioStore.currentReciterId}_${surah.surahId}`] ? (
-                                  <CheckCircle size={16} color={colors.highlight} />
+                                  <CheckCircle size={16} color={activeQuranColor} />
                                 ) : downloadStore.downloadProgress[`${audioStore.currentReciterId}_${surah.surahId}`] !== undefined ? (
                                   <DownloadProgressRing
                                     size={22}
@@ -610,7 +592,7 @@ export default function QuranScreen() {
             position: 'absolute',
             bottom: 100,
             alignSelf: 'center',
-            backgroundColor: colors.highlight,
+            backgroundColor: activeQuranColor,
             paddingHorizontal: 20,
             paddingVertical: 12,
             borderRadius: 24,

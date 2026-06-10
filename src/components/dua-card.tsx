@@ -1,7 +1,7 @@
 import React from 'react';
 import { StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import ThemeCard from '@/components/ThemeCard';
-import { Fonts, Spacing } from '@/constants/theme';
+import { Fonts, Spacing, useActiveColor } from '@/constants/theme';
 import { useTranslation } from 'react-i18next';
 import { Bookmark } from 'lucide-react-native';
 import { formatNumber } from '@/utils/formatNumber';
@@ -31,11 +31,12 @@ const DuaCard = React.memo(function DuaCard({
   colors,
 }: DuaCardProps) {
   const { t, i18n } = useTranslation();
+  const activeColor = useActiveColor();
   
   return (
     <ThemeCard intensity={40} style={[styles.wrapper, 
           (isMyDuas || id === 'bookmarks') && { borderColor: colors.accent },
-          isCustom && { borderColor: colors.highlight }
+          isCustom && { borderColor: activeColor }
     ]}>
       <TouchableOpacity activeOpacity={1}
         style={[styles.card]}
@@ -45,7 +46,7 @@ const DuaCard = React.memo(function DuaCard({
       >
           {isPinned && (
             <View style={styles.pinBadge}>
-              <Bookmark size={14} color={isCustom ? colors.highlight : colors.accent} fill={isCustom ? colors.highlight : colors.accent} />
+              <Bookmark size={14} color={isCustom ? activeColor : colors.accent} fill={isCustom ? activeColor : colors.accent} />
             </View>
           )}
 

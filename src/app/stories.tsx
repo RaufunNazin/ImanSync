@@ -1,5 +1,5 @@
 import ThemeCard from '@/components/ThemeCard';
-import { Fonts, Spacing, useThemeColors } from '@/constants/theme';
+import { Fonts, Spacing, useThemeColors, useActiveColor } from '@/constants/theme';
 import PageHeader from '@/components/page-header';
 import { useRouter } from 'expo-router';
 import { BookOpen, History, PenTool } from 'lucide-react-native';
@@ -10,6 +10,7 @@ import { useTranslation } from 'react-i18next';
 
 export default function StoriesScreen() {
   const colors = useThemeColors();
+  const activeColor = useActiveColor();
   const router = useRouter();
   const { t } = useTranslation();
 
@@ -56,7 +57,7 @@ export default function StoriesScreen() {
         <View style={{ flex: 1 }} />
 
         <TouchableOpacity activeOpacity={1} 
-          style={[styles.notifyBtn, { backgroundColor: colors.highlight }]}
+          style={[styles.notifyBtn, { backgroundColor: activeColor }]}
           onPress={() => router.back()}
         >
           <Text style={styles.notifyText}>{t('stories.return')}</Text>

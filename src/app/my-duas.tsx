@@ -3,7 +3,7 @@ import React, { useEffect, useState, useRef } from 'react';
 import { ActivityIndicator, StyleSheet, Text, TouchableOpacity, View, Animated } from 'react-native';
 import { useRouter } from 'expo-router';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { Fonts, Spacing, useThemeColors } from '@/constants/theme';
+import { Fonts, Spacing, useThemeColors, useActiveColor } from '@/constants/theme';
 import PageHeader from '@/components/page-header';
 import { useTranslation } from 'react-i18next';
 import { Search, FolderLock, X } from 'lucide-react-native';
@@ -13,7 +13,7 @@ import {
 } from '@/utils/my-duas-storage';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import AddDuaModal from '@/components/add-dua-modal';
-import SkeletonBox from '@/components/SkeletonBox';
+
 import { ChevronRight, Image as ImageIcon, Video, Type, Bookmark, Plus, FolderOpen } from 'lucide-react-native';
 import PinSheet from '@/components/pin-sheet';
 
@@ -23,11 +23,12 @@ const PINNED_DUAS_KEY      = 'imansync_pinned_duas';
 
 export default function MyDuasScreen() {
   const colors = useThemeColors();
+  const activeColor = useActiveColor();
   const { t, i18n } = useTranslation();
   const router = useRouter();
 
   const [duas, setDuas] = useState<UserDua[]>([]);
-  const [loading, setLoading] = useState(true);
+
 
   // Banner states
   const [showSuggestBanner, setShowSuggestBanner] = useState(false);
@@ -89,8 +90,6 @@ export default function MyDuasScreen() {
       }
     } catch (e) {
       console.error(e);
-    } finally {
-      setLoading(false);
     }
   };
 
@@ -153,8 +152,8 @@ export default function MyDuasScreen() {
 
         {/* ── Suggestion Banner ─────────────────────────────────────────── */}
         {!showRelinkBanner && showSuggestBanner && (
-          <View style={[styles.banner, { borderColor: colors.highlight + '60', backgroundColor: colors.highlight + '15' }]}>
-            <FolderLock size={18} color={colors.highlight} style={{ flexShrink: 0 }} />
+          <View style={[styles.banner, { borderColor: activeColor + '60', backgroundColor: activeColor + '15' }]}>
+            <FolderLock size={18} color={activeColor} style={{ flexShrink: 0 }} />
             <Text style={[styles.bannerText, { color: colors.text, flex: 1 }]}>
               {t('dua.suggestPermanentStorage')}
             </Text>
@@ -212,7 +211,6 @@ export default function MyDuasScreen() {
   );
 
   const renderEmpty = () => {
-    if (loading) return null;
     
     return (
       <View style={{ alignItems: 'center', marginTop: 80 }}>
@@ -245,27 +243,7 @@ export default function MyDuasScreen() {
           </TouchableOpacity>
         }
       />
-      {loading ? (
-        <View style={{ flex: 1 }}>
-          {renderHeader()}
-          <View style={[styles.list, { gap: Spacing.three, padding: Spacing.four }]}>
-            {[...Array(5)].map((_, i) => (
-              <View key={i} style={[styles.duaCard, { backgroundColor: colors.backgroundElement, borderColor: colors.border }]}>
-                <View style={styles.duaHeader}>
-                  <View style={styles.duaTitleContainer}>
-                    <SkeletonBox width={24} height={24} borderRadius={4} color={colors.border} />
-                    <View style={{ flex: 1 }}>
-                      <SkeletonBox width={'70%' as any} height={16} borderRadius={6} color={colors.border} style={{ marginBottom: 4 }} />
-                      <SkeletonBox width={'40%' as any} height={13} borderRadius={4} color={colors.border} />
-                    </View>
-                  </View>
-                  <ChevronRight size={20} color={colors.border} />
-                </View>
-              </View>
-            ))}
-          </View>
-        </View>
-      ) : (
+      {renderHeader()}
         <Animated.FlatList
           data={sortedDuas}
           keyExtractor={(item: any) => item.id.toString()}
@@ -284,7 +262,7 @@ export default function MyDuasScreen() {
           )}
           scrollEventThrottle={16}
         />
-      )}
+
 
 
       {selectedDua && (

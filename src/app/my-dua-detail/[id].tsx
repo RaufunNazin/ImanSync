@@ -1,6 +1,6 @@
 import ThemeCard from '@/components/ThemeCard';
 import React, { useEffect, useState } from 'react';
-import { View, Text, StyleSheet, ScrollView, ActivityIndicator, Image, TouchableOpacity, Modal, TouchableWithoutFeedback } from 'react-native';
+import { View, Text, StyleSheet, ScrollView, Image, TouchableOpacity, Modal, TouchableWithoutFeedback } from 'react-native';
 import { Trash2, Edit2, Bookmark, Settings2, Minus, Plus, X } from 'lucide-react-native';
 import { saveMyDuas } from '@/utils/my-duas-storage';
 import { useLocalSearchParams, useRouter } from 'expo-router';
@@ -46,7 +46,7 @@ export default function MyDuaDetailScreen() {
   
   const [dua, setDua] = useState<UserDua | null>(null);
   const [localUri, setLocalUri] = useState<string | null>(null);
-  const [loading, setLoading] = useState(true);
+
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [showEditModal, setShowEditModal] = useState(false);
   const [imageRatio, setImageRatio] = useState(1);
@@ -84,7 +84,7 @@ export default function MyDuaDetailScreen() {
           }
         }
       }
-      setLoading(false);
+
     };
     fetchDua();
 
@@ -248,14 +248,6 @@ export default function MyDuaDetailScreen() {
     </Modal>
   );
 
-  if (loading) {
-    return (
-      <SafeAreaView style={[styles.safeArea, { backgroundColor: colors.background }]}>
-        <PageHeader titleEn={t('dua.loading', { defaultValue: 'Loading...' })} titleAr="" showBack />
-        <ActivityIndicator size="large" color={colors.accent} style={{ marginTop: 40 }} />
-      </SafeAreaView>
-    );
-  }
 
   if (!dua) {
     return (

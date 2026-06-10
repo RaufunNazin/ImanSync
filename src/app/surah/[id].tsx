@@ -100,7 +100,7 @@ export default function SurahScreen() {
     }
     return [];
   });
-  const [loading, setLoading] = useState(() => ayahs.length === 0);
+
   const [modalVisible, setModalVisible] = useState(false);
   const [bookmarkedAyahs, setBookmarkedAyahs] = useState<Record<string, boolean>>({});
   const [deleteDownloadConfirm, setDeleteDownloadConfirm] = useState(false);
@@ -199,8 +199,7 @@ export default function SurahScreen() {
 
     fetchOnce({
       key: cacheKey,
-      onStart: (isCached) => {
-        if (!isCached) setLoading(true);
+      onStart: () => {
       },
       fetcher: async () => {
         const res = await fetch(`https://api.alquran.cloud/v1/surah/${id}/editions/${editions}`);
@@ -236,12 +235,10 @@ export default function SurahScreen() {
           surahNameRef.current = data.surahName;
           setSurahName(data.surahName);
           setAyahs(data.ayahs);
-          setLoading(false);
         }
       },
       onError: (err) => {
         console.error("Error fetching surah:", err);
-        setLoading(false);
       }
     });
   }, [id, settings.showEnglish, settings.showBangla, settings.showEnglishTranslit]);
@@ -346,18 +343,18 @@ export default function SurahScreen() {
             <Text style={[styles.sectionTitle, { color: colors.textSecondary, marginTop: Spacing.four }]}>{t('quranSettings.translations')}</Text>
             <View style={[styles.settingRow, { borderBottomColor: colors.textSecondary + '20' }]}>
               <Text style={[styles.settingLabel, { color: colors.text }]}>{t('quranSettings.enTrans')}</Text>
-              <Switch value={settings.showEnglish} onValueChange={(v) => updateSetting('showEnglish', v)} trackColor={{ false: colors.border, true: colors.highlight }} thumbColor="#FFFFFF" />
+              <Switch value={settings.showEnglish} onValueChange={(v) => updateSetting('showEnglish', v)} trackColor={{ false: colors.border, true: activeQuranColor }} thumbColor="#FFFFFF" />
             </View>
             <View style={[styles.settingRow, { borderBottomColor: colors.textSecondary + '20' }]}>
               <Text style={[styles.settingLabel, { color: colors.text }]}>{t('quranSettings.bnTrans')}</Text>
-              <Switch value={settings.showBangla} onValueChange={(v) => updateSetting('showBangla', v)} trackColor={{ false: colors.border, true: colors.highlight }} thumbColor="#FFFFFF" />
+              <Switch value={settings.showBangla} onValueChange={(v) => updateSetting('showBangla', v)} trackColor={{ false: colors.border, true: activeQuranColor }} thumbColor="#FFFFFF" />
             </View>
 
             {/* Transliterations */}
             <Text style={[styles.sectionTitle, { color: colors.textSecondary, marginTop: Spacing.four }]}>{t('quranSettings.translit', { defaultValue: 'Transliteration' })}</Text>
             <View style={[styles.settingRow, { borderBottomColor: colors.textSecondary + '20' }]}>
               <Text style={[styles.settingLabel, { color: colors.text }]}>{t('quranSettings.enTranslit', { defaultValue: 'Show Transliteration' })}</Text>
-              <Switch value={settings.showEnglishTranslit} onValueChange={(v) => updateSetting('showEnglishTranslit', v)} trackColor={{ false: colors.border, true: colors.highlight }} thumbColor="#FFFFFF" />
+              <Switch value={settings.showEnglishTranslit} onValueChange={(v) => updateSetting('showEnglishTranslit', v)} trackColor={{ false: colors.border, true: activeQuranColor }} thumbColor="#FFFFFF" />
             </View>
 
             {/* Audio Reciter */}
@@ -365,26 +362,26 @@ export default function SurahScreen() {
             
             <View style={[styles.settingRow, { borderBottomColor: colors.textSecondary + '20', marginBottom: Spacing.two }]}>
               <Text style={[styles.settingLabel, { color: colors.text }]}>{t('quranSettings.autoPlayNextAyah', { defaultValue: 'Auto-Play Next Ayah' })}</Text>
-              <Switch value={settings.autoPlayNextAyah} onValueChange={(v) => updateSetting('autoPlayNextAyah', v)} trackColor={{ false: colors.border, true: colors.highlight }} thumbColor="#FFFFFF" />
+              <Switch value={settings.autoPlayNextAyah} onValueChange={(v) => updateSetting('autoPlayNextAyah', v)} trackColor={{ false: colors.border, true: activeQuranColor }} thumbColor="#FFFFFF" />
             </View>
             <View style={{ flexDirection: 'column', alignItems: 'stretch', gap: 12, paddingBottom: Spacing.four }}>
               <TouchableOpacity activeOpacity={1} 
-                style={[{ padding: 12, borderRadius: 12, borderWidth: 1, borderColor: colors.border }, currentReciterId === 7 ? { borderColor: colors.highlight, backgroundColor: colors.highlight + '15' } : { backgroundColor: colors.backgroundElement, ...themeStyles.cardShadow }]} 
+                style={[{ padding: 12, borderRadius: 12, borderWidth: 1, borderColor: colors.border }, currentReciterId === 7 ? { borderColor: activeQuranColor, backgroundColor: activeQuranColor + '15' } : { backgroundColor: colors.backgroundElement, ...themeStyles.cardShadow }]} 
                 onPress={() => setReciter(7)}
               >
-                <Text style={[styles.settingLabel, { color: currentReciterId === 7 ? colors.highlight : colors.text }]}>{t("quran.reciters.mishary")}</Text>
+                <Text style={[styles.settingLabel, { color: currentReciterId === 7 ? activeQuranColor : colors.text }]}>{t("quran.reciters.mishary")}</Text>
               </TouchableOpacity>
               <TouchableOpacity activeOpacity={1} 
-                style={[{ padding: 12, borderRadius: 12, borderWidth: 1, borderColor: colors.border }, currentReciterId === 1 ? { borderColor: colors.highlight, backgroundColor: colors.highlight + '15' } : { backgroundColor: colors.backgroundElement, ...themeStyles.cardShadow }]} 
+                style={[{ padding: 12, borderRadius: 12, borderWidth: 1, borderColor: colors.border }, currentReciterId === 1 ? { borderColor: activeQuranColor, backgroundColor: activeQuranColor + '15' } : { backgroundColor: colors.backgroundElement, ...themeStyles.cardShadow }]} 
                 onPress={() => setReciter(1)}
               >
-                <Text style={[styles.settingLabel, { color: currentReciterId === 1 ? colors.highlight : colors.text }]}>{t("quran.reciters.abdulBaset")}</Text>
+                <Text style={[styles.settingLabel, { color: currentReciterId === 1 ? activeQuranColor : colors.text }]}>{t("quran.reciters.abdulBaset")}</Text>
               </TouchableOpacity>
               <TouchableOpacity activeOpacity={1} 
-                style={[{ padding: 12, borderRadius: 12, borderWidth: 1, borderColor: colors.border }, currentReciterId === 3 ? { borderColor: colors.highlight, backgroundColor: colors.highlight + '15' } : { backgroundColor: colors.backgroundElement, ...themeStyles.cardShadow }]} 
+                style={[{ padding: 12, borderRadius: 12, borderWidth: 1, borderColor: colors.border }, currentReciterId === 3 ? { borderColor: activeQuranColor, backgroundColor: activeQuranColor + '15' } : { backgroundColor: colors.backgroundElement, ...themeStyles.cardShadow }]} 
                 onPress={() => setReciter(3)}
               >
-                <Text style={[styles.settingLabel, { color: currentReciterId === 3 ? colors.highlight : colors.text }]}>{t("quran.reciters.sudais")}</Text>
+                <Text style={[styles.settingLabel, { color: currentReciterId === 3 ? activeQuranColor : colors.text }]}>{t("quran.reciters.sudais")}</Text>
               </TouchableOpacity>
             </View>
           </ScrollView>
@@ -409,7 +406,7 @@ export default function SurahScreen() {
         </TouchableOpacity>
         <View style={{ flex: 1, alignItems: 'center' }}>
           <Text style={[styles.title, { color: colors.text }]}>{t('surahNames.' + id, { defaultValue: surahName })}</Text>
-          {!loading && ayahs.length > 0 && <Text style={{ color: colors.textSecondary, fontFamily: Fonts.outfit, fontSize: 12 }}>{t('surah.verses', { count: formatNumber(ayahs.length, i18n.language) })}</Text>}
+          {ayahs.length > 0 && <Text style={{ color: colors.textSecondary, fontFamily: Fonts.outfit, fontSize: 12 }}>{t('surah.verses', { count: formatNumber(ayahs.length, i18n.language) })}</Text>}
         </View>
         <View style={{ flexDirection: 'row', gap: Spacing.three, alignItems: 'center' }}>
           <TouchableOpacity activeOpacity={1} 
@@ -468,11 +465,7 @@ export default function SurahScreen() {
         </View>
       </View>
       
-      {loading ? (
-        <View style={styles.loaderContainer}>
-          <ActivityIndicator size="large" color={colors.highlight} />
-        </View>
-      ) : (
+
         <FlatList
           ref={flatListRef}
           data={ayahs}
@@ -547,7 +540,6 @@ export default function SurahScreen() {
             </ThemeCard>
           )}
         />
-      )}
 
       {renderSettingsModal()}
       <ConfirmModal

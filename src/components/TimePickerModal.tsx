@@ -1,5 +1,5 @@
 import ThemeCard from "@/components/ThemeCard";
-import { Fonts, Spacing } from "@/constants/theme";
+import { Fonts, Spacing, useThemeColors, useActiveColor } from "@/constants/theme";
 import { formatNumber } from "@/utils/formatNumber";
 import * as Haptics from "expo-haptics";
 import React, { useEffect, useRef, useState } from "react";
@@ -21,7 +21,6 @@ interface TimePickerModalProps {
   onSave: (hour: number, minute: number) => void;
   initialHour: number;
   initialMinute: number;
-  colors: any;
   title: string;
 }
 
@@ -36,9 +35,10 @@ export default function TimePickerModal({
   onSave,
   initialHour,
   initialMinute,
-  colors,
   title,
 }: TimePickerModalProps) {
+  const colors = useThemeColors();
+  const activeColor = useActiveColor();
   const { t, i18n } = useTranslation();
 
   const [mode, setMode] = useState<"hour" | "minute">("hour");
@@ -239,7 +239,7 @@ export default function TimePickerModal({
                 style={[
                   styles.headerTimeBtn,
                   mode === "hour" && {
-                    backgroundColor: colors.highlight + "33",
+                    backgroundColor: activeColor + "33",
                   },
                 ]}
                 onPress={() => handleModeChange("hour")}
@@ -250,7 +250,7 @@ export default function TimePickerModal({
                     {
                       color:
                         mode === "hour"
-                          ? colors.highlight
+                          ? activeColor
                           : colors.textSecondary,
                     },
                   ]}
@@ -271,7 +271,7 @@ export default function TimePickerModal({
                 style={[
                   styles.headerTimeBtn,
                   mode === "minute" && {
-                    backgroundColor: colors.highlight + "33",
+                    backgroundColor: activeColor + "33",
                   },
                 ]}
                 onPress={() => handleModeChange("minute")}
@@ -282,7 +282,7 @@ export default function TimePickerModal({
                     {
                       color:
                         mode === "minute"
-                          ? colors.highlight
+                          ? activeColor
                           : colors.textSecondary,
                     },
                   ]}
@@ -303,14 +303,14 @@ export default function TimePickerModal({
                 activeOpacity={1}
                 style={[
                   styles.amPmBtn,
-                  isAM && { backgroundColor: colors.highlight + "33" },
+                  isAM && { backgroundColor: activeColor + "33" },
                 ]}
                 onPress={handleSetAM}
               >
                 <Text
                   style={[
                     styles.amPmText,
-                    { color: isAM ? colors.highlight : colors.textSecondary },
+                    { color: isAM ? activeColor : colors.textSecondary },
                   ]}
                 >
                   AM
@@ -323,14 +323,14 @@ export default function TimePickerModal({
                 activeOpacity={1}
                 style={[
                   styles.amPmBtn,
-                  !isAM && { backgroundColor: colors.highlight + "33" },
+                  !isAM && { backgroundColor: activeColor + "33" },
                 ]}
                 onPress={handleSetPM}
               >
                 <Text
                   style={[
                     styles.amPmText,
-                    { color: !isAM ? colors.highlight : colors.textSecondary },
+                    { color: !isAM ? activeColor : colors.textSecondary },
                   ]}
                 >
                   PM
@@ -373,7 +373,7 @@ export default function TimePickerModal({
                 <View
                   style={[
                     styles.handLine,
-                    { backgroundColor: colors.highlight },
+                    { backgroundColor: activeColor },
                   ]}
                 />
                 <View style={styles.handLineSpacer} />
@@ -384,7 +384,7 @@ export default function TimePickerModal({
                 style={[
                   styles.handCircle,
                   {
-                    backgroundColor: colors.highlight,
+                    backgroundColor: activeColor,
                     left: circleX,
                     top: circleY,
                     overflow: "hidden",
@@ -408,7 +408,7 @@ export default function TimePickerModal({
               <View
                 style={[
                   styles.centerDot,
-                  { backgroundColor: colors.highlight },
+                  { backgroundColor: activeColor },
                 ]}
               />
             </Animated.View>
@@ -435,13 +435,14 @@ export default function TimePickerModal({
 
             <TouchableOpacity
               activeOpacity={1}
-              style={[styles.button, { backgroundColor: colors.accent }]}
+              style={[styles.button, { backgroundColor: activeColor }]}
               onPress={() => onSave(selectedHour, selectedMinute)}
             >
               <Text style={[styles.buttonText, { color: "#FFF" }]}>
                 {t("settings.save")}
               </Text>
             </TouchableOpacity>
+            </View>
             </View>
           </TouchableWithoutFeedback>
         </View>

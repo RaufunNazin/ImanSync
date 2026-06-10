@@ -8,7 +8,7 @@ import { ChevronLeft, X } from 'lucide-react-native';
 import React, { useEffect, useState, useRef } from 'react';
 import { useTranslation } from 'react-i18next';
 import { 
-  ActivityIndicator, 
+
   ScrollView, 
   StyleSheet, 
   Text, 
@@ -20,7 +20,7 @@ import {
   Platform
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { useThemeStore } from '@/store/themeStore';
+
 import Animated, { 
   FadeIn, 
   FadeOut, 
@@ -40,7 +40,7 @@ interface Surah {
 }
 
 export default function QuranSearchScreen() {
-  const scheme = useThemeStore((s) => s.theme);
+
   const colors = useThemeColors();
   const isDark = colors.background === '#0c1618';
   const activeQuranColor = isDark ? colors.accent : colors.highlight;
@@ -51,7 +51,7 @@ export default function QuranSearchScreen() {
     const cached = storage.getString('quran_surahs_list');
     return cached ? JSON.parse(cached) : [];
   });
-  const [loading, setLoading] = useState(() => surahs.length === 0);
+
   const [searchQuery, setSearchQuery] = useState('');
   const inputRef = useRef<TextInput>(null);
 
@@ -68,8 +68,7 @@ export default function QuranSearchScreen() {
 
     fetchOnce({
       key: 'quran_surahs_list',
-      onStart: (isCached) => {
-        if (!isCached) setLoading(true);
+      onStart: () => {
       },
       fetcher: async () => {
         const res = await fetch('https://api.alquran.cloud/v1/surah');
@@ -85,12 +84,10 @@ export default function QuranSearchScreen() {
       onData: (data) => {
         if (data) {
           setSurahs(data);
-          setLoading(false);
         }
       },
       onError: (err) => {
         console.error("Error fetching surahs:", err);
-        setLoading(false);
       }
     });
   }, []);
@@ -143,10 +140,7 @@ export default function QuranSearchScreen() {
       <KeyboardAvoidingView behavior={Platform.OS === 'ios' ? 'padding' : 'height'} style={{ flex: 1 }}>
         <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={styles.container} keyboardDismissMode="on-drag" keyboardShouldPersistTaps="handled">
           
-          {loading && searchQuery.length > 0 ? (
-            <ActivityIndicator size="large" color={activeQuranColor} style={{ marginTop: 40 }} />
-          ) : (
-            <View style={styles.listContainer}>
+          <View style={styles.listContainer}>
               {searchQuery.length > 0 && filteredSurahs.length === 0 ? (
                  <Text style={[styles.emptyText, { color: colors.textSecondary }]}>
                    {t('search.noMatchingQuran', { query: searchQuery })}
@@ -178,7 +172,6 @@ export default function QuranSearchScreen() {
                 ))
               )}
             </View>
-          )}
 
           <View style={{ height: Spacing.six + 20 }} />
         </ScrollView>

@@ -7,7 +7,7 @@ import * as Haptics from 'expo-haptics';
 import Animated, { useAnimatedStyle, withSpring, withTiming, runOnJS, useSharedValue } from 'react-native-reanimated';
 import ConfettiCannon from 'react-native-confetti-cannon';
 
-import { Fonts, Spacing, useThemeColors, useThemeStyles } from '@/constants/theme';
+import { Fonts, Spacing, useThemeColors, useThemeStyles, useActiveColor } from '@/constants/theme';
 import { useTranslation } from 'react-i18next';
 import { formatNumber } from '@/utils/formatNumber';
 import triviaData from '@/data/trivia.json';
@@ -27,6 +27,7 @@ function shuffle(array: any[]) {
 export default function TriviaScreen() {
   const colors = useThemeColors();
   const themeStyles = useThemeStyles();
+  const activeColor = useActiveColor();
   const router = useRouter();
   const { t, i18n } = useTranslation();
   const isBn = i18n.language === 'bn';
@@ -202,7 +203,7 @@ export default function TriviaScreen() {
             {selectedOption !== null && (
               <View style={styles.footer}>
                 <TouchableOpacity activeOpacity={1}
-                  style={[styles.nextBtn, { backgroundColor: colors.highlight, width: 64, height: 64, borderRadius: 32, alignSelf: 'flex-end', justifyContent: 'center' }]}
+                  style={[styles.nextBtn, { backgroundColor: activeColor, width: 64, height: 64, borderRadius: 32, alignSelf: 'flex-end', justifyContent: 'center' }]}
                   onPress={nextQuestion}
                 >
                   <ArrowRight size={28} color="#FFF" />

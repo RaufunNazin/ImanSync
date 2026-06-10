@@ -3,11 +3,12 @@ import { View, Text, StyleSheet, ScrollView } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useTranslation } from 'react-i18next';
 import PageHeader from '@/components/page-header';
-import { Fonts, Spacing, useThemeColors } from '@/constants/theme';
+import { Fonts, Spacing, useThemeColors, useActiveColor } from '@/constants/theme';
 import systemConfig from '../../system_config.json';
 
 export default function ChangelogScreen() {
   const colors = useThemeColors();
+  const activeColor = useActiveColor();
   const { t, i18n } = useTranslation();
   
   const lang = (i18n.language === 'bn' ? 'bn' : 'en') as 'en' | 'bn';
@@ -27,7 +28,7 @@ export default function ChangelogScreen() {
             <View key={index} style={{ marginBottom: 32 }}>
               <View style={styles.versionHeader}>
                 <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'flex-end', marginBottom: 8 }}>
-                  <Text style={[styles.versionText, { color: colors.highlight }]}>
+                  <Text style={[styles.versionText, { color: activeColor }]}>
                     Version {log.version}
                   </Text>
                   {log.date && (

@@ -2,7 +2,7 @@ import ThemeCard from '@/components/ThemeCard';
 import React, { useCallback, useState } from 'react';
 import { ScrollView, StyleSheet, Text, TouchableOpacity, View, TouchableWithoutFeedback } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { Fonts, Spacing, useThemeColors } from '@/constants/theme';
+import { Fonts, Spacing, useThemeColors, useActiveColor } from '@/constants/theme';
 import PageHeader from '@/components/page-header';
 import { ChevronRight, Bookmark, Search } from 'lucide-react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
@@ -16,6 +16,7 @@ import { Modal } from 'react-native';
 
 export default function DuaBookmarksScreen() {
   const colors = useThemeColors();
+  const activeColor = useActiveColor();
   const router = useRouter();
   const { t } = useTranslation();
 
@@ -197,7 +198,7 @@ export default function DuaBookmarksScreen() {
                   <TouchableOpacity activeOpacity={1} style={{ flex: 1, padding: Spacing.four, alignItems: 'center', borderRadius: 12, backgroundColor: colors.background }} onPress={() => setCreateModalVisible(false)}>
                     <Text style={{ fontFamily: Fonts.outfit, color: colors.text }}>{t('common.cancel', { defaultValue: 'Cancel' })}</Text>
                   </TouchableOpacity>
-                  <TouchableOpacity activeOpacity={1} style={{ flex: 1, padding: Spacing.four, alignItems: 'center', borderRadius: 12, backgroundColor: colors.highlight }} onPress={handleCreateFolder}>
+                  <TouchableOpacity activeOpacity={1} style={{ flex: 1, padding: Spacing.four, alignItems: 'center', borderRadius: 12, backgroundColor: activeColor }} onPress={handleCreateFolder}>
                     <Text style={{ fontFamily: Fonts.outfit, color: '#FFF' }}>{t('common.create', { defaultValue: 'Create' })}</Text>
                   </TouchableOpacity>
                 </View>

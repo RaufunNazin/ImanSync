@@ -1,7 +1,7 @@
 import ThemeCard from '@/components/ThemeCard';
-import SkeletonBox from '@/components/SkeletonBox';
+
 import PageHeader from '@/components/page-header';
-import { Fonts, Spacing, useThemeColors } from '@/constants/theme';
+import { Fonts, Spacing, useThemeColors, useActiveColor } from '@/constants/theme';
 import { formatNumber } from '@/utils/formatNumber';
 import * as Haptics from 'expo-haptics';
 import { Activity, BookOpen, CheckCircle2, HandCoins, Heart, RotateCcw, X, History } from 'lucide-react-native';
@@ -101,6 +101,7 @@ const TaskCard = ({ task, isDone, onToggle, colors, t }: { task: typeof DAILY_TA
 
 export default function TrackerScreen() {
   const colors = useThemeColors();
+  const activeColor = useActiveColor();
   const { t, i18n } = useTranslation();
   const router = useRouter();
 
@@ -244,7 +245,7 @@ export default function TrackerScreen() {
               >
                 <AnimatedProgressBar
                   progress={loading ? 0 : Math.max(val, val > 0 ? 2 : 0)}
-                  color={val === 100 ? colors.accent : val > 0 ? colors.highlight : colors.border}
+                  color={val === 100 ? colors.accent : val > 0 ? activeColor : colors.border}
                   trackColor="transparent"
                   height={undefined as any}
                   duration={800}
@@ -266,7 +267,7 @@ export default function TrackerScreen() {
                   styles.heatmapCell,
                   days === 7 && styles.heatmapCellWeekly,
                   {
-                    backgroundColor: val === 100 ? colors.accent : val > 0 ? colors.highlight : colors.border,
+                    backgroundColor: val === 100 ? colors.accent : val > 0 ? activeColor : colors.border,
                     opacity: val === 100 ? 1 : val > 0 ? 0.6 : 0.3
                   }
                 ]}
@@ -274,11 +275,9 @@ export default function TrackerScreen() {
             ))}
           </View>
 
-          <SkeletonBox loaded={!loading} width={240} height={16} borderRadius={4} color={colors.border} style={{ alignSelf: 'center', marginTop: 8 }}>
-            <Text style={[styles.chartDesc, { color: colors.textSecondary, marginTop: 0 }]}>
+            <Text style={[styles.chartDesc, { color: colors.textSecondary, marginTop: 8, alignSelf: 'center' }]}>
               {getChartDescMsg(avg)}
             </Text>
-          </SkeletonBox>
           <Text style={[styles.chartDesc, { color: colors.textSecondary, fontSize: 11, opacity: 0.6, marginTop: 8 }]}>
             {t('tracker.clickBarsHint', { defaultValue: 'Click on the bars to view daily details' })}
           </Text>
@@ -342,13 +341,13 @@ export default function TrackerScreen() {
           {['Daily', 'Weekly', 'Monthly'].map((tab) => (
             <TouchableOpacity activeOpacity={1}
               key={tab}
-              style={[styles.tabBtn, activeTab === tab && { borderBottomWidth: 2, borderBottomColor: colors.highlight }]}
+              style={[styles.tabBtn, activeTab === tab && { borderBottomWidth: 2, borderBottomColor: activeColor }]}
               onPress={() => {
                 Haptics.selectionAsync();
                 setActiveTab(tab as any);
               }}
             >
-              <Text style={[styles.tabText, { color: activeTab === tab ? colors.highlight : colors.textSecondary }]}>{t('tracker.' + tab.toLowerCase())}</Text>
+              <Text style={[styles.tabText, { color: activeTab === tab ? activeColor : colors.textSecondary }]}>{t('tracker.' + tab.toLowerCase())}</Text>
             </TouchableOpacity>
           ))}
         </View>
@@ -360,13 +359,11 @@ export default function TrackerScreen() {
                   <Text style={[styles.progressTitle, { color: colors.text }]}>
                     {activeTab === 'Daily' ? t('tracker.progress') : activeTab === 'Weekly' ? t('tracker.weeklyOverview') : t('tracker.monthly')}
                   </Text>
-                  <SkeletonBox loaded={!loading} width={140} height={16} borderRadius={4} color={colors.border} style={{ marginTop: 2 }}>
-                    <Text style={[styles.progressSubtitle, { color: colors.textSecondary }]}>
+                    <Text style={[styles.progressSubtitle, { color: colors.textSecondary, marginTop: 2 }]}>
                       {activeTab === 'Daily'
                         ? t('tracker.tasksDone', { completed: formatNumber(completedCount, i18n.language), total: formatNumber(DAILY_TASKS.length, i18n.language) })
                         : t('tracker.consistency', { title: activeTab === 'Weekly' ? t('tracker.weekly') : t('tracker.monthly') })}
                     </Text>
-                  </SkeletonBox>
                 </View>
 
                 <View style={styles.progressCircleContainer}>
@@ -385,20 +382,16 @@ export default function TrackerScreen() {
                     />
                   </Svg>
                   <View style={styles.progressTextContainer}>
-                    <SkeletonBox loaded={!loading} width={34} height={20} borderRadius={4} color={colors.border}>
                       <Text style={[styles.progressText, { color: colors.accent }]}>
                         {formatNumber(displayPercentage, i18n.language)}%
                       </Text>
-                    </SkeletonBox>
                   </View>
                 </View>
               </View>
 
-              <SkeletonBox loaded={!loading} width={240} height={20} borderRadius={4} color={colors.border} style={{ marginTop: Spacing.two }}>
-                <Text style={[styles.encouragement, { color: colors.textSecondary, marginTop: 0 }]}>
+                <Text style={[styles.encouragement, { color: colors.textSecondary, marginTop: Spacing.two }]}>
                   {getEncouragementMsg(displayPercentage)}
                 </Text>
-              </SkeletonBox>
             </ThemeCard>
 
 
@@ -493,7 +486,7 @@ const styles = StyleSheet.create({
   chartContainer: { flexDirection: 'row', height: 150, alignItems: 'flex-end', justifyContent: 'space-between' },
   chartBarWrapper: { flex: 1, height: '100%', justifyContent: 'flex-end', paddingHorizontal: 2 },
   chartBar: { borderRadius: 4, width: '100%' },
-  heatmapGrid: { flexDirection: 'row', flexWrap: 'wrap', justifyContent: 'center', marginBottom: Spacing.four, marginTop: Spacing.four },
+  heatmapGrid: { flexDirection: 'row', flexWrap: 'wrap', justifyContent: 'center', alignItems: 'center', minHeight: 40, marginBottom: Spacing.four, marginTop: Spacing.four },
   heatmapWeekly: { gap: 12 },
   heatmapMonthly: { gap: 6 },
   heatmapCell: { width: 14, height: 14, borderRadius: 4 },

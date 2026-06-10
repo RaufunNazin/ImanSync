@@ -16,8 +16,8 @@ import { loadMyDuas, saveMyDuas, saveMediaFile, UserDua } from '@/utils/my-duas-
 
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import SkeletonBox from '@/components/SkeletonBox';
-import ThemeCard from '@/components/ThemeCard';
+
+
 import { getStorageMode, loadCustomCategories, saveCustomCategories } from '@/utils/my-duas-storage';
 import { usePreferencesStore } from '@/store/preferencesStore';
 import curatedDuasData from '@/data/curated-duas.json';
@@ -321,10 +321,6 @@ export default function DuaScreen() {
   }, []);
 
   const listData = useMemo(() => {
-    if (loading) {
-      return [...Array(20)].map((_, i) => ({ id: `skeleton_${i}`, type: 'skeleton' }));
-    }
-    
     return [
       { id: 'my_duas', type: 'my_duas' },
       { id: 'bookmarks', type: 'bookmarks' },
@@ -333,19 +329,7 @@ export default function DuaScreen() {
   }, [loading, myDuasCount, bookmarksCount, unpinnedCategories]);
 
   const renderItem = useCallback(({ item }: { item: any }) => {
-    if (item.type === 'skeleton') {
-      return (
-        <View style={styles.gridItem}>
-          <ThemeCard style={{ minHeight: 70, borderRadius: 20, padding: Spacing.two, paddingVertical: Spacing.two, alignItems: 'center', justifyContent: 'center' }}>
-            <View style={{ alignItems: 'center', justifyContent: 'center', gap: 2, paddingHorizontal: 8 }}>
-              <SkeletonBox width={110} height={20} borderRadius={8} color={colors.border} loaded={false} />
-              <SkeletonBox width={70} height={16} borderRadius={6} color={colors.border} loaded={false} />
-            </View>
-          </ThemeCard>
-        </View>
-      );
-    }
-    
+
     if (item.type === 'my_duas') {
       return (
         <View style={styles.gridItem}>
@@ -414,7 +398,7 @@ export default function DuaScreen() {
         )}
 
         {/* Pinned Section */}
-        {(pinnedCategories.length > 0 || (loading && pinnedIds.length > 0)) && (
+        {(pinnedCategories.length > 0) && (
           <View style={[styles.section, { paddingLeft: Spacing.four, marginBottom: Spacing.four }]}>
             <Text style={[styles.sectionTitle, { color: colors.textSecondary, marginBottom: Spacing.one }]}>{t('dua.pinned')}</Text>
             <View>
@@ -423,19 +407,7 @@ export default function DuaScreen() {
                 showsHorizontalScrollIndicator={false}
                 contentContainerStyle={styles.pinnedScroll}
               >
-                {loading ? (
-                  pinnedIds.map((_, i) => (
-                    <View key={`pin-skel-${i}`} style={{ width: 160 }}>
-                      <ThemeCard style={{ minHeight: 70, borderRadius: 20, padding: Spacing.two, paddingVertical: Spacing.two, alignItems: 'center', justifyContent: 'center' }}>
-                        <View style={{ alignItems: 'center', justifyContent: 'center', gap: 2, paddingHorizontal: 8 }}>
-                          <SkeletonBox width={110} height={20} borderRadius={8} color={colors.border} loaded={false} />
-                          <SkeletonBox width={70} height={16} borderRadius={6} color={colors.border} loaded={false} />
-                        </View>
-                      </ThemeCard>
-                    </View>
-                  ))
-                ) : (
-                  pinnedCategories.map((item) => (
+                  {pinnedCategories.map((item) => (
                     <TouchableOpacity activeOpacity={1}
                       key={item.id}
                       style={{ width: 160 }}
@@ -460,8 +432,7 @@ export default function DuaScreen() {
                         }}
                       />
                     </TouchableOpacity>
-                  ))
-                )}
+                  ))}
               </ScrollView>
             </View>
           </View>

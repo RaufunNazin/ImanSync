@@ -12,7 +12,7 @@ export interface SpecialTime {
   date: Date | null;
 }
 
-export default function SpecialTimeCard({ item, colors, i18nLanguage, styles, t }: { item: SpecialTime, colors: any, i18nLanguage: string, styles: any, t: any }) {
+export default function SpecialTimeCard({ item, colors, i18nLanguage, styles, t, activeColor }: { item: SpecialTime, colors: any, i18nLanguage: string, styles: any, t: any, activeColor: string }) {
   const [showCountdown, setShowCountdown] = useState(false);
   const [remainingStr, setRemainingStr] = useState('');
 
@@ -68,7 +68,7 @@ export default function SpecialTimeCard({ item, colors, i18nLanguage, styles, t 
         <View style={[styles.specialCardInner, { alignItems: 'center', justifyContent: 'center', paddingVertical: 16 }]}>
           <View style={{ height: 42, width: '100%', justifyContent: 'center', alignItems: 'center', marginBottom: 4 }}>
             {showCountdown ? (
-              <Text style={{ position: 'absolute', fontFamily: Fonts.outfit, fontSize: 16, lineHeight: 20, color: colors.highlight, textAlign: 'center' }}>
+              <Text style={{ position: 'absolute', fontFamily: Fonts.outfit, fontSize: 16, lineHeight: 20, color: activeColor, textAlign: 'center' }}>
                 {remainingStr}
               </Text>
             ) : (

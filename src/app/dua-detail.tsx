@@ -1,6 +1,6 @@
 import ThemeCard from '@/components/ThemeCard';
 import PageHeader from '@/components/page-header';
-import { Fonts, Spacing, useThemeColors, useThemeStyles } from '@/constants/theme';
+import { Fonts, Spacing, useThemeColors, useThemeStyles, useActiveColor } from '@/constants/theme';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import * as Haptics from 'expo-haptics';
 import { useLocalSearchParams } from 'expo-router';
@@ -47,6 +47,7 @@ export default function DuaDetailScreen() {
   }>();
   const colors = useThemeColors();
   const themeStyles = useThemeStyles();
+  const activeColor = useActiveColor();
   const { t, i18n } = useTranslation();
 
   const [settings, setSettings] = useState<DuaSettings>(() => ({
@@ -157,7 +158,7 @@ export default function DuaDetailScreen() {
     <View style={styles.settingRow}>
       <Text style={[styles.settingLabel, { color: colors.text }]}>{label}</Text>
       <TouchableOpacity activeOpacity={1} 
-        style={[styles.toggleWrap, value ? { backgroundColor: colors.highlight } : { backgroundColor: colors.border }]}
+        style={[styles.toggleWrap, value ? { backgroundColor: activeColor } : { backgroundColor: colors.border }]}
         onPress={() => { Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light); onChange(!value); }}
       >
         <View style={[styles.toggleThumb, value ? styles.toggleThumbOn : styles.toggleThumbOff]} />

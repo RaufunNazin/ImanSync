@@ -8,7 +8,7 @@ import curatedDuasData from '@/data/curated-duas.json';
 import React, { useEffect, useState, useRef } from 'react';
 import { useTranslation } from 'react-i18next';
 import { 
-  ActivityIndicator, 
+
   ScrollView, 
   StyleSheet, 
   Text, 
@@ -37,7 +37,7 @@ export default function DuaSearchScreen() {
   
   const [searchQuery, setSearchQuery] = useState('');
   const [searchResults, setSearchResults] = useState<UnifiedDuaItem[]>([]);
-  const [fetchingAll, setFetchingAll] = useState(false);
+
   const inputRef = useRef<TextInput>(null);
 
   const searchWidth = useSharedValue(40); // Starts small like an icon
@@ -55,7 +55,6 @@ export default function DuaSearchScreen() {
   useEffect(() => {
     if (searchQuery.length > 0) {
       const delayDebounceFn = setTimeout(async () => {
-        setFetchingAll(true);
         try {
           const q = searchQuery.toLowerCase();
           let results: UnifiedDuaItem[] = [];
@@ -185,8 +184,6 @@ export default function DuaSearchScreen() {
           setSearchResults(results);
         } catch (err) {
           console.error("Error searching duas:", err);
-        } finally {
-          setFetchingAll(false);
         }
       }, 500);
       return () => clearTimeout(delayDebounceFn);
@@ -239,9 +236,7 @@ export default function DuaSearchScreen() {
         <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={styles.container} keyboardDismissMode="on-drag" keyboardShouldPersistTaps="handled">
           
           <View style={styles.list}>
-            {fetchingAll ? (
-              <ActivityIndicator size="large" color={colors.accent} style={{ marginTop: 40 }} />
-            ) : searchResults.map(dua => {
+            {searchResults.map(dua => {
               let translation = i18n.language === 'bn' ? dua.translationBn : dua.translationEn;
               if (!translation) translation = dua.name;
 
@@ -282,7 +277,7 @@ export default function DuaSearchScreen() {
                 </View>
               );
             })}
-            {searchQuery.length > 0 && searchResults.length === 0 && !fetchingAll && (
+            {searchQuery.length > 0 && searchResults.length === 0 && (
               <Text style={[styles.emptyText, { color: colors.textSecondary }]}>
                 {t('search.noMatchingDuas', { query: searchQuery })}
               </Text>

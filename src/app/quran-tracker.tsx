@@ -1,4 +1,4 @@
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useEffect } from 'react';
 import ThemeCard from '@/components/ThemeCard';
 import { View, Text, StyleSheet, ScrollView, TouchableOpacity, TextInput, Modal, KeyboardAvoidingView, Platform, Dimensions } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
@@ -52,7 +52,11 @@ export default function QuranTrackerScreen() {
     Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
   };
 
-  const past30Days = useMemo(() => generatePastDays(30), []);
+  useEffect(() => {
+    readingStore.initialize();
+  }, []);
+
+  const past30Days = useMemo(() => generatePastDays(30), [todayStr]);
 
   return (
     <SafeAreaView style={[styles.safeArea, { backgroundColor: colors.background }]}>
@@ -95,7 +99,7 @@ export default function QuranTrackerScreen() {
 
             <View style={styles.quickAddRow}>
               <TouchableOpacity activeOpacity={1} 
-                style={[styles.quickAddBtn, { backgroundColor: colors.backgroundElement, borderColor: colors.textSecondary + '20', borderWidth: 1 }]}
+                style={[styles.quickAddBtn, { backgroundColor: colors.backgroundElement, borderColor: colors.textSecondary + '20', borderWidth: 1, paddingHorizontal: 24 }]}
                 onPress={() => {
                   if (pagesReadToday > 0) readingStore.addPagesRead(-1);
                 }}
@@ -147,7 +151,7 @@ export default function QuranTrackerScreen() {
           </ThemeCard>
 
           {/* Daily Reflection / Notes */}
-          <View style={{ marginTop: Spacing.four }}>
+          <View style={{ marginTop: Spacing.two }}>
             <Text style={[styles.sectionTitle, { color: colors.textSecondary }]}>{t('quran.dailyReflection', { defaultValue: "Today's Reflection" })}</Text>
             <ThemeCard  style={styles.noteContainer}>
               <TextInput
@@ -164,7 +168,7 @@ export default function QuranTrackerScreen() {
           </View>
 
           {/* Reading History (Heatmap) */}
-          <View style={{ marginTop: Spacing.six }}>
+          <View style={{ marginTop: Spacing.four }}>
             <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', marginBottom: Spacing.three }}>
               <Text style={[styles.sectionTitle, { color: colors.textSecondary, marginBottom: 0 }]}>{t('quran.history', { defaultValue: 'Reading History (30 Days)' })}</Text>
               <History size={16} color={colors.textSecondary} />
@@ -179,7 +183,7 @@ export default function QuranTrackerScreen() {
                   let opacity = 1;
                   
                   if (pages > 0) {
-                    const ratio = Math.min(pages / readingStore.dailyGoalPages, 1);
+                    const ratio = Math.min(pages / Math.max(1, readingStore.dailyGoalPages), 1);
                     bgColor = ratio >= 1 ? colors.highlight : activeQuranColor;
                     opacity = ratio >= 1 ? 1 : Math.max(0.4, ratio);
                   }
@@ -212,8 +216,6 @@ export default function QuranTrackerScreen() {
               </View>
             </ThemeCard>
           </View>
-          
-          <View style={{ height: 100 }} />
         </ScrollView>
       </KeyboardAvoidingView>
 
@@ -275,7 +277,7 @@ const styles = StyleSheet.create({
   card: {
     borderRadius: 20,
     padding: Spacing.four,
-    marginBottom: Spacing.four,
+    marginBottom: Spacing.three,
     overflow: 'hidden',
   },
   cardHeader: {

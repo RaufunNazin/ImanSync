@@ -1,6 +1,6 @@
 import PageHeader from '@/components/page-header';
 import React, { useEffect, useState, useMemo } from 'react';
-import { Fonts, Spacing, useThemeColors, useThemeStyles } from '@/constants/theme';
+import { Fonts, Spacing, useThemeColors, useActiveColor, useThemeStyles } from '@/constants/theme';
 import { usePreferencesStore } from '@/store/preferencesStore';
 import { useThemeStore } from '@/store/themeStore';
 import { ChevronLeft, ChevronRight } from 'lucide-react-native';
@@ -20,6 +20,7 @@ export default function CalendarScreen() {
   const theme = useThemeStore((s) => s.theme);
   const colors = useThemeColors();
   const themeStyles = useThemeStyles();
+  const activeColor = useActiveColor();
   const prefs = usePreferencesStore();
 
   const [currentDate, setCurrentDate] = useState(new Date());
@@ -130,13 +131,13 @@ export default function CalendarScreen() {
             styles.gridCell,
             { 
               backgroundColor: isSelected ? colors.backgroundSelected : 'transparent',
-              borderColor: isSelected ? colors.highlight : (isToday ? colors.accent : 'transparent'),
+              borderColor: isSelected ? activeColor : (isToday ? colors.accent : 'transparent'),
               borderWidth: isSelected ? 1 : (isToday ? 1 : 0),
             }
           ]}
           onPress={() => setSelectedDate(dayData.date.gregorian.date)}
         >
-          <Text style={[styles.gregorianText, { color: isSelected ? colors.highlight : colors.text }]}>
+          <Text style={[styles.gregorianText, { color: isSelected ? activeColor : colors.text }]}>
             {formatNumber(parseInt(dayData.date.gregorian.day).toString(), i18n.language)}
           </Text>
 
@@ -159,7 +160,7 @@ export default function CalendarScreen() {
             <View style={{ position: 'absolute', bottom: prefs.showBanglaCalendar ? 2 : 4, width: 4, height: 4, borderRadius: 2, backgroundColor: colors.accent }} />
           )}
           {hasEvents && isSelected && (
-            <View style={{ position: 'absolute', bottom: prefs.showBanglaCalendar ? 2 : 4, width: 4, height: 4, borderRadius: 2, backgroundColor: colors.highlight }} />
+            <View style={{ position: 'absolute', bottom: prefs.showBanglaCalendar ? 2 : 4, width: 4, height: 4, borderRadius: 2, backgroundColor: activeColor }} />
           )}
         </TouchableOpacity>
       );
@@ -175,7 +176,7 @@ export default function CalendarScreen() {
         </View>
       </View>
     );
-  }, [calendarData, selectedDate, currentDate, colors, theme, prefs.hijriOffset, prefs.banglaOffset, prefs.showBanglaCalendar, i18n.language, t]);
+  }, [calendarData, selectedDate, currentDate, colors, theme, prefs.hijriOffset, prefs.banglaOffset, prefs.showBanglaCalendar, i18n.language, t, activeColor]);
 
   const getMonthName = (date: Date) => {
     return date.toLocaleString(i18n.language === 'bn' ? 'bn-BD' : 'en-US', { month: 'long', year: 'numeric' });
@@ -338,7 +339,7 @@ export default function CalendarScreen() {
         options={[]}
         selectedValue={null}
         onSelect={() => {}}
-        colors={colors}
+
         customContent={
           <View style={{ gap: Spacing.four }}>
             <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' }}>
@@ -361,7 +362,7 @@ export default function CalendarScreen() {
                   <TouchableOpacity activeOpacity={1} 
                     key={`h-${val}`} 
                     onPress={() => prefs.setPreferences({ hijriOffset: val })}
-                    style={[{ padding: 8, paddingHorizontal: 12, borderRadius: 8, backgroundColor: prefs.hijriOffset === val ? colors.highlight : colors.backgroundElement, borderWidth: 1, borderColor: colors.border }, prefs.hijriOffset !== val && themeStyles.cardShadow]}
+                    style={[{ padding: 8, paddingHorizontal: 12, borderRadius: 8, backgroundColor: prefs.hijriOffset === val ? activeColor : colors.backgroundElement, borderWidth: 1, borderColor: colors.border }, prefs.hijriOffset !== val && themeStyles.cardShadow]}
                   >
                     <Text style={{ fontFamily: Fonts.outfit, color: prefs.hijriOffset === val ? '#FFF' : colors.text }}>{val > 0 ? '+' : ''}{val}</Text>
                   </TouchableOpacity>
@@ -379,7 +380,7 @@ export default function CalendarScreen() {
                     <TouchableOpacity activeOpacity={1} 
                       key={`b-${val}`} 
                       onPress={() => prefs.setPreferences({ banglaOffset: val })}
-                      style={[{ padding: 8, paddingHorizontal: 12, borderRadius: 8, backgroundColor: prefs.banglaOffset === val ? colors.highlight : colors.backgroundElement, borderWidth: 1, borderColor: colors.border }, prefs.banglaOffset !== val && themeStyles.cardShadow]}
+                      style={[{ padding: 8, paddingHorizontal: 12, borderRadius: 8, backgroundColor: prefs.banglaOffset === val ? activeColor : colors.backgroundElement, borderWidth: 1, borderColor: colors.border }, prefs.banglaOffset !== val && themeStyles.cardShadow]}
                     >
                       <Text style={{ fontFamily: Fonts.outfit, color: prefs.banglaOffset === val ? '#FFF' : colors.text }}>{val > 0 ? '+' : ''}{val}</Text>
                     </TouchableOpacity>

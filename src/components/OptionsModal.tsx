@@ -12,7 +12,7 @@ import {
 
 import { Check, Search, X } from 'lucide-react-native';
 import { useTranslation } from 'react-i18next';
-import { Fonts } from '@/constants/theme';
+import { Fonts, useThemeColors, useActiveColor } from '@/constants/theme';
 
 interface OptionItem {
   id: string | number;
@@ -26,7 +26,6 @@ interface OptionsModalProps {
   options: OptionItem[];
   selectedValue: string | number | null;
   onSelect: (id: string | number) => void;
-  colors: any;
   enableSearch?: boolean;
   customContent?: React.ReactNode;
 }
@@ -38,10 +37,11 @@ export default function OptionsModal({
   options,
   selectedValue,
   onSelect,
-  colors,
   enableSearch = false,
   customContent,
 }: OptionsModalProps) {
+  const activeColor = useActiveColor();
+  const colors = useThemeColors();
   const { t } = useTranslation();
   const [searchQuery, setSearchQuery] = useState('');
 
@@ -119,13 +119,13 @@ export default function OptionsModal({
                         <Text
                           style={[
                             styles.optionText,
-                            { color: isSelected ? colors.highlight : colors.text },
+                            { color: isSelected ? activeColor : colors.text },
                             isSelected && { fontWeight: '600' }
                           ]}
                         >
                           {opt.name}
                         </Text>
-                        {isSelected && <Check size={20} color={colors.highlight} />}
+                        {isSelected && <Check size={20} color={activeColor} />}
                       </TouchableOpacity>
                     );
                   })

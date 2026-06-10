@@ -3,7 +3,7 @@ import { Modal, StyleSheet, Text, TouchableOpacity, View, ScrollView, TouchableW
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import * as Updates from 'expo-updates';
 import { useTranslation } from 'react-i18next';
-import { Fonts, Spacing, useThemeColors, useThemeStyles } from '@/constants/theme';
+import { Fonts, Spacing, useThemeColors, useThemeStyles, useActiveColor } from '@/constants/theme';
 import { Bell, RefreshCw, Info, X } from 'lucide-react-native';
 
 const SYSTEM_CONFIG_URL = 'https://raw.githubusercontent.com/RaufunNazin/ImanSync/main/system_config.json';
@@ -29,6 +29,7 @@ interface SystemConfig {
 export default function SystemAnnouncer() {
   const { t, i18n } = useTranslation();
   const colors = useThemeColors();
+  const activeColor = useActiveColor();
   const themeStyles = useThemeStyles();
 
   const [updateReady, setUpdateReady] = useState(false);
@@ -115,14 +116,14 @@ export default function SystemAnnouncer() {
       <Modal visible={updateReady} transparent animationType="fade">
         <View style={styles.overlay}>
           <View style={[styles.card, themeStyles.cardShadow, { backgroundColor: colors.background, borderColor: colors.border }]}>
-            <View style={[styles.iconWrap, { backgroundColor: colors.highlight + '20' }]}>
-              <RefreshCw size={32} color={colors.highlight} />
+            <View style={[styles.iconWrap, { backgroundColor: activeColor + '15' }]}>
+              <RefreshCw size={24} color={activeColor} />
             </View>
             <Text style={[styles.title, { color: colors.text }]}>{t('system.updateReadyTitle', 'Update Ready!')}</Text>
             <Text style={[styles.desc, { color: colors.textSecondary }]}>
               {t('system.updateReadyDesc', 'A new version of the app has been downloaded. Restart the app to apply the new features.')}
             </Text>
-            <TouchableOpacity activeOpacity={1} style={[styles.btn, { backgroundColor: colors.highlight }]} onPress={handleRestart}>
+            <TouchableOpacity activeOpacity={1} style={[styles.btn, { backgroundColor: activeColor }]} onPress={handleRestart}>
               <Text style={styles.btnText}>{t('system.restartNow', 'Restart Now')}</Text>
             </TouchableOpacity>
           </View>
@@ -170,14 +171,14 @@ export default function SystemAnnouncer() {
           <View style={styles.overlay}>
             <TouchableWithoutFeedback>
               <View style={[styles.card, themeStyles.cardShadow, { backgroundColor: colors.background, borderColor: colors.border }]}>
-                <View style={[styles.iconWrap, { backgroundColor: colors.highlight + '20' }]}>
-                  <Bell size={16} color={colors.highlight} />
+                <View style={[styles.iconWrap, { backgroundColor: activeColor + '15' }]}>
+                  <Bell size={24} color={activeColor} />
                 </View>
                 <Text style={[styles.title, { color: colors.text }]}>{t('system.notification', 'Notice')}</Text>
                 <Text style={[styles.desc, { color: colors.text, textAlign: 'center', fontSize: 16 }]}>
                   {notification && getLocalizedText(notification)}
                 </Text>
-                <TouchableOpacity activeOpacity={1} style={[styles.btn, { backgroundColor: colors.highlight, width: '100%', marginTop: Spacing.two }]} onPress={dismissNotification}>
+                <TouchableOpacity activeOpacity={1} style={[styles.btn, { backgroundColor: activeColor, width: '100%', marginTop: Spacing.two }]} onPress={dismissNotification}>
                   <Text style={styles.btnText}>{t('system.gotIt', 'Got It')}</Text>
                 </TouchableOpacity>
               </View>

@@ -45,6 +45,12 @@ export function useThemeColors() {
   return Colors[currentTheme];
 }
 
+export function useActiveColor() {
+  const { theme } = useThemeStore();
+  const currentTheme = theme === 'unspecified' ? 'light' : (theme ?? 'light');
+  return currentTheme === 'dark' ? Colors.dark.accent : Colors.light.highlight;
+}
+
 export function useThemeStyles() {
   const { theme } = useThemeStore();
   const currentTheme = theme === 'unspecified' ? 'light' : (theme ?? 'light');

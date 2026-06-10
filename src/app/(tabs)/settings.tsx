@@ -3,7 +3,7 @@ import ThemeCard from '@/components/ThemeCard';
 import OptionsModal from '@/components/OptionsModal';
 import PageHeader from '@/components/page-header';
 import TimePickerModal from '@/components/TimePickerModal';
-import { Fonts, Spacing, useThemeColors } from '@/constants/theme';
+import { Fonts, Spacing, useThemeColors, useActiveColor } from '@/constants/theme';
 import { setLanguage } from '@/i18n';
 import { usePreferencesStore } from '@/store/preferencesStore';
 import { useThemeStore } from '@/store/themeStore';
@@ -43,8 +43,9 @@ import SettingRow from '@/components/SettingRow';
 export default function SettingsScreen() {
   const scheme = useThemeStore((s) => s.theme);
   const setTheme = useThemeStore((s) => s.setTheme);
-          const colors = useThemeColors();
-    const { t, i18n } = useTranslation();
+  const colors = useThemeColors();
+  const activeColor = useActiveColor();
+  const { t, i18n } = useTranslation();
   const router = useRouter();
 
   const [fetchingLoc, setFetchingLoc] = useState(false);
@@ -85,14 +86,13 @@ export default function SettingsScreen() {
 
   // ── Permanent Storage ──────────────────────────────────────────────────────
   const [storageMode, setStorageMode] = useState<StorageMode>('internal');
-  const [storageModeLoading, setStorageModeLoading] = useState(true);
+
   const [storageProcessing, setStorageProcessing] = useState(false);
   const [storageConfirmModal, setStorageConfirmModal] = useState<'enable' | 'disable' | null>(null);
 
   useEffect(() => {
     getStorageMode().then((mode) => {
       setStorageMode(mode);
-      setStorageModeLoading(false);
     });
   }, []);
 
@@ -243,9 +243,9 @@ export default function SettingsScreen() {
 
         <Animated.Text layout={LinearTransition.duration(200)} style={[styles.sectionTitle, { color: colors.textSecondary }]}>{t('settings.preferences')}</Animated.Text>
         <ThemeCard animated layout={LinearTransition.duration(200)} style={[styles.card]}>
-          <SettingRow icon={Globe} title={t('settings.language')} value={i18n.language === 'bn' ? 'বাংলা' : 'English'} onPress={cycleLanguage} colors={colors} />
-          <SettingRow icon={Palette} title={t('settings.theme')} value={scheme === 'dark'} type="toggle" onPress={toggleDarkMode} colors={colors} />
-                    <SettingRow icon={BookOpen} title={t('settings.showCuratedDuas')} value={prefs.showCuratedDuas} type="toggle" isLast={true} onPress={(v) => prefs.setPreferences({ showCuratedDuas: v })} colors={colors} />
+          <SettingRow icon={Globe} title={t('settings.language')} value={i18n.language === 'bn' ? 'বাংলা' : 'English'} onPress={cycleLanguage} />
+          <SettingRow icon={Palette} title={t('settings.theme')} value={scheme === 'dark'} type="toggle" onPress={toggleDarkMode} />
+                    <SettingRow icon={BookOpen} title={t('settings.showCuratedDuas')} value={prefs.showCuratedDuas} type="toggle" isLast={true} onPress={(v) => prefs.setPreferences({ showCuratedDuas: v })} />
         </ThemeCard>
 
         <Animated.Text layout={LinearTransition.duration(200)} style={[styles.sectionTitle, { color: colors.textSecondary, marginTop: Spacing.four }]}>{t('settings.calendarSettings', { defaultValue: 'Calendar Settings' })}</Animated.Text>
@@ -258,7 +258,7 @@ export default function SettingsScreen() {
               setOptionsModalType('hijri');
               setOptionsModalVisible(true);
             }}
-            colors={colors}
+           
           />
           <SettingRow
             icon={CalendarDays}
@@ -267,7 +267,7 @@ export default function SettingsScreen() {
             type="toggle"
             isLast={!prefs.showBanglaCalendar}
             onPress={(val) => prefs.setPreferences({ showBanglaCalendar: val })}
-            colors={colors}
+           
           />
           {prefs.showBanglaCalendar && (
             <View>
@@ -280,7 +280,7 @@ export default function SettingsScreen() {
                   setOptionsModalVisible(true);
                 }}
                 isLast={true}
-                colors={colors}
+               
               />
             </View>
           )}
@@ -288,12 +288,12 @@ export default function SettingsScreen() {
 
         <Animated.Text layout={LinearTransition.duration(200)} style={[styles.sectionTitle, { color: colors.textSecondary, marginTop: Spacing.four }]}>{t('settings.notificationsTitle', { defaultValue: 'Notifications Settings' })}</Animated.Text>
         <ThemeCard animated layout={LinearTransition.duration(200)} style={[styles.card]}>
-          <SettingRow icon={Bell} title={t('settings.masterToggle', { defaultValue: 'Master Toggle' })} value={prefs.notificationsEnabled} type="toggle" isLast={!prefs.notificationsEnabled} onPress={toggleNotifications} colors={colors} />
+          <SettingRow icon={Bell} title={t('settings.masterToggle', { defaultValue: 'Master Toggle' })} value={prefs.notificationsEnabled} type="toggle" isLast={!prefs.notificationsEnabled} onPress={toggleNotifications} />
           {prefs.notificationsEnabled && (
             <View>
-              <SettingRow icon={Clock} title={t('settings.prayerStartAlerts', { defaultValue: 'Prayer Start Alerts' })} value={prefs.prayerStartAlerts} type="toggle" onPress={togglePrayerStartAlerts} colors={colors} />
-              <SettingRow icon={Clock} title={t('settings.prayerEndAlerts', { defaultValue: 'Prayer End Alerts' })} value={prefs.prayerEndAlerts} type="toggle" onPress={togglePrayerEndAlerts} colors={colors} />
-              <SettingRow icon={ListTodo} title={t('settings.dailyReminders', { defaultValue: 'Daily Reminders' })} value={prefs.taskRemindersEnabled} type="toggle" onPress={toggleTaskReminders} colors={colors} />
+              <SettingRow icon={Clock} title={t('settings.prayerStartAlerts', { defaultValue: 'Prayer Start Alerts' })} value={prefs.prayerStartAlerts} type="toggle" onPress={togglePrayerStartAlerts} />
+              <SettingRow icon={Clock} title={t('settings.prayerEndAlerts', { defaultValue: 'Prayer End Alerts' })} value={prefs.prayerEndAlerts} type="toggle" onPress={togglePrayerEndAlerts} />
+              <SettingRow icon={ListTodo} title={t('settings.dailyReminders', { defaultValue: 'Daily Reminders' })} value={prefs.taskRemindersEnabled} type="toggle" onPress={toggleTaskReminders} />
               <SettingRow
                 icon={BellOff}
                 title={t('settings.doNotDisturb')}
@@ -304,7 +304,7 @@ export default function SettingsScreen() {
                   prefs.setPreferences({ quietHours: { ...prefs.quietHours, enabled: v } });
                   import('../../services/notificationService').then(s => s.scheduleAllNotifications());
                 }}
-                colors={colors}
+               
               />
               {prefs.quietHours.enabled && (
                 <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', paddingBottom: Spacing.three, paddingLeft: 52 }}>
@@ -344,7 +344,7 @@ export default function SettingsScreen() {
           title={pickerType === 'start' ? t('settings.dndFrom') : t('settings.dndTo')}
           initialHour={pickerType === 'start' ? prefs.quietHours.startHour : prefs.quietHours.endHour}
           initialMinute={pickerType === 'start' ? prefs.quietHours.startMinute : prefs.quietHours.endMinute}
-          colors={colors}
+         
           onSave={(hour, minute) => {
             setPickerVisible(false);
             if (pickerType === 'start') {
@@ -368,7 +368,7 @@ export default function SettingsScreen() {
               setOptionsModalVisible(true);
             }}
             highlight={highlightedRow === 'location'}
-            colors={colors}
+           
           />
           <SettingRow
             icon={Calculator}
@@ -378,7 +378,7 @@ export default function SettingsScreen() {
               setOptionsModalType('calc');
               setOptionsModalVisible(true);
             }}
-            colors={colors}
+           
           />
           <SettingRow
             icon={Scale}
@@ -388,7 +388,7 @@ export default function SettingsScreen() {
               setOptionsModalType('madhab');
               setOptionsModalVisible(true);
             }}
-            colors={colors}
+           
           />
           </ThemeCard>
 
@@ -401,35 +401,34 @@ export default function SettingsScreen() {
             type={storageProcessing ? 'loading' : 'toggle'}
             onPress={togglePermanentStorage}
             highlight={highlightedRow === 'storage'}
-            colors={colors}
-            isLoading={storageModeLoading}
+           
           />
           <SettingRow
             icon={Shield}
             title={t('settings.managePermissions')}
             value=""
             onPress={() => Linking.openSettings()}
-            colors={colors}
+           
           />
           <SettingRow 
             icon={RefreshCw} 
             title={t('settings.checkForUpdates')} 
             type={checkingUpdate ? 'loading' : 'navigate'} 
             onPress={checkForUpdates} 
-            colors={colors} 
+            
           />
           <SettingRow 
             icon={FileText} 
             title={t('settings.changelog')} 
             onPress={() => router.push('/changelog')} 
-            colors={colors} 
+            
           />
           <SettingRow 
             icon={Info} 
             title={t('settings.aboutImanSync')} 
             onPress={() => router.push('/about')} 
             isLast={true} 
-            colors={colors} 
+            
           />
         </ThemeCard>
         </Animated.View>
@@ -479,7 +478,7 @@ export default function SettingsScreen() {
             }
             import('../../services/notificationService').then(s => s.scheduleAllNotifications());
           }}
-          colors={colors}
+         
           customContent={
             undefined
           }
@@ -499,13 +498,13 @@ export default function SettingsScreen() {
                     </TouchableOpacity>
                   )}
                   
-                  <View style={[updateStyles.iconWrap, { backgroundColor: updateModal.type === 'success' ? colors.accent + '20' : updateModal.type === 'error' ? colors.error + '20' : colors.highlight + '20' }]}>
+                  <View style={[updateStyles.iconWrap, { backgroundColor: updateModal.type === 'success' ? colors.accent + '20' : updateModal.type === 'error' ? colors.error + '20' : activeColor + '20' }]}>
                     {updateModal.type === 'success' ? (
                       <CheckCircle size={32} color={colors.accent} />
                     ) : updateModal.type === 'error' ? (
                       <AlertCircle size={32} color={colors.error} />
                     ) : (
-                      <ActivityIndicator size="large" color={colors.highlight} />
+                      <ActivityIndicator size="large" color={activeColor} />
                     )}
                   </View>
                   
@@ -554,7 +553,7 @@ export default function SettingsScreen() {
                   </Text>
 
                   <TouchableOpacity activeOpacity={1}
-                    style={[updateStyles.btn, { backgroundColor: storageConfirmModal === 'enable' ? colors.highlight : colors.error }]}
+                    style={[updateStyles.btn, { backgroundColor: storageConfirmModal === 'enable' ? activeColor : colors.error }]}
                     onPress={confirmStorageChange}
                   >
                     <Text style={updateStyles.btnText}>

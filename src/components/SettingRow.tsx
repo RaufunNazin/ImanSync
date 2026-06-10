@@ -1,8 +1,7 @@
 import React from 'react';
 import { View, Text, TouchableOpacity, StyleSheet, Switch, ActivityIndicator } from 'react-native';
 import { ChevronRight } from 'lucide-react-native';
-import { Fonts, Spacing } from '@/constants/theme';
-import SkeletonBox from './SkeletonBox';
+import { Fonts, Spacing, useThemeColors, useActiveColor } from '@/constants/theme';
 
 export interface SettingRowProps {
   icon: React.ComponentType<{ size: number; color: string }>;
@@ -12,17 +11,18 @@ export interface SettingRowProps {
   onPress?: (val?: any) => void;
   isLast?: boolean;
   highlight?: boolean;
-  colors: any;
-  isLoading?: boolean;
 }
 
-export default function SettingRow({ icon: Icon, title, value, type = 'navigate', onPress, isLast, highlight, colors, isLoading }: SettingRowProps) {
+export default function SettingRow({ icon: Icon, title, value, type = 'navigate', onPress, isLast, highlight }: SettingRowProps) {
+  const colors = useThemeColors();
+  const activeColor = useActiveColor();
+
   return (
     <TouchableOpacity activeOpacity={1}
       style={[
         styles.settingRow,
         !isLast && { borderBottomWidth: StyleSheet.hairlineWidth, borderBottomColor: colors.border },
-        highlight && { backgroundColor: colors.highlight + '20', borderRadius: 12, paddingHorizontal: Spacing.three, marginHorizontal: -Spacing.three }
+        highlight && { backgroundColor: activeColor + '20', borderRadius: 12, paddingHorizontal: Spacing.three, marginHorizontal: -Spacing.three }
       ]}
       onPress={() => {
         if (type === 'toggle') {
@@ -39,15 +39,7 @@ export default function SettingRow({ icon: Icon, title, value, type = 'navigate'
         <Text style={[styles.settingTitle, { color: colors.text }]}>{title}</Text>
       </View>
 
-      {isLoading ? (
-        <View style={{ justifyContent: 'center' }}>
-          {type === 'toggle' ? (
-            <SkeletonBox width={48} height={28} borderRadius={14} color={colors.border} loaded={false} />
-          ) : (
-            <SkeletonBox width={80} height={18} borderRadius={4} color={colors.border} loaded={false} />
-          )}
-        </View>
-      ) : type === 'navigate' ? (
+      {type === 'navigate' ? (
         <View style={{ flexDirection: 'row', alignItems: 'center', flex: value ? 1 : undefined, flexShrink: 1, justifyContent: 'flex-end', paddingLeft: value ? 10 : 0 }}>
           {!!value && <Text style={[styles.settingValue, { color: colors.textSecondary }]}>{value}</Text>}
           <ChevronRight size={20} color={colors.textSecondary} />
@@ -58,11 +50,11 @@ export default function SettingRow({ icon: Icon, title, value, type = 'navigate'
           onValueChange={(val) => {
             if (onPress) onPress(val);
           }}
-          trackColor={{ false: colors.border, true: colors.highlight }}
+          trackColor={{ false: colors.border, true: activeColor }}
           thumbColor={value ? '#FFFFFF' : '#f4f3f4'}
         />
       ) : type === 'loading' ? (
-        <ActivityIndicator size="small" color={colors.highlight} />
+        <ActivityIndicator size="small" color={activeColor} />
       ) : null}
     </TouchableOpacity>
   );

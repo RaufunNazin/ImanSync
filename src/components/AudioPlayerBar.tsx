@@ -2,7 +2,7 @@ import React, { useEffect, useRef, useState } from 'react';
 import { View, Text, StyleSheet, TouchableOpacity, ActivityIndicator, Animated } from 'react-native';
 import { useAudioStore } from '@/store/audioStore';
 import { Play, Pause, X } from 'lucide-react-native';
-import { Fonts, Spacing, useThemeColors, useThemeStyles } from '@/constants/theme';
+import { Fonts, Spacing, useThemeColors, useThemeStyles, useActiveColor } from '@/constants/theme';
 import { Platform } from 'react-native';
 import { useTranslation } from 'react-i18next';
 import { formatNumber } from '@/utils/formatNumber';
@@ -11,6 +11,7 @@ export default function AudioPlayerBar() {
   const { currentSurahId, currentSurahName, isPlaying, isLoading, pause, resume, stop, playlist, playbackMode, currentAyahNumber, juzAyahs, currentJuzAyahIndex } = useAudioStore();
   const colors = useThemeColors();
   const themeStyles = useThemeStyles();
+  const activeColor = useActiveColor();
   const { i18n } = useTranslation();
 
   const translateX = useRef(new Animated.Value(150)).current;
@@ -92,15 +93,15 @@ export default function AudioPlayerBar() {
 
         {data.isLoading ? (
           <View style={styles.btn}>
-            <ActivityIndicator size="small" color={colors.highlight} />
+            <ActivityIndicator size="small" color={activeColor} />
           </View>
         ) : data.isPlaying ? (
           <TouchableOpacity activeOpacity={1} style={styles.btn} onPress={pause}>
-            <Pause size={24} color={colors.highlight} fill={colors.highlight} />
+            <Pause size={24} color={activeColor} fill={activeColor} />
           </TouchableOpacity>
         ) : (
           <TouchableOpacity activeOpacity={1} style={styles.btn} onPress={resume}>
-            <Play size={24} color={colors.highlight} fill={colors.highlight} />
+            <Play size={24} color={activeColor} fill={activeColor} />
           </TouchableOpacity>
         )}
 

@@ -83,7 +83,7 @@ export default function JuzScreen() {
     }
     return [];
   });
-  const [loading, setLoading] = useState(() => ayahs.length === 0);
+
   const [modalVisible, setModalVisible] = useState(false);
   const [bookmarkedAyahs, setBookmarkedAyahs] = useState<Record<string, boolean>>({});
 
@@ -171,8 +171,7 @@ export default function JuzScreen() {
 
     fetchOnce({
       key: cacheKey,
-      onStart: (isCached) => {
-        if (!isCached) setLoading(true);
+      onStart: () => {
       },
       fetcher: async () => {
         const urls = [`https://api.alquran.cloud/v1/juz/${id}/quran-uthmani`];
@@ -211,12 +210,10 @@ export default function JuzScreen() {
       onData: (data) => {
         if (data && data.ayahs) {
           setAyahs(data.ayahs);
-          setLoading(false);
         }
       },
       onError: (err) => {
         console.error("Error fetching juz:", err);
-        setLoading(false);
       }
     });
   }, [id, settings.showEnglish, settings.showBangla, settings.showEnglishTranslit]);
@@ -393,11 +390,7 @@ export default function JuzScreen() {
         </View>
       </View>
       
-      {loading ? (
-        <View style={styles.loaderContainer}>
-          <ActivityIndicator size="large" color={colors.highlight} />
-        </View>
-      ) : (
+
         <FlatList
           ref={flatListRef}
           data={ayahs}
@@ -452,7 +445,6 @@ export default function JuzScreen() {
             </ThemeCard>
           )}
         />
-      )}
 
       {renderSettingsModal()}
     </SafeAreaView>

@@ -2,7 +2,7 @@ import React, { useEffect, useState, useMemo, useRef } from 'react';
 import { View, Text, StyleSheet, ScrollView, TouchableOpacity } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useLocalSearchParams, useRouter } from 'expo-router';
-import { Fonts, Spacing, useThemeColors } from '@/constants/theme';
+import { Fonts, Spacing, useThemeColors, useActiveColor } from '@/constants/theme';
 import PageHeader from '@/components/page-header';
 import { useTranslation } from 'react-i18next';
 import { QURAN_CURRICULUM, LessonItem } from '@/data/quran-curriculum';
@@ -15,6 +15,7 @@ import { Check, ChevronLeft, ChevronRight, Volume2 } from 'lucide-react-native';
 export default function LessonPlayerScreen() {
   const { id } = useLocalSearchParams<{ id: string }>();
   const colors = useThemeColors();
+  const activeColor = useActiveColor();
   const { t, i18n } = useTranslation();
   const router = useRouter();
   const { playAudio } = useAudioPlayer();
@@ -138,7 +139,7 @@ export default function LessonPlayerScreen() {
       />
 
       <View style={[styles.progressBarBg, { backgroundColor: colors.border }]}>
-        <View style={[styles.progressBarFill, { backgroundColor: colors.highlight, width: `${progress}%` }]} />
+        <View style={[styles.progressBarFill, { backgroundColor: activeColor, width: `${progress}%` }]} />
       </View>
 
       <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={styles.container}>
@@ -154,7 +155,7 @@ export default function LessonPlayerScreen() {
                   style={[
                     styles.gridItem,
                     activeLesson.items && activeLesson.items.length <= 6 && { width: '45%' }, 
-                    { backgroundColor: isTapped ? colors.highlight + '20' : colors.backgroundElement, borderColor: isTapped ? colors.highlight : colors.border }
+                    { backgroundColor: isTapped ? activeColor + '20' : colors.backgroundElement, borderColor: isTapped ? activeColor : colors.border }
                   ]}
                   onPress={() => handleGridPress(item)}
                 >
@@ -163,7 +164,7 @@ export default function LessonPlayerScreen() {
                     {i18n.language === 'bn' && item.transliterationBn ? item.transliterationBn : item.transliteration}
                   </Text>
                   <View style={{ position: 'absolute', top: 8, right: 8 }}>
-                    <Volume2 size={12} color={isTapped ? colors.highlight : colors.textSecondary} opacity={isTapped ? 1 : 0.4} />
+                    <Volume2 size={12} color={isTapped ? activeColor : colors.textSecondary} opacity={isTapped ? 1 : 0.4} />
                   </View>
                 </TouchableOpacity>
               );
@@ -188,7 +189,7 @@ export default function LessonPlayerScreen() {
               </Text>
               
               {flipped ? (
-                <Text style={[styles.flashcardTranslit, { color: colors.highlight }]}>
+                <Text style={[styles.flashcardTranslit, { color: activeColor }]}>
                   {i18n.language === 'bn' && activeLesson.items[currentIndex].transliterationBn 
                     ? activeLesson.items[currentIndex].transliterationBn 
                     : activeLesson.items[currentIndex].transliteration}
@@ -204,7 +205,7 @@ export default function LessonPlayerScreen() {
               <TouchableOpacity activeOpacity={1} onPress={handlePrevSequential} style={[styles.controlBtn, { backgroundColor: colors.border }]}>
                 <ChevronLeft size={24} color={colors.text} />
               </TouchableOpacity>
-              <TouchableOpacity activeOpacity={1} onPress={handleNextSequential} style={[styles.controlBtn, { backgroundColor: colors.highlight }]}>
+              <TouchableOpacity activeOpacity={1} onPress={handleNextSequential} style={[styles.controlBtn, { backgroundColor: activeColor }]}>
                 <ChevronRight size={24} color={colors.background} />
               </TouchableOpacity>
             </View>
@@ -215,14 +216,14 @@ export default function LessonPlayerScreen() {
         {activeLesson.type === 'quiz' && activeLesson.items && (
           <View style={styles.sequentialContainer}>
             <TouchableOpacity activeOpacity={1} 
-              style={[styles.audioBtn, { backgroundColor: colors.highlight + '20', borderColor: colors.highlight }]}
+              style={[styles.audioBtn, { backgroundColor: activeColor + '20', borderColor: activeColor }]}
               onPress={() => {
                 const url = activeLesson!.items![currentIndex].audioUrl;
                 playAudio(url, activeLesson!.items![currentIndex].arabic);
               }}
             >
-              <Volume2 size={48} color={colors.highlight} />
-              <Text style={[styles.tapToListen, { color: colors.highlight }]}>{t('learn.tapToListen')}</Text>
+              <Volume2 size={48} color={activeColor} />
+              <Text style={[styles.tapToListen, { color: activeColor }]}>{t('learn.tapToListen')}</Text>
             </TouchableOpacity>
 
             <View style={styles.quizOptions}>
@@ -257,7 +258,7 @@ export default function LessonPlayerScreen() {
       {completed && (
         <View style={[styles.footer, { borderTopColor: colors.border, backgroundColor: colors.background }]}>
           <TouchableOpacity activeOpacity={1} 
-            style={[styles.completeBtn, { backgroundColor: colors.highlight }]}
+            style={[styles.completeBtn, { backgroundColor: activeColor }]}
             onPress={() => {
               if (router.canGoBack()) {
                 router.back();
