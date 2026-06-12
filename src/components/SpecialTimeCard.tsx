@@ -99,7 +99,7 @@ export default function SpecialTimeCard({ item, colors, i18nLanguage, styles, t,
             <Animated.Text style={[countdownStyle, { position: 'absolute', fontFamily: Fonts.outfit, fontSize: 16, lineHeight: 20, color: activeColor, textAlign: 'center' }]}>
               {remainingStr}
             </Animated.Text>
-            <Animated.Text style={[timeStyle, { position: 'absolute', fontFamily: Fonts.outfit, fontSize: 22, color: timeColor || colors.accent, textAlign: 'center' }]}>
+            <Animated.Text style={[timeStyle, { position: 'absolute', fontFamily: Fonts.outfit, fontSize: 22, color: timeColor || activeColor, textAlign: 'center' }]}>
               {formatNumber(item.time.replace(/ AM| PM/g, ''), i18nLanguage)}
               {item.time.includes(' AM') && <Text style={{ fontSize: 13 }}> AM</Text>}
               {item.time.includes(' PM') && <Text style={{ fontSize: 13 }}> PM</Text>}

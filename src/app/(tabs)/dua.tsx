@@ -1,7 +1,7 @@
 import DuaCard from '@/components/dua-card';
 import PageHeader from '@/components/page-header';
 import PinSheet from '@/components/pin-sheet';
-import { Fonts, Spacing, useThemeColors } from '@/constants/theme';
+import { Fonts, Spacing, useThemeColors, useActiveColor } from '@/constants/theme';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useFocusEffect, useRouter } from 'expo-router';
 import { FolderLock, Search, X, CheckCircle2, AlertCircle, Plus } from 'lucide-react-native';
@@ -35,6 +35,7 @@ const BANNER_DISMISSED_KEY = 'imansync_storage_banner_dismissed';
 
 export default function DuaScreen() {
   const colors = useThemeColors();
+  const activeColor = useActiveColor();
   const { t, i18n } = useTranslation();
   const router = useRouter();
   const prefs = usePreferencesStore();
@@ -433,7 +434,7 @@ export default function DuaScreen() {
 
   return (
     <GestureHandlerRootView style={{ flex: 1 }}>
-      <SafeAreaView style={[styles.safeArea, { backgroundColor: colors.background }]}>
+      <SafeAreaView edges={['top']} style={[styles.safeArea, { backgroundColor: colors.background }]}>
         <PageHeader 
           titleEn={t('dua.titleEn')} 
           rightElement={
@@ -480,7 +481,7 @@ export default function DuaScreen() {
     
       <RNAnimated.View style={[styles.fab, { transform: [{ translateY: fabTranslateY }] }]}>
         <TouchableOpacity activeOpacity={1}
-          style={[StyleSheet.absoluteFill, { backgroundColor: colors.accent, borderRadius: 28, justifyContent: 'center', alignItems: 'center' }]}
+          style={[StyleSheet.absoluteFill, { backgroundColor: activeColor, borderRadius: 28, justifyContent: 'center', alignItems: 'center' }]}
           onPress={() => setModalVisible(true)}
         >
           <Plus size={24} color="#FFF" />
@@ -618,7 +619,7 @@ const styles = StyleSheet.create({
     overflow: 'hidden',
   },
   item: {
-    padding: Spacing.five,
+    padding: Spacing.four,
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',

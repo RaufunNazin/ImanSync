@@ -3,7 +3,7 @@ import React, { useEffect, useState, useRef } from 'react';
 import { StyleSheet, Text, TouchableOpacity, View, Animated } from 'react-native';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { Fonts, Spacing, useThemeColors } from '@/constants/theme';
+import { Fonts, Spacing, useThemeColors, useActiveColor } from '@/constants/theme';
 import PageHeader from '@/components/page-header';
 import { useTranslation } from 'react-i18next';
 import { ChevronRight } from 'lucide-react-native';
@@ -20,6 +20,7 @@ const PINNED_DUAS_KEY = 'imansync_pinned_duas';
 export default function DuaCategoryScreen() {
   const { id, name, isCustom } = useLocalSearchParams<{ id: string; name: string; isCustom?: string }>();
   const colors = useThemeColors();
+  const activeColor = useActiveColor();
   const { t, i18n } = useTranslation();
   const router = useRouter();
 
@@ -170,7 +171,7 @@ export default function DuaCategoryScreen() {
           <View style={styles.itemContent}>
             <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8 }}>
               {pinnedDuaIds.includes(dua.id.toString()) && (
-                <Bookmark size={14} color={colors.accent} fill={colors.accent} />
+                <Bookmark size={14} color={activeColor} fill={activeColor} />
               )}
               <Text style={[styles.itemTitle, { color: colors.text, flex: 1 }]} numberOfLines={3}>
                 {title}
@@ -193,7 +194,7 @@ export default function DuaCategoryScreen() {
         </Text>
         {isCustom === 'true' && !id.startsWith('curated_cat_') && (
           <TouchableOpacity activeOpacity={1}
-            style={[styles.emptyBtn, { backgroundColor: colors.accent }]}
+            style={[styles.emptyBtn, { backgroundColor: activeColor }]}
             onPress={() => setModalVisible(true)}
           >
             <Plus size={20} color="#FFF" />
@@ -269,7 +270,7 @@ export default function DuaCategoryScreen() {
         <>
           <Animated.View style={[styles.fab, { transform: [{ translateY: fabTranslateY }] }]}>
             <TouchableOpacity activeOpacity={1}
-              style={[StyleSheet.absoluteFill, { backgroundColor: colors.accent, borderRadius: 28, justifyContent: 'center', alignItems: 'center' }]}
+              style={[StyleSheet.absoluteFill, { backgroundColor: activeColor, borderRadius: 28, justifyContent: 'center', alignItems: 'center' }]}
               onPress={() => setModalVisible(true)}
             >
               <Plus size={24} color="#FFF" />
@@ -305,7 +306,7 @@ const styles = StyleSheet.create({
     overflow: 'hidden',
   },
   item: {
-    padding: Spacing.five,
+    padding: Spacing.four,
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',

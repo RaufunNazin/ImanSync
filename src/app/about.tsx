@@ -4,10 +4,11 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { useTranslation } from 'react-i18next';
 import PageHeader from '@/components/page-header';
 import { FontAwesome } from '@expo/vector-icons';
-import { Fonts, Spacing, useThemeColors } from '@/constants/theme';
+import { Fonts, Spacing, useThemeColors, useActiveColor } from '@/constants/theme';
 
 export default function AboutScreen() {
   const colors = useThemeColors();
+  const activeColor = useActiveColor();
   const { t } = useTranslation();
 
   return (
@@ -31,8 +32,8 @@ export default function AboutScreen() {
           
           <Text style={[styles.appName, { color: colors.text }]}>{t('home.titleEn')}</Text>
           
-          <View style={[styles.versionBadge, { backgroundColor: colors.accent + '20' }]}>
-            <Text style={[styles.versionText, { color: colors.accent }]}>
+          <View style={[styles.versionBadge, { backgroundColor: activeColor + '20' }]}>
+            <Text style={[styles.versionText, { color: activeColor }]}>
               {t('settings.version')}: 1.0.0
             </Text>
           </View>

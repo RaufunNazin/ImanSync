@@ -615,7 +615,7 @@ export default function HomeScreen() {
   }));
 
   return (
-    <SafeAreaView style={[styles.safeArea, { backgroundColor: colors.background }]}>
+    <SafeAreaView edges={['top']} style={[styles.safeArea, { backgroundColor: colors.background }]}>
       <PageHeader
         titleEn="ImanSync"
         icon={require('../../../assets/images/zoomed-icon.png')}
@@ -839,7 +839,7 @@ export default function HomeScreen() {
                     const isCurrent = index === timelineProgress.currentTimelineIndex;
                     return (
                       <View key={`name-${prayer.id}`} style={{ width: '20%', alignItems: 'center' }}>
-                        <Text style={[styles.timelineName, { marginBottom: 0, color: isCurrent ? '#FFFFFF' : colors.text, opacity: isCurrent ? 1 : 0.5 }]}>
+                        <Text style={[styles.timelineName, { marginBottom: 0, color: isCurrent ? (colors.background === '#0c1618' ? '#FFFFFF' : '#000000') : colors.text, opacity: isCurrent ? 1 : 0.5 }]}>
                           {prayer.name}
                         </Text>
                       </View>
@@ -874,7 +874,7 @@ export default function HomeScreen() {
                     const isCurrent = index === timelineProgress.currentTimelineIndex;
                     return (
                       <View key={`time-${prayer.id}`} style={{ width: '20%', alignItems: 'center' }}>
-                        <Text style={[styles.timelineTime, { color: isCurrent ? '#FFFFFF' : colors.text, opacity: isCurrent ? 1 : 0.5 }]}>
+                        <Text style={[styles.timelineTime, { color: isCurrent ? (colors.background === '#0c1618' ? '#FFFFFF' : '#000000') : colors.text, opacity: isCurrent ? 1 : 0.5 }]}>
                           {formatNumber(prayer.time.replace(/ AM| PM/g, ''), i18n.language)}
                         </Text>
                       </View>
@@ -955,7 +955,7 @@ export default function HomeScreen() {
                       {dailyVerse.translationBn}
                     </Text>
                   )}
-                  <Text style={[styles.inspirationRef, { color: colors.textSecondary }]}>
+                  <Text style={[styles.inspirationRef, { color: activeColor }]}>
                     — {t('surahNames.' + dailyVerse.surahId, { defaultValue: dailyVerse.surahDefaultName })} {formatNumber(dailyVerse.surahId, i18n.language)}:{formatNumber(dailyVerse.ayahNum, i18n.language)}
                   </Text>
                 </View>
@@ -981,7 +981,7 @@ export default function HomeScreen() {
                   <Text style={{ fontFamily: Fonts.outfit, fontSize: 16, color: colors.text, textAlign: 'center', fontStyle: 'italic', marginBottom: Spacing.four, lineHeight: 24 }}>
                     "{i18n.language === 'bn' ? dailyHadith.bengali : dailyHadith.english}"
                   </Text>
-                  <Text style={{ fontFamily: Fonts.outfit, fontSize: 11, color: colors.accent, marginTop: 4 }}>
+                  <Text style={[styles.inspirationRef, { color: activeColor }]}>
                     — {dailyHadith.reference}
                   </Text>
                 </View>
@@ -1297,7 +1297,7 @@ const styles = StyleSheet.create({
   },
   inspirationRef: {
     fontFamily: Fonts.outfit,
-    fontSize: 13,
-    fontWeight: '600',
+    fontSize: 11,
+    marginTop: 4,
   },
 });

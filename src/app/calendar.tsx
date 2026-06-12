@@ -131,7 +131,7 @@ export default function CalendarScreen() {
             { 
               width: cellWidth,
               backgroundColor: isSelected ? colors.backgroundSelected : 'transparent',
-              borderColor: isSelected ? activeColor : (isToday ? colors.accent : 'transparent'),
+              borderColor: isSelected ? activeColor : (isToday ? activeColor : 'transparent'),
               borderWidth: isSelected ? 1 : (isToday ? 1 : 0),
             }
           ]}
@@ -143,21 +143,21 @@ export default function CalendarScreen() {
 
           {prefs.showBanglaCalendar ? (
             <View style={{ flexDirection: 'row', justifyContent: 'space-between', width: '100%', paddingHorizontal: 4, marginTop: 2 }}>
-              <Text style={[styles.hijriText, { color: isSelected ? colors.accent : colors.textSecondary, marginTop: 0, marginBottom: 0 }]}>
+              <Text style={[styles.hijriText, { color: isSelected ? activeColor : colors.textSecondary, marginTop: 0, marginBottom: 0 }]}>
                 {formatNumber(parseInt(adjustedHijri.day).toString(), i18n.language)}
               </Text>
-              <Text style={[styles.hijriText, { color: isSelected ? colors.accent : colors.textSecondary, marginTop: 0, marginBottom: 0 }]}>
+              <Text style={[styles.hijriText, { color: isSelected ? activeColor : colors.textSecondary, marginTop: 0, marginBottom: 0 }]}>
                 {formatNumber(bDate.day.toString(), i18n.language)}
               </Text>
             </View>
           ) : (
-            <Text style={[styles.hijriText, { color: isSelected ? colors.accent : colors.textSecondary }]}>
+            <Text style={[styles.hijriText, { color: isSelected ? activeColor : colors.textSecondary }]}>
               {formatNumber(parseInt(adjustedHijri.day).toString(), i18n.language)}
             </Text>
           )}
 
           {hasEvents && !isSelected && (
-            <View style={{ position: 'absolute', bottom: prefs.showBanglaCalendar ? 2 : 4, width: 4, height: 4, borderRadius: 2, backgroundColor: colors.accent }} />
+            <View style={{ position: 'absolute', bottom: prefs.showBanglaCalendar ? 2 : 4, width: 4, height: 4, borderRadius: 2, backgroundColor: activeColor }} />
           )}
           {hasEvents && isSelected && (
             <View style={{ position: 'absolute', bottom: prefs.showBanglaCalendar ? 2 : 4, width: 4, height: 4, borderRadius: 2, backgroundColor: activeColor }} />
@@ -343,7 +343,6 @@ export default function CalendarScreen() {
                     i18nLanguage={i18n.language}
                     styles={styles}
                     t={t}
-                    timeColor="#FFF"
                     disableInteractive={true}
                   />
                   <SpecialTimeCard
@@ -358,7 +357,6 @@ export default function CalendarScreen() {
                     i18nLanguage={i18n.language}
                     styles={styles}
                     t={t}
-                    timeColor="#FFF"
                     disableInteractive={true}
                   />
                 </View>
@@ -386,7 +384,7 @@ export default function CalendarScreen() {
               <Switch 
                 value={prefs.showBanglaCalendar} 
                 onValueChange={(val) => prefs.setPreferences({ showBanglaCalendar: val })} 
-                trackColor={{ true: colors.accent }}
+                trackColor={{ true: activeColor }}
               />
             </View>
 

@@ -236,7 +236,7 @@ export default function SettingsScreen() {
   };
 
   return (
-    <SafeAreaView style={[styles.safeArea, { backgroundColor: colors.background }]}>
+    <SafeAreaView edges={['top']} style={[styles.safeArea, { backgroundColor: colors.background }]}>
       <PageHeader titleEn={t('settings.titleEn')} titleAr={t('settings.titleAr')} />
       <ScrollView ref={scrollViewRef} showsVerticalScrollIndicator={false} contentContainerStyle={styles.container}>
         <Animated.View layout={LinearTransition.duration(200)}>

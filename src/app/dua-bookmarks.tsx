@@ -105,8 +105,8 @@ export default function DuaBookmarksScreen() {
                 onPress={() => router.push(`/dua-bookmarks?folderId=${folder.id}&folderName=${encodeURIComponent(folder.name)}` as any)}
               >
                 <View style={{ flexDirection: 'row', alignItems: 'center', gap: Spacing.three }}>
-                  <View style={{ width: 40, height: 40, borderRadius: 20, backgroundColor: colors.accent + '22', alignItems: 'center', justifyContent: 'center' }}>
-                    <Folder size={20} color={colors.accent} />
+                  <View style={{ width: 40, height: 40, borderRadius: 20, backgroundColor: activeColor + '22', alignItems: 'center', justifyContent: 'center' }}>
+                    <Folder size={20} color={activeColor} />
                   </View>
                   <View>
                     <Text style={[styles.itemTitle, { color: colors.text }]}>{folder.name}</Text>
@@ -224,7 +224,7 @@ export default function DuaBookmarksScreen() {
                   </TouchableOpacity>
                   {folderStore.folders.map(folder => (
                     <TouchableOpacity activeOpacity={1} key={folder.id} style={{ flexDirection: 'row', alignItems: 'center', paddingVertical: Spacing.three, gap: Spacing.three }} onPress={() => moveBookmark(folder.id)}>
-                      <Folder size={20} color={colors.accent} />
+                      <Folder size={20} color={activeColor} />
                       <Text style={{ fontFamily: Fonts.outfit, fontSize: 16, color: colors.text }}>{folder.name}</Text>
                     </TouchableOpacity>
                   ))}
@@ -273,7 +273,7 @@ const styles = StyleSheet.create({
     overflow: 'hidden',
   },
   item: {
-    padding: Spacing.five,
+    padding: Spacing.four,
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',

@@ -325,7 +325,7 @@ export default function QuranScreen() {
   );
 
   return (
-    <SafeAreaView style={[styles.safeArea, { backgroundColor: colors.background }]}>
+    <SafeAreaView edges={['top']} style={[styles.safeArea, { backgroundColor: colors.background }]}>
       
       <PageHeader 
         titleEn={t('quran.titleEn')} 

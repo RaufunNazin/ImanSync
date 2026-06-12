@@ -53,10 +53,10 @@ export default function QadaTrackerScreen() {
             )}
             <View style={{ flex: count > 0 ? 1 : 2 }}>
               <TouchableOpacity activeOpacity={1} 
-                style={[styles.btn, { backgroundColor: colors.accent + '22', borderColor: colors.accent }]}
+                style={[styles.btn, { backgroundColor: activeColor + '22', borderColor: activeColor }]}
                 onPress={() => handleUpdate(type, 1)}
               >
-                <Plus size={18} color={colors.accent} />
+                <Plus size={18} color={activeColor} />
               </TouchableOpacity>
             </View>
           </View>

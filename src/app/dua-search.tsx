@@ -39,6 +39,7 @@ export default function DuaSearchScreen() {
   
   const [searchQuery, setSearchQuery] = useState('');
   const [searchResults, setSearchResults] = useState<UnifiedDuaItem[]>([]);
+  const [isSearching, setIsSearching] = useState(false);
 
   const inputRef = useRef<TextInput>(null);
 
@@ -56,6 +57,7 @@ export default function DuaSearchScreen() {
 
   useEffect(() => {
     if (searchQuery.length > 0) {
+      setIsSearching(true);
       const delayDebounceFn = setTimeout(async () => {
         try {
           const q = searchQuery.toLowerCase();
@@ -200,11 +202,14 @@ export default function DuaSearchScreen() {
           setSearchResults(results);
         } catch (err) {
           console.error("Error searching duas:", err);
+        } finally {
+          setIsSearching(false);
         }
       }, 500);
       return () => clearTimeout(delayDebounceFn);
     } else {
       setSearchResults([]);
+      setIsSearching(false);
     }
   }, [searchQuery, categoryId, isCustom]);
 
@@ -252,11 +257,25 @@ export default function DuaSearchScreen() {
         <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={styles.container} keyboardDismissMode="on-drag" keyboardShouldPersistTaps="handled">
           
           <View style={styles.list}>
-            {searchResults.map(dua => {
-              let translation = i18n.language === 'bn' ? dua.translationBn : dua.translationEn;
-              if (!translation) translation = dua.name;
+            {isSearching ? (
+              [1, 2, 3].map((key) => (
+                <ThemeCard key={key} intensity={40} style={[styles.itemWrapper, { borderColor: colors.border, opacity: 0.5 }]}>
+                  <View style={styles.item}>
+                    <View style={styles.itemContent}>
+                      <View style={{ height: 16, backgroundColor: colors.textSecondary, borderRadius: 4, width: '70%', opacity: 0.3 }} />
+                      <View style={{ height: 16, backgroundColor: colors.textSecondary, borderRadius: 4, width: '40%', opacity: 0.3, marginTop: 8 }} />
+                      <View style={{ height: 24, backgroundColor: colors.textSecondary, borderRadius: 4, width: '80%', opacity: 0.3, marginTop: 12, alignSelf: 'flex-end' }} />
+                    </View>
+                    <ChevronRight size={20} color={colors.textSecondary} style={{ opacity: 0.3 }} />
+                  </View>
+                </ThemeCard>
+              ))
+            ) : (
+              searchResults.map(dua => {
+                let translation = i18n.language === 'bn' ? dua.translationBn : dua.translationEn;
+                if (!translation) translation = dua.name;
 
-              return (
+                return (
                 <View key={dua.id}>
                   <ThemeCard intensity={40} style={[styles.itemWrapper, { borderColor: colors.border }]}>
                     <TouchableOpacity activeOpacity={1}
@@ -292,8 +311,9 @@ export default function DuaSearchScreen() {
                   </ThemeCard>
                 </View>
               );
-            })}
-            {searchQuery.length > 0 && searchResults.length === 0 && (
+            })
+            )}
+            {searchQuery.length > 0 && searchResults.length === 0 && !isSearching && (
               <Text style={[styles.emptyText, { color: colors.textSecondary }]}>
                 {categoryId ? t('search.noMatchingCategoryDuas', { query: searchQuery, categoryName: categoryName || '' }) : t('search.noMatchingAllDuas', { query: searchQuery })}
               </Text>
@@ -340,7 +360,7 @@ const styles = StyleSheet.create({
     overflow: 'hidden',
   },
   item: {
-    padding: Spacing.five,
+    padding: Spacing.four,
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',

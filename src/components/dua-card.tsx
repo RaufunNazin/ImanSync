@@ -38,7 +38,7 @@ const DuaCard = React.memo(function DuaCard({
   return (
     <View style={{ flex: 1 }}>
       <ThemeCard intensity={40} style={[styles.wrapper, 
-            (isMyDuas || id === 'bookmarks') && { borderColor: colors.accent },
+            (isMyDuas || id === 'bookmarks') && { borderColor: activeColor },
             isCustom && { borderColor: activeColor }
       ]}>
         <TouchableOpacity activeOpacity={1}
@@ -68,7 +68,7 @@ const DuaCard = React.memo(function DuaCard({
 
       {isPinned && (
         <View style={styles.pinBadge} pointerEvents="none">
-          <Pin size={14} color={isCustom ? activeColor : colors.accent} fill={isCustom ? activeColor : colors.accent} />
+          <Pin size={14} color={activeColor} fill={activeColor} />
         </View>
       )}
     </View>

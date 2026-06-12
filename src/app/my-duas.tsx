@@ -132,13 +132,13 @@ export default function MyDuasScreen() {
       {/* ── Relink Banner ─────────────────────────────────────────────── */}
 
         {showRelinkBanner && (
-          <View style={[styles.banner, styles.bannerRelink, { borderColor: colors.accent, backgroundColor: colors.accent + '15' }]}>
-            <FolderLock size={20} color={colors.accent} style={{ marginRight: Spacing.three }} />
+          <View style={[styles.banner, styles.bannerRelink, { borderColor: activeColor, backgroundColor: activeColor + '15' }]}>
+            <FolderLock size={20} color={activeColor} style={{ marginRight: Spacing.three }} />
             <Text style={[styles.bannerText, { color: colors.text, flex: 1 }]}>
               {t('dua.relinkStorage')}
             </Text>
             <TouchableOpacity activeOpacity={1}
-              style={[styles.bannerBtn, { backgroundColor: colors.accent }]}
+              style={[styles.bannerBtn, { backgroundColor: activeColor }]}
               onPress={handleRelink}
               disabled={relinkLoading}
             >
@@ -187,13 +187,13 @@ export default function MyDuasScreen() {
       >
         <View style={styles.duaHeader}>
           <View style={styles.duaTitleContainer}>
-            {dua.type === 'text' && <Type size={24} color={colors.accent} />}
-            {dua.type === 'image' && <ImageIcon size={24} color={colors.accent} />}
-            {dua.type === 'video' && <Video size={24} color={colors.accent} />}
+            {dua.type === 'text' && <Type size={24} color={activeColor} />}
+            {dua.type === 'image' && <ImageIcon size={24} color={activeColor} />}
+            {dua.type === 'video' && <Video size={24} color={activeColor} />}
             <View style={{ flex: 1 }}>
               <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8 }}>
                 {pinnedDuaIds.includes(dua.id.toString()) && (
-                  <Bookmark size={14} color={colors.accent} fill={colors.accent} />
+                  <Bookmark size={14} color={activeColor} fill={activeColor} />
                 )}
                 <Text style={[styles.duaTitle, { color: colors.text, flex: 1 }]} numberOfLines={1}>
                   {i18n.language === 'bn' ? (dua.titleBn || dua.titleEn || dua.title) : (dua.titleEn || dua.titleBn || dua.title)}
@@ -219,7 +219,7 @@ export default function MyDuasScreen() {
           {t('dua.noMyDuas', { defaultValue: 'No custom duas added.' })}
         </Text>
         <TouchableOpacity activeOpacity={1}
-          style={[styles.emptyBtn, { backgroundColor: colors.accent }]}
+          style={[styles.emptyBtn, { backgroundColor: activeColor }]}
           onPress={() => setModalVisible(true)}
         >
           <Plus size={20} color="#FFF" />
@@ -296,7 +296,7 @@ export default function MyDuasScreen() {
 
       <Animated.View style={[styles.fab, { transform: [{ translateY: fabTranslateY }] }]}>
         <TouchableOpacity activeOpacity={1}
-          style={[StyleSheet.absoluteFill, { backgroundColor: colors.accent, borderRadius: 28, justifyContent: 'center', alignItems: 'center' }]}
+          style={[StyleSheet.absoluteFill, { backgroundColor: activeColor, borderRadius: 28, justifyContent: 'center', alignItems: 'center' }]}
           onPress={() => setModalVisible(true)}
         >
           <Plus size={24} color="#FFF" />

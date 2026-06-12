@@ -140,8 +140,8 @@ export default function SystemAnnouncer() {
                   <X size={20} color={colors.textSecondary} />
                 </TouchableOpacity>
                 
-                <View style={[styles.iconWrap, { backgroundColor: colors.accent + '20' }]}>
-                  <Info size={32} color={colors.accent} />
+                <View style={[styles.iconWrap, { backgroundColor: activeColor + '20' }]}>
+                  <Info size={32} color={activeColor} />
                 </View>
                 
                 <Text style={[styles.title, { color: colors.text }]}>{t('system.whatsNew', "What's New")}</Text>
@@ -156,7 +156,7 @@ export default function SystemAnnouncer() {
                   ))}
                 </ScrollView>
 
-                <TouchableOpacity activeOpacity={1} style={[styles.btn, { backgroundColor: colors.accent, width: '100%', marginTop: Spacing.two }]} onPress={dismissChangelog}>
+                <TouchableOpacity activeOpacity={1} style={[styles.btn, { backgroundColor: activeColor, width: '100%', marginTop: Spacing.two }]} onPress={dismissChangelog}>
                   <Text style={styles.btnText}>{t('system.awesome', 'Awesome!')}</Text>
                 </TouchableOpacity>
               </View>

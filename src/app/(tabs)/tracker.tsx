@@ -39,7 +39,7 @@ const getLocalYYYYMMDD = (d: Date = new Date()) => {
   return `${year}-${month}-${day}`;
 };
 
-const TaskCard = ({ task, isDone, onToggle, colors, t }: { task: typeof DAILY_TASKS[0], isDone: boolean, onToggle: (id: string) => void, colors: any, t: any }) => {
+const TaskCard = ({ task, isDone, onToggle, colors, activeColor, t }: { task: typeof DAILY_TASKS[0], isDone: boolean, onToggle: (id: string) => void, colors: any, activeColor: string, t: any }) => {
   const scale = useSharedValue(1);
   const Icon = task.icon;
 
@@ -58,7 +58,7 @@ const TaskCard = ({ task, isDone, onToggle, colors, t }: { task: typeof DAILY_TA
         
         style={[
           styles.taskCardBlur,
-          isDone && { borderColor: colors.accent, borderWidth: 1.5 },
+          isDone && { borderColor: activeColor, borderWidth: 1.5 },
           !isDone && { borderColor: colors.border, borderWidth: 1 },
         ]}
       >
@@ -84,13 +84,13 @@ const TaskCard = ({ task, isDone, onToggle, colors, t }: { task: typeof DAILY_TA
 
           {/* Tiny icon — bottom-right */}
           <View style={styles.taskCardIcon}>
-            <Icon size={12} color={isDone ? colors.accent : colors.textSecondary} />
+            <Icon size={12} color={isDone ? activeColor : colors.textSecondary} />
           </View>
 
           {/* Check badge — top-right */}
           {isDone && (
-            <View style={[styles.taskCardCheck, { backgroundColor: colors.accent + '22' }]}>
-              <CheckCircle2 size={12} color={colors.accent} />
+            <View style={[styles.taskCardCheck, { backgroundColor: activeColor + '22' }]}>
+              <CheckCircle2 size={12} color={activeColor} />
             </View>
           )}
         </TouchableOpacity>
@@ -207,6 +207,7 @@ export default function TrackerScreen() {
             isDone={!!completedTasks[task.id]}
             onToggle={toggleTask}
             colors={colors}
+            activeColor={activeColor}
             t={t}
           />
         ))}
@@ -245,7 +246,7 @@ export default function TrackerScreen() {
               >
                 <AnimatedProgressBar
                   progress={loading ? 0 : Math.max(val, val > 0 ? 2 : 0)}
-                  color={val === 100 ? colors.accent : val > 0 ? activeColor : colors.border}
+                  color={val > 0 ? activeColor : colors.border}
                   trackColor="transparent"
                   height={undefined as any}
                   duration={800}
@@ -267,7 +268,7 @@ export default function TrackerScreen() {
                   styles.heatmapCell,
                   days === 7 && styles.heatmapCellWeekly,
                   {
-                    backgroundColor: val === 100 ? colors.accent : val > 0 ? activeColor : colors.border,
+                    backgroundColor: val > 0 ? activeColor : colors.border,
                     opacity: val === 100 ? 1 : val > 0 ? 0.6 : 0.3
                   }
                 ]}
@@ -333,7 +334,7 @@ export default function TrackerScreen() {
   );
 
   return (
-    <SafeAreaView style={[styles.safeArea, { backgroundColor: colors.background }]}>
+    <SafeAreaView edges={['top']} style={[styles.safeArea, { backgroundColor: colors.background }]}>
       <PageHeader titleEn={t('tracker.titleEn')} titleAr={t('tracker.titleAr')} rightElement={kazaChip} />
       <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={styles.container}>
 
@@ -373,7 +374,7 @@ export default function TrackerScreen() {
                       cx={32}
                       cy={32}
                       r={radius}
-                      stroke={colors.accent}
+                      stroke={activeColor}
                       strokeWidth={strokeWidth}
                       fill="none"
                       strokeDasharray={circumference}
@@ -382,7 +383,7 @@ export default function TrackerScreen() {
                     />
                   </Svg>
                   <View style={styles.progressTextContainer}>
-                      <Text style={[styles.progressText, { color: colors.accent }]}>
+                      <Text style={[styles.progressText, { color: activeColor }]}>
                         {formatNumber(displayPercentage, i18n.language)}%
                       </Text>
                   </View>
@@ -422,13 +423,13 @@ export default function TrackerScreen() {
                   return (
                     <View key={task.id} style={[styles.historyRow, { borderBottomColor: colors.border }]}>
                       <View style={styles.historyRowLeft}>
-                        <Icon size={18} color={isDone ? colors.accent : colors.textSecondary} />
+                        <Icon size={18} color={isDone ? activeColor : colors.textSecondary} />
                         <Text style={[styles.historyRowText, { color: isDone ? colors.text : colors.textSecondary }]}>
                           {t('tracker.tasks.' + task.id)}
                         </Text>
                       </View>
                       {isDone ? (
-                        <CheckCircle2 size={18} color={colors.accent} />
+                        <CheckCircle2 size={18} color={activeColor} />
                       ) : (
                         <View style={[styles.historyEmptyCircle, { borderColor: colors.border }]} />
                       )}
