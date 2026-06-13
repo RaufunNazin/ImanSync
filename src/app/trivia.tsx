@@ -199,7 +199,7 @@ export default function TriviaScreen() {
             {selectedOption !== null && (
               <View style={styles.footer}>
                 <TouchableOpacity activeOpacity={1}
-                  style={[styles.nextBtn, { backgroundColor: activeColor, width: 64, height: 64, borderRadius: 32, alignSelf: 'flex-end', justifyContent: 'center' }]}
+                  style={[styles.nextBtn, { backgroundColor: activeColor, width: 64, height: 64, borderRadius: 16, alignSelf: 'flex-end', justifyContent: 'center' }]}
                   onPress={nextQuestion}
                 >
                   <ArrowRight size={28} color="#FFF" />
@@ -237,7 +237,7 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
     alignItems: 'center',
     padding: Spacing.four,
-    borderRadius: 16,
+    borderRadius: 12,
     borderWidth: 1,
   },
   optionText: { fontFamily: Fonts.outfit, fontSize: 16, flex: 1, marginRight: Spacing.three },
@@ -273,7 +273,7 @@ const styles = StyleSheet.create({
     gap: Spacing.three,
     paddingVertical: Spacing.four,
     paddingHorizontal: Spacing.six,
-    borderRadius: 20,
+    borderRadius: 12,
   },
   retryText: { fontFamily: Fonts.outfit, fontSize: 18, color: '#FFF', fontWeight: '600' },
 });

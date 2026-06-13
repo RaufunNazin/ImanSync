@@ -1,5 +1,6 @@
+import AppModal from './AppModal';
 import React, { useState, useEffect, useRef } from 'react';
-import { Modal, StyleSheet, Text, TouchableOpacity, View, TextInput, KeyboardAvoidingView } from 'react-native';
+import { StyleSheet, Text, TouchableOpacity, View, TextInput } from 'react-native';
 import { Fonts, Spacing } from '@/constants/theme';
 import { useTranslation } from 'react-i18next';
 import { Pin, PinOff, Trash2, Edit3 } from 'lucide-react-native';
@@ -71,7 +72,7 @@ export default function PinSheet({
   if (showRename) {
     actionOptions.push({
       id: 'rename',
-      icon: <Edit3 size={20} color={colors.textSecondary} />,
+      icon: <Edit3 size={18} color={colors.textSecondary} />,
       label: t('dua.renameCategory', { defaultValue: 'Rename' }),
       iconBgColor: colors.textSecondary + '22',
       onPress: () => setIsRenaming(true),
@@ -120,80 +121,55 @@ export default function PinSheet({
       />
 
       {isRenaming && (
-        <Modal visible={visible && isRenaming} transparent animationType="fade" onRequestClose={() => setIsRenaming(false)}>
-          <TouchableOpacity activeOpacity={1} style={styles.overlay} onPress={() => setIsRenaming(false)}>
-          <KeyboardAvoidingView behavior="padding" style={{ width: '100%' }}>
-            <TouchableOpacity activeOpacity={1} onPress={(e) => e.stopPropagation()}>
-              <View style={[styles.sheet, { backgroundColor: colors.background, borderColor: colors.border }]}>
-                <View style={[styles.handle, { backgroundColor: colors.border }]} />
-                <View>
-                  <Text style={[styles.title, { color: colors.text }]}>{t('dua.renameCategory', { defaultValue: 'Rename' })}</Text>
-                  <TextInput
-                    ref={inputRef}
-                    style={[styles.input, { color: colors.text, borderColor: colors.border, backgroundColor: colors.backgroundElement }]}
-                    value={newName}
-                    onChangeText={setNewName}
-                    placeholderTextColor={colors.textSecondary}
-                  />
-                  <View style={{ flexDirection: 'row', gap: Spacing.three, marginTop: Spacing.four }}>
-                    <TouchableOpacity activeOpacity={1}
-                      style={[styles.btn, { backgroundColor: colors.card, flex: 1 }]}
-                      onPress={() => {
-                        setIsRenaming(false);
-                        onClose();
-                      }}
-                    >
-                      <Text style={[styles.btnText, { color: colors.text }]}>{t('dua.cancel', { defaultValue: 'Cancel' })}</Text>
-                    </TouchableOpacity>
-                    <TouchableOpacity activeOpacity={1}
-                      style={[styles.btn, { backgroundColor: colors.accent, flex: 1 }]}
-                      onPress={() => {
-                        if (newName.trim() && onRename) {
-                          onRename(newName.trim());
-                        }
-                        onClose();
-                      }}
-                    >
-                      <Text style={[styles.btnText, { color: '#FFF' }]}>{t('dua.save', { defaultValue: 'Save' })}</Text>
-                    </TouchableOpacity>
-                  </View>
-                </View>
-              </View>
+        <AppModal visible={visible && isRenaming} onClose={() => setIsRenaming(false)} title={t('dua.renameCategory', { defaultValue: 'Rename' })} avoidKeyboard scrollable={false}>
+          <TextInput
+            ref={inputRef}
+            style={[styles.input, { color: colors.text, borderColor: colors.border, backgroundColor: colors.backgroundElement, marginBottom: Spacing.four }]}
+            value={newName}
+            onChangeText={setNewName}
+            placeholderTextColor={colors.textSecondary}
+          />
+          <View style={{ flexDirection: 'row', gap: Spacing.three }}>
+            <TouchableOpacity activeOpacity={1}
+              style={[styles.btn, { backgroundColor: colors.card, flex: 1 }]}
+              onPress={() => {
+                setIsRenaming(false);
+                onClose();
+              }}
+            >
+              <Text style={[styles.btnText, { color: colors.text }]}>{t('dua.cancel', { defaultValue: 'Cancel' })}</Text>
             </TouchableOpacity>
-          </KeyboardAvoidingView>
-        </TouchableOpacity>
-        </Modal>
+            <TouchableOpacity activeOpacity={1}
+              style={[styles.btn, { backgroundColor: colors.accent, flex: 1 }]}
+              onPress={() => {
+                if (newName.trim() && onRename) {
+                  onRename(newName.trim());
+                }
+                onClose();
+              }}
+            >
+              <Text style={[styles.btnText, { color: '#FFF' }]}>{t('dua.save', { defaultValue: 'Save' })}</Text>
+            </TouchableOpacity>
+          </View>
+        </AppModal>
       )}
     </>
   );
 }
 
 const styles = StyleSheet.create({
-  overlay: {
-    flex: 1,
-    backgroundColor: 'rgba(0,0,0,0.5)',
-    justifyContent: 'flex-end',
-  },
-  sheet: {
-    borderTopLeftRadius: 32,
-    borderTopRightRadius: 32,
-    padding: Spacing.five,
-    borderTopWidth: 1,
-    borderLeftWidth: 1,
-    borderRightWidth: 1,
-  },
-  handle: {
+  title: {
+    fontFamily: Fonts.outfit,
+    fontSize: 18,
+    fontWeight: '600',
+  },  handle: {
     width: 40,
     height: 4,
     borderRadius: 2,
     alignSelf: 'center',
     marginBottom: Spacing.five,
   },
-  title: {
-    fontFamily: Fonts.outfit,
-    fontSize: 16,
-    marginBottom: Spacing.three,
-  },
+
   actionBtn: {
     flexDirection: 'row',
     alignItems: 'center',

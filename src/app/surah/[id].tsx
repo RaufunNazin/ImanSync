@@ -2,9 +2,10 @@ import ThemeCard from '@/components/ThemeCard';
 import { Fonts, Spacing, useThemeColors, useThemeStyles } from '@/constants/theme';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useLocalSearchParams, useRouter } from 'expo-router';
-import { Bookmark, Minus, Plus, Settings2, X, Play, Pause, DownloadCloud, CheckCircle, Share2, Square } from 'lucide-react-native';
+import { Bookmark, Minus, Plus, Settings2, Play, Pause, DownloadCloud, CheckCircle, Share2, Square } from 'lucide-react-native';
 import React, { useEffect, useRef, useState } from 'react';
-import { ActivityIndicator, FlatList, Modal, ScrollView, StyleSheet, Switch, Text, TouchableOpacity, View, Share } from 'react-native';
+import { ActivityIndicator, FlatList, StyleSheet, Switch, Text, TouchableOpacity, View, Share } from 'react-native';
+import AppModal from '@/components/AppModal';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useTranslation } from 'react-i18next';
 import { formatNumber } from '@/utils/formatNumber';
@@ -286,23 +287,9 @@ export default function SurahScreen() {
   };
 
   const renderSettingsModal = () => (
-    <Modal visible={modalVisible} transparent animationType="slide" onRequestClose={() => setModalVisible(false)}>
-      <View style={styles.modalOverlay}>
-        <TouchableOpacity activeOpacity={1} style={StyleSheet.absoluteFill} onPress={() => setModalVisible(false)} />
-        <View 
-          style={[styles.modalContent, { backgroundColor: colors.background, borderColor: colors.textSecondary + '20' }]}
-        >
-          <View style={{ width: 40, height: 4, backgroundColor: colors.border, borderRadius: 2, alignSelf: 'center', marginBottom: Spacing.four }} />
-          <View style={styles.modalHeader}>
-            <Text style={[styles.modalTitle, { color: colors.text }]}>{t('quranSettings.title')}</Text>
-            <TouchableOpacity activeOpacity={1} onPress={() => setModalVisible(false)} style={styles.closeBtn}>
-              <X size={24} color={colors.text} />
-            </TouchableOpacity>
-          </View>
-
-          <ScrollView showsVerticalScrollIndicator={false}>
+    <AppModal visible={modalVisible} onClose={() => setModalVisible(false)} title={t('quranSettings.title')}>
             {/* Font Sizes */}
-            <Text style={[styles.sectionTitle, { color: colors.textSecondary }]}>{t('quranSettings.textSizes')}</Text>
+            <Text style={[{ fontFamily: Fonts.outfit, fontSize: 14, marginBottom: 8, marginTop: 16 }, { color: colors.textSecondary }]}>{t('quranSettings.textSizes')}</Text>
             <View style={[styles.settingRow, { borderBottomColor: colors.textSecondary + '20' }]}>
               <Text style={[styles.settingLabel, { color: colors.text }]}>{t('quranSettings.arabicFont')}</Text>
               <View style={styles.stepper}>
@@ -343,7 +330,7 @@ export default function SurahScreen() {
             </View>
 
             {/* Translations */}
-            <Text style={[styles.sectionTitle, { color: colors.textSecondary, marginTop: Spacing.four }]}>{t('quranSettings.translations')}</Text>
+            <Text style={[{ fontFamily: Fonts.outfit, fontSize: 14, marginBottom: 8, marginTop: 16 }, { color: colors.textSecondary, marginTop: Spacing.four }]}>{t('quranSettings.translations')}</Text>
             <View style={[styles.settingRow, { borderBottomColor: colors.textSecondary + '20' }]}>
               <Text style={[styles.settingLabel, { color: colors.text }]}>{t('quranSettings.enTrans')}</Text>
               <Switch value={settings.showEnglish} onValueChange={(v) => updateSetting('showEnglish', v)} trackColor={{ false: colors.border, true: activeQuranColor }} thumbColor="#FFFFFF" />
@@ -354,14 +341,14 @@ export default function SurahScreen() {
             </View>
 
             {/* Transliterations */}
-            <Text style={[styles.sectionTitle, { color: colors.textSecondary, marginTop: Spacing.four }]}>{t('quranSettings.translit', { defaultValue: 'Transliteration' })}</Text>
+            <Text style={[{ fontFamily: Fonts.outfit, fontSize: 14, marginBottom: 8, marginTop: 16 }, { color: colors.textSecondary, marginTop: Spacing.four }]}>{t('quranSettings.translit', { defaultValue: 'Transliteration' })}</Text>
             <View style={[styles.settingRow, { borderBottomColor: colors.textSecondary + '20' }]}>
               <Text style={[styles.settingLabel, { color: colors.text }]}>{t('quranSettings.enTranslit', { defaultValue: 'Show Transliteration' })}</Text>
               <Switch value={settings.showEnglishTranslit} onValueChange={(v) => updateSetting('showEnglishTranslit', v)} trackColor={{ false: colors.border, true: activeQuranColor }} thumbColor="#FFFFFF" />
             </View>
 
             {/* Audio Reciter */}
-            <Text style={[styles.sectionTitle, { color: colors.textSecondary, marginTop: Spacing.four }]}>{t('quranSettings.reciter', { defaultValue: 'Audio Reciter' })}</Text>
+            <Text style={[{ fontFamily: Fonts.outfit, fontSize: 14, marginBottom: 8, marginTop: 16 }, { color: colors.textSecondary, marginTop: Spacing.four }]}>{t('quranSettings.reciter', { defaultValue: 'Audio Reciter' })}</Text>
             
             <View style={[styles.settingRow, { borderBottomColor: colors.textSecondary + '20', marginBottom: Spacing.two }]}>
               <Text style={[styles.settingLabel, { color: colors.text }]}>{t('quranSettings.autoPlayNextAyah', { defaultValue: 'Auto-Play Next Ayah' })}</Text>
@@ -387,10 +374,7 @@ export default function SurahScreen() {
                 <Text style={[styles.settingLabel, { color: currentReciterId === 3 ? activeQuranColor : colors.text }]}>{t("quran.reciters.sudais")}</Text>
               </TouchableOpacity>
             </View>
-          </ScrollView>
-        </View>
-      </View>
-    </Modal>
+    </AppModal>
   );
 
   const handleBack = () => {
@@ -631,37 +615,10 @@ const styles = StyleSheet.create({
   translitText: { fontFamily: Fonts.outfit, fontStyle: 'italic', marginTop: Spacing.two },
 
   // Modal Styles
-  modalOverlay: {
-    flex: 1,
-    justifyContent: 'flex-end',
-    backgroundColor: 'rgba(0,0,0,0.5)',
-  },
-  modalContent: {
-    borderTopLeftRadius: 32,
-    borderTopRightRadius: 32,
-    padding: Spacing.five,
-    maxHeight: '80%',
-    borderTopWidth: 1,
-    overflow: 'hidden',
-  },
-  modalHeader: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    marginBottom: Spacing.five,
-  },
-  modalTitle: { fontFamily: Fonts.outfit, fontSize: 24 },
-  closeBtn: { padding: Spacing.two },
-  
-  sectionTitle: {
-    fontFamily: Fonts.outfit,
-    fontSize: 10,
-    textTransform: 'uppercase',
-    letterSpacing: 1.2,
-    opacity: 0.6,
-    height: 15,
-    marginBottom: Spacing.two,
-  },
+
+
+
+
   settingRow: {
     flexDirection: 'row',
     justifyContent: 'space-between',

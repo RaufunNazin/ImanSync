@@ -85,7 +85,7 @@ const styles = StyleSheet.create({
   logoWrap: {
     width: 120,
     height: 120,
-    borderRadius: 60,
+    borderRadius: 32,
     borderWidth: 1,
     alignItems: 'center',
     justifyContent: 'center',
@@ -104,7 +104,7 @@ const styles = StyleSheet.create({
   versionBadge: {
     paddingHorizontal: Spacing.three,
     paddingVertical: 6,
-    borderRadius: 16,
+    borderRadius: 8,
     marginBottom: Spacing.three,
   },
   versionText: {
@@ -122,7 +122,7 @@ const styles = StyleSheet.create({
   descCard: {
     width: '100%',
     padding: Spacing.five,
-    borderRadius: 24,
+    borderRadius: 16,
     borderWidth: 1,
   },
   descText: {
@@ -146,7 +146,7 @@ const styles = StyleSheet.create({
     gap: Spacing.three,
     paddingVertical: Spacing.four,
     paddingHorizontal: Spacing.six,
-    borderRadius: 16,
+    borderRadius: 12,
     borderWidth: 1,
     width: '100%',
   },

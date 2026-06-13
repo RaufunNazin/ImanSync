@@ -22,10 +22,11 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import * as Location from 'expo-location';
 import { useRouter, useLocalSearchParams } from 'expo-router';
 import * as Updates from 'expo-updates';
-import { AlertCircle, Bell, BellOff, BookOpen, CalendarDays, Calculator, CheckCircle, Clock, FileText, FolderLock, Globe, Info, ListTodo, MapPin, Palette, RefreshCw, Scale, Shield, X} from 'lucide-react-native';
+import { AlertCircle, Bell, BellOff, BookOpen, CalendarDays, Calculator, CheckCircle, Clock, FileText, FolderLock, Globe, Info, ListTodo, MapPin, Palette, RefreshCw, Scale, Shield} from 'lucide-react-native';
 import React, { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { ActivityIndicator, Alert, Linking, Modal, ScrollView, StyleSheet, Text, TouchableOpacity, View, TouchableWithoutFeedback } from 'react-native';
+import { ActivityIndicator, Alert, Linking, ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import AppModal from '@/components/AppModal';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 const CALC_METHODS = [
@@ -487,95 +488,75 @@ export default function SettingsScreen() {
 
       {/* Update Modal */}
       {updateModal && (
-        <Modal visible={updateModal.visible} transparent animationType="fade" onRequestClose={() => updateModal.type !== 'loading' && setUpdateModal(null)}>
-          <TouchableWithoutFeedback onPress={() => updateModal.type !== 'loading' && setUpdateModal(null)}>
-            <View style={updateStyles.overlay}>
-              <TouchableWithoutFeedback>
-                <View style={[updateStyles.card, { backgroundColor: colors.background, borderColor: colors.border }]}>
-                  {updateModal.type !== 'loading' && (
-                    <TouchableOpacity activeOpacity={1} style={[updateStyles.closeBtn, { backgroundColor: colors.backgroundElement }]} onPress={() => setUpdateModal(null)}>
-                      <X size={20} color={colors.textSecondary} />
-                    </TouchableOpacity>
-                  )}
-                  
-                  <View style={[updateStyles.iconWrap, { backgroundColor: updateModal.type === 'success' ? colors.accent + '20' : updateModal.type === 'error' ? colors.error + '20' : activeColor + '20' }]}>
-                    {updateModal.type === 'success' ? (
-                      <CheckCircle size={32} color={colors.accent} />
-                    ) : updateModal.type === 'error' ? (
-                      <AlertCircle size={32} color={colors.error} />
-                    ) : (
-                      <ActivityIndicator size="large" color={activeColor} />
-                    )}
-                  </View>
-                  
-                  <Text style={[updateStyles.title, { color: colors.text }]}>{updateModal.title}</Text>
-                  <Text style={[updateStyles.desc, { color: colors.textSecondary }]}>{updateModal.message}</Text>
-                  
-                  {updateModal.type !== 'loading' && (
-                    <TouchableOpacity activeOpacity={1} style={[updateStyles.btn, { backgroundColor: updateModal.type === 'success' ? colors.accent : colors.error }]} onPress={() => setUpdateModal(null)}>
-                      <Text style={updateStyles.btnText}>{t('system.gotIt', 'Got It')}</Text>
-                    </TouchableOpacity>
-                  )}
-                </View>
-              </TouchableWithoutFeedback>
+        <AppModal 
+          visible={updateModal.visible} 
+          onClose={() => updateModal.type !== 'loading' && setUpdateModal(null)}
+          hideClose={updateModal.type === 'loading'}
+          scrollable={false}
+        >
+          <View style={{ alignItems: 'center', paddingTop: 8 }}>
+            <View style={[{ width: 48, height: 48, borderRadius: 24, alignItems: 'center', justifyContent: 'center', marginBottom: 16 }, { backgroundColor: updateModal.type === 'success' ? colors.accent + '20' : updateModal.type === 'error' ? colors.error + '20' : activeColor + '20' }]}>
+              {updateModal.type === 'success' ? (
+                <CheckCircle size={32} color={colors.accent} />
+              ) : updateModal.type === 'error' ? (
+                <AlertCircle size={32} color={colors.error} />
+              ) : (
+                <ActivityIndicator size="large" color={activeColor} />
+              )}
             </View>
-          </TouchableWithoutFeedback>
-        </Modal>
+            
+            <Text style={[{ fontFamily: Fonts.outfit, fontSize: 18, marginBottom: 8, textAlign: 'center' }, { color: colors.text }]}>{updateModal.title}</Text>
+            <Text style={[{ fontFamily: Fonts.outfit, fontSize: 14, textAlign: 'center', marginBottom: 24 }, { color: colors.textSecondary }]}>{updateModal.message}</Text>
+            
+            {updateModal.type !== 'loading' && (
+              <TouchableOpacity activeOpacity={1} style={[{ paddingVertical: 14, paddingHorizontal: 24, borderRadius: 12, width: '100%', alignItems: 'center' }, { backgroundColor: updateModal.type === 'success' ? colors.accent : colors.error }]} onPress={() => setUpdateModal(null)}>
+                <Text style={{ fontFamily: Fonts.outfit, color: '#FFF', fontSize: 16, fontWeight: '500' }}>{t('system.gotIt', 'Got It')}</Text>
+              </TouchableOpacity>
+            )}
+          </View>
+        </AppModal>
       )}
 
       {/* Storage Confirm Modal */}
       {storageConfirmModal && (
-        <Modal visible={true} transparent animationType="fade" onRequestClose={() => setStorageConfirmModal(null)}>
-          <TouchableWithoutFeedback onPress={() => setStorageConfirmModal(null)}>
-            <View style={updateStyles.overlay}>
-              <TouchableWithoutFeedback>
-                <View style={[updateStyles.card, { backgroundColor: colors.background, borderColor: colors.border }]}>
-                  <TouchableOpacity activeOpacity={1}
-                    style={[updateStyles.closeBtn, { backgroundColor: colors.backgroundElement }]}
-                    onPress={() => setStorageConfirmModal(null)}
-                  >
-                    <X size={20} color={colors.textSecondary} />
-                  </TouchableOpacity>
-
-                  <View style={[updateStyles.iconWrap, { backgroundColor: colors.textSecondary + '20' }]}>
-                    <FolderLock size={32} color={colors.textSecondary} />
-                  </View>
-
-                  <Text style={[updateStyles.title, { color: colors.text }]}>
-                    {storageConfirmModal === 'enable'
-                      ? t('settings.permanentStorageOn')
-                      : t('settings.permanentStorageOff')}
-                  </Text>
-                  <Text style={[updateStyles.desc, { color: colors.textSecondary }]}>
-                    {storageConfirmModal === 'enable'
-                      ? t('settings.permanentStorageOnDesc')
-                      : t('settings.permanentStorageOffDesc')}
-                  </Text>
-
-                  <TouchableOpacity activeOpacity={1}
-                    style={[updateStyles.btn, { backgroundColor: storageConfirmModal === 'enable' ? activeColor : colors.error }]}
-                    onPress={confirmStorageChange}
-                  >
-                    <Text style={updateStyles.btnText}>
-                      {storageConfirmModal === 'enable'
-                        ? t('settings.permanentStorageConfirmEnable')
-                        : t('settings.permanentStorageConfirmDisable')}
-                    </Text>
-                  </TouchableOpacity>
-
-                  <TouchableOpacity activeOpacity={1}
-                    style={[updateStyles.btn, { backgroundColor: colors.backgroundElement, marginTop: 8 }]}
-                    onPress={() => setStorageConfirmModal(null)}
-                  >
-                    <Text style={[updateStyles.btnText, { color: colors.textSecondary }]}>
-                      {t('settings.cancel')}
-                    </Text>
-                  </TouchableOpacity>
-                </View>
-              </TouchableWithoutFeedback>
+        <AppModal visible={true} onClose={() => setStorageConfirmModal(null)} scrollable={false}>
+          <View style={{ alignItems: 'center', paddingTop: 8 }}>
+            <View style={[{ width: 48, height: 48, borderRadius: 24, alignItems: 'center', justifyContent: 'center', marginBottom: 16 }, { backgroundColor: colors.textSecondary + '20' }]}>
+              <FolderLock size={32} color={colors.textSecondary} />
             </View>
-          </TouchableWithoutFeedback>
-        </Modal>
+
+            <Text style={[{ fontFamily: Fonts.outfit, fontSize: 18, marginBottom: 8, textAlign: 'center' }, { color: colors.text }]}>
+              {storageConfirmModal === 'enable'
+                ? t('settings.permanentStorageOn')
+                : t('settings.permanentStorageOff')}
+            </Text>
+            <Text style={[{ fontFamily: Fonts.outfit, fontSize: 14, textAlign: 'center', marginBottom: 24 }, { color: colors.textSecondary }]}>
+              {storageConfirmModal === 'enable'
+                ? t('settings.permanentStorageOnDesc')
+                : t('settings.permanentStorageOffDesc')}
+            </Text>
+
+            <TouchableOpacity activeOpacity={1}
+              style={[{ paddingVertical: 14, paddingHorizontal: 24, borderRadius: 12, width: '100%', alignItems: 'center' }, { backgroundColor: storageConfirmModal === 'enable' ? activeColor : colors.error }]}
+              onPress={confirmStorageChange}
+            >
+              <Text style={{ fontFamily: Fonts.outfit, color: '#FFF', fontSize: 16, fontWeight: '500' }}>
+                {storageConfirmModal === 'enable'
+                  ? t('settings.permanentStorageConfirmEnable')
+                  : t('settings.permanentStorageConfirmDisable')}
+              </Text>
+            </TouchableOpacity>
+
+            <TouchableOpacity activeOpacity={1}
+              style={[{ paddingVertical: 14, paddingHorizontal: 24, borderRadius: 12, width: '100%', alignItems: 'center' }, { backgroundColor: colors.backgroundElement, marginTop: 8 }]}
+              onPress={() => setStorageConfirmModal(null)}
+            >
+              <Text style={{ fontFamily: Fonts.outfit, fontSize: 16, fontWeight: '500', color: colors.textSecondary }}>
+                {t('settings.cancel')}
+              </Text>
+            </TouchableOpacity>
+          </View>
+        </AppModal>
       )}
     </SafeAreaView>
   );
@@ -588,6 +569,13 @@ const styles = StyleSheet.create({
   container: {
     padding: Spacing.four,
   },
+  card: {
+    width: '100%',
+    borderRadius: 24,
+    padding: Spacing.four,
+    marginBottom: Spacing.four,
+    borderWidth: 1,
+  },
   sectionTitle: {
     fontFamily: Fonts.outfit,
     fontSize: 10,
@@ -598,13 +586,7 @@ const styles = StyleSheet.create({
     marginBottom: Spacing.two,
     marginLeft: 4,
   },
-  card: {
-    borderRadius: 24,
-    paddingVertical: Spacing.two,
-    paddingHorizontal: Spacing.four,
-    overflow: 'hidden',
-    borderWidth: 1,
-  },
+
   settingRow: {
     flexDirection: 'row',
     alignItems: 'center',
@@ -636,67 +618,6 @@ const styles = StyleSheet.create({
     flexShrink: 1,
     textAlign: 'right',
     marginRight: 4,
-  },
-});
-
-const updateStyles = StyleSheet.create({
-  overlay: {
-    flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-    padding: Spacing.four,
-  },
-  card: {
-    width: '100%',
-    maxWidth: 340,
-    borderRadius: 24,
-    padding: Spacing.four,
-    alignItems: 'center',
-    borderWidth: 1,
-  },
-  closeBtn: {
-    position: 'absolute',
-    top: 16,
-    right: 16,
-    width: 32,
-    height: 32,
-    borderRadius: 16,
-    alignItems: 'center',
-    justifyContent: 'center',
-    zIndex: 10,
-  },
-  iconWrap: {
-    width: 64,
-    height: 64,
-    borderRadius: 32,
-    alignItems: 'center',
-    justifyContent: 'center',
-    marginBottom: Spacing.three,
-    marginTop: Spacing.two,
-  },
-  title: {
-    fontFamily: Fonts.outfit,
-    fontSize: 22,
-    marginBottom: Spacing.two,
-    textAlign: 'center',
-  },
-  desc: {
-    fontFamily: Fonts.outfit,
-    fontSize: 15,
-    textAlign: 'center',
-    lineHeight: 22,
-    marginBottom: Spacing.four,
-  },
-  btn: {
-    width: '100%',
-    paddingVertical: Spacing.three,
-    borderRadius: 14,
-    alignItems: 'center',
-  },
-  btnText: {
-    fontFamily: Fonts.outfit,
-    fontSize: 15,
-    color: '#fff',
   },
 });
 

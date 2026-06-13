@@ -1,18 +1,17 @@
-import ThemeCard from "@/components/ThemeCard";
+
 import { Fonts, Spacing, useThemeColors, useActiveColor } from "@/constants/theme";
 import { formatNumber } from "@/utils/formatNumber";
 import * as Haptics from "expo-haptics";
+import AppModal from './AppModal';
 import React, { useEffect, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
 import {
   Animated,
-  Modal,
   PanResponder,
   StyleSheet,
   Text,
   TouchableOpacity,
   View,
-  TouchableWithoutFeedback,
 } from "react-native";
 
 interface TimePickerModalProps {
@@ -215,21 +214,8 @@ export default function TimePickerModal({
     20;
 
   return (
-    <Modal visible={visible} transparent animationType="fade" onRequestClose={onClose}>
-      <TouchableWithoutFeedback onPress={onClose}>
-        <View style={styles.overlay}>
-          <ThemeCard intensity={20} style={StyleSheet.absoluteFill} />
-
-          <TouchableWithoutFeedback>
-            <View
-              style={[
-                styles.container,
-                { backgroundColor: colors.background, borderColor: colors.border },
-              ]}
-            >
-          <Text style={[styles.title, { color: colors.textSecondary }]}>
-            {title}
-          </Text>
+    <AppModal visible={visible} onClose={onClose} title={title} scrollable={false}>
+      <View style={[styles.container, { borderColor: 'transparent', backgroundColor: colors.background }]}>
 
           {/* Header Display */}
           <View style={styles.headerDisplay}>
@@ -238,6 +224,7 @@ export default function TimePickerModal({
                 activeOpacity={1}
                 style={[
                   styles.headerTimeBtn,
+                  { backgroundColor: activeColor + "08" },
                   mode === "hour" && {
                     backgroundColor: activeColor + "33",
                   },
@@ -270,6 +257,7 @@ export default function TimePickerModal({
                 activeOpacity={1}
                 style={[
                   styles.headerTimeBtn,
+                  { backgroundColor: activeColor + "08" },
                   mode === "minute" && {
                     backgroundColor: activeColor + "33",
                   },
@@ -443,28 +431,18 @@ export default function TimePickerModal({
               </Text>
             </TouchableOpacity>
             </View>
-            </View>
-          </TouchableWithoutFeedback>
-        </View>
-      </TouchableWithoutFeedback>
-    </Modal>
+      </View>
+    </AppModal>
   );
 }
 
 const styles = StyleSheet.create({
-  overlay: {
-    flex: 1,
-    backgroundColor: "rgba(0,0,0,0.5)",
-    alignItems: "center",
-    justifyContent: "center",
-    padding: Spacing.four,
-  },
+
   container: {
     width: "100%",
     maxWidth: 340,
     borderRadius: 28,
     borderWidth: 1,
-    padding: Spacing.five,
     alignItems: "center",
   },
   title: {
@@ -475,20 +453,20 @@ const styles = StyleSheet.create({
   },
   headerDisplay: {
     flexDirection: "row",
-    justifyContent: "space-between",
-    alignItems: "center",
+    alignItems: "stretch",
     width: "100%",
-    marginBottom: Spacing.two,
+    marginBottom: Spacing.five,
+    gap: 16,
   },
   timeGroup: {
+    flex: 1,
     flexDirection: "row",
     alignItems: "center",
   },
   headerTimeBtn: {
-    paddingHorizontal: 12,
+    flex: 1,
     paddingVertical: 2,
     borderRadius: 14,
-    minWidth: 76,
     alignItems: "center",
     justifyContent: "center",
   },
@@ -509,7 +487,8 @@ const styles = StyleSheet.create({
     width: 60,
   },
   amPmBtn: {
-    paddingVertical: 6,
+    flex: 1,
+    justifyContent: "center",
     alignItems: "center",
   },
   amPmText: {
@@ -528,7 +507,6 @@ const styles = StyleSheet.create({
     position: "relative",
     justifyContent: "center",
     alignItems: "center",
-    marginBottom: Spacing.four,
   },
   touchOverlay: {
     ...StyleSheet.absoluteFill,

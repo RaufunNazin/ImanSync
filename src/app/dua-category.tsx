@@ -270,7 +270,7 @@ export default function DuaCategoryScreen() {
         <>
           <Animated.View style={[styles.fab, { transform: [{ translateY: fabTranslateY }] }]}>
             <TouchableOpacity activeOpacity={1}
-              style={[StyleSheet.absoluteFill, { backgroundColor: activeColor, borderRadius: 28, justifyContent: 'center', alignItems: 'center' }]}
+              style={[StyleSheet.absoluteFill, { backgroundColor: activeColor, borderRadius: 16, justifyContent: 'center', alignItems: 'center' }]}
               onPress={() => setModalVisible(true)}
             >
               <Plus size={24} color="#FFF" />
@@ -331,7 +331,7 @@ const styles = StyleSheet.create({
     gap: 8,
     paddingHorizontal: 20,
     paddingVertical: 12,
-    borderRadius: 24,
+    borderRadius: 12,
   },
   fab: {
     position: 'absolute',
@@ -339,7 +339,7 @@ const styles = StyleSheet.create({
     bottom: Spacing.four,
     width: 56,
     height: 56,
-    borderRadius: 28,
+    borderRadius: 16,
     justifyContent: 'center',
     alignItems: 'center',
     elevation: 4,

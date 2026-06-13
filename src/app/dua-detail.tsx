@@ -4,10 +4,11 @@ import { Fonts, Spacing, useThemeColors, useThemeStyles, useActiveColor } from '
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import * as Haptics from 'expo-haptics';
 import { useLocalSearchParams } from 'expo-router';
-import { Bookmark, BookOpen, Minus, Plus, Settings2, X } from 'lucide-react-native';
+import { Bookmark, BookOpen, Minus, Plus, Settings2 } from 'lucide-react-native';
+import AppModal from '@/components/AppModal';
 import React, { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { Modal, ScrollView, StyleSheet, Text, TouchableOpacity, TouchableWithoutFeedback, View, Image } from 'react-native';
+import { ScrollView, StyleSheet, Text, TouchableOpacity, View, Image } from 'react-native';
 import { curatedImageMap } from '@/data/curated-images';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import ImageViewerModal from '@/components/ImageViewerModal';
@@ -166,43 +167,26 @@ export default function DuaDetailScreen() {
   );
 
   const renderSettingsModal = () => (
-    <Modal visible={settingsVisible} transparent animationType="slide" onRequestClose={() => setSettingsVisible(false)}>
-      <TouchableWithoutFeedback onPress={() => setSettingsVisible(false)}>
-        <View style={styles.modalOverlay}>
-          <TouchableWithoutFeedback>
-            <View style={[styles.modalContent, { backgroundColor: colors.background, borderColor: colors.border }]}>
-              <View style={{ width: 40, height: 4, backgroundColor: colors.border, borderRadius: 2, alignSelf: 'center', marginBottom: Spacing.four }} />
-              <View style={[styles.modalHeader, { borderBottomColor: colors.border }]}>
-                <Text style={[styles.modalTitle, { color: colors.text }]}>{t('duaSettings.title')}</Text>
-                <TouchableOpacity activeOpacity={1} onPress={() => setSettingsVisible(false)} style={styles.closeBtn}>
-                  <X size={24} color={colors.text} />
-                </TouchableOpacity>
-              </View>
+    <AppModal visible={settingsVisible} onClose={() => setSettingsVisible(false)} title={t('duaSettings.title')}>
+      <View style={{ gap: Spacing.four }}>
+        <Text style={[{ fontFamily: Fonts.outfit, fontSize: 14, marginBottom: 8, marginTop: 16 }, { color: colors.textSecondary }]}>{t('duaSettings.textSizes')}</Text>
+        
+        {renderSizeControl(t('duaSettings.arabicFont'), settings.arabicFontSize, v => updateSetting('arabicFontSize', v))}
+        {renderSizeControl(t('duaSettings.translationFont'), settings.translationFontSize, v => updateSetting('translationFontSize', v))}
+        {renderSizeControl(t('duaSettings.translitFont'), settings.translitFontSize, v => updateSetting('translitFontSize', v))}
 
-              <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={{ gap: Spacing.four }}>
-                <Text style={[styles.sectionTitle, { color: colors.textSecondary }]}>{t('duaSettings.textSizes')}</Text>
-                
-                {renderSizeControl(t('duaSettings.arabicFont'), settings.arabicFontSize, v => updateSetting('arabicFontSize', v))}
-                {renderSizeControl(t('duaSettings.translationFont'), settings.translationFontSize, v => updateSetting('translationFontSize', v))}
-                {renderSizeControl(t('duaSettings.translitFont'), settings.translitFontSize, v => updateSetting('translitFontSize', v))}
+        <View style={[styles.divider, { backgroundColor: colors.border }]} />
 
-                <View style={[styles.divider, { backgroundColor: colors.border }]} />
+        <Text style={[{ fontFamily: Fonts.outfit, fontSize: 14, marginBottom: 8, marginTop: 16 }, { color: colors.textSecondary }]}>{t('duaSettings.translations')}</Text>
+        {renderToggle(t('duaSettings.enTrans'), settings.showEnTrans, v => updateSetting('showEnTrans', v))}
+        {renderToggle(t('duaSettings.bnTrans'), settings.showBnTrans, v => updateSetting('showBnTrans', v))}
 
-                <Text style={[styles.sectionTitle, { color: colors.textSecondary }]}>{t('duaSettings.translations')}</Text>
-                {renderToggle(t('duaSettings.enTrans'), settings.showEnTrans, v => updateSetting('showEnTrans', v))}
-                {renderToggle(t('duaSettings.bnTrans'), settings.showBnTrans, v => updateSetting('showBnTrans', v))}
+        <View style={[styles.divider, { backgroundColor: colors.border }]} />
 
-                <View style={[styles.divider, { backgroundColor: colors.border }]} />
-
-                <Text style={[styles.sectionTitle, { color: colors.textSecondary }]}>{t('duaSettings.translit')}</Text>
-                {renderToggle(t('duaSettings.enTranslit'), settings.showEnTranslit, v => updateSetting('showEnTranslit', v))}
-                {renderToggle(t('duaSettings.bnTranslit'), settings.showBnTranslit, v => updateSetting('showBnTranslit', v))}
-              </ScrollView>
-            </View>
-          </TouchableWithoutFeedback>
-        </View>
-      </TouchableWithoutFeedback>
-    </Modal>
+        <Text style={[{ fontFamily: Fonts.outfit, fontSize: 14, marginBottom: 8, marginTop: 16 }, { color: colors.textSecondary }]}>{t('duaSettings.transliterations')}</Text>
+        {renderToggle(t('duaSettings.enTranslit'), settings.showEnTranslit, v => updateSetting('showEnTranslit', v))}
+      </View>
+    </AppModal>
   );
 
 
@@ -399,33 +383,11 @@ const styles = StyleSheet.create({
   },
   
   // Modal Styles
-  modalOverlay: {
-    flex: 1,
-    backgroundColor: 'rgba(0,0,0,0.5)',
-    justifyContent: 'flex-end',
-  },
-  modalContent: {
-    borderTopLeftRadius: 32,
-    borderTopRightRadius: 32,
-    maxHeight: '80%',
-    padding: Spacing.five,
-    borderTopWidth: 1,
-    borderLeftWidth: 1,
-    borderRightWidth: 1,
-  },
-  modalHeader: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    marginBottom: Spacing.five,
-  },
-  modalTitle: {
-    fontFamily: Fonts.outfit,
-    fontSize: 18,
-  },
-  closeBtn: {
-    padding: Spacing.two,
-  },
+
+
+
+
+
   sectionTitle: {
     fontFamily: Fonts.outfit,
     fontSize: 10,

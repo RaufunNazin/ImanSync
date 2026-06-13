@@ -1,10 +1,11 @@
+import AppModal from './AppModal';
 import React, { useEffect, useState } from 'react';
-import { Modal, StyleSheet, Text, TouchableOpacity, View, ScrollView, TouchableWithoutFeedback } from 'react-native';
+import { StyleSheet, Text, TouchableOpacity, View, ScrollView } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import * as Updates from 'expo-updates';
 import { useTranslation } from 'react-i18next';
-import { Fonts, Spacing, useThemeColors, useThemeStyles, useActiveColor } from '@/constants/theme';
-import { Bell, RefreshCw, Info, X } from 'lucide-react-native';
+import { Fonts, Spacing, useThemeColors, useActiveColor } from '@/constants/theme';
+import { Bell, RefreshCw, Info } from 'lucide-react-native';
 
 const SYSTEM_CONFIG_URL = 'https://raw.githubusercontent.com/RaufunNazin/ImanSync/main/system_config.json';
 
@@ -30,7 +31,6 @@ export default function SystemAnnouncer() {
   const { t, i18n } = useTranslation();
   const colors = useThemeColors();
   const activeColor = useActiveColor();
-  const themeStyles = useThemeStyles();
 
   const [updateReady, setUpdateReady] = useState(false);
   const [changelog, setChangelog] = useState<SystemConfig['changelog'][0] | null>(null);
@@ -113,105 +113,93 @@ export default function SystemAnnouncer() {
   return (
     <>
       {/* Update Ready Modal */}
-      <Modal visible={updateReady} transparent animationType="fade">
-        <View style={styles.overlay}>
-          <View style={[styles.card, themeStyles.cardShadow, { backgroundColor: colors.background, borderColor: colors.border }]}>
-            <View style={[styles.iconWrap, { backgroundColor: activeColor + '15' }]}>
-              <RefreshCw size={24} color={activeColor} />
-            </View>
-            <Text style={[styles.title, { color: colors.text }]}>{t('system.updateReadyTitle', 'Update Ready!')}</Text>
-            <Text style={[styles.desc, { color: colors.textSecondary }]}>
-              {t('system.updateReadyDesc', 'A new version of the app has been downloaded. Restart the app to apply the new features.')}
-            </Text>
-            <TouchableOpacity activeOpacity={1} style={[styles.btn, { backgroundColor: activeColor }]} onPress={handleRestart}>
-              <Text style={styles.btnText}>{t('system.restartNow', 'Restart Now')}</Text>
-            </TouchableOpacity>
+      <AppModal visible={updateReady} onClose={() => {}} hideClose scrollable={false}>
+        <View style={{ alignItems: 'center', paddingTop: 8 }}>
+          <View style={[styles.iconWrap, { backgroundColor: activeColor + '15' }]}>
+            <RefreshCw size={32} color={activeColor} />
           </View>
+          <Text style={[styles.title, { color: colors.text }]}>{t('system.updateReadyTitle', 'Update Ready!')}</Text>
+          <Text style={[styles.desc, { color: colors.textSecondary }]}>
+            {t('system.updateReadyDesc', 'A new version of the app has been downloaded. Restart the app to apply the new features.')}
+          </Text>
+          <TouchableOpacity activeOpacity={1} style={[styles.btn, { backgroundColor: activeColor }]} onPress={handleRestart}>
+            <Text style={styles.btnText}>{t('system.restartNow', 'Restart Now')}</Text>
+          </TouchableOpacity>
         </View>
-      </Modal>
+      </AppModal>
 
       {/* Changelog Modal */}
-      <Modal visible={!!changelog && !updateReady} transparent animationType="slide">
-        <TouchableWithoutFeedback onPress={dismissChangelog}>
-          <View style={styles.overlay}>
-            <TouchableWithoutFeedback>
-              <View style={[styles.card, themeStyles.cardShadow, { backgroundColor: colors.background, borderColor: colors.border, maxHeight: '80%' }]}>
-                <TouchableOpacity activeOpacity={1} style={[styles.closeBtn, { backgroundColor: colors.backgroundElement }]} onPress={dismissChangelog}>
-                  <X size={20} color={colors.textSecondary} />
-                </TouchableOpacity>
-                
-                <View style={[styles.iconWrap, { backgroundColor: activeColor + '20' }]}>
-                  <Info size={32} color={activeColor} />
-                </View>
-                
-                <Text style={[styles.title, { color: colors.text }]}>{t('system.whatsNew', "What's New")}</Text>
-                <Text style={[styles.versionTag, { color: colors.textSecondary }]}>v{changelog?.version}</Text>
-
-                <ScrollView showsVerticalScrollIndicator={false} style={{ width: '100%', marginTop: Spacing.four }}>
-                  {changelog && getLocalizedText(changelog).map((line: string, i: number) => (
-                    <View key={i} style={styles.bulletRow}>
-                      <View style={[styles.bullet, { backgroundColor: colors.textSecondary }]} />
-                      <Text style={[styles.bulletText, { color: colors.text }]}>{line}</Text>
-                    </View>
-                  ))}
-                </ScrollView>
-
-                <TouchableOpacity activeOpacity={1} style={[styles.btn, { backgroundColor: activeColor, width: '100%', marginTop: Spacing.two }]} onPress={dismissChangelog}>
-                  <Text style={styles.btnText}>{t('system.awesome', 'Awesome!')}</Text>
-                </TouchableOpacity>
-              </View>
-            </TouchableWithoutFeedback>
+      <AppModal visible={!!changelog && !updateReady} onClose={dismissChangelog} scrollable={false}>
+        <View style={{ alignItems: 'center', paddingTop: 8 }}>
+          <View style={[styles.iconWrap, { backgroundColor: activeColor + '20' }]}>
+            <Info size={32} color={activeColor} />
           </View>
-        </TouchableWithoutFeedback>
-      </Modal>
+          <Text style={[styles.title, { color: colors.text }]}>{t('system.whatsNew', "What's New")}</Text>
+          <Text style={[styles.versionTag, { color: colors.textSecondary }]}>v{changelog?.version}</Text>
+        </View>
+
+        <ScrollView showsVerticalScrollIndicator={false} style={{ width: '100%', marginTop: 24, maxHeight: 300 }}>
+          {changelog && getLocalizedText(changelog).map((line: string, i: number) => (
+            <View key={i} style={styles.bulletRow}>
+              <View style={[styles.bullet, { backgroundColor: colors.textSecondary }]} />
+              <Text style={[styles.bulletText, { color: colors.text }]}>{line}</Text>
+            </View>
+          ))}
+        </ScrollView>
+
+        <TouchableOpacity activeOpacity={1} style={[styles.btn, { backgroundColor: activeColor, width: '100%', marginTop: 24 }]} onPress={dismissChangelog}>
+          <Text style={styles.btnText}>{t('system.awesome', 'Awesome!')}</Text>
+        </TouchableOpacity>
+      </AppModal>
 
       {/* Notification Modal */}
-      <Modal visible={!!notification && !updateReady && !changelog} transparent animationType="slide">
-        <TouchableWithoutFeedback onPress={dismissNotification}>
-          <View style={styles.overlay}>
-            <TouchableWithoutFeedback>
-              <View style={[styles.card, themeStyles.cardShadow, { backgroundColor: colors.background, borderColor: colors.border }]}>
-                <View style={[styles.iconWrap, { backgroundColor: activeColor + '15' }]}>
-                  <Bell size={24} color={activeColor} />
-                </View>
-                <Text style={[styles.title, { color: colors.text }]}>{t('system.notification', 'Notice')}</Text>
-                <Text style={[styles.desc, { color: colors.text, textAlign: 'center', fontSize: 16 }]}>
-                  {notification && getLocalizedText(notification)}
-                </Text>
-                <TouchableOpacity activeOpacity={1} style={[styles.btn, { backgroundColor: activeColor, width: '100%', marginTop: Spacing.two }]} onPress={dismissNotification}>
-                  <Text style={styles.btnText}>{t('system.gotIt', 'Got It')}</Text>
-                </TouchableOpacity>
-              </View>
-            </TouchableWithoutFeedback>
+      <AppModal visible={!!notification && !updateReady && !changelog} onClose={dismissNotification} scrollable={false}>
+        <View style={{ alignItems: 'center', paddingTop: 8 }}>
+          <View style={[styles.iconWrap, { backgroundColor: activeColor + '15' }]}>
+            <Bell size={32} color={activeColor} />
           </View>
-        </TouchableWithoutFeedback>
-      </Modal>
+          <Text style={[styles.title, { color: colors.text }]}>{t('system.notification', 'Notice')}</Text>
+          <Text style={[styles.desc, { color: colors.text, textAlign: 'center', fontSize: 16, marginTop: 12 }]}>
+            {notification && getLocalizedText(notification)}
+          </Text>
+          <TouchableOpacity activeOpacity={1} style={[styles.btn, { backgroundColor: activeColor, width: '100%', marginTop: 24 }]} onPress={dismissNotification}>
+            <Text style={styles.btnText}>{t('system.gotIt', 'Got It')}</Text>
+          </TouchableOpacity>
+        </View>
+      </AppModal>
     </>
   );
 }
 
 const styles = StyleSheet.create({
-  overlay: {
-    flex: 1,
-    backgroundColor: 'rgba(0,0,0,0.6)',
-    alignItems: 'center',
-    justifyContent: 'center',
-    padding: Spacing.four,
-  },
-  card: {
-    width: '100%',
-    borderRadius: 24,
-    borderWidth: 1,
-    padding: Spacing.four,
-    alignItems: 'center',
-  },
+
+
   iconWrap: {
     width: 32,
     height: 32,
-    borderRadius: 16,
+    borderRadius: 8,
     alignItems: 'center',
     justifyContent: 'center',
     marginBottom: Spacing.two,
+  },
+  card: {
+    flex: 1,
+    padding: Spacing.four,
+    borderRadius: 16,
+    borderWidth: 1,
+    minHeight: 120,
+    gap: Spacing.two,
+    justifyContent: 'space-between',
+  },
+  cardTitle: {
+    fontFamily: Fonts.outfit,
+    fontSize: 16,
+    fontWeight: '600',
+    marginBottom: 4,
+  },
+  cardDesc: {
+    fontFamily: Fonts.outfit,
+    fontSize: 14,
   },
   title: {
     fontFamily: Fonts.outfit,
@@ -233,7 +221,7 @@ const styles = StyleSheet.create({
   btn: {
     paddingVertical: 14,
     paddingHorizontal: Spacing.six,
-    borderRadius: 16,
+    borderRadius: 12,
     width: '100%',
     alignItems: 'center',
   },
@@ -242,17 +230,7 @@ const styles = StyleSheet.create({
     color: '#FFF',
     fontSize: 16,
   },
-  closeBtn: {
-    position: 'absolute',
-    top: 16,
-    right: 16,
-    width: 32,
-    height: 32,
-    borderRadius: 16,
-    alignItems: 'center',
-    justifyContent: 'center',
-    zIndex: 10,
-  },
+
   bulletRow: {
     flexDirection: 'row',
     alignItems: 'flex-start',

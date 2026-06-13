@@ -1,16 +1,15 @@
 import React, { useState, useMemo } from 'react';
 import {
-  Modal,
   View,
   Text,
   TouchableOpacity,
   StyleSheet,
-  TouchableWithoutFeedback,
   ScrollView,
   TextInput,
 } from 'react-native';
+import AppModal from './AppModal';
 
-import { Check, Search, X } from 'lucide-react-native';
+import { Check, Search } from 'lucide-react-native';
 import { useTranslation } from 'react-i18next';
 import { Fonts, useThemeColors, useActiveColor } from '@/constants/theme';
 
@@ -59,24 +58,8 @@ export default function OptionsModal({
   }, [visible]);
 
   return (
-    <Modal
-      visible={visible}
-      transparent
-      animationType="fade"
-      onRequestClose={onClose}
-    >
-      <TouchableWithoutFeedback onPress={onClose}>
-        <View style={styles.overlay}>
-          <TouchableWithoutFeedback>
-            <View style={[styles.modalContainer, { backgroundColor: colors.background, borderColor: colors.border }]}>
-              <View style={{ width: 40, height: 4, backgroundColor: colors.border, borderRadius: 2, alignSelf: 'center', marginBottom: 24, marginTop: 24 }} />
-              {/* Header */}
-              <View style={[styles.header, { borderBottomColor: colors.border }]}>
-                <Text style={[styles.title, { color: colors.text }]}>{title}</Text>
-                <TouchableOpacity activeOpacity={1} onPress={onClose} style={styles.closeBtn}>
-                  <X size={24} color={colors.text} />
-                </TouchableOpacity>
-              </View>
+    <AppModal visible={visible} onClose={onClose} title={title} scrollable={false}>
+      <View style={{ paddingTop: 8 }}>
 
               {/* Search Bar */}
               {enableSearch && (
@@ -96,21 +79,18 @@ export default function OptionsModal({
               {customContent ? (
                 customContent
               ) : (
-                <ScrollView style={styles.list} contentContainerStyle={styles.listContent}>
+                <ScrollView style={styles.list} contentContainerStyle={[styles.listContent, { gap: 24 }]}>
                   {filteredOptions.length === 0 ? (
                   <Text style={[styles.emptyText, { color: colors.textSecondary }]}>
                     {t('noResults', { defaultValue: 'No results found' })}
                   </Text>
                 ) : (
-                  filteredOptions.map((opt, index) => {
+                  filteredOptions.map((opt) => {
                     const isSelected = selectedValue === opt.id;
                     return (
                       <TouchableOpacity activeOpacity={1}
                         key={opt.id}
-                        style={[
-                          styles.optionRow,
-                          index < filteredOptions.length - 1 && { borderBottomColor: colors.border, borderBottomWidth: StyleSheet.hairlineWidth },
-                        ]}
+                        style={styles.optionRow}
                         onPress={() => {
                           onSelect(opt.id);
                           onClose();
@@ -132,43 +112,16 @@ export default function OptionsModal({
                 )}
               </ScrollView>
               )}
-            </View>
-          </TouchableWithoutFeedback>
-        </View>
-      </TouchableWithoutFeedback>
-    </Modal>
+      </View>
+    </AppModal>
   );
 }
 
 const styles = StyleSheet.create({
-  overlay: {
-    flex: 1,
-    backgroundColor: 'rgba(0,0,0,0.5)',
-    justifyContent: 'flex-end',
-  },
-  modalContainer: {
-    borderTopLeftRadius: 32,
-    borderTopRightRadius: 32,
-    paddingHorizontal: 24,
-    paddingBottom: 24,
-    borderTopWidth: 1,
-    maxHeight: '80%',
-  },
-  header: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    marginBottom: 24,
-  },
   title: {
     fontFamily: Fonts.outfit,
-    fontWeight: '600',
-    fontSize: 18,
-  },
-  closeBtn: {
-    padding: 4,
-  },
-  searchContainer: {
+    fontSize: 16,
+  },  searchContainer: {
     flexDirection: 'row',
     alignItems: 'center',
     marginBottom: 16,
@@ -186,14 +139,11 @@ const styles = StyleSheet.create({
   list: {
     maxHeight: 400,
   },
-  listContent: {
-    paddingBottom: 20,
-  },
+  listContent: {},
   optionRow: {
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
-    paddingVertical: 16,
   },
   optionText: {
     fontFamily: Fonts.outfit,

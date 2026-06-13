@@ -1,0 +1,148 @@
+import React from 'react';
+import Animated, { SlideInDown } from 'react-native-reanimated';
+import {
+  Modal,
+  View,
+  Text,
+  TouchableOpacity,
+  StyleSheet,
+  TouchableWithoutFeedback,
+  ScrollView,
+  KeyboardAvoidingView,
+  Platform,
+} from 'react-native';
+import { X } from 'lucide-react-native';
+import { Fonts, useThemeColors } from '@/constants/theme';
+
+export interface AppModalProps {
+  visible: boolean;
+  onClose: () => void;
+  title?: string;
+  children: React.ReactNode;
+  headerRight?: React.ReactNode;
+  footer?: React.ReactNode;
+  avoidKeyboard?: boolean;
+  scrollable?: boolean;
+  contentContainerStyle?: any;
+  hideClose?: boolean;
+}
+
+export default function AppModal({
+  visible,
+  onClose,
+  title,
+  children,
+  headerRight,
+  footer,
+  avoidKeyboard = false,
+  scrollable = true,
+  contentContainerStyle,
+  hideClose = false,
+}: AppModalProps) {
+  const colors = useThemeColors();
+
+  const content = (
+    <View style={styles.overlay}>
+      <TouchableWithoutFeedback onPress={onClose}>
+        <View style={StyleSheet.absoluteFill} />
+      </TouchableWithoutFeedback>
+      <Animated.View entering={SlideInDown.duration(250)} style={[styles.modalContainer, { backgroundColor: colors.background, borderColor: colors.border }]}>
+        <View style={{ width: 40, height: 4, backgroundColor: colors.border, borderRadius: 2, alignSelf: 'center', marginBottom: 12, marginTop: 12 }} />
+        
+        {(title || headerRight || !hideClose) && (
+          <View style={[styles.header, { borderBottomColor: colors.border }]}>
+            <Text style={[styles.title, { color: colors.text }]}>{title || ''}</Text>
+            <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+              {headerRight}
+              {!hideClose && (
+                <TouchableOpacity activeOpacity={1} onPress={onClose} style={[styles.closeBtn]}>
+                  <X size={20} color={colors.textSecondary} />
+                </TouchableOpacity>
+              )}
+            </View>
+          </View>
+        )}
+
+        {scrollable ? (
+          <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={[styles.scrollContent, contentContainerStyle]} keyboardShouldPersistTaps="handled">
+            {children}
+          </ScrollView>
+        ) : (
+          <View style={[styles.staticContent, contentContainerStyle]}>
+            {children}
+          </View>
+        )}
+
+        {footer && (
+          <View style={styles.footer}>
+            {footer}
+          </View>
+        )}
+      </Animated.View>
+    </View>
+  );
+
+  return (
+    <Modal
+      visible={visible}
+      transparent
+      animationType="fade"
+      onRequestClose={onClose}
+    >
+      {avoidKeyboard ? (
+        <KeyboardAvoidingView style={{ flex: 1 }} behavior={Platform.OS === 'ios' ? 'padding' : undefined}>
+          {content}
+        </KeyboardAvoidingView>
+      ) : (
+        content
+      )}
+    </Modal>
+  );
+}
+
+const styles = StyleSheet.create({
+  overlay: {
+    flex: 1,
+    backgroundColor: 'rgba(0,0,0,0.6)',
+    justifyContent: 'flex-end',
+  },
+  modalContainer: {
+    borderTopLeftRadius: 32,
+    borderTopRightRadius: 32,
+    borderTopWidth: 1,
+    borderLeftWidth: 1,
+    borderRightWidth: 1,
+    maxHeight: '90%',
+    overflow: 'hidden',
+  },
+  header: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    paddingHorizontal: 32,
+    marginBottom: 12,
+  },
+  title: {
+    fontFamily: Fonts.outfit,
+    fontSize: 18,
+    flex: 1,
+  },
+  closeBtn: {
+    padding: 8,
+    borderRadius: 20,
+    marginLeft: 12,
+  },
+  scrollContent: {
+    paddingHorizontal: 32,
+    paddingBottom: 32,
+  },
+  staticContent: {
+    paddingHorizontal: 32,
+    paddingBottom: 32,
+  },
+  footer: {
+    paddingHorizontal: 32,
+    paddingTop: 16,
+    paddingBottom: 32,
+  },
+});
