@@ -335,7 +335,7 @@ export default function TrackerScreen() {
 
   return (
     <SafeAreaView edges={['top']} style={[styles.safeArea, { backgroundColor: colors.background }]}>
-      <PageHeader titleEn={t('tracker.titleEn')} titleAr={t('tracker.titleAr')} rightElement={kazaChip} />
+      <PageHeader titleEn={t('tracker.titleEn')} titleAr={t('tracker.titleAr')} showBack={true} rightElement={kazaChip} />
       <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={styles.container}>
 
         <View style={[styles.tabsContainer, { borderBottomColor: colors.border }]}>

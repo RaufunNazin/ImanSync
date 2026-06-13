@@ -182,7 +182,7 @@ export default function RootLayout() {
             animated={true}
           />
           <View style={[styles.background, { backgroundColor: colors.background }]}>
-            <Stack screenOptions={{ headerShown: false, contentStyle: { backgroundColor: colors.background }, animation: 'slide_from_right' }}>
+            <Stack screenOptions={{ headerShown: false, contentStyle: { backgroundColor: colors.background } }}>
               <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
               <Stack.Screen name="quran-search" />
               <Stack.Screen name="dua-search" />

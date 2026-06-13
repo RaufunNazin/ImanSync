@@ -206,8 +206,8 @@
     "prayers": "নামাজসমূহ",
     "fasting": "রোজা",
     "missedFasts": "ছুটে যাওয়া রোজা",
-    "kazaChip_one": "{{namaj}} টি নামাজ",
-    "kazaChip_other": "{{namaj}} টি নামাজ"
+    "kazaChip_one": "{{namaj}}টি কাজা নামাজ",
+    "kazaChip_other": "{{namaj}}টি কাজা নামাজ"
   },
   "dua": {
     "titleEn": "দোয়া ও জিকির",
@@ -1338,5 +1338,34 @@
   "time": {
     "am": "এএম",
     "pm": "পিএম"
+  },
+  "hadith": {
+    "titleEn": "হাদিস",
+    "titleAr": "الحديث",
+    "tabBooks": "বইসমূহ",
+    "sahihSittah": "ছয়টি বিশুদ্ধ কিতাব (সিহাহ সিত্তাহ)",
+    "hadithCount": "{{count}} হাদিস",
+    "chapter": "অধ্যায় {{id}}",
+    "readingSettings": "পড়ার সেটিংস",
+    "arabicFontSize": "আরবি ফন্ট সাইজ",
+    "translationFontSize": "অনুবাদ ফন্ট সাইজ",
+    "showEnglish": "ইংরেজি দেখান",
+    "showBangla": "বাংলা দেখান",
+    "books": {
+      "bukhari": "সহীহ বুখারী",
+      "muslim": "সহীহ মুসলিম",
+      "abudawud": "সুনান আবু দাউদ",
+      "tirmidhi": "জামে আত-তিরমিযী",
+      "nasai": "সুনান আন-নাসায়ী",
+      "ibnmajah": "সুনান ইবনে মাজাহ"
+    },
+    "authors": {
+      "bukhari": "ইমাম বুখারী",
+      "muslim": "ইমাম মুসলিম",
+      "abudawud": "ইমাম আবু দাউদ",
+      "tirmidhi": "ইমাম আত-তিরমিযী",
+      "nasai": "ইমাম আন-নাসায়ী",
+      "ibnmajah": "ইমাম ইবনে মাজাহ"
+    }
   }
 }

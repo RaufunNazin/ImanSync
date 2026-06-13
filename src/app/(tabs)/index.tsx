@@ -4,7 +4,7 @@ import AnimatedProgressBar from '@/components/AnimatedProgressBar';
 import { Fonts, Spacing, useThemeColors } from '@/constants/theme';
 import { usePreferencesStore } from '@/store/preferencesStore';
 import { useQadaStore } from '@/store/qadaStore';
-import { getDistrictName, districtCoords } from '@/utils/districts';
+import { districtCoords } from '@/utils/districts';
 import { Coordinates, CalculationMethod, PrayerTimes, Madhab } from 'adhan';
 import { formatNumber } from '@/utils/formatNumber';
 import { getLocalYYYYMMDD } from '@/utils/dateUtils';
@@ -14,7 +14,7 @@ import { useTrackerHistoryStore } from '@/store/trackerHistoryStore';
 import * as Haptics from 'expo-haptics';
 import { LinearGradient } from 'expo-linear-gradient';
 import { useRouter } from 'expo-router';
-import { Book, BookOpen, CalendarDays, Compass, MapPin, Share2, History } from 'lucide-react-native';
+import { Book, BookOpen, CalendarDays, Compass, Share2, History, Activity } from 'lucide-react-native';
 import React, { useEffect, useMemo, useState, useRef } from 'react';
 import { useTranslation } from 'react-i18next';
 import {
@@ -100,12 +100,6 @@ export default function HomeScreen() {
 
   const qada = useQadaStore();
   const totalQada = qada.fajr + qada.dhuhr + qada.asr + qada.maghrib + qada.isha + qada.witr;
-  
-  const qadaBadgeText = t('home.qadaBadge', { 
-    count: totalQada,
-    formatted: formatNumber(totalQada.toString(), i18n.language)
-  });
-
 
   const [currentTime, setCurrentTime] = useState(new Date());
   const [rawTimings, setRawTimings] = useState<Record<string, string>>({});
@@ -121,8 +115,7 @@ export default function HomeScreen() {
   const trackerHistoryStore = useTrackerHistoryStore();
   const trackerHistory = trackerHistoryStore.history;
   const prefs = usePreferencesStore();
-  const locationCity = prefs.manualCity || prefs.location?.city || 'Dhaka';
-  const locationName = getDistrictName(locationCity, i18n.language);
+  
 
   const hadithRef = useRef(null);
   const verseRef = useRef(null);
@@ -621,21 +614,24 @@ export default function HomeScreen() {
         icon={require('../../../assets/images/zoomed-icon.png')}
         rightElement={
           <TouchableOpacity activeOpacity={1}
-            onPress={() => router.push('/(tabs)/settings?highlight=location')}
+            onPress={() => {
+              Haptics.selectionAsync();
+              router.push('/qada-tracker' as any);
+            }}
             style={{
               flexDirection: 'row',
               alignItems: 'center',
-              backgroundColor: colors.backgroundElement,
+              backgroundColor: totalQada === 0 ? 'transparent' : colors.error + '22',
               paddingHorizontal: 10,
-              paddingVertical: 4,
-              borderRadius: 12,
+              paddingVertical: 5,
+              borderRadius: 14,
               borderWidth: 1,
-              borderColor: colors.border,
+              borderColor: totalQada === 0 ? colors.border : colors.error,
             }}
           >
-            <MapPin size={12} color={colors.textSecondary} style={{ marginRight: 4 }} />
-            <Text style={{ fontFamily: Fonts.outfit, fontSize: 12, color: colors.textSecondary }} numberOfLines={1}>
-              {locationName}
+            <History size={12} color={totalQada === 0 ? colors.textSecondary : colors.error} style={{ marginRight: 4 }} />
+            <Text style={{ fontFamily: Fonts.outfit, fontSize: 12, color: totalQada === 0 ? colors.textSecondary : colors.error, fontWeight: '600' }}>
+              {t('tracker.kazaChip', { namaj: formatNumber(totalQada, i18n.language), count: totalQada, defaultValue: `${formatNumber(totalQada, i18n.language)} Prayers` })}
             </Text>
           </TouchableOpacity>
         }
@@ -772,17 +768,16 @@ export default function HomeScreen() {
                 <Text style={[styles.actionText, { color: colors.text }]}>{t('home.names')}</Text>
               </AnimatedCard>
             </ThemeCard>
-            
-            {/* <ThemeCard intensity={40} style={[styles.actionItemCard, { borderColor: colors.border }]}>
-              <TouchableOpacity activeOpacity={1}
+            <ThemeCard intensity={40} style={[styles.actionItemCard, { borderColor: colors.border }]}>
+              <AnimatedCard
                 style={styles.actionItemBlur} 
-                onPress={() => router.push('/quran-learn' as any)}
+                onPress={() => router.push('/tracker' as any)}
               >
-                <GraduationCap size={16} color={activeColor} />
-                <Text style={[styles.actionText, { color: colors.text }]}>{t('home.learnQuran')}</Text>
-              </TouchableOpacity>
-            </ThemeCard> */}
-
+                <Activity size={16} color={activeColor} />
+                <Text style={[styles.actionText, { color: colors.text }]}>{t('tracker.titleEn', { defaultValue: 'Amal Tracker' })}</Text>
+              </AnimatedCard>
+            </ThemeCard>
+            
             <ThemeCard intensity={40} style={[styles.actionItemCard, { borderColor: colors.border }]}>
               <AnimatedCard
                 style={styles.actionItemBlur} 
@@ -790,35 +785,6 @@ export default function HomeScreen() {
               >
                 <CalendarDays size={16} color={activeColor} />
                 <Text style={[styles.actionText, { color: colors.text }]}>{t('calendar.titleEn', { defaultValue: 'Islamic Calendar' })}</Text>
-              </AnimatedCard>
-            </ThemeCard>
-
-            {/* <ThemeCard intensity={40} style={[styles.actionItemCard, { borderColor: colors.border }]}>
-              <TouchableOpacity activeOpacity={1}
-                style={styles.actionItemBlur} 
-                onPress={() => router.push('/trivia' as any)}
-              >
-                <Brain size={16} color={activeColor} />
-                <Text style={[styles.actionText, { color: colors.text }]}>{t('home.trivia', { defaultValue: 'Islamic Trivia' })}</Text>
-              </TouchableOpacity>
-            </ThemeCard> */}
-
-            <ThemeCard intensity={40} style={[styles.actionItemCard, { borderColor: totalQada > 0 ? colors.error + '40' : colors.border }]}>
-              <AnimatedCard
-                style={[styles.actionItemBlur, totalQada > 0 && { backgroundColor: colors.error + '10' }]}
-                onPress={() => router.push('/qada-tracker' as any)}
-              >
-                {totalQada > 0 ? (
-                  <>
-                    <History size={16} color={colors.error} />
-                    <Text style={[styles.actionText, { color: colors.error }]}>{qadaBadgeText}</Text>
-                  </>
-                ) : (
-                  <>
-                    <History size={16} color={activeColor} />
-                    <Text style={[styles.actionText, { color: colors.text }]}>{t('tracker.qadaTitle', { defaultValue: 'Qada Tracker' })}</Text>
-                  </>
-                )}
               </AnimatedCard>
             </ThemeCard>
           </View>
@@ -976,11 +942,21 @@ export default function HomeScreen() {
           </View>
           {dailyHadith && (
             <ViewShot ref={hadithRef} options={{ format: 'png', quality: 1 }}>
-              <ThemeCard intensity={20} style={[styles.inspirationCard, { borderColor: colors.border, padding: Spacing.six }]}>
+              <ThemeCard intensity={20} style={[styles.inspirationCard, { borderColor: colors.border }]}>
                 <View style={{ alignItems: 'center' }}>
-                  <Text style={{ fontFamily: Fonts.outfit, fontSize: 16, color: colors.text, textAlign: 'center', fontStyle: 'italic', marginBottom: Spacing.four, lineHeight: 24 }}>
-                    "{i18n.language === 'bn' ? dailyHadith.bengali : dailyHadith.english}"
-                  </Text>
+                  <View style={styles.quoteIconContainer}>
+                    <Book size={24} color={colors.textSecondary} />
+                  </View>
+                  {i18n.language !== 'bn' && (
+                    <Text style={[styles.inspirationEnglish, { color: colors.text }]}>
+                      "{dailyHadith.english}"
+                    </Text>
+                  )}
+                  {i18n.language === 'bn' && (
+                    <Text style={[styles.inspirationBangla, { color: colors.textSecondary }]}>
+                      "{dailyHadith.bengali}"
+                    </Text>
+                  )}
                   <Text style={[styles.inspirationRef, { color: activeColor }]}>
                     — {dailyHadith.reference}
                   </Text>
@@ -1285,7 +1261,6 @@ const styles = StyleSheet.create({
     fontSize: 15,
     textAlign: 'center',
     lineHeight: 22,
-    fontStyle: 'italic',
     marginBottom: Spacing.two,
   },
   inspirationBangla: {

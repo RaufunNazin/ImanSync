@@ -1,7 +1,7 @@
 import React from 'react';
 import { Platform, Pressable, Text } from 'react-native';
 import { useActiveColor, useThemeColors } from '@/constants/theme';
-import { Home, BookOpen, Book, Activity, Settings } from 'lucide-react-native';
+import { Home, BookOpen, Book, Activity, Settings, HeartHandshake } from 'lucide-react-native';
 import { useTranslation } from 'react-i18next';
 import { Tabs } from 'expo-router';
 import Animated, { useAnimatedStyle, useSharedValue, withSpring } from 'react-native-reanimated';
@@ -74,9 +74,15 @@ export default function TabLayout() {
         ),
         tabBarButton: (props) => <TabBarButton {...props} />,
         lazy: true,
-        animation: 'shift',
       }}
     >
+      <Tabs.Screen
+        name="hadith"
+        options={{
+          title: t('hadith.titleEn', { defaultValue: 'Hadith' }),
+          tabBarIcon: ({ color, focused }) => <Book size={20} color={color} fill={focused ? color + '40' : 'none'} />,
+        }}
+      />
       <Tabs.Screen
         name="tracker"
         options={{
@@ -102,7 +108,7 @@ export default function TabLayout() {
         name="dua"
         options={{
           title: t('dua.titleEn'),
-          tabBarIcon: ({ color, focused }) => <Book size={20} color={color} fill={focused ? color + '40' : 'none'} />,
+          tabBarIcon: ({ color, focused }) => <HeartHandshake size={20} color={color} fill={focused ? color + '40' : 'none'} />,
         }}
       />
       <Tabs.Screen

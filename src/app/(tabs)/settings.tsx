@@ -22,10 +22,10 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import * as Location from 'expo-location';
 import { useRouter, useLocalSearchParams } from 'expo-router';
 import * as Updates from 'expo-updates';
-import { AlertCircle, Bell, BellOff, BookOpen, CalendarDays, Calculator, CheckCircle, Clock, FileText, FolderLock, Globe, Info, ListTodo, MapPin, Palette, RefreshCw, Scale, Shield} from 'lucide-react-native';
+import { Bell, BellOff, BookOpen, CalendarDays, Calculator, Clock, FileText, FolderLock, Globe, Info, ListTodo, MapPin, Palette, RefreshCw, Scale, Shield} from 'lucide-react-native';
 import React, { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { ActivityIndicator, Alert, Linking, ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import { Alert, Linking, ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import AppModal from '@/components/AppModal';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
@@ -58,7 +58,7 @@ export default function SettingsScreen() {
   const [optionsModalVisible, setOptionsModalVisible] = useState(false);
   const [optionsModalType, setOptionsModalType] = useState<'calc' | 'madhab' | 'hijri' | 'bangla' | 'location' | 'appearance' | 'calendar' | null>(null);
 
-  const [updateModal, setUpdateModal] = useState<{ visible: boolean; title: string; message: string; type: 'loading' | 'success' | 'error' } | null>(null);
+  const [updateStatus, setUpdateStatus] = useState<string | null>(null);
 
   const prefs = usePreferencesStore();
 
@@ -173,28 +173,31 @@ export default function SettingsScreen() {
 
   const checkForUpdates = async () => {
     if (__DEV__) {
-      setUpdateModal({ visible: true, title: t('settings.devMode', 'Development Mode'), message: t('settings.devModeUpdateMsg', 'Update checking is disabled in development mode. Please build an APK (e.g. using EAS) to test Over-The-Air updates.'), type: 'error' });
+      setUpdateStatus(t('settings.devModeUpdateMsg', 'Unavailable in Dev'));
+      setTimeout(() => setUpdateStatus(null), 3000);
       return;
     }
 
     try {
       setCheckingUpdate(true);
-      setUpdateModal({ visible: true, title: t('settings.checkingUpdates', 'Checking for Updates'), message: t('settings.pleaseWait', 'Please wait while we check for the latest version...'), type: 'loading' });
+      setUpdateStatus(t('settings.checkingUpdates', 'Checking for Updates...'));
       
       const update = await Updates.checkForUpdateAsync();
       
       if (update.isAvailable) {
-        setUpdateModal({ visible: true, title: t('settings.updatesAvailable', 'Update Found!'), message: t('settings.downloadingUpdate', 'Downloading and applying the new features...'), type: 'loading' });
+        setUpdateStatus(t('settings.downloadingUpdate', 'Downloading Update...'));
         await Updates.fetchUpdateAsync();
         
-        setUpdateModal({ visible: true, title: t('settings.updateRestarting', 'Restarting App'), message: t('settings.restartingApp', 'Applying updates now...'), type: 'loading' });
+        setUpdateStatus(t('settings.restartingApp', 'Applying Updates...'));
         await Updates.reloadAsync();
       } else {
-        setUpdateModal({ visible: true, title: t('settings.upToDate', 'Up to Date'), message: t('settings.updatesNotAvailable', 'You are already running the latest version.'), type: 'success' });
+        setUpdateStatus(t('settings.upToDate', 'Up to Date'));
+        setTimeout(() => setUpdateStatus(null), 3000);
       }
     } catch (error) {
       console.log('Error checking for updates', error);
-      setUpdateModal({ visible: true, title: t('settings.error', 'Error'), message: t('settings.errorCheckingUpdates', 'Could not check for updates. Please try again later.'), type: 'error' });
+      setUpdateStatus(t('settings.errorCheckingUpdates', 'Update Failed'));
+      setTimeout(() => setUpdateStatus(null), 3000);
     } finally {
       setCheckingUpdate(false);
     }
@@ -271,7 +274,7 @@ export default function SettingsScreen() {
            
           />
           {prefs.showBanglaCalendar && (
-            <View>
+            <>
               <SettingRow
                 icon={CalendarDays}
                 title={t('settings.banglaOffset', { defaultValue: 'Bangla Date Adjustment' })}
@@ -283,7 +286,7 @@ export default function SettingsScreen() {
                 isLast={true}
                
               />
-            </View>
+            </>
           )}
         </ThemeCard>
 
@@ -291,7 +294,7 @@ export default function SettingsScreen() {
         <ThemeCard animated layout={LinearTransition.duration(200)} style={[styles.card]}>
           <SettingRow icon={Bell} title={t('settings.masterToggle', { defaultValue: 'Master Toggle' })} value={prefs.notificationsEnabled} type="toggle" isLast={!prefs.notificationsEnabled} onPress={toggleNotifications} />
           {prefs.notificationsEnabled && (
-            <View>
+            <>
               <SettingRow icon={Clock} title={t('settings.prayerStartAlerts', { defaultValue: 'Prayer Start Alerts' })} value={prefs.prayerStartAlerts} type="toggle" onPress={togglePrayerStartAlerts} />
               <SettingRow icon={Clock} title={t('settings.prayerEndAlerts', { defaultValue: 'Prayer End Alerts' })} value={prefs.prayerEndAlerts} type="toggle" onPress={togglePrayerEndAlerts} />
               <SettingRow icon={ListTodo} title={t('settings.dailyReminders', { defaultValue: 'Daily Reminders' })} value={prefs.taskRemindersEnabled} type="toggle" onPress={toggleTaskReminders} />
@@ -335,7 +338,7 @@ export default function SettingsScreen() {
                   </View>
                 </View>
               )}
-            </View>
+            </>
           )}
         </ThemeCard>
 
@@ -413,7 +416,7 @@ export default function SettingsScreen() {
           />
           <SettingRow 
             icon={RefreshCw} 
-            title={t('settings.checkForUpdates')} 
+            title={updateStatus || t('settings.checkForUpdates')} 
             type={checkingUpdate ? 'loading' : 'navigate'} 
             onPress={checkForUpdates} 
             
@@ -486,37 +489,6 @@ export default function SettingsScreen() {
         />
       )}
 
-      {/* Update Modal */}
-      {updateModal && (
-        <AppModal 
-          visible={updateModal.visible} 
-          onClose={() => updateModal.type !== 'loading' && setUpdateModal(null)}
-          hideClose={updateModal.type === 'loading'}
-          scrollable={false}
-        >
-          <View style={{ alignItems: 'center', paddingTop: 8 }}>
-            <View style={[{ width: 48, height: 48, borderRadius: 24, alignItems: 'center', justifyContent: 'center', marginBottom: 16 }, { backgroundColor: updateModal.type === 'success' ? colors.accent + '20' : updateModal.type === 'error' ? colors.error + '20' : activeColor + '20' }]}>
-              {updateModal.type === 'success' ? (
-                <CheckCircle size={32} color={colors.accent} />
-              ) : updateModal.type === 'error' ? (
-                <AlertCircle size={32} color={colors.error} />
-              ) : (
-                <ActivityIndicator size="large" color={activeColor} />
-              )}
-            </View>
-            
-            <Text style={[{ fontFamily: Fonts.outfit, fontSize: 18, marginBottom: 8, textAlign: 'center' }, { color: colors.text }]}>{updateModal.title}</Text>
-            <Text style={[{ fontFamily: Fonts.outfit, fontSize: 14, textAlign: 'center', marginBottom: 24 }, { color: colors.textSecondary }]}>{updateModal.message}</Text>
-            
-            {updateModal.type !== 'loading' && (
-              <TouchableOpacity activeOpacity={1} style={[{ paddingVertical: 14, paddingHorizontal: 24, borderRadius: 12, width: '100%', alignItems: 'center' }, { backgroundColor: updateModal.type === 'success' ? colors.accent : colors.error }]} onPress={() => setUpdateModal(null)}>
-                <Text style={{ fontFamily: Fonts.outfit, color: '#FFF', fontSize: 16, fontWeight: '500' }}>{t('system.gotIt', 'Got It')}</Text>
-              </TouchableOpacity>
-            )}
-          </View>
-        </AppModal>
-      )}
-
       {/* Storage Confirm Modal */}
       {storageConfirmModal && (
         <AppModal visible={true} onClose={() => setStorageConfirmModal(null)} scrollable={false}>
@@ -573,8 +545,8 @@ const styles = StyleSheet.create({
     width: '100%',
     borderRadius: 24,
     padding: Spacing.four,
-    marginBottom: Spacing.four,
     borderWidth: 1,
+    gap: Spacing.four,
   },
   sectionTitle: {
     fontFamily: Fonts.outfit,

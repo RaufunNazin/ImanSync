@@ -1224,5 +1224,34 @@
   "time": {
     "am": "AM",
     "pm": "PM"
+  },
+  "hadith": {
+    "titleEn": "Hadith",
+    "titleAr": "الحديث",
+    "tabBooks": "Books",
+    "sahihSittah": "The Six Canonical Books",
+    "hadithCount": "{{count}} Hadiths",
+    "chapter": "Chapter {{id}}",
+    "readingSettings": "Reading Settings",
+    "arabicFontSize": "Arabic Font Size",
+    "translationFontSize": "Translation Font Size",
+    "showEnglish": "Show English",
+    "showBangla": "Show Bangla",
+    "books": {
+      "bukhari": "Sahih al-Bukhari",
+      "muslim": "Sahih Muslim",
+      "abudawud": "Sunan Abu Dawud",
+      "tirmidhi": "Jami' at-Tirmidhi",
+      "nasai": "Sunan an-Nasa'i",
+      "ibnmajah": "Sunan Ibn Majah"
+    },
+    "authors": {
+      "bukhari": "Imam al-Bukhari",
+      "muslim": "Imam Muslim",
+      "abudawud": "Imam Abu Dawud",
+      "tirmidhi": "Imam at-Tirmidhi",
+      "nasai": "Imam an-Nasa'i",
+      "ibnmajah": "Imam Ibn Majah"
+    }
   }
 }
