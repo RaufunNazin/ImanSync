@@ -10,6 +10,7 @@ import ThemeCard from '@/components/ThemeCard';
 import * as Haptics from 'expo-haptics';
 import { Bookmark } from 'lucide-react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import hadithChaptersBn from '@/data/hadith-chapters-bn.json';
 
 const BOOK_NAMES: Record<string, string> = {
   bukhari: 'Sahih al-Bukhari',
@@ -165,7 +166,9 @@ export default function HadithBookScreen() {
                     
                     <View style={styles.textContainer}>
                       <Text style={[styles.sectionName, { color: colors.text }]} numberOfLines={2}>
-                        {section.name}
+                        {i18n.language === 'bn' && (hadithChaptersBn as any)[book as string]?.[section.id] 
+                          ? (hadithChaptersBn as any)[book as string][section.id] 
+                          : section.name}
                       </Text>
                       <Text style={[styles.hadithCount, { color: colors.textSecondary }]}>
                         {t('hadith.hadithCount', { count: formatNumber(section.count, i18n.language), defaultValue: `${section.count} Hadiths` })}

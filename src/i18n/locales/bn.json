@@ -48,7 +48,8 @@
     "prev": "আগের",
     "next": "পরের",
     "continue": "চালিয়ে যান",
-    "tapToListen": "শুনতে ট্যাপ করুন"
+    "tapToListen": "শুনতে ট্যাপ করুন",
+    "tapToFlip": "উল্টাতে ট্যাপ করুন"
   },
   "home": {
     "titleEn": "ইমান সিঙ্ক",
@@ -139,7 +140,15 @@
       "pause": "ডাউনলোড পজ করুন",
       "resume": "ডাউনলোড রিজিউম করুন",
       "stop": "ডাউনলোড বন্ধ করুন"
-    }
+    },
+    "readingSettings": "পড়ার সেটিংস",
+    "arabicFontSize": "আরবি ফন্ট সাইজ",
+    "translationFontSize": "অনুবাদ ফন্ট সাইজ",
+    "showEnglish": "ইংরেজি দেখান",
+    "showBangla": "বাংলা দেখান",
+    "deleteDownloadTitle": "অডিও মুছুন",
+    "deleteDownloadMessage": "আপনার ডিভাইস থেকে এই ডাউনলোড করা সূরার অডিওটি মুছে ফেলতে চান?",
+    "deleteDownloadConfirm": "মুছুন"
   },
   "quranSettings": {
     "title": "রিডিং সেটিংস",
@@ -329,7 +338,8 @@
     "searchBookmarks": "বুকমার্ক করা দোয়া খুঁজুন...",
     "searchAllDuas": "সব দোয়া খুঁজুন...",
     "searchInCategory": "{{categoryName}} এ খুঁজুন...",
-    "searchCategory": "ক্যাটাগরি খুঁজুন..."
+    "searchCategory": "ক্যাটাগরি খুঁজুন...",
+    "transliterations": "উচ্চারণ"
   },
   "settings": {
     "viewSource": "সোর্স কোড দেখুন",
@@ -426,7 +436,9 @@
     "facingQibla": "আপনি কিবলার দিকে মুখ করে আছেন!",
     "east": "পূঃ",
     "south": "দঃ",
-    "west": "পঃ"
+    "west": "পঃ",
+    "accuracy": "কম্পাসের নির্ভুলতা:",
+    "interference": "ম্যাগনেটিক সিগন্যালে সমস্যা হচ্ছে। দয়া করে ফোনটি ইলেকট্রনিক্স ডিভাইস থেকে দূরে সরান।"
   },
   "stories": {
     "titleEn": "সূরার প্রেক্ষাপট",
@@ -1366,6 +1378,9 @@
       "tirmidhi": "ইমাম আত-তিরমিযী",
       "nasai": "ইমাম আন-নাসায়ী",
       "ibnmajah": "ইমাম ইবনে মাজাহ"
-    }
-  }
+    },
+    "searchPlaceholder": "হাদিস খুঁজুন...",
+    "chapterBookmark": "অধ্যায় বুকমার্ক"
+  },
+  "searchIn": "{{title}} খুঁজুন..."
 }

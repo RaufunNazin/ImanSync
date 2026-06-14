@@ -17,7 +17,8 @@ import {
   View,
   Dimensions,
   KeyboardAvoidingView,
-  Platform
+  Platform,
+  ActivityIndicator
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
@@ -52,23 +53,21 @@ export default function QuranSearchScreen() {
   });
 
   const [searchQuery, setSearchQuery] = useState('');
+  const [debouncedQuery, setDebouncedQuery] = useState('');
+  const [isSearching, setIsSearching] = useState(false);
   const inputRef = useRef<TextInput>(null);
 
-  const searchWidth = useSharedValue(40); // Starts small like an icon
+  const searchWidth = useSharedValue(40);
 
   useEffect(() => {
-    // Expand search bar on mount
     searchWidth.value = withTiming(width - Spacing.four * 2 - 40, { duration: 150 });
-    
-    // Auto focus
     setTimeout(() => {
       inputRef.current?.focus();
     }, 150);
 
     fetchOnce({
       key: 'quran_surahs_list',
-      onStart: () => {
-      },
+      onStart: () => {},
       fetcher: async () => {
         const res = await fetch('https://api.alquran.cloud/v1/surah');
         const json = await res.json();
@@ -81,29 +80,30 @@ export default function QuranSearchScreen() {
         }));
       },
       onData: (data) => {
-        if (data) {
-          setSurahs(data);
-        }
+        if (data) setSurahs(data);
       },
-      onError: (err) => {
-        console.error("Error fetching surahs:", err);
-      }
+      onError: (err) => console.error("Error fetching surahs:", err)
     });
   }, []);
 
+  useEffect(() => {
+    setIsSearching(true);
+    const timer = setTimeout(() => {
+      setDebouncedQuery(searchQuery);
+      setIsSearching(false);
+    }, 300);
+    return () => clearTimeout(timer);
+  }, [searchQuery]);
+
   const animatedSearchStyle = useAnimatedStyle(() => {
-    return {
-      width: searchWidth.value,
-    };
+    return { width: searchWidth.value };
   });
 
-  const handleBack = () => {
-    router.back();
-  };
+  const handleBack = () => router.back();
 
   const filteredSurahs = surahs.filter(s => {
-    if (!searchQuery) return false; // Only show results if there's a query
-    const q = searchQuery.toLowerCase();
+    if (!debouncedQuery) return false;
+    const q = debouncedQuery.toLowerCase();
     const translatedName = t('surahNames.' + s.id, { defaultValue: s.name }).toLowerCase();
     return (
       s.name.toLowerCase().includes(q) || 
@@ -142,9 +142,13 @@ export default function QuranSearchScreen() {
         <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={styles.container} keyboardDismissMode="on-drag" keyboardShouldPersistTaps="handled">
           
           <View style={styles.listContainer}>
-              {searchQuery.length > 0 && filteredSurahs.length === 0 ? (
+              {isSearching ? (
+                 <View style={{ marginTop: 40, alignItems: 'center' }}>
+                   <ActivityIndicator size="large" color={activeQuranColor} />
+                 </View>
+              ) : debouncedQuery.length > 0 && filteredSurahs.length === 0 ? (
                  <Text style={[styles.emptyText, { color: colors.textSecondary }]}>
-                   {t('search.noMatchingQuran', { query: searchQuery })}
+                   {t('search.noMatchingQuran', { query: debouncedQuery })}
                  </Text>
               ) : (
                 filteredSurahs.map((surah) => (

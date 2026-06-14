@@ -12,6 +12,7 @@ import { formatNumber } from '@/utils/formatNumber';
 import PageHeader from '@/components/page-header';
 import { fetchOnce } from '@/utils/fetchWithCache';
 import { storage } from '@/store/mmkv';
+import hadithChaptersBn from '@/data/hadith-chapters-bn.json';
 
 interface Hadith {
   hadithnumber: number;
@@ -239,7 +240,11 @@ export default function HadithChapterScreen() {
 
         const nameAr = arData.metadata?.section?.[chapter] || `Chapter ${chapter}`;
         const nameEn = enData?.metadata?.section?.[chapter] || nameAr;
-        const nameBn = bnData?.metadata?.section?.[chapter] || nameEn;
+        
+        let nameBn = bnData?.metadata?.section?.[chapter] || nameEn;
+        if ((hadithChaptersBn as any)[book as string]?.[chapter]) {
+          nameBn = (hadithChaptersBn as any)[book as string][chapter];
+        }
                      
         storage.set(`hadith_${book}_${chapter}_name`, nameEn);
 
@@ -284,7 +289,11 @@ export default function HadithChapterScreen() {
           {/* Hadith Header */}
           <View style={[styles.hadithHeader, { backgroundColor: colors.backgroundElement, borderColor: colors.border }]}>
             <View style={[styles.hadithNumberCircle, { backgroundColor: colors.background }]}>
-              <Text style={[styles.hadithNumberText, { color: activeColor }]}>
+              <Text 
+                numberOfLines={1} 
+                adjustsFontSizeToFit 
+                style={[styles.hadithNumberText, { color: activeColor }]}
+              >
                 {formatNumber(item.hadithnumber, i18n.language)}
               </Text>
             </View>
@@ -464,9 +473,10 @@ const styles = StyleSheet.create({
     marginBottom: Spacing.three,
   },
   hadithNumberCircle: {
-    width: 32,
+    minWidth: 46,
     height: 32,
     borderRadius: 16,
+    paddingHorizontal: 8,
     alignItems: 'center',
     justifyContent: 'center',
   },

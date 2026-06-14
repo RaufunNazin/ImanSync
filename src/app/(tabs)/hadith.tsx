@@ -58,7 +58,7 @@ export default function HadithScreen() {
         titleEn={t('hadith.titleEn', { defaultValue: 'Hadith Library' })} 
         titleAr={t('hadith.titleAr', { defaultValue: 'الحديث' })} 
         rightElement={
-          <View style={{ flexDirection: 'row', alignItems: 'center', gap: Spacing.four }}>
+          <View style={{ flexDirection: 'row', alignItems: 'center', gap: Spacing.three }}>
             {lastReadHadith && (
               <TouchableOpacity activeOpacity={1} 
                 onPress={() => {
@@ -205,18 +205,17 @@ const styles = StyleSheet.create({
   },
   tabsContainer: {
     flexDirection: 'row',
+    marginBottom: Spacing.two,
     borderBottomWidth: 1,
-    marginBottom: Spacing.three,
   },
   tabBtn: {
     flex: 1,
+    paddingBottom: Spacing.one,
     alignItems: 'center',
-    paddingBottom: Spacing.two,
   },
   tabText: {
     fontFamily: Fonts.outfit,
     fontSize: 16,
-    fontWeight: '500',
   },
   container: {
     padding: Spacing.four,

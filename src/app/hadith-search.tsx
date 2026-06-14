@@ -3,6 +3,7 @@ import { Fonts, Spacing, useThemeColors, useActiveColor } from '@/constants/them
 import { formatNumber } from '@/utils/formatNumber';
 import { fetchOnce } from '@/utils/fetchWithCache';
 import { storage } from '@/store/mmkv';
+import hadithChaptersBn from '@/data/hadith-chapters-bn.json';
 import { useRouter } from 'expo-router';
 import { Book, X } from 'lucide-react-native';
 import React, { useEffect, useState, useRef } from 'react';
@@ -17,7 +18,8 @@ import {
   View,
   Dimensions,
   KeyboardAvoidingView,
-  Platform
+  Platform,
+  ActivityIndicator
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
@@ -61,9 +63,20 @@ export default function HadithSearchScreen() {
   });
 
   const [searchQuery, setSearchQuery] = useState('');
+  const [debouncedQuery, setDebouncedQuery] = useState('');
+  const [isSearching, setIsSearching] = useState(false);
   const inputRef = useRef<TextInput>(null);
 
   const searchWidth = useSharedValue(40); // Starts small like an icon
+
+  useEffect(() => {
+    setIsSearching(true);
+    const timer = setTimeout(() => {
+      setDebouncedQuery(searchQuery);
+      setIsSearching(false);
+    }, 300);
+    return () => clearTimeout(timer);
+  }, [searchQuery]);
 
   useEffect(() => {
     // Expand search bar on mount
@@ -131,8 +144,8 @@ export default function HadithSearchScreen() {
 
   // Filter books and sections
   const filteredBooks = SAHIH_BOOKS.filter(b => {
-    if (!searchQuery) return false;
-    const q = searchQuery.toLowerCase();
+    if (!debouncedQuery) return false;
+    const q = debouncedQuery.toLowerCase();
     const translatedName = t(`hadith.books.${b.id}`, { defaultValue: b.name }).toLowerCase();
     const translatedAuthor = t(`hadith.authors.${b.id}`, { defaultValue: b.author }).toLowerCase();
     return (
@@ -145,11 +158,14 @@ export default function HadithSearchScreen() {
   });
 
   const filteredSections = sections.filter(s => {
-    if (!searchQuery) return false;
-    const q = searchQuery.toLowerCase();
+    if (!debouncedQuery) return false;
+    const q = debouncedQuery.toLowerCase();
     const translatedBookName = t(`hadith.books.${s.bookId}`, { defaultValue: s.bookName }).toLowerCase();
+    const translatedChapterNameBn = (hadithChaptersBn as any)[s.bookId]?.[s.chapterId]?.toLowerCase() || '';
+
     return (
       s.chapterName.toLowerCase().includes(q) || 
+      translatedChapterNameBn.includes(q) ||
       translatedBookName.includes(q) ||
       String(s.chapterId).includes(q)
     );
@@ -165,7 +181,7 @@ export default function HadithSearchScreen() {
             <TextInput
               ref={inputRef}
               style={[styles.searchInput, { color: colors.text }]}
-              placeholder={t('searchLabel', { defaultValue: 'Search...' })}
+              placeholder={t('hadith.searchPlaceholder', { defaultValue: 'Search Hadiths...' })}
               placeholderTextColor={colors.textSecondary}
               value={searchQuery}
               onChangeText={setSearchQuery}
@@ -184,7 +200,11 @@ export default function HadithSearchScreen() {
         <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={styles.container} keyboardDismissMode="on-drag" keyboardShouldPersistTaps="handled">
           
           <View style={styles.listContainer}>
-              {searchQuery.length > 0 && filteredBooks.length === 0 && filteredSections.length === 0 ? (
+              {isSearching ? (
+                 <View style={{ marginTop: 40, alignItems: 'center' }}>
+                   <ActivityIndicator size="large" color={activeColor} />
+                 </View>
+              ) : debouncedQuery.length > 0 && filteredBooks.length === 0 && filteredSections.length === 0 ? (
                  <Text style={[styles.emptyText, { color: colors.textSecondary }]}>
                    {t('noResults', { defaultValue: 'No results found' })}
                  </Text>
@@ -227,7 +247,9 @@ export default function HadithSearchScreen() {
                             </View>
                             <View style={{ flex: 1 }}>
                               <Text style={[styles.titleTextEn, { color: colors.text }]} numberOfLines={2}>
-                                {section.chapterName}
+                                {i18n.language === 'bn' && (hadithChaptersBn as any)[section.bookId]?.[section.chapterId] 
+                                  ? (hadithChaptersBn as any)[section.bookId][section.chapterId] 
+                                  : section.chapterName}
                               </Text>
                               <Text style={[styles.metaText, { color: colors.textSecondary }]} numberOfLines={1}>
                                 {t(`hadith.books.${section.bookId}`, { defaultValue: section.bookName })} • {t('hadith.hadithCount', { count: formatNumber(section.count, i18n.language), defaultValue: `${section.count} Hadiths` })}

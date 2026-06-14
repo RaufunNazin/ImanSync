@@ -48,7 +48,8 @@
     "prev": "Prev",
     "next": "Next",
     "continue": "Continue",
-    "tapToListen": "Tap to Listen"
+    "tapToListen": "Tap to Listen",
+    "tapToFlip": "Tap to flip"
   },
   "home": {
     "titleEn": "ImanSync",
@@ -139,7 +140,15 @@
       "pause": "Pause Download",
       "resume": "Resume Download",
       "stop": "Stop Download"
-    }
+    },
+    "readingSettings": "Reading Settings",
+    "arabicFontSize": "Arabic Font Size",
+    "translationFontSize": "Translation Font Size",
+    "showEnglish": "Show English",
+    "showBangla": "Show Bangla",
+    "deleteDownloadTitle": "Delete Audio",
+    "deleteDownloadMessage": "Remove this downloaded surah audio from your device?",
+    "deleteDownloadConfirm": "Delete"
   },
   "quranSettings": {
     "title": "Reading Preferences",
@@ -329,7 +338,8 @@
     "searchBookmarks": "Search Bookmarks...",
     "searchAllDuas": "Search all duas...",
     "searchInCategory": "Search in {{categoryName}}...",
-    "searchCategory": "Search Categories..."
+    "searchCategory": "Search Categories...",
+    "transliterations": "Transliteration"
   },
   "settings": {
     "viewSource": "View Source Code",
@@ -426,7 +436,9 @@
     "facingQibla": "You are facing the Qibla!",
     "east": "E",
     "south": "S",
-    "west": "W"
+    "west": "W",
+    "accuracy": "Compass Accuracy:",
+    "interference": "Magnetic interference detected. Move away from electronics."
   },
   "stories": {
     "titleEn": "Stories & Context",
@@ -1252,6 +1264,9 @@
       "tirmidhi": "Imam at-Tirmidhi",
       "nasai": "Imam an-Nasa'i",
       "ibnmajah": "Imam Ibn Majah"
-    }
-  }
+    },
+    "searchPlaceholder": "Search Hadiths...",
+    "chapterBookmark": "Chapter Bookmark"
+  },
+  "searchIn": "Search {{title}}..."
 }

@@ -59,7 +59,7 @@ export default function OptionsModal({
 
   return (
     <AppModal visible={visible} onClose={onClose} title={title} scrollable={false}>
-      <View style={{ paddingTop: 8 }}>
+      <View>
 
               {/* Search Bar */}
               {enableSearch && (
@@ -67,7 +67,7 @@ export default function OptionsModal({
                   <Search size={18} color={colors.textSecondary} />
                   <TextInput
                     style={[styles.searchInput, { color: colors.text }]}
-                    placeholder={t('search', { defaultValue: 'Search...' })}
+                    placeholder={t('searchIn', { title, defaultValue: `Search ${title}...` })}
                     placeholderTextColor={colors.textSecondary}
                     value={searchQuery}
                     onChangeText={setSearchQuery}

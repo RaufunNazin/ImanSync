@@ -196,7 +196,7 @@ export default function LessonPlayerScreen() {
                 </Text>
               ) : (
                 <Text style={[styles.tapToFlip, { color: colors.textSecondary }]}>
-                  Tap to flip
+                  {t('learn.tapToFlip', { defaultValue: 'Tap to flip' })}
                 </Text>
               )}
             </TouchableOpacity>

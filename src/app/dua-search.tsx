@@ -1,4 +1,4 @@
-import { Fonts, Spacing, useThemeColors } from '@/constants/theme';
+import { Fonts, Spacing, useThemeColors, useActiveColor } from '@/constants/theme';
 
 import { useRouter, useLocalSearchParams } from 'expo-router';
 import { ChevronRight, X } from 'lucide-react-native';
@@ -19,7 +19,8 @@ import {
   View,
   Dimensions,
   KeyboardAvoidingView,
-  Platform
+  Platform,
+  ActivityIndicator
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import DuaService, { UnifiedDuaItem } from '@/services/duaService';
@@ -33,6 +34,7 @@ const { width } = Dimensions.get('window');
 
 export default function DuaSearchScreen() {
   const colors = useThemeColors();
+  const activeColor = useActiveColor();
   const router = useRouter();
   const { categoryId, isCustom, categoryName } = useLocalSearchParams<{ categoryId?: string, isCustom?: string, categoryName?: string }>();
   const { t, i18n } = useTranslation();
@@ -258,18 +260,9 @@ export default function DuaSearchScreen() {
           
           <View style={styles.list}>
             {isSearching ? (
-              [1, 2, 3].map((key) => (
-                <ThemeCard key={key} intensity={40} style={[styles.itemWrapper, { borderColor: colors.border, opacity: 0.5 }]}>
-                  <View style={styles.item}>
-                    <View style={styles.itemContent}>
-                      <View style={{ height: 16, backgroundColor: colors.textSecondary, borderRadius: 4, width: '70%', opacity: 0.3 }} />
-                      <View style={{ height: 16, backgroundColor: colors.textSecondary, borderRadius: 4, width: '40%', opacity: 0.3, marginTop: 8 }} />
-                      <View style={{ height: 24, backgroundColor: colors.textSecondary, borderRadius: 4, width: '80%', opacity: 0.3, marginTop: 12, alignSelf: 'flex-end' }} />
-                    </View>
-                    <ChevronRight size={20} color={colors.textSecondary} style={{ opacity: 0.3 }} />
-                  </View>
-                </ThemeCard>
-              ))
+                 <View style={{ marginTop: 40, alignItems: 'center' }}>
+                   <ActivityIndicator size="large" color={activeColor} />
+                 </View>
             ) : (
               searchResults.map(dua => {
                 let translation = i18n.language === 'bn' ? dua.translationBn : dua.translationEn;

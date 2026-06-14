@@ -179,13 +179,13 @@ export default function QuranTrackerScreen() {
                 {past30Days.map((dateStr) => {
                   const pages = readingStore.historyLog[dateStr] || 0;
                   const hasNote = !!readingStore.notesLog[dateStr];
+                  const safeGoal = Number(readingStore.dailyGoalPages) || 3;
                   let bgColor: string = colors.textSecondary + '30';
                   let opacity = 1;
                   
                   if (pages > 0) {
-                    const ratio = Math.min(pages / Math.max(1, readingStore.dailyGoalPages), 1);
-                    bgColor = ratio >= 1 ? colors.highlight : activeQuranColor;
-                    opacity = ratio >= 1 ? 1 : Math.max(0.4, ratio);
+                    bgColor = pages >= safeGoal ? colors.highlight : activeQuranColor;
+                    opacity = pages >= safeGoal ? 1 : 0.6;
                   }
 
                   return (
