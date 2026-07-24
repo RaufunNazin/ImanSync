@@ -92,7 +92,46 @@
       "expo-video",
       "./plugins/withAndroidSound.js",
       "./plugins/fixAndroidManifestWarnings.js",
-      "expo-sharing"
+      "expo-sharing",
+      [
+        "react-native-android-widget",
+        {
+          "widgets": [
+            {
+              "name": "Timeline",
+              "label": "Prayer Timeline",
+              "minWidth": "250dp",
+              "minHeight": "40dp",
+              "description": "Today's prayer timeline",
+              "updatePeriodMillis": 900000
+            },
+            {
+              "name": "Date",
+              "label": "Islamic Date",
+              "minWidth": "40dp",
+              "minHeight": "40dp",
+              "description": "Current Arabic and Bangla date",
+              "updatePeriodMillis": 86400000
+            },
+            {
+              "name": "SpecialTimes",
+              "label": "Special Times",
+              "minWidth": "250dp",
+              "minHeight": "40dp",
+              "description": "Suhur, Iftar, and Tahajjud",
+              "updatePeriodMillis": 86400000
+            },
+            {
+              "name": "Tracker",
+              "label": "Daily Tracker",
+              "minWidth": "300dp",
+              "minHeight": "40dp",
+              "description": "Track your 5 daily prayers",
+              "updatePeriodMillis": 3600000
+            }
+          ]
+        }
+      ]
     ],
     "experiments": {
       "typedRoutes": true,

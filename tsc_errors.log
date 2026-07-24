@@ -1,0 +1,17 @@
+src/widgets/android/WidgetTaskHandler.ts(32,36): error TS1005: '>' expected.
+src/widgets/android/WidgetTaskHandler.ts(32,40): error TS1005: ',' expected.
+src/widgets/android/WidgetTaskHandler.ts(32,49): error TS1109: Expression expected.
+src/widgets/android/WidgetTaskHandler.ts(32,50): error TS1109: Expression expected.
+src/widgets/android/WidgetTaskHandler.ts(34,32): error TS1005: '>' expected.
+src/widgets/android/WidgetTaskHandler.ts(34,36): error TS1005: ',' expected.
+src/widgets/android/WidgetTaskHandler.ts(34,45): error TS1109: Expression expected.
+src/widgets/android/WidgetTaskHandler.ts(34,46): error TS1109: Expression expected.
+src/widgets/android/WidgetTaskHandler.ts(36,40): error TS1005: '>' expected.
+src/widgets/android/WidgetTaskHandler.ts(36,44): error TS1005: ',' expected.
+src/widgets/android/WidgetTaskHandler.ts(36,52): error TS1005: ',' expected.
+src/widgets/android/WidgetTaskHandler.ts(36,95): error TS1109: Expression expected.
+src/widgets/android/WidgetTaskHandler.ts(36,96): error TS1109: Expression expected.
+src/widgets/android/WidgetTaskHandler.ts(40,35): error TS1005: '>' expected.
+src/widgets/android/WidgetTaskHandler.ts(40,39): error TS1005: ',' expected.
+src/widgets/android/WidgetTaskHandler.ts(40,48): error TS1109: Expression expected.
+src/widgets/android/WidgetTaskHandler.ts(40,49): error TS1109: Expression expected.

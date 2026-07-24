@@ -11,6 +11,7 @@ import {
   KeyboardAvoidingView,
   Platform,
 } from 'react-native';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { X } from 'lucide-react-native';
 import { Fonts, useThemeColors } from '@/constants/theme';
 
@@ -40,6 +41,7 @@ export default function AppModal({
   hideClose = false,
 }: AppModalProps) {
   const colors = useThemeColors();
+  const insets = useSafeAreaInsets();
 
   const content = (
     <View style={styles.overlay}>
@@ -64,17 +66,17 @@ export default function AppModal({
         )}
 
         {scrollable ? (
-          <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={[styles.scrollContent, contentContainerStyle]} keyboardShouldPersistTaps="handled">
+          <ScrollView style={{ flexShrink: 1 }} showsVerticalScrollIndicator={false} contentContainerStyle={[styles.scrollContent, { paddingBottom: Math.max(32, insets.bottom + 16) }, contentContainerStyle]} keyboardShouldPersistTaps="handled">
             {children}
           </ScrollView>
         ) : (
-          <View style={[styles.staticContent, contentContainerStyle]}>
+          <View style={[{ flexShrink: 1 }, styles.staticContent, { paddingBottom: Math.max(32, insets.bottom + 16) }, contentContainerStyle]}>
             {children}
           </View>
         )}
 
         {footer && (
-          <View style={styles.footer}>
+          <View style={[styles.footer, { paddingBottom: Math.max(32, insets.bottom + 16) }]}>
             {footer}
           </View>
         )}
@@ -88,9 +90,15 @@ export default function AppModal({
       transparent
       animationType="fade"
       onRequestClose={onClose}
+      statusBarTranslucent={true}
+      hardwareAccelerated={true}
     >
       {avoidKeyboard ? (
-        <KeyboardAvoidingView style={{ flex: 1 }} behavior={Platform.OS === 'ios' ? 'padding' : undefined}>
+        <KeyboardAvoidingView 
+          style={{ flex: 1, margin: 0, padding: 0 }} 
+          behavior={Platform.OS === 'ios' ? 'padding' : undefined}
+          keyboardVerticalOffset={Platform.OS === 'ios' ? -insets.bottom : 0}
+        >
           {content}
         </KeyboardAvoidingView>
       ) : (
@@ -103,6 +111,10 @@ export default function AppModal({
 const styles = StyleSheet.create({
   overlay: {
     flex: 1,
+    width: '100%',
+    height: '100%',
+    margin: 0,
+    padding: 0,
     backgroundColor: 'rgba(0,0,0,0.6)',
     justifyContent: 'flex-end',
   },
@@ -114,6 +126,7 @@ const styles = StyleSheet.create({
     borderRightWidth: 1,
     maxHeight: '90%',
     overflow: 'hidden',
+    marginBottom: 0,
   },
   header: {
     flexDirection: 'row',

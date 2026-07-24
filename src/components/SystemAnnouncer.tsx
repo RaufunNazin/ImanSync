@@ -1,6 +1,6 @@
 import AppModal from './AppModal';
 import React, { useEffect, useState } from 'react';
-import { StyleSheet, Text, TouchableOpacity, View, ScrollView } from 'react-native';
+import { StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import * as Updates from 'expo-updates';
 import { useTranslation } from 'react-i18next';
@@ -35,6 +35,14 @@ export default function SystemAnnouncer() {
   const [updateReady, setUpdateReady] = useState(false);
   const [changelog, setChangelog] = useState<SystemConfig['changelog'][0] | null>(null);
   const [notification, setNotification] = useState<SystemConfig['notification'] | null>(null);
+  const [activeModal, setActiveModal] = useState<'update' | 'changelog' | 'notification' | null>(null);
+
+  useEffect(() => {
+    if (updateReady) setActiveModal('update');
+    else if (changelog) setActiveModal('changelog');
+    else if (notification) setActiveModal('notification');
+    else setActiveModal(null);
+  }, [updateReady, changelog, notification]);
 
   useEffect(() => {
     checkSystem();
@@ -88,14 +96,16 @@ export default function SystemAnnouncer() {
   const dismissChangelog = async () => {
     if (changelog) {
       await AsyncStorage.setItem('last_seen_changelog_version', changelog.version);
-      setChangelog(null);
+      setActiveModal(null);
+      setTimeout(() => setChangelog(null), 300);
     }
   };
 
   const dismissNotification = async () => {
     if (notification) {
       await AsyncStorage.setItem('last_seen_notification_id', notification.id);
-      setNotification(null);
+      setActiveModal(null);
+      setTimeout(() => setNotification(null), 300);
     }
   };
 
@@ -113,7 +123,7 @@ export default function SystemAnnouncer() {
   return (
     <>
       {/* Update Ready Modal */}
-      <AppModal visible={updateReady} onClose={() => {}} hideClose scrollable={false}>
+      <AppModal visible={activeModal === 'update'} onClose={() => {}} hideClose scrollable={false}>
         <View style={{ alignItems: 'center', paddingTop: 8 }}>
           <View style={[styles.iconWrap, { backgroundColor: activeColor + '15' }]}>
             <RefreshCw size={32} color={activeColor} />
@@ -129,7 +139,16 @@ export default function SystemAnnouncer() {
       </AppModal>
 
       {/* Changelog Modal */}
-      <AppModal visible={!!changelog && !updateReady} onClose={dismissChangelog} scrollable={false}>
+      <AppModal 
+        visible={activeModal === 'changelog'} 
+        onClose={dismissChangelog} 
+        scrollable={true}
+        footer={
+          <TouchableOpacity activeOpacity={1} style={[styles.btn, { backgroundColor: activeColor, width: '100%', marginTop: 12 }]} onPress={dismissChangelog}>
+            <Text style={styles.btnText}>{t('system.awesome', 'Awesome!')}</Text>
+          </TouchableOpacity>
+        }
+      >
         <View style={{ alignItems: 'center', paddingTop: 8 }}>
           <View style={[styles.iconWrap, { backgroundColor: activeColor + '20' }]}>
             <Info size={32} color={activeColor} />
@@ -138,22 +157,27 @@ export default function SystemAnnouncer() {
           <Text style={[styles.versionTag, { color: colors.textSecondary }]}>v{changelog?.version}</Text>
         </View>
 
-        <ScrollView showsVerticalScrollIndicator={false} style={{ width: '100%', marginTop: 24, maxHeight: 300 }}>
+        <View style={{ width: '100%', marginTop: 24 }}>
           {changelog && getLocalizedText(changelog).map((line: string, i: number) => (
             <View key={i} style={styles.bulletRow}>
               <View style={[styles.bullet, { backgroundColor: colors.textSecondary }]} />
               <Text style={[styles.bulletText, { color: colors.text }]}>{line}</Text>
             </View>
           ))}
-        </ScrollView>
-
-        <TouchableOpacity activeOpacity={1} style={[styles.btn, { backgroundColor: activeColor, width: '100%', marginTop: 24 }]} onPress={dismissChangelog}>
-          <Text style={styles.btnText}>{t('system.awesome', 'Awesome!')}</Text>
-        </TouchableOpacity>
+        </View>
       </AppModal>
 
       {/* Notification Modal */}
-      <AppModal visible={!!notification && !updateReady && !changelog} onClose={dismissNotification} scrollable={false}>
+      <AppModal 
+        visible={activeModal === 'notification'} 
+        onClose={dismissNotification} 
+        scrollable={true}
+        footer={
+          <TouchableOpacity activeOpacity={1} style={[styles.btn, { backgroundColor: activeColor, width: '100%', marginTop: 12 }]} onPress={dismissNotification}>
+            <Text style={styles.btnText}>{t('system.gotIt', 'Got It')}</Text>
+          </TouchableOpacity>
+        }
+      >
         <View style={{ alignItems: 'center', paddingTop: 8 }}>
           <View style={[styles.iconWrap, { backgroundColor: activeColor + '15' }]}>
             <Bell size={32} color={activeColor} />
@@ -162,9 +186,6 @@ export default function SystemAnnouncer() {
           <Text style={[styles.desc, { color: colors.text, textAlign: 'center', fontSize: 16, marginTop: 12 }]}>
             {notification && getLocalizedText(notification)}
           </Text>
-          <TouchableOpacity activeOpacity={1} style={[styles.btn, { backgroundColor: activeColor, width: '100%', marginTop: 24 }]} onPress={dismissNotification}>
-            <Text style={styles.btnText}>{t('system.gotIt', 'Got It')}</Text>
-          </TouchableOpacity>
         </View>
       </AppModal>
     </>

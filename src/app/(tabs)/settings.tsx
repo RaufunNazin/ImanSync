@@ -22,7 +22,7 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import * as Location from 'expo-location';
 import { useRouter, useLocalSearchParams } from 'expo-router';
 import * as Updates from 'expo-updates';
-import { Bell, BellOff, BookOpen, CalendarDays, Calculator, Clock, FileText, FolderLock, Globe, Info, ListTodo, MapPin, Palette, RefreshCw, Scale, Shield} from 'lucide-react-native';
+import { Bell, BellOff, BookOpen, CalendarDays, Calculator, Clock, FileText, FolderLock, Globe, Info, LayoutDashboard, ListTodo, MapPin, Palette, RefreshCw, Scale, Shield} from 'lucide-react-native';
 import React, { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Alert, Linking, ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
@@ -410,9 +410,13 @@ export default function SettingsScreen() {
           <SettingRow
             icon={Shield}
             title={t('settings.managePermissions')}
-            value=""
             onPress={() => Linking.openSettings()}
            
+          />
+          <SettingRow 
+            icon={LayoutDashboard} 
+            title="Manage Widgets" 
+            onPress={() => router.push('/widgets' as any)} 
           />
           <SettingRow 
             icon={RefreshCw} 
