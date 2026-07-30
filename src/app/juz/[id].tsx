@@ -5,7 +5,7 @@ import { useLocalSearchParams, useRouter } from 'expo-router';
 import { Bookmark, Minus, Plus, Settings2, Play, Pause } from 'lucide-react-native';
 import AppModal from '@/components/AppModal';
 import React, { useEffect, useRef, useState } from 'react';
-import { ActivityIndicator, FlatList, StyleSheet, Switch, Text, TouchableOpacity, View } from 'react-native';
+import { ActivityIndicator, FlatList, StyleSheet, Switch, Text, TouchableOpacity, View, InteractionManager, Platform } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useTranslation } from 'react-i18next';
 import { formatNumber } from '@/utils/formatNumber';
@@ -13,6 +13,7 @@ import { useAudioStore } from '@/store/audioStore';
 import PageHeader from '@/components/page-header';
 import { fetchOnce } from '@/utils/fetchWithCache';
 import { storage } from '@/store/mmkv';
+import { useShallow } from 'zustand/react/shallow';
 
 interface Ayah {
   numberInSurah: number;
@@ -42,6 +43,57 @@ const DEFAULT_SETTINGS: Settings = {
   showContext: false,
 };
 
+const JuzAyahCard = React.memo(({
+  item,
+  colors,
+  activeQuranColor,
+  language,
+  settings,
+  surahName,
+  isBookmarked,
+  onBookmarkToggle,
+}: any) => {
+  return (
+    <ThemeCard intensity={30} style={styles.ayahCardWrapper}>
+      <View style={styles.ayahCard}>
+        <View style={styles.ayahHeader}>
+          <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8 }}>
+            <View style={[styles.numberCircle, { borderColor: colors.textSecondary + '20', backgroundColor: colors.textSecondary + '15' }]}>
+              <Text style={[styles.numberText, { color: colors.textSecondary }]}>{formatNumber(item.numberInSurah, language)}</Text>
+            </View>
+            <Text style={[styles.surahTag, { color: colors.textSecondary }]}>{surahName}</Text>
+          </View>
+          <TouchableOpacity activeOpacity={1} onPress={() => onBookmarkToggle(item)}>
+            <Bookmark size={20} color={activeQuranColor} fill={isBookmarked ? activeQuranColor : 'transparent'} />
+          </TouchableOpacity>
+        </View>
+
+        <Text style={[styles.arabicText, { color: colors.text, fontSize: settings.arabicFontSize, lineHeight: settings.arabicFontSize * 1.8 }]}>
+          {item.arabic}
+        </Text>
+
+        {settings.showEnglishTranslit && item.englishTranslit && (
+          <Text style={[styles.translitText, { color: colors.textSecondary, fontSize: settings.translationFontSize, lineHeight: settings.translationFontSize * 1.5 }]}>
+            {item.englishTranslit}
+          </Text>
+        )}
+
+        {settings.showBangla && item.bangla && (
+          <Text style={[styles.banglaText, { color: colors.textSecondary, fontSize: settings.translationFontSize, lineHeight: settings.translationFontSize * 1.5 }]}>
+            {item.bangla}
+          </Text>
+        )}
+
+        {settings.showEnglish && item.english && (
+          <Text style={[styles.englishText, { color: colors.textSecondary, fontSize: settings.translationFontSize, lineHeight: settings.translationFontSize * 1.5 }]}>
+            {item.english}
+          </Text>
+        )}
+      </View>
+    </ThemeCard>
+  );
+});
+
 export default function JuzScreen() {
   const { id, ayah } = useLocalSearchParams();
   const colors = useThemeColors();
@@ -51,7 +103,19 @@ export default function JuzScreen() {
   const router = useRouter();
   const { t, i18n } = useTranslation();
 
-  const { playJuzAyahs, pause, resume, isPlaying, isLoading: isAudioLoading, playbackMode, currentReciterId, setReciter, currentSurahId, juzAyahs: storeJuzAyahs, setHideGlobalBanner } = useAudioStore();
+  const { playJuzAyahs, pause, resume, isPlaying, isLoading: isAudioLoading, playbackMode, currentReciterId, setReciter, currentSurahId, juzAyahs: storeJuzAyahs, setHideGlobalBanner } = useAudioStore(useShallow(state => ({
+    playJuzAyahs: state.playJuzAyahs,
+    pause: state.pause,
+    resume: state.resume,
+    isPlaying: state.isPlaying,
+    isLoading: state.isLoading,
+    playbackMode: state.playbackMode,
+    currentReciterId: state.currentReciterId,
+    setReciter: state.setReciter,
+    currentSurahId: state.currentSurahId,
+    juzAyahs: state.juzAyahs,
+    setHideGlobalBanner: state.setHideGlobalBanner
+  })));
 
   const [settings, setSettings] = useState<Settings>(() => {
     let initialSettings = {
@@ -92,6 +156,15 @@ export default function JuzScreen() {
   const flatListRef = useRef<FlatList>(null);
   const isInitialScrollDone = useRef(false);
   const scrollY = useRef(0);
+  const interactionHandles = useRef<any[]>([]);
+  const isMounted = useRef(true);
+
+  useEffect(() => {
+    return () => {
+      isMounted.current = false;
+      interactionHandles.current.forEach(h => h?.cancel());
+    };
+  }, []);
 
   // Clean up global banner state on unmount
   useEffect(() => {
@@ -122,39 +195,48 @@ export default function JuzScreen() {
         parsed.forEach((b: any) => {
           map[`${b.surahId}-${b.numberInSurah}`] = true;
         });
-        setBookmarkedAyahs(map);
+        if (isMounted.current) {
+          setBookmarkedAyahs(map);
+        }
       }
     } catch (e) {
       console.error(e);
     }
   };
 
-  const toggleBookmark = async (ayahItem: Ayah) => {
-    try {
-      const stored = await AsyncStorage.getItem('imansync_quran_bookmarks');
-      let bookmarks = stored ? JSON.parse(stored) : [];
-      
-      const existsIndex = bookmarks.findIndex((b: any) => b.surahId === ayahItem.surahId && b.numberInSurah === ayahItem.numberInSurah);
-      const key = `${ayahItem.surahId}-${ayahItem.numberInSurah}`;
+  const toggleBookmark = (ayahItem: Ayah) => {
+    const key = `${ayahItem.surahId}-${ayahItem.numberInSurah}`;
+    const isCurrentlyBookmarked = !!bookmarkedAyahs[key];
+    setBookmarkedAyahs(prev => ({ ...prev, [key]: !isCurrentlyBookmarked }));
 
-      if (existsIndex >= 0) {
-        bookmarks.splice(existsIndex, 1);
-        setBookmarkedAyahs(prev => ({ ...prev, [key]: false }));
-      } else {
-        bookmarks.push({
-          surahId: ayahItem.surahId,
-          surahName: ayahItem.surahName,
-          numberInSurah: ayahItem.numberInSurah,
-          arabic: ayahItem.arabic,
-          translation: ayahItem.english || '',
-        });
-        setBookmarkedAyahs(prev => ({ ...prev, [key]: true }));
+    const handle = InteractionManager.runAfterInteractions(async () => {
+      try {
+        const stored = await AsyncStorage.getItem('imansync_quran_bookmarks');
+        let bookmarks = stored ? JSON.parse(stored) : [];
+        
+        const existsIndex = bookmarks.findIndex((b: any) => b.surahId === ayahItem.surahId && b.numberInSurah === ayahItem.numberInSurah);
+
+        if (existsIndex >= 0) {
+          bookmarks.splice(existsIndex, 1);
+        } else {
+          bookmarks.push({
+            surahId: ayahItem.surahId,
+            surahName: ayahItem.surahName,
+            numberInSurah: ayahItem.numberInSurah,
+            arabic: ayahItem.arabic,
+            translation: ayahItem.english || '',
+          });
+        }
+        
+        await AsyncStorage.setItem('imansync_quran_bookmarks', JSON.stringify(bookmarks));
+      } catch (e) {
+        console.error(e);
+        if (isMounted.current) {
+          setBookmarkedAyahs(prev => ({ ...prev, [key]: isCurrentlyBookmarked }));
+        }
       }
-      
-      await AsyncStorage.setItem('imansync_quran_bookmarks', JSON.stringify(bookmarks));
-    } catch (e) {
-      console.error(e);
-    }
+    });
+    interactionHandles.current.push(handle);
   };
 
   const updateSetting = (key: keyof Settings, val: any) => {
@@ -338,6 +420,19 @@ export default function JuzScreen() {
     }
   };
 
+  const renderItem = React.useCallback(({ item }: any) => (
+    <JuzAyahCard
+      item={item}
+      colors={colors}
+      activeQuranColor={activeQuranColor}
+      language={i18n.language}
+      settings={settings}
+      surahName={t('surahNames.' + item.surahId, { defaultValue: item.surahName })}
+      isBookmarked={!!bookmarkedAyahs[`${item.surahId}-${item.numberInSurah}`]}
+      onBookmarkToggle={toggleBookmark}
+    />
+  ), [colors, activeQuranColor, i18n.language, settings, bookmarkedAyahs, t, toggleBookmark]);
+
   return (
     <SafeAreaView style={[styles.safeArea, { backgroundColor: colors.background }]}>
       <PageHeader
@@ -375,8 +470,7 @@ export default function JuzScreen() {
         }
       />
       
-
-        <FlatList
+      <FlatList
           ref={flatListRef}
           data={ayahs}
           keyExtractor={(item, index) => String(item.surahId) + '-' + String(item.numberInSurah) + '-' + index}
@@ -386,49 +480,11 @@ export default function JuzScreen() {
           onScrollToIndexFailed={onScrollToIndexFailed}
           onScroll={handleScroll}
           scrollEventThrottle={16}
-          renderItem={({ item }) => (
-            <ThemeCard intensity={30}  style={styles.ayahCardWrapper}>
-              <View style={styles.ayahCard}>
-                <View style={styles.ayahHeader}>
-                  <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8 }}>
-                    <View style={[styles.numberCircle, { borderColor: colors.textSecondary + '20', backgroundColor: colors.textSecondary + '15' }]}>
-                      <Text style={[styles.numberText, { color: colors.textSecondary }]}>{formatNumber(item.numberInSurah, i18n.language)}</Text>
-                    </View>
-                    <Text style={[styles.surahTag, { color: colors.textSecondary }]}>{t('surahNames.' + item.surahId, { defaultValue: item.surahName })}</Text>
-                  </View>
-                  <TouchableOpacity activeOpacity={1} onPress={() => toggleBookmark(item)}>
-                    <Bookmark 
-                      size={20} 
-                      color={activeQuranColor} 
-                      fill={bookmarkedAyahs[`${item.surahId}-${item.numberInSurah}`] ? activeQuranColor : 'transparent'} 
-                    />
-                  </TouchableOpacity>
-                </View>
-                
-                <Text style={[styles.arabicText, { color: colors.text, fontSize: settings.arabicFontSize, lineHeight: settings.arabicFontSize * 1.8 }]}>
-                  {item.arabic}
-                </Text>
-
-                {settings.showEnglishTranslit && item.englishTranslit && (
-                  <Text style={[styles.translitText, { color: colors.textSecondary, fontSize: settings.translationFontSize, lineHeight: settings.translationFontSize * 1.5 }]}>
-                    {item.englishTranslit}
-                  </Text>
-                )}
-
-                {settings.showBangla && item.bangla && (
-                  <Text style={[styles.banglaText, { color: colors.textSecondary, fontSize: settings.translationFontSize, lineHeight: settings.translationFontSize * 1.5 }]}>
-                    {item.bangla}
-                  </Text>
-                )}
-
-                {settings.showEnglish && item.english && (
-                  <Text style={[styles.englishText, { color: colors.textSecondary, fontSize: settings.translationFontSize, lineHeight: settings.translationFontSize * 1.5 }]}>
-                    {item.english}
-                  </Text>
-                )}
-              </View>
-            </ThemeCard>
-          )}
+          initialNumToRender={10}
+          maxToRenderPerBatch={10}
+          windowSize={5}
+          removeClippedSubviews={Platform.OS === 'android'}
+          renderItem={renderItem}
         />
 
       {renderSettingsModal()}

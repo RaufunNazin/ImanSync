@@ -5,11 +5,10 @@ import { fetchOnce } from '@/utils/fetchWithCache';
 import { storage } from '@/store/mmkv';
 import { useRouter } from 'expo-router';
 import { X } from 'lucide-react-native';
-import React, { useEffect, useState, useRef } from 'react';
+import React, { useEffect, useState, useRef, useCallback } from 'react';
 import { useTranslation } from 'react-i18next';
 import PageHeader from '@/components/page-header';
 import { 
-  ScrollView, 
   StyleSheet, 
   Text, 
   TextInput, 
@@ -18,7 +17,8 @@ import {
   Dimensions,
   KeyboardAvoidingView,
   Platform,
-  ActivityIndicator
+  ActivityIndicator,
+  FlatList
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
@@ -55,21 +55,30 @@ export default function QuranSearchScreen() {
   const [searchQuery, setSearchQuery] = useState('');
   const [debouncedQuery, setDebouncedQuery] = useState('');
   const [isSearching, setIsSearching] = useState(false);
+  const [fetchError, setFetchError] = useState(false);
+  const [isLoading, setIsLoading] = useState(surahs.length === 0);
   const inputRef = useRef<TextInput>(null);
 
   const searchWidth = useSharedValue(40);
+  const isMounted = useRef(true);
 
   useEffect(() => {
-    searchWidth.value = withTiming(width - Spacing.four * 2 - 40, { duration: 150 });
-    setTimeout(() => {
-      inputRef.current?.focus();
-    }, 150);
+    return () => {
+      isMounted.current = false;
+    };
+  }, []);
 
+  const fetchSurahs = useCallback(() => {
     fetchOnce({
       key: 'quran_surahs_list',
-      onStart: () => {},
+      onStart: () => {
+        if (!isMounted.current) return;
+        setFetchError(false);
+        if (surahs.length === 0) setIsLoading(true);
+      },
       fetcher: async () => {
         const res = await fetch('https://api.alquran.cloud/v1/surah');
+        if (!res.ok) throw new Error('Network error');
         const json = await res.json();
         return json.data.map((item: any) => ({
           id: item.number,
@@ -80,11 +89,31 @@ export default function QuranSearchScreen() {
         }));
       },
       onData: (data) => {
+        if (!isMounted.current) return;
         if (data) setSurahs(data);
+        setIsLoading(false);
       },
-      onError: (err) => console.error("Error fetching surahs:", err)
+      onError: (err) => {
+        if (!isMounted.current) return;
+        console.error("Error fetching surahs:", err);
+        if (surahs.length === 0) setFetchError(true);
+        setIsLoading(false);
+      }
     });
-  }, []);
+  }, [surahs.length]);
+
+  useEffect(() => {
+    searchWidth.value = withTiming(width - Spacing.four * 2 - 40, { duration: 150 });
+    const focusTimer = setTimeout(() => {
+      inputRef.current?.focus();
+    }, 150);
+
+    fetchSurahs();
+
+    return () => {
+      clearTimeout(focusTimer);
+    };
+  }, [fetchSurahs, searchWidth]);
 
   useEffect(() => {
     setIsSearching(true);
@@ -139,45 +168,58 @@ export default function QuranSearchScreen() {
       />
 
       <KeyboardAvoidingView behavior={Platform.OS === 'ios' ? 'padding' : 'height'} style={{ flex: 1 }}>
-        <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={styles.container} keyboardDismissMode="on-drag" keyboardShouldPersistTaps="handled">
-          
-          <View style={styles.listContainer}>
-              {isSearching ? (
-                 <View style={{ marginTop: 40, alignItems: 'center' }}>
-                   <ActivityIndicator size="large" color={activeQuranColor} />
-                 </View>
-              ) : debouncedQuery.length > 0 && filteredSurahs.length === 0 ? (
-                 <Text style={[styles.emptyText, { color: colors.textSecondary }]}>
-                   {t('search.noMatchingQuran', { query: debouncedQuery })}
-                 </Text>
-              ) : (
-                filteredSurahs.map((surah) => (
-                  <Animated.View entering={FadeIn.duration(300)} key={surah.id}>
-                    <ThemeCard intensity={30}  style={[styles.surahRowWrapper, { borderColor: colors.border }]}>
-                      <TouchableOpacity activeOpacity={1} 
-                        style={styles.surahRow}
-                        onPress={() => router.push(`/surah/${surah.id}`)}
-                      >
-                        <View style={styles.surahLeft}>
-                          <View style={[styles.numberBox, { borderColor: colors.border, borderWidth: 1 }]}>
-                            <Text style={[styles.numberText, { color: colors.textSecondary }]}>{formatNumber(surah.id, i18n.language)}</Text>
-                          </View>
-                          <View style={{ flex: 1 }}>
-                            <Text style={[styles.surahNameEn, { color: colors.text }]}>{t('surahNames.' + surah.id, { defaultValue: surah.name })}</Text>
-                            <Text style={[styles.surahMeta, { color: colors.textSecondary }]}>
-                              {t('quran.' + surah.type, { defaultValue: surah.type })} • {t('surah.verses', { count: formatNumber(surah.verses, i18n.language) })}
-                            </Text>
-                          </View>
-                        </View>
-                        
-                        <Text style={[styles.surahNameAr, { color: activeQuranColor }]}>{surah.nameAr}</Text>
-                      </TouchableOpacity>
-                    </ThemeCard>
-                  </Animated.View>
-                ))
-              )}
+        <View style={styles.container}>
+          {fetchError ? (
+            <View style={{ marginTop: 80, alignItems: 'center' }}>
+              <Text style={[styles.emptyText, { color: colors.textSecondary, marginBottom: 16 }]}>
+                {t('common.networkError', { defaultValue: 'Network Error: Please check your connection' })}
+              </Text>
+              <TouchableOpacity activeOpacity={1} style={{ paddingHorizontal: 20, paddingVertical: 10, backgroundColor: activeQuranColor, borderRadius: 8 }} onPress={fetchSurahs}>
+                <Text style={{ color: '#fff', fontFamily: Fonts.outfit, fontSize: 16 }}>{t('common.retry', { defaultValue: 'Retry' })}</Text>
+              </TouchableOpacity>
             </View>
-        </ScrollView>
+          ) : isLoading || isSearching ? (
+            <View style={{ marginTop: 40, alignItems: 'center' }}>
+              <ActivityIndicator size="large" color={activeQuranColor} />
+            </View>
+          ) : debouncedQuery.length > 0 && filteredSurahs.length === 0 ? (
+            <Text style={[styles.emptyText, { color: colors.textSecondary }]}>
+              {t('search.noMatchingQuran', { query: debouncedQuery })}
+            </Text>
+          ) : (
+            <FlatList
+              data={filteredSurahs}
+              keyExtractor={(item) => item.id.toString()}
+              contentContainerStyle={styles.listContainer}
+              keyboardDismissMode="on-drag"
+              keyboardShouldPersistTaps="handled"
+              showsVerticalScrollIndicator={false}
+              renderItem={({ item: surah }) => (
+                <Animated.View entering={FadeIn.duration(300)}>
+                  <ThemeCard intensity={30} style={[styles.surahRowWrapper, { borderColor: colors.border }]}>
+                    <TouchableOpacity activeOpacity={1} 
+                      style={styles.surahRow}
+                      onPress={() => router.push(`/surah/${surah.id}`)}
+                    >
+                      <View style={styles.surahLeft}>
+                        <View style={[styles.numberBox, { borderColor: colors.border, borderWidth: 1 }]}>
+                          <Text style={[styles.numberText, { color: colors.textSecondary }]}>{formatNumber(surah.id, i18n.language)}</Text>
+                        </View>
+                        <View style={{ flex: 1 }}>
+                          <Text style={[styles.surahNameEn, { color: colors.text }]}>{t('surahNames.' + surah.id, { defaultValue: surah.name })}</Text>
+                          <Text style={[styles.surahMeta, { color: colors.textSecondary }]}>
+                            {t('quran.' + surah.type, { defaultValue: surah.type })} • {t('surah.verses', { count: formatNumber(surah.verses, i18n.language) })}
+                          </Text>
+                        </View>
+                      </View>
+                      <Text style={[styles.surahNameAr, { color: activeQuranColor }]}>{surah.nameAr}</Text>
+                    </TouchableOpacity>
+                  </ThemeCard>
+                </Animated.View>
+              )}
+            />
+          )}
+        </View>
       </KeyboardAvoidingView>
     </SafeAreaView>
   );

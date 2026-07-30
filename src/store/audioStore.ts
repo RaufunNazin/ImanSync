@@ -43,6 +43,7 @@ interface AudioState {
   seek: (millis: number) => Promise<void>;
   playNext: () => Promise<void>;
   _updatePlaybackStatus: (status: any) => void;
+  _abortController: AbortController | null;
 }
 
 const RECITER_MALE_1 = 7; // Mishary
@@ -63,6 +64,7 @@ export const useAudioStore = create<AudioState>((set, get) => ({
   currentAyahNumber: null,
   ayahAudioList: [],
   audioRequestId: 0,
+  _abortController: null,
   
   juzAyahs: [],
   currentJuzAyahIndex: null,
@@ -73,7 +75,12 @@ export const useAudioStore = create<AudioState>((set, get) => ({
   setReciter: async (id: number) => {
     set({ currentReciterId: id, ayahAudioList: [] });
     await AsyncStorage.setItem('imansync_quran_reciter', String(id));
-    const { isPlaying, currentSurahId, currentSurahName, currentAyahNumber, playbackMode, playSurah, playAyah, playJuzAyahs, juzAyahs, currentJuzAyahIndex } = get();
+    const { isPlaying, currentSurahId, currentSurahName, currentAyahNumber, playbackMode, playSurah, playAyah, playJuzAyahs, juzAyahs, currentJuzAyahIndex, audioRequestId } = get();
+    
+    // Increment request ID to cancel pending plays
+    const newReqId = audioRequestId + 1;
+    set({ audioRequestId: newReqId });
+
     if (isPlaying && currentSurahId && currentSurahName) {
       if (playbackMode === 'juz' && juzAyahs.length > 0 && currentJuzAyahIndex !== null) {
         await playJuzAyahs(juzAyahs, currentJuzAyahIndex);
@@ -89,11 +96,17 @@ export const useAudioStore = create<AudioState>((set, get) => ({
     const { sound, currentReciterId, _updatePlaybackStatus, audioRequestId } = get();
     
     const reqId = audioRequestId + 1;
-    set({ isLoading: true, currentSurahId: surahId, currentSurahName: surahName, playbackMode: 'surah', currentAyahNumber: null, audioRequestId: reqId });
+    if (get()._abortController) {
+      get()._abortController?.abort();
+    }
+    const abortController = new AbortController();
+
+    set({ isLoading: true, currentSurahId: surahId, currentSurahName: surahName, playbackMode: 'surah', currentAyahNumber: null, audioRequestId: reqId, _abortController: abortController });
 
     if (sound) {
       sound.pause();
       sound.removeListener('playbackStatusUpdate', _updatePlaybackStatus);
+      sound.release();
       set({ sound: null, isPlaying: false, positionMillis: 0, durationMillis: 0 });
     }
 
@@ -104,7 +117,9 @@ export const useAudioStore = create<AudioState>((set, get) => ({
       if (localUri) {
         finalUrl = localUri;
       } else {
-        const res = await fetch(`https://api.quran.com/api/v4/chapter_recitations/${currentReciterId}/${surahId}`);
+        const res = await fetch(`https://api.quran.com/api/v4/chapter_recitations/${currentReciterId}/${surahId}`, {
+          signal: abortController.signal
+        });
         const json = await res.json();
         
         if (get().audioRequestId !== reqId) return;
@@ -130,7 +145,8 @@ export const useAudioStore = create<AudioState>((set, get) => ({
       } else {
         set({ isLoading: false });
       }
-    } catch (error) {
+    } catch (error: any) {
+      if (error.name === 'AbortError') return;
       console.error("Failed to play Surah:", error);
       if (get().audioRequestId === reqId) set({ isLoading: false });
     }
@@ -140,18 +156,26 @@ export const useAudioStore = create<AudioState>((set, get) => ({
     const { sound, currentReciterId, _updatePlaybackStatus, audioRequestId, currentSurahId, ayahAudioList } = get();
     
     const reqId = audioRequestId + 1;
-    set({ isLoading: true, currentSurahId: surahId, currentSurahName: surahName, playbackMode: 'ayah', currentAyahNumber: ayahNumber, audioRequestId: reqId });
+    if (get()._abortController) {
+      get()._abortController?.abort();
+    }
+    const abortController = new AbortController();
+
+    set({ isLoading: true, currentSurahId: surahId, currentSurahName: surahName, playbackMode: 'ayah', currentAyahNumber: ayahNumber, audioRequestId: reqId, _abortController: abortController });
 
     if (sound) {
       sound.pause();
       sound.removeListener('playbackStatusUpdate', _updatePlaybackStatus);
+      sound.release();
       set({ sound: null, isPlaying: false, positionMillis: 0, durationMillis: 0 });
     }
 
     try {
       let currentList = ayahAudioList;
       if (surahId !== currentSurahId || currentList.length === 0) {
-        const res = await fetch(`https://api.quran.com/api/v4/recitations/${currentReciterId}/by_chapter/${surahId}`);
+        const res = await fetch(`https://api.quran.com/api/v4/recitations/${currentReciterId}/by_chapter/${surahId}`, {
+          signal: abortController.signal
+        });
         const json = await res.json();
         if (get().audioRequestId !== reqId) return;
         if (json.audio_files) {
@@ -178,7 +202,8 @@ export const useAudioStore = create<AudioState>((set, get) => ({
       } else {
         set({ isLoading: false });
       }
-    } catch (error) {
+    } catch (error: any) {
+      if (error.name === 'AbortError') return;
       console.error("Failed to play Ayah:", error);
       if (get().audioRequestId === reqId) set({ isLoading: false });
     }
@@ -192,18 +217,27 @@ export const useAudioStore = create<AudioState>((set, get) => ({
     
     const { sound, currentReciterId, _updatePlaybackStatus, audioRequestId, ayahAudioList, currentSurahId } = get();
     const reqId = audioRequestId + 1;
-    set({ isLoading: true, currentSurahId: current.surahId, currentSurahName: current.surahName, currentAyahNumber: current.ayahNumber, audioRequestId: reqId });
+    
+    if (get()._abortController) {
+      get()._abortController?.abort();
+    }
+    const abortController = new AbortController();
+
+    set({ isLoading: true, currentSurahId: current.surahId, currentSurahName: current.surahName, currentAyahNumber: current.ayahNumber, audioRequestId: reqId, _abortController: abortController });
 
     if (sound) {
       sound.pause();
       sound.removeListener('playbackStatusUpdate', _updatePlaybackStatus);
+      sound.release();
       set({ sound: null, isPlaying: false, positionMillis: 0, durationMillis: 0 });
     }
 
     try {
       let currentList = ayahAudioList;
       if (current.surahId !== currentSurahId || currentList.length === 0) {
-        const res = await fetch(`https://api.quran.com/api/v4/recitations/${currentReciterId}/by_chapter/${current.surahId}`);
+        const res = await fetch(`https://api.quran.com/api/v4/recitations/${currentReciterId}/by_chapter/${current.surahId}`, {
+          signal: abortController.signal
+        });
         const json = await res.json();
         if (get().audioRequestId !== reqId) return;
         if (json.audio_files) {
@@ -229,7 +263,8 @@ export const useAudioStore = create<AudioState>((set, get) => ({
       } else {
         set({ isLoading: false });
       }
-    } catch (error) {
+    } catch (error: any) {
+      if (error.name === 'AbortError') return;
       console.error("Failed to play Juz Ayah:", error);
       if (get().audioRequestId === reqId) set({ isLoading: false });
     }
@@ -260,18 +295,24 @@ export const useAudioStore = create<AudioState>((set, get) => ({
   },
 
   stop: async () => {
-    const { sound, _updatePlaybackStatus, audioRequestId } = get();
+    const { sound, _updatePlaybackStatus, audioRequestId, _abortController } = get();
+    if (_abortController) _abortController.abort();
     if (sound) {
       sound.pause();
       sound.removeListener('playbackStatusUpdate', _updatePlaybackStatus);
-      set({ sound: null, isPlaying: false, currentSurahId: null, currentSurahName: null, currentAyahNumber: null, playlist: [], juzAyahs: [], currentJuzAyahIndex: null, positionMillis: 0, durationMillis: 0, audioRequestId: audioRequestId + 1 });
+      sound.release();
+      set({ sound: null, isPlaying: false, currentSurahId: null, currentSurahName: null, currentAyahNumber: null, playlist: [], juzAyahs: [], currentJuzAyahIndex: null, positionMillis: 0, durationMillis: 0, audioRequestId: audioRequestId + 1, _abortController: null });
     }
   },
 
   seek: async (millis: number) => {
     const { sound } = get();
     if (sound) {
-      await sound.seekTo(millis / 1000);
+      try {
+        await sound.seekTo(millis / 1000);
+      } catch (e) {
+        console.error('Failed to seek audio', e);
+      }
     }
   },
 
@@ -310,11 +351,12 @@ export const useAudioStore = create<AudioState>((set, get) => ({
               get().stop();
             }
           } else if (playbackMode === 'ayah' && currentSurahId && currentAyahNumber) {
-            AsyncStorage.getItem('imansync_quran_settings').then(val => {
+            AsyncStorage.getItem('imansync_quran_settings_sync').then(val => {
               let autoPlay = true;
               if (val) {
                 try { autoPlay = JSON.parse(val).autoPlayNextAyah !== false; } catch (e) {}
               }
+              if (get().audioRequestId !== reqId) return; // Strict guard against unmounted race conditions
               if (autoPlay) {
                 const nextAyahStr = `${currentSurahId}:${currentAyahNumber + 1}`;
                 const hasNext = ayahAudioList.some(a => a.verse_key === nextAyahStr);
@@ -326,7 +368,7 @@ export const useAudioStore = create<AudioState>((set, get) => ({
               } else {
                 get().stop(); 
               }
-            });
+            }).catch(console.error);
           } else {
             get().playNext();
           }
@@ -347,5 +389,5 @@ if (Platform.OS !== 'web') {
     if (val) {
       useAudioStore.setState({ currentReciterId: parseInt(val, 10) });
     }
-  });
+  }).catch(console.error);
 }

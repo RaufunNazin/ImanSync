@@ -374,8 +374,16 @@
     "footerSubtitle": "Made with the pleasure of Allah in mind",
     "notificationsTitle": "Notification Settings",
     "masterToggle": "Enable Notifications",
-    "prayerStartAlerts": "Prayer Start Alerts",
-    "prayerEndAlerts": "Prayer End Alerts",
+    "fajrStart": "Fajr Start",
+    "fajrEnd": "Fajr End Warning",
+    "dhuhrStart": "Dhuhr Start",
+    "dhuhrEnd": "Dhuhr End Warning",
+    "asrStart": "Asr Start",
+    "asrEnd": "Asr End Warning",
+    "maghribStart": "Maghrib Start",
+    "maghribEnd": "Maghrib End Warning",
+    "ishaStart": "Isha Start",
+    "ishaEnd": "Isha End Warning",
     "dailyReminders": "Daily Reminders",
     "doNotDisturb": "Do Not Disturb",
     "dndFrom": "Quiet Hours Start",
@@ -439,17 +447,6 @@
     "west": "W",
     "accuracy": "Compass Accuracy:",
     "interference": "Magnetic interference detected. Move away from electronics."
-  },
-  "stories": {
-    "titleEn": "Stories & Context",
-    "titleAr": "سياق السور",
-    "discover": "Discover the Origins",
-    "body": "We are translating and verifying authentic revelation contexts for each surah.",
-    "authentic": "Authentic Sources",
-    "authenticDesc": "Sourced from trusted historical scholars.",
-    "deeper": "Deeper Understanding",
-    "deeperDesc": "Learn why and when verses were revealed.",
-    "return": "Back to Quran"
   },
   "prayerTimes": {
     "fajr": "Fajr",
@@ -1185,18 +1182,6 @@
     "noMatchingQuran": "No matching verses found for \"{{query}}\""
   },
   "noResults": "No results found",
-  "trivia": {
-    "title": "Islamic Trivia",
-    "quizCompleted": "Quiz Completed!",
-    "perfectScore": "Perfect! Excellent knowledge! MashaAllah!",
-    "goodScore": "Good job! Keep learning!",
-    "lowScore": "A great opportunity to learn more!",
-    "playAgain": "Play Again",
-    "questionOf": "Question {{current}} of {{total}}",
-    "score": "Score: {{score}}",
-    "finish": "Finish",
-    "nextQuestion": "Next Question"
-  },
   "common": {
     "less": "Less",
     "more": "More",
@@ -1268,5 +1253,13 @@
     "searchPlaceholder": "Search Hadiths...",
     "chapterBookmark": "Chapter Bookmark"
   },
-  "searchIn": "Search {{title}}..."
+  "searchIn": "Search {{title}}...",
+  "widgets": {
+    "manageWidgets": "Manage Widgets",
+    "previewDesc": "Preview the available widgets. Long press on your home screen to add them.",
+    "prayerTimeline": "Prayer Timeline",
+    "specialTimes": "Special Times",
+    "dailyTracker": "Daily Tracker",
+    "islamicDate": "Islamic Date"
+  }
 }

@@ -48,12 +48,13 @@ export default function SpecialTimeCard({ item, colors, i18nLanguage, styles, t,
   }));
 
   useEffect(() => {
-    let interval: NodeJS.Timeout;
+    let nextUpdateTimer: NodeJS.Timeout;
     let timeout: NodeJS.Timeout;
 
     if (showCountdown && item.date && item.time !== '--:--') {
       const update = () => {
-        const diff = item.date!.getTime() - Date.now();
+        const now = Date.now();
+        const diff = item.date!.getTime() - now;
         if (diff <= 0) {
           setRemainingStr(formatNumber(t('home.timeRemainingMinsOnly', { minutes: '00' }), i18nLanguage));
         } else {
@@ -65,9 +66,10 @@ export default function SpecialTimeCard({ item, colors, i18nLanguage, styles, t,
             setRemainingStr(formatNumber(t('home.timeRemainingMinsOnly', { minutes: m.toString().padStart(2, '0') }), i18nLanguage));
           }
         }
+        const msUntilNextSecond = 1000 - (now % 1000);
+        nextUpdateTimer = setTimeout(update, msUntilNextSecond);
       };
       update();
-      interval = setInterval(update, 1000);
 
       timeout = setTimeout(() => {
         setShowCountdown(false);
@@ -75,7 +77,7 @@ export default function SpecialTimeCard({ item, colors, i18nLanguage, styles, t,
     }
 
     return () => {
-      if (interval) clearInterval(interval);
+      if (nextUpdateTimer) clearTimeout(nextUpdateTimer);
       if (timeout) clearTimeout(timeout);
     };
   }, [showCountdown, item.date?.getTime(), item.time, i18nLanguage, t]);

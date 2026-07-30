@@ -4,9 +4,10 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { Bookmark, Minus, Plus, Settings2, Play, Pause, DownloadCloud, CheckCircle, Share2, Square } from 'lucide-react-native';
 import React, { useEffect, useRef, useState } from 'react';
-import { ActivityIndicator, FlatList, StyleSheet, Switch, Text, TouchableOpacity, View, Share } from 'react-native';
+import { ActivityIndicator, FlatList, StyleSheet, Switch, Text, TouchableOpacity, View, Share, InteractionManager, Platform } from 'react-native';
 import AppModal from '@/components/AppModal';
 import { SafeAreaView } from 'react-native-safe-area-context';
+import { useShallow } from 'zustand/react/shallow';
 import { useTranslation } from 'react-i18next';
 import { formatNumber } from '@/utils/formatNumber';
 import { useAudioStore } from '@/store/audioStore';
@@ -46,6 +47,71 @@ const DEFAULT_SETTINGS: Settings = {
   autoPlayNextAyah: true,
 };
 
+const AyahCard = React.memo(({
+  item,
+  colors,
+  activeQuranColor,
+  language,
+  settings,
+  isBookmarked,
+  isPlayingThis,
+  isLoadingThis,
+  onShare,
+  onPlayToggle,
+  onBookmarkToggle,
+}: any) => {
+  return (
+    <ThemeCard intensity={30} style={[styles.ayahCardWrapper, { borderColor: colors.border }]}>
+      <View style={styles.ayahCard}>
+        <View style={styles.ayahHeader}>
+          <View style={[styles.numberCircle, { borderColor: colors.textSecondary + '20', backgroundColor: colors.textSecondary + '15' }]}>
+            <Text style={[styles.numberText, { color: colors.textSecondary }]}>{formatNumber(item.numberInSurah, language)}</Text>
+          </View>
+          <View style={{ flexDirection: 'row', gap: Spacing.two, alignItems: 'center' }}>
+            <TouchableOpacity activeOpacity={1} onPress={() => onShare(item)} style={{ padding: Spacing.one }}>
+              <Share2 size={20} color={colors.textSecondary} opacity={0.6} />
+            </TouchableOpacity>
+            <TouchableOpacity activeOpacity={1} onPress={() => onPlayToggle(item)} style={{ padding: Spacing.one }}>
+              {isLoadingThis ? (
+                <ActivityIndicator size="small" color={activeQuranColor} />
+              ) : isPlayingThis ? (
+                <Pause size={20} color={activeQuranColor} fill={activeQuranColor} />
+              ) : (
+                <Play size={20} color={activeQuranColor} fill={activeQuranColor} />
+              )}
+            </TouchableOpacity>
+            <TouchableOpacity activeOpacity={1} onPress={() => onBookmarkToggle(item)} style={{ padding: Spacing.one }}>
+              <Bookmark size={20} color={activeQuranColor} fill={isBookmarked ? activeQuranColor : 'transparent'} />
+            </TouchableOpacity>
+          </View>
+        </View>
+
+        <Text style={[styles.arabicText, { color: colors.text, fontSize: settings.arabicFontSize, lineHeight: settings.arabicFontSize * 1.8 }]}>
+          {item.arabic}
+        </Text>
+
+        {settings.showEnglishTranslit && item.englishTranslit && (
+          <Text style={[styles.translitText, { color: colors.textSecondary, fontSize: settings.translitFontSize, lineHeight: settings.translitFontSize * 1.5 }]}>
+            {item.englishTranslit}
+          </Text>
+        )}
+
+        {settings.showBangla && item.bangla && (
+          <Text style={[styles.banglaText, { color: colors.textSecondary, fontSize: settings.translationFontSize, lineHeight: settings.translationFontSize * 1.5 }]}>
+            {item.bangla}
+          </Text>
+        )}
+
+        {settings.showEnglish && item.english && (
+          <Text style={[styles.englishText, { color: colors.textSecondary, fontSize: settings.translationFontSize, lineHeight: settings.translationFontSize * 1.5 }]}>
+            {item.english}
+          </Text>
+        )}
+      </View>
+    </ThemeCard>
+  );
+});
+
 export default function SurahScreen() {
   const { id, ayah } = useLocalSearchParams();
   const colors = useThemeColors();
@@ -55,8 +121,31 @@ export default function SurahScreen() {
   const router = useRouter();
   const { t, i18n } = useTranslation();
   
-  const { playSurah, playAyah, pause, resume, isPlaying, currentSurahId, currentAyahNumber, playbackMode, currentReciterId, setReciter, isLoading: isAudioLoading } = useAudioStore();
-  const downloadStore = useDownloadStore();
+  const { playSurah, playAyah, pause, resume, isPlaying, currentSurahId, currentAyahNumber, playbackMode, currentReciterId, setReciter, isLoading: isAudioLoading } = useAudioStore(useShallow(state => ({
+    playSurah: state.playSurah,
+    playAyah: state.playAyah,
+    pause: state.pause,
+    resume: state.resume,
+    isPlaying: state.isPlaying,
+    currentSurahId: state.currentSurahId,
+    currentAyahNumber: state.currentAyahNumber,
+    playbackMode: state.playbackMode,
+    currentReciterId: state.currentReciterId,
+    setReciter: state.setReciter,
+    isLoading: state.isLoading
+  })));
+  
+  const downloadStore = useDownloadStore(useShallow(state => ({
+    downloadedFiles: state.downloadedFiles,
+    downloadProgress: state.downloadProgress,
+    pausedDownloads: state.pausedDownloads,
+    downloadSurah: state.downloadSurah,
+    pauseDownload: state.pauseDownload,
+    resumeDownload: state.resumeDownload,
+    cancelDownload: state.cancelDownload,
+    deleteSurah: state.deleteSurah,
+    initialize: state.initialize
+  })));
 
   const [settings, setSettings] = useState<Settings>(() => {
     let initialSettings = {
@@ -111,6 +200,15 @@ export default function SurahScreen() {
 
   const flatListRef = useRef<FlatList>(null);
   const isInitialScrollDone = useRef(false);
+  const interactionHandles = useRef<any[]>([]);
+  const isMounted = useRef(true);
+
+  useEffect(() => {
+    return () => {
+      isMounted.current = false;
+      interactionHandles.current.forEach(h => h?.cancel());
+    };
+  }, []);
 
   // Load Settings and Bookmarks
   useEffect(() => {
@@ -126,38 +224,50 @@ export default function SurahScreen() {
         parsed.forEach((b: any) => {
           if (b.surahId === id) map[b.numberInSurah] = true;
         });
-        setBookmarkedAyahs(map);
+        if (isMounted.current) {
+          setBookmarkedAyahs(map);
+        }
       }
     } catch (e) {
       console.error(e);
     }
   };
 
-  const toggleBookmark = async (ayahItem: Ayah) => {
-    try {
-      const stored = await AsyncStorage.getItem('imansync_quran_bookmarks');
-      let bookmarks = stored ? JSON.parse(stored) : [];
-      
-      const existsIndex = bookmarks.findIndex((b: any) => b.surahId === id && b.numberInSurah === ayahItem.numberInSurah);
-      
-      if (existsIndex >= 0) {
-        bookmarks.splice(existsIndex, 1);
-        setBookmarkedAyahs(prev => ({ ...prev, [ayahItem.numberInSurah]: false }));
-      } else {
-        bookmarks.push({
-          surahId: id,
-          surahName: surahName,
-          numberInSurah: ayahItem.numberInSurah,
-          arabic: ayahItem.arabic,
-          translation: ayahItem.english || '',
-        });
-        setBookmarkedAyahs(prev => ({ ...prev, [ayahItem.numberInSurah]: true }));
+  const toggleBookmark = (ayahItem: Ayah) => {
+    // Optimistic UI update
+    const isCurrentlyBookmarked = !!bookmarkedAyahs[ayahItem.numberInSurah];
+    setBookmarkedAyahs(prev => ({ ...prev, [ayahItem.numberInSurah]: !isCurrentlyBookmarked }));
+
+    // Defer heavy disk I/O and serialization to avoid blocking the main thread
+    const handle = InteractionManager.runAfterInteractions(async () => {
+      try {
+        const stored = await AsyncStorage.getItem('imansync_quran_bookmarks');
+        let bookmarks = stored ? JSON.parse(stored) : [];
+        
+        const existsIndex = bookmarks.findIndex((b: any) => b.surahId === id && b.numberInSurah === ayahItem.numberInSurah);
+        
+        if (existsIndex >= 0) {
+          bookmarks.splice(existsIndex, 1);
+        } else {
+          bookmarks.push({
+            surahId: id,
+            surahName: surahName,
+            numberInSurah: ayahItem.numberInSurah,
+            arabic: ayahItem.arabic,
+            translation: ayahItem.english || '',
+          });
+        }
+        
+        await AsyncStorage.setItem('imansync_quran_bookmarks', JSON.stringify(bookmarks));
+      } catch (e) {
+        console.error(e);
+        // Revert UI on error
+        if (isMounted.current) {
+          setBookmarkedAyahs(prev => ({ ...prev, [ayahItem.numberInSurah]: isCurrentlyBookmarked }));
+        }
       }
-      
-      await AsyncStorage.setItem('imansync_quran_bookmarks', JSON.stringify(bookmarks));
-    } catch (e) {
-      console.error(e);
-    }
+    });
+    interactionHandles.current.push(handle);
   };
 
   const shareAyah = async (ayahItem: Ayah) => {
@@ -385,6 +495,28 @@ export default function SurahScreen() {
     }
   };
 
+  const renderItem = React.useCallback(({ item }: any) => (
+    <AyahCard
+      item={item}
+      colors={colors}
+      activeQuranColor={activeQuranColor}
+      language={i18n.language}
+      settings={settings}
+      isBookmarked={!!bookmarkedAyahs[item.numberInSurah]}
+      isPlayingThis={isPlaying && currentSurahId === Number(id) && currentAyahNumber === item.numberInSurah && playbackMode === 'ayah'}
+      isLoadingThis={isAudioLoading && currentSurahId === Number(id) && currentAyahNumber === item.numberInSurah && playbackMode === 'ayah'}
+      onShare={shareAyah}
+      onPlayToggle={(itm: any) => {
+        if (currentSurahId === Number(id) && currentAyahNumber === itm.numberInSurah && playbackMode === 'ayah') {
+          isPlaying ? pause() : resume();
+        } else {
+          playAyah(Number(id), itm.numberInSurah, surahName, settings.autoPlayNextAyah);
+        }
+      }}
+      onBookmarkToggle={toggleBookmark}
+    />
+  ), [colors, activeQuranColor, i18n.language, settings, bookmarkedAyahs, isPlaying, currentSurahId, id, currentAyahNumber, playbackMode, isAudioLoading, shareAyah, pause, resume, playAyah, surahName, toggleBookmark]);
+
   return (
     <SafeAreaView style={[styles.safeArea, { backgroundColor: colors.background }]}>
       <PageHeader
@@ -464,70 +596,11 @@ export default function SurahScreen() {
           viewabilityConfig={viewabilityConfig}
           onViewableItemsChanged={onViewableItemsChanged}
           onScrollToIndexFailed={onScrollToIndexFailed}
-          renderItem={({ item }) => (
-            <ThemeCard intensity={30}  style={[styles.ayahCardWrapper, { borderColor: colors.border }]}>
-              <View style={styles.ayahCard}>
-                <View style={styles.ayahHeader}>
-                  <View style={[styles.numberCircle, { borderColor: colors.textSecondary + '20', backgroundColor: colors.textSecondary + '15' }]}>
-                    <Text style={[styles.numberText, { color: colors.textSecondary }]}>{formatNumber(item.numberInSurah, i18n.language)}</Text>
-                  </View>
-                  <View style={{ flexDirection: 'row', gap: Spacing.two, alignItems: 'center' }}>
-                    <TouchableOpacity activeOpacity={1} onPress={() => shareAyah(item)} style={{ padding: Spacing.one }}>
-                      <Share2 
-                        size={20} 
-                        color={colors.textSecondary} 
-                        opacity={0.6}
-                      />
-                    </TouchableOpacity>
-                    <TouchableOpacity activeOpacity={1} onPress={() => {
-                      if (currentSurahId === Number(id) && currentAyahNumber === item.numberInSurah && playbackMode === 'ayah') {
-                        isPlaying ? pause() : resume();
-                      } else {
-                        playAyah(Number(id), item.numberInSurah, surahName, settings.autoPlayNextAyah);
-                      }
-                    }} style={{ padding: Spacing.one }}>
-                      {isAudioLoading && currentSurahId === Number(id) && currentAyahNumber === item.numberInSurah && playbackMode === 'ayah' ? (
-                        <ActivityIndicator size="small" color={activeQuranColor} />
-                      ) : isPlaying && currentSurahId === Number(id) && currentAyahNumber === item.numberInSurah && playbackMode === 'ayah' ? (
-                        <Pause size={20} color={activeQuranColor} fill={activeQuranColor} />
-                      ) : (
-                        <Play size={20} color={activeQuranColor} fill={activeQuranColor} />
-                      )}
-                    </TouchableOpacity>
-                    <TouchableOpacity activeOpacity={1} onPress={() => toggleBookmark(item)} style={{ padding: Spacing.one }}>
-                      <Bookmark 
-                        size={20} 
-                        color={activeQuranColor} 
-                        fill={bookmarkedAyahs[item.numberInSurah] ? activeQuranColor : 'transparent'} 
-                      />
-                    </TouchableOpacity>
-                  </View>
-                </View>
-                
-                <Text style={[styles.arabicText, { color: colors.text, fontSize: settings.arabicFontSize, lineHeight: settings.arabicFontSize * 1.8 }]}>
-                  {item.arabic}
-                </Text>
-
-                {settings.showEnglishTranslit && item.englishTranslit && (
-                  <Text style={[styles.translitText, { color: colors.textSecondary, fontSize: settings.translitFontSize, lineHeight: settings.translitFontSize * 1.5 }]}>
-                    {item.englishTranslit}
-                  </Text>
-                )}
-
-                {settings.showBangla && item.bangla && (
-                  <Text style={[styles.banglaText, { color: colors.textSecondary, fontSize: settings.translationFontSize, lineHeight: settings.translationFontSize * 1.5 }]}>
-                    {item.bangla}
-                  </Text>
-                )}
-
-                {settings.showEnglish && item.english && (
-                  <Text style={[styles.englishText, { color: colors.textSecondary, fontSize: settings.translationFontSize, lineHeight: settings.translationFontSize * 1.5 }]}>
-                    {item.english}
-                  </Text>
-                )}
-              </View>
-            </ThemeCard>
-          )}
+          initialNumToRender={10}
+          maxToRenderPerBatch={10}
+          windowSize={5}
+          removeClippedSubviews={Platform.OS === 'android'}
+          renderItem={renderItem}
         />
 
       {renderSettingsModal()}

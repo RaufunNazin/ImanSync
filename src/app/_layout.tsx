@@ -34,7 +34,7 @@ export default function RootLayout() {
 
   const colorScheme = useThemeStore((s) => s.theme);
   const [i18nLoaded, setI18nLoaded] = React.useState(false);
-  const [themeLoaded, setThemeLoaded] = React.useState(false);
+  const [storageInitialized, setStorageInitialized] = React.useState(false);
   
   const [fontsLoaded, fontError] = useFonts({
     Outfit_400Regular,
@@ -58,13 +58,12 @@ export default function RootLayout() {
       scheduleAllNotifications(); // initial schedule
     });
 
-    // Load user theme preference
-    useThemeStore.getState().initialize().finally(() => {
-      setThemeLoaded(true);
-    });
-
-    // Initialize offline audio downloads
+    // Load user preferences
     useDownloadStore.getState().initialize().catch(e => console.log('Download store init error:', e));
+
+    import('../store/trackerHistoryStore').then(m => {
+      m.useTrackerHistoryStore.getState().initialize().catch(e => console.log('Tracker history init error:', e));
+    });
 
     // Fix #3: only re-schedule when the calendar date actually changes,
     // not on every app-foreground event (which fires many times per day).
@@ -81,7 +80,9 @@ export default function RootLayout() {
 
     // Silently initialize storage on startup.
     // No blocking prompts — internal mode is automatic; permanent is opt-in via Settings.
-    initStorageOnStartup().catch(e => console.log('Storage startup check failed', e));
+    initStorageOnStartup()
+      .catch(e => console.log('Storage startup check failed', e))
+      .finally(() => setStorageInitialized(true));
 
     return () => {
       subscription.remove();
@@ -89,10 +90,10 @@ export default function RootLayout() {
   }, []);
 
   useEffect(() => {
-    if ((fontsLoaded || fontError) && i18nLoaded && themeLoaded) {
+    if ((fontsLoaded || fontError) && i18nLoaded && storageInitialized) {
       SplashScreen.hideAsync();
     }
-  }, [fontsLoaded, fontError, i18nLoaded, themeLoaded]);
+  }, [fontsLoaded, fontError, i18nLoaded, storageInitialized]);
 
 
 
@@ -168,7 +169,7 @@ export default function RootLayout() {
     colors: { ...DefaultTheme.colors, background: colors.background }
   }, [colorScheme, colors.background]);
 
-  if (!(fontsLoaded || fontError) || !i18nLoaded || !themeLoaded) {
+  if (!(fontsLoaded || fontError) || !i18nLoaded) {
     return null;
   }
 

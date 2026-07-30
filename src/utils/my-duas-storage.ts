@@ -57,8 +57,9 @@ async function readJsonFromUri(uri: string): Promise<UserDua[]> {
   try {
     const content = await FileSystem.readAsStringAsync(uri);
     return JSON.parse(content) as UserDua[];
-  } catch {
-    return [];
+  } catch (e) {
+    console.error('Failed to read or parse custom duas JSON', e);
+    throw e;
   }
 }
 
@@ -121,8 +122,8 @@ export async function initPermanentStorage(): Promise<{ duas: UserDua[]; cancell
       const content = await FileSystem.readAsStringAsync(fileUri);
       try {
         return { duas: JSON.parse(content) as UserDua[], cancelled: false };
-      } catch {
-        return { duas: [], cancelled: false };
+      } catch (err) {
+        throw new Error('Failed to parse permanent storage JSON. Data may be corrupted.');
       }
     } else {
       const newFileUri = await StorageAccessFramework.createFileAsync(
@@ -251,24 +252,33 @@ export async function saveMyDuas(duas: UserDua[]): Promise<void> {
   const content = JSON.stringify(duas, null, 2);
 
   if (mode === 'permanent' && uri.startsWith('content://')) {
+    // 1. Write backup to internal storage to prevent SAF data loss
+    const internalDir = getInternalDir();
+    const backupUri = internalDir + FILE_NAME + '.backup';
+    await ensureInternalDir();
+    await FileSystem.writeAsStringAsync(backupUri, content);
+
     const files = await StorageAccessFramework.readDirectoryAsync(uri);
     let fileUri = files.find((f: string) => f.endsWith(FILE_NAME));
 
-    let existingLength = 0;
-    if (!fileUri) {
-      fileUri = await StorageAccessFramework.createFileAsync(uri, FILE_NAME, 'application/json');
-    } else {
+    if (fileUri) {
       try {
-        const old = await FileSystem.readAsStringAsync(fileUri);
-        existingLength = old.length;
-      } catch {}
+        await FileSystem.deleteAsync(fileUri, { idempotent: true });
+      } catch (e) {}
     }
-    // Pad to overwrite old content (Android SAF truncation workaround)
-    const paddedContent = content.padEnd(existingLength, ' ');
-    await FileSystem.writeAsStringAsync(fileUri, paddedContent);
-  } else {
-    const fileUri = uri + FILE_NAME;
+    fileUri = await StorageAccessFramework.createFileAsync(uri, FILE_NAME, 'application/json');
     await FileSystem.writeAsStringAsync(fileUri, content);
+    
+    // Clean backup
+    try { await FileSystem.deleteAsync(backupUri, { idempotent: true }); } catch (e) {}
+  } else {
+    // Internal temp file swap
+    const fileUri = uri + FILE_NAME;
+    const tmpUri = fileUri + '.tmp';
+    await FileSystem.writeAsStringAsync(tmpUri, content);
+    
+    // Move tmp to final atomically
+    await FileSystem.moveAsync({ from: tmpUri, to: fileUri });
   }
   
   cachedMyDuas = duas;
@@ -303,13 +313,13 @@ export async function migrateDuas(
     if (permanentUri.startsWith('content://')) {
       const files = await StorageAccessFramework.readDirectoryAsync(permanentUri);
       let fileUri = files.find((f: string) => f.endsWith(FILE_NAME));
-      let existingLength = 0;
-      if (!fileUri) {
-        fileUri = await StorageAccessFramework.createFileAsync(permanentUri, FILE_NAME, 'application/json');
-      } else {
-        try { existingLength = (await FileSystem.readAsStringAsync(fileUri)).length; } catch {}
+      if (fileUri) {
+        try {
+          await FileSystem.deleteAsync(fileUri, { idempotent: true });
+        } catch (e) {}
       }
-      await FileSystem.writeAsStringAsync(fileUri, content.padEnd(existingLength, ' '));
+      fileUri = await StorageAccessFramework.createFileAsync(permanentUri, FILE_NAME, 'application/json');
+      await FileSystem.writeAsStringAsync(fileUri, content);
     } else {
       await FileSystem.writeAsStringAsync(permanentUri + FILE_NAME, content);
     }

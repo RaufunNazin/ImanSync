@@ -13,8 +13,16 @@ export interface QuietHours {
 
 interface PreferencesState {
   notificationsEnabled: boolean;
-  prayerStartAlerts: boolean;
-  prayerEndAlerts: boolean;
+  fajrStartAlert: boolean;
+  fajrEndAlert: boolean;
+  dhuhrStartAlert: boolean;
+  dhuhrEndAlert: boolean;
+  asrStartAlert: boolean;
+  asrEndAlert: boolean;
+  maghribStartAlert: boolean;
+  maghribEndAlert: boolean;
+  ishaStartAlert: boolean;
+  ishaEndAlert: boolean;
   taskRemindersEnabled: boolean;
   quietHours: QuietHours;
   calcMethod: number;
@@ -45,8 +53,16 @@ export const usePreferencesStore = create<PreferencesState>()(
   persist(
     (set) => ({
       notificationsEnabled: true,
-      prayerStartAlerts: true,
-      prayerEndAlerts: true,
+      fajrStartAlert: true,
+      fajrEndAlert: true,
+      dhuhrStartAlert: true,
+      dhuhrEndAlert: true,
+      asrStartAlert: true,
+      asrEndAlert: true,
+      maghribStartAlert: true,
+      maghribEndAlert: true,
+      ishaStartAlert: true,
+      ishaEndAlert: true,
       taskRemindersEnabled: true,
       quietHours: defaultQuietHours,
       calcMethod: 1, // Default to Karachi (UIS)
@@ -64,23 +80,47 @@ export const usePreferencesStore = create<PreferencesState>()(
       
       initialize: async () => {
         try {
+          const mmkvVal = await zustandStorage.getItem('preferences-storage');
+          if (mmkvVal) {
+             const mmkvParsed = typeof mmkvVal === 'string' ? JSON.parse(mmkvVal) : mmkvVal;
+             if (mmkvParsed && mmkvParsed.state && mmkvParsed.state.prayerStartAlerts !== undefined) {
+               const s = mmkvParsed.state.prayerStartAlerts;
+               const e = mmkvParsed.state.prayerEndAlerts;
+               set({
+                 fajrStartAlert: s, fajrEndAlert: e,
+                 dhuhrStartAlert: s, dhuhrEndAlert: e,
+                 asrStartAlert: s, asrEndAlert: e,
+                 maghribStartAlert: s, maghribEndAlert: e,
+                 ishaStartAlert: s, ishaEndAlert: e,
+               });
+             }
+          }
+
           // Fallback migration from old AsyncStorage
           const val = await AsyncStorage.getItem('imansync_preferences');
-          if (val) {
+          if (val && !mmkvVal) {
             const parsed = JSON.parse(val);
-            // Only migrate if we haven't saved to MMKV yet
-            // Wait, persist auto-hydrates. But just in case, we can check if it's the default state.
-            // Actually, we don't need this if persist handles it, but since we are changing engines:
-            const mmkvVal = zustandStorage.getItem('preferences-storage');
-            if (!mmkvVal) {
-              if (parsed.prayerAlertsEnabled !== undefined && parsed.prayerStartAlerts === undefined) {
-                parsed.prayerStartAlerts = parsed.prayerAlertsEnabled;
-                parsed.prayerEndAlerts = parsed.prayerAlertsEnabled;
-                delete parsed.prayerAlertsEnabled;
-              }
-              set({ ...parsed });
+            if (parsed.prayerAlertsEnabled !== undefined && parsed.fajrStartAlert === undefined) {
+              const pv = parsed.prayerAlertsEnabled;
+              parsed.fajrStartAlert = pv; parsed.fajrEndAlert = pv;
+              parsed.dhuhrStartAlert = pv; parsed.dhuhrEndAlert = pv;
+              parsed.asrStartAlert = pv; parsed.asrEndAlert = pv;
+              parsed.maghribStartAlert = pv; parsed.maghribEndAlert = pv;
+              parsed.ishaStartAlert = pv; parsed.ishaEndAlert = pv;
+              delete parsed.prayerAlertsEnabled;
+            } else if (parsed.prayerStartAlerts !== undefined && parsed.fajrStartAlert === undefined) {
+              const s = parsed.prayerStartAlerts;
+              const e = parsed.prayerEndAlerts;
+              parsed.fajrStartAlert = s; parsed.fajrEndAlert = e;
+              parsed.dhuhrStartAlert = s; parsed.dhuhrEndAlert = e;
+              parsed.asrStartAlert = s; parsed.asrEndAlert = e;
+              parsed.maghribStartAlert = s; parsed.maghribEndAlert = e;
+              parsed.ishaStartAlert = s; parsed.ishaEndAlert = e;
+              delete parsed.prayerStartAlerts;
+              delete parsed.prayerEndAlerts;
             }
-          } else {
+            set({ ...parsed });
+          } else if (!val && !mmkvVal) {
              // Migration from old separate AsyncStorage keys
              const locVal = await AsyncStorage.getItem('imansync_location');
              const methVal = await AsyncStorage.getItem('imansync_calc_method');

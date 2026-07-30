@@ -6,11 +6,10 @@ import { storage } from '@/store/mmkv';
 import hadithChaptersBn from '@/data/hadith-chapters-bn.json';
 import { useRouter } from 'expo-router';
 import { Book, X } from 'lucide-react-native';
-import React, { useEffect, useState, useRef } from 'react';
+import React, { useEffect, useState, useRef, useCallback } from 'react';
 import { useTranslation } from 'react-i18next';
 import PageHeader from '@/components/page-header';
 import { 
-  ScrollView, 
   StyleSheet, 
   Text, 
   TextInput, 
@@ -18,8 +17,10 @@ import {
   View,
   Dimensions,
   KeyboardAvoidingView,
-  Platform,
-  ActivityIndicator
+  ActivityIndicator,
+  InteractionManager,
+  FlatList,
+  Platform
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
@@ -65,10 +66,16 @@ export default function HadithSearchScreen() {
   const [searchQuery, setSearchQuery] = useState('');
   const [debouncedQuery, setDebouncedQuery] = useState('');
   const [isSearching, setIsSearching] = useState(false);
+  const [fetchError, setFetchError] = useState(false);
+  const [isLoading, setIsLoading] = useState(sections.length === 0);
   const inputRef = useRef<TextInput>(null);
 
   const searchWidth = useSharedValue(40); // Starts small like an icon
 
+  const isMounted = useRef(true);
+  useEffect(() => {
+    return () => { isMounted.current = false; };
+  }, []);
   useEffect(() => {
     setIsSearching(true);
     const timer = setTimeout(() => {
@@ -78,59 +85,87 @@ export default function HadithSearchScreen() {
     return () => clearTimeout(timer);
   }, [searchQuery]);
 
+  const fetchSections = useCallback(() => {
+    fetchOnce({
+      key: 'hadith_all_sections_list',
+      onStart: () => {
+        setFetchError(false);
+        if (sections.length === 0) setIsLoading(true);
+      },
+      fetcher: async () => {
+        return new Promise<HadithSection[]>((resolve, reject) => {
+          InteractionManager.runAfterInteractions(async () => {
+            try {
+              const res = await fetch('https://cdn.jsdelivr.net/gh/fawazahmed0/hadith-api@1/info.json');
+              if (!res.ok) throw new Error('Network error');
+              
+              // Yield before heavy JSON parsing
+              await new Promise(r => setTimeout(r, 10));
+              const data = await res.json();
+              
+              const allSections: HadithSection[] = [];
+              
+              // Yield before processing massive arrays
+              await new Promise(r => setTimeout(r, 10));
+              
+              for (const book of SAHIH_BOOKS) {
+                const bookData = data[book.id]?.metadata;
+                if (bookData && bookData.sections && bookData.section_details) {
+                  for (const key in bookData.sections) {
+                    const sectionName = bookData.sections[key];
+                    const details = bookData.section_details[key];
+                    if (sectionName && details) {
+                      const count = details.hadithnumber_last - details.hadithnumber_first + 1;
+                      if (count > 0) {
+                        allSections.push({
+                          bookId: book.id,
+                          bookName: book.name,
+                          bookNameAr: book.arabic,
+                          chapterId: key,
+                          chapterName: sectionName,
+                          count: count,
+                        });
+                      }
+                    }
+                  }
+                }
+              }
+              resolve(allSections);
+            } catch (err) {
+              reject(err);
+            }
+          });
+        });
+      },
+      onData: (data) => {
+        if (!isMounted.current) return;
+        if (data) {
+          setSections(data);
+        }
+        setIsLoading(false);
+      },
+      onError: (err) => {
+        if (!isMounted.current) return;
+        console.error("Error fetching hadith info for search:", err);
+        if (sections.length === 0) setFetchError(true);
+        setIsLoading(false);
+      }
+    });
+  }, [sections.length]);
+
   useEffect(() => {
     // Expand search bar on mount
     searchWidth.value = withTiming(width - Spacing.four * 2 - 40, { duration: 150 });
     
     // Auto focus
-    setTimeout(() => {
+    const timer = setTimeout(() => {
       inputRef.current?.focus();
     }, 150);
 
-    fetchOnce({
-      key: 'hadith_all_sections_list',
-      onStart: () => {
-      },
-      fetcher: async () => {
-        const res = await fetch('https://cdn.jsdelivr.net/gh/fawazahmed0/hadith-api@1/info.json');
-        const data = await res.json();
-        
-        const allSections: HadithSection[] = [];
-        
-        SAHIH_BOOKS.forEach(book => {
-          const bookData = data[book.id]?.metadata;
-          if (bookData && bookData.sections && bookData.section_details) {
-            for (const key in bookData.sections) {
-              const sectionName = bookData.sections[key];
-              const details = bookData.section_details[key];
-              if (sectionName && details) {
-                const count = details.hadithnumber_last - details.hadithnumber_first + 1;
-                if (count > 0) {
-                  allSections.push({
-                    bookId: book.id,
-                    bookName: book.name,
-                    bookNameAr: book.arabic,
-                    chapterId: key,
-                    chapterName: sectionName,
-                    count: count,
-                  });
-                }
-              }
-            }
-          }
-        });
-        return allSections;
-      },
-      onData: (data) => {
-        if (data) {
-          setSections(data);
-        }
-      },
-      onError: (err) => {
-        console.error("Error fetching hadith info for search:", err);
-      }
-    });
-  }, []);
+    fetchSections();
+
+    return () => clearTimeout(timer);
+  }, [fetchSections, searchWidth]);
 
   const animatedSearchStyle = useAnimatedStyle(() => {
     return {
@@ -197,21 +232,38 @@ export default function HadithSearchScreen() {
       />
 
       <KeyboardAvoidingView behavior={Platform.OS === 'ios' ? 'padding' : 'height'} style={{ flex: 1 }}>
-        <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={styles.container} keyboardDismissMode="on-drag" keyboardShouldPersistTaps="handled">
-          
-          <View style={styles.listContainer}>
-              {isSearching ? (
-                 <View style={{ marginTop: 40, alignItems: 'center' }}>
-                   <ActivityIndicator size="large" color={activeColor} />
-                 </View>
-              ) : debouncedQuery.length > 0 && filteredBooks.length === 0 && filteredSections.length === 0 ? (
-                 <Text style={[styles.emptyText, { color: colors.textSecondary }]}>
-                   {t('noResults', { defaultValue: 'No results found' })}
-                 </Text>
-              ) : (
-                <>
-                  {filteredBooks.map((book) => (
-                    <Animated.View entering={FadeIn.duration(300)} key={book.id}>
+        <View style={styles.container}>
+          {fetchError ? (
+            <View style={{ marginTop: 80, alignItems: 'center' }}>
+              <Text style={[styles.emptyText, { color: colors.textSecondary, marginBottom: 16 }]}>
+                {t('common.networkError', { defaultValue: 'Network Error: Please check your connection' })}
+              </Text>
+              <TouchableOpacity activeOpacity={1} style={{ paddingHorizontal: 20, paddingVertical: 10, backgroundColor: activeColor, borderRadius: 8 }} onPress={fetchSections}>
+                <Text style={{ color: '#fff', fontFamily: Fonts.outfit, fontSize: 16 }}>{t('common.retry', { defaultValue: 'Retry' })}</Text>
+              </TouchableOpacity>
+            </View>
+          ) : isLoading || isSearching ? (
+            <View style={{ marginTop: 40, alignItems: 'center' }}>
+              <ActivityIndicator size="large" color={activeColor} />
+            </View>
+          ) : debouncedQuery.length > 0 && filteredBooks.length === 0 && filteredSections.length === 0 ? (
+            <Text style={[styles.emptyText, { color: colors.textSecondary }]}>
+              {t('noResults', { defaultValue: 'No results found' })}
+            </Text>
+          ) : (
+            <FlatList
+              data={[...filteredBooks, ...filteredSections]}
+              keyExtractor={(item) => 'id' in item ? `book_${item.id}` : `section_${item.bookId}_${item.chapterId}`}
+              contentContainerStyle={styles.listContainer}
+              keyboardDismissMode="on-drag"
+              keyboardShouldPersistTaps="handled"
+              showsVerticalScrollIndicator={false}
+              renderItem={({ item }) => {
+                if ('id' in item) {
+                  // Book item
+                  const book = item;
+                  return (
+                    <Animated.View entering={FadeIn.duration(300)}>
                       <ThemeCard intensity={30} style={[styles.cardWrapper, { borderColor: colors.border }]}>
                         <TouchableOpacity activeOpacity={1} 
                           style={styles.cardRow}
@@ -232,10 +284,12 @@ export default function HadithSearchScreen() {
                         </TouchableOpacity>
                       </ThemeCard>
                     </Animated.View>
-                  ))}
-
-                  {filteredSections.map((section) => (
-                    <Animated.View entering={FadeIn.duration(300)} key={`${section.bookId}_${section.chapterId}`}>
+                  );
+                } else {
+                  // Section item
+                  const section = item;
+                  return (
+                    <Animated.View entering={FadeIn.duration(300)}>
                       <ThemeCard intensity={30} style={[styles.cardWrapper, { borderColor: colors.border }]}>
                         <TouchableOpacity activeOpacity={1} 
                           style={styles.cardRow}
@@ -259,11 +313,12 @@ export default function HadithSearchScreen() {
                         </TouchableOpacity>
                       </ThemeCard>
                     </Animated.View>
-                  ))}
-                </>
-              )}
-            </View>
-        </ScrollView>
+                  );
+                }
+              }}
+            />
+          )}
+        </View>
       </KeyboardAvoidingView>
     </SafeAreaView>
   );

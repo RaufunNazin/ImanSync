@@ -1,6 +1,6 @@
 import ThemeCard from '@/components/ThemeCard';
 import AppModal from '@/components/AppModal';
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useRef } from 'react';
 import { View, Text, StyleSheet, ScrollView, Image, TouchableOpacity } from 'react-native';
 import { Trash2, Edit2, Bookmark, Settings2, Minus, Plus } from 'lucide-react-native';
 import { saveMyDuas } from '@/utils/my-duas-storage';
@@ -52,6 +52,13 @@ export default function MyDuaDetailScreen() {
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [showEditModal, setShowEditModal] = useState(false);
   const [imageRatio, setImageRatio] = useState(1);
+  const isMounted = useRef(true);
+
+  useEffect(() => {
+    return () => {
+      isMounted.current = false;
+    };
+  }, []);
   const [showOptionsSheet, setShowOptionsSheet] = useState(false);
 
   const [settings, setSettings] = useState<DuaSettings>(() => ({
@@ -76,13 +83,15 @@ export default function MyDuaDetailScreen() {
     const fetchDua = async () => {
       const duas = await loadMyDuas();
       const found = duas.find(d => d.id === id);
+      if (!isMounted.current) return;
       if (found) {
         setDua(found);
         if (found.mediaUri && found.type !== 'text') {
           const uri = await getMediaUri(found.mediaUri);
+          if (!isMounted.current) return;
           setLocalUri(uri);
           if (found.type === 'image' && uri) {
-            Image.getSize(uri, (w, h) => setImageRatio(w / h), () => setImageRatio(1));
+            Image.getSize(uri, (w, h) => { if (isMounted.current) setImageRatio(w / h) }, () => { if (isMounted.current) setImageRatio(1) });
           }
         }
       }
@@ -91,13 +100,13 @@ export default function MyDuaDetailScreen() {
     fetchDua();
 
     AsyncStorage.getItem('imansync_dua_settings').then(val => {
-      if (val) {
+      if (val && isMounted.current) {
         try { setSettings(prev => ({ ...prev, ...JSON.parse(val) })); } catch (e) { console.error('Corrupted dua settings', e); }
       }
     }).catch(e => console.error(e));
 
     AsyncStorage.getItem('imansync_dua_bookmarks').then(val => {
-      if (val) {
+      if (val && isMounted.current) {
         try {
           const parsed = JSON.parse(val);
           setBookmarks(parsed);
@@ -168,7 +177,7 @@ export default function MyDuaDetailScreen() {
       const uri = await getMediaUri(updatedDua.mediaUri);
       setLocalUri(uri);
       if (updatedDua.type === 'image' && uri) {
-        Image.getSize(uri, (w, h) => setImageRatio(w / h), () => setImageRatio(1));
+        Image.getSize(uri, (w, h) => { if (isMounted.current) setImageRatio(w / h) }, () => { if (isMounted.current) setImageRatio(1) });
       }
     } else {
       setLocalUri(null);

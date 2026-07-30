@@ -5,7 +5,7 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import * as Location from 'expo-location';
 import React, { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { StyleSheet, Text, View } from 'react-native';
+import { StyleSheet, Text, View, AppState } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import Animated, { useSharedValue, useAnimatedStyle, withSpring } from 'react-native-reanimated';
 
@@ -60,8 +60,8 @@ export default function QiblaScreen() {
       }
     });
 
-    (async () => {
-      // NEW COMMENT: Verify global device location services are switched on
+    const checkLocation = async () => {
+      // Verify global device location services are switched on
       const servicesEnabled = await Location.hasServicesEnabledAsync();
       if (!servicesEnabled) {
         setAccuracy('Poor');
@@ -81,50 +81,61 @@ export default function QiblaScreen() {
           }));
         }
 
-        const sub = await Location.watchHeadingAsync((headingData) => {
-          const osHeading = headingData.trueHeading >= 0 ? headingData.trueHeading : headingData.magHeading;
-          
-          const deviation = headingData.accuracy;
-          if (deviation > 15 || deviation === 0) {
-            setInterference(true);
-            setAccuracy('Poor');
-          } else if (deviation > 10) {
-            setInterference(false);
-            setAccuracy('Good');
-          } else {
-            setInterference(false);
-            setAccuracy('High');
-          }
+        if (!headingSubscription) {
+          const sub = await Location.watchHeadingAsync((headingData) => {
+            const osHeading = headingData.trueHeading >= 0 ? headingData.trueHeading : headingData.magHeading;
+            
+            const deviation = headingData.accuracy;
+            if (deviation > 15 || deviation === 0) {
+              setInterference(true);
+              setAccuracy('Poor');
+            } else if (deviation > 10) {
+              setInterference(false);
+              setAccuracy('Good');
+            } else {
+              setInterference(false);
+              setAccuracy('High');
+            }
 
-          let currentShared = heading.value;
-          // NEW COMMENT: Handle JavaScript negative modulo behavior safely
-          let normalizedShared = ((currentShared % 360) + 360) % 360;
-          let diff = angleDifference(normalizedShared, osHeading);
-          let targetHeading = currentShared + diff;
+            let currentShared = heading.value;
+            // Handle JavaScript negative modulo behavior safely
+            let normalizedShared = ((currentShared % 360) + 360) % 360;
+            let diff = angleDifference(normalizedShared, osHeading);
+            let targetHeading = currentShared + diff;
 
-          heading.value = withSpring(targetHeading, { 
-            damping: 20,
-            stiffness: 200,
+            heading.value = withSpring(targetHeading, { 
+              damping: 20,
+              stiffness: 200,
+            });
+            
+            const now = Date.now();
+            if (now - lastStateUpdate > 250) {
+              setHeadingState(osHeading);
+              lastStateUpdate = now;
+            }
           });
-          
-          const now = Date.now();
-          if (now - lastStateUpdate > 250) {
-            setHeadingState(osHeading);
-            lastStateUpdate = now;
-          }
-        });
 
-        // NEW COMMENT: Safely handle unmounting during asynchronous initialization
-        if (!isMounted) {
-          sub.remove();
-        } else {
-          headingSubscription = sub;
+          // Safely handle unmounting during asynchronous initialization
+          if (!isMounted) {
+            sub.remove();
+          } else {
+            headingSubscription = sub;
+          }
         }
       } catch (e) {}
-    })();
+    };
+
+    checkLocation();
+
+    const appStateSub = AppState.addEventListener('change', (state) => {
+      if (state === 'active') {
+        checkLocation();
+      }
+    });
 
     return () => {
       isMounted = false;
+      appStateSub.remove();
       if (headingSubscription) {
         headingSubscription.remove();
       }

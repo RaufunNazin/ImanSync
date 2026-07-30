@@ -76,6 +76,12 @@ export default function DuaScreen() {
     outputRange: [0, 100],
     extrapolate: 'clamp',
   });
+  
+  const onScrollEvent = useRef(
+    RNAnimated.event([{ nativeEvent: { contentOffset: { y: scrollY } } }], {
+      useNativeDriver: true,
+    })
+  ).current;
 
 
   // Pin Sheet State
@@ -86,10 +92,20 @@ export default function DuaScreen() {
   const [showSuggestBanner, setShowSuggestBanner] = useState(false);
   const [modalVisible, setModalVisible] = useState(false);
   const [toast, setToast] = useState<{message: string, type: 'success' | 'error'} | null>(null);
+  const toastTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+  const isMounted = useRef(true);
+
+  useEffect(() => {
+    return () => {
+      isMounted.current = false;
+      if (toastTimeoutRef.current) clearTimeout(toastTimeoutRef.current);
+    };
+  }, []);
 
   const showToast = (message: string, type: 'success' | 'error') => {
     setToast({ message, type });
-    setTimeout(() => {
+    if (toastTimeoutRef.current) clearTimeout(toastTimeoutRef.current);
+    toastTimeoutRef.current = setTimeout(() => {
       setToast(null);
     }, 3000);
   };
@@ -103,6 +119,7 @@ export default function DuaScreen() {
       AsyncStorage.getItem('imansync_dua_bookmarks')
     ])
     .then(([apiCats, customCats, userDuas, bookmarksStr]) => {
+      if (!isMounted.current) return;
       const uncategorizedCount = userDuas.filter((d: any) => !d.categoryId).length;
       setMyDuasCount(uncategorizedCount);
       let bCount = 0;
@@ -148,10 +165,14 @@ export default function DuaScreen() {
         cats = [...cats, ...formattedApiCats];
       }
 
-      setCategories(cats);
+      if (isMounted.current) setCategories(cats);
     })
-    .catch((err) => console.error(err))
-    .finally(() => setLoading(false));
+    .catch((err) => {
+      if (isMounted.current) console.error(err);
+    })
+    .finally(() => {
+      if (isMounted.current) setLoading(false);
+    });
   };
 
   useEffect(() => {
@@ -159,13 +180,13 @@ export default function DuaScreen() {
     AsyncStorage.getItem(PIN_STORAGE_KEY).then((val) => {
       if (val) {
         try {
-          setPinnedIds(JSON.parse(val));
+          if (isMounted.current) setPinnedIds(JSON.parse(val));
         } catch (e) {
           console.error('Failed to parse pinned duas', e);
-          setPinnedIds([]);
+          if (isMounted.current) setPinnedIds([]);
         }
       }
-    });
+    }).catch(console.error);
   }, []);
 
   const checkStorageState = async () => {
@@ -252,7 +273,7 @@ export default function DuaScreen() {
       }
       const newDua: UserDua = {
         ...duaData,
-        id: Math.random().toString(36).substring(7),
+        id: `${Date.now()}-${Math.random().toString(36).substring(2, 9)}`,
         createdAt: Date.now(),
         mediaUri: finalMediaUri,
       };
@@ -453,13 +474,13 @@ export default function DuaScreen() {
         style={{ flex: 1 }}
         showsVerticalScrollIndicator={false} 
         contentContainerStyle={[styles.container, { gap: Spacing.three, paddingHorizontal: Spacing.four }]}
-        onScroll={RNAnimated.event(
-          [{ nativeEvent: { contentOffset: { y: scrollY } } }],
-          { useNativeDriver: true }
-        )}
+        onScroll={onScrollEvent}
         scrollEventThrottle={16}
         keyboardDismissMode="on-drag" 
         keyboardShouldPersistTaps="handled"
+        initialNumToRender={10}
+        windowSize={5}
+        maxToRenderPerBatch={10}
       />
 
         {/* Pin Action Sheet */}

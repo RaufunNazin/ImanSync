@@ -8,7 +8,19 @@ import { useTranslation } from 'react-i18next';
 import { formatNumber } from '@/utils/formatNumber';
 
 export default function AudioPlayerBar() {
-  const { currentSurahId, currentSurahName, isPlaying, isLoading, pause, resume, stop, playlist, playbackMode, currentAyahNumber, juzAyahs, currentJuzAyahIndex } = useAudioStore();
+  const currentSurahId = useAudioStore(s => s.currentSurahId);
+  const currentSurahName = useAudioStore(s => s.currentSurahName);
+  const isPlaying = useAudioStore(s => s.isPlaying);
+  const isLoading = useAudioStore(s => s.isLoading);
+  const pause = useAudioStore(s => s.pause);
+  const resume = useAudioStore(s => s.resume);
+  const stop = useAudioStore(s => s.stop);
+  const playlistLength = useAudioStore(s => s.playlist.length);
+  const playbackMode = useAudioStore(s => s.playbackMode);
+  const currentAyahNumber = useAudioStore(s => s.currentAyahNumber);
+  const juzQueueLength = useAudioStore(s => s.juzAyahs.length);
+  const currentJuzAyahIndex = useAudioStore(s => s.currentJuzAyahIndex);
+
   const colors = useThemeColors();
   const themeStyles = useThemeStyles();
   const activeColor = useActiveColor();
@@ -28,8 +40,8 @@ export default function AudioPlayerBar() {
     mode: playbackMode,
     index: currentJuzAyahIndex,
     ayah: currentAyahNumber,
-    juzQueueLength: juzAyahs.length,
-    playlistLength: playlist.length,
+    juzQueueLength: juzQueueLength,
+    playlistLength: playlistLength,
     isLoading: isLoading,
   });
 
@@ -41,13 +53,18 @@ export default function AudioPlayerBar() {
       mode: playbackMode,
       index: currentJuzAyahIndex,
       ayah: currentAyahNumber,
-      juzQueueLength: juzAyahs.length,
-      playlistLength: playlist.length,
+      juzQueueLength: juzQueueLength,
+      playlistLength: playlistLength,
       isLoading: isLoading,
     };
   }
 
   const data = cachedData.current;
+
+  const isMounted = useRef(true);
+  useEffect(() => {
+    return () => { isMounted.current = false; };
+  }, []);
 
   // Animate in when audio starts, animate out when it stops
   useEffect(() => {
@@ -62,7 +79,7 @@ export default function AudioPlayerBar() {
       Animated.parallel([
         Animated.timing(translateX, { toValue: 150, duration: 300, useNativeDriver: true }),
         Animated.timing(opacity, { toValue: 0, duration: 300, useNativeDriver: true }),
-      ]).start(() => setVisible(false));
+      ]).start(() => { if (isMounted.current) setVisible(false); });
     }
   }, [shouldShow, closing]);
 
@@ -75,8 +92,10 @@ export default function AudioPlayerBar() {
       Animated.timing(opacity, { toValue: 0, duration: 300, useNativeDriver: true }),
     ]).start(() => {
       stop();
-      setClosing(false);
-      setVisible(false);
+      if (isMounted.current) {
+        setClosing(false);
+        setVisible(false);
+      }
     });
   };
 

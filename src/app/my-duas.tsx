@@ -7,6 +7,7 @@ import { Fonts, Spacing, useThemeColors, useActiveColor } from '@/constants/them
 import PageHeader from '@/components/page-header';
 import { useTranslation } from 'react-i18next';
 import { Search, FolderLock, X } from 'lucide-react-native';
+import { useCallback } from 'react';
 import {
   loadMyDuas, saveMyDuas, saveMediaFile, UserDua,
   getStorageMode, clearRelinkFlag, initPermanentStorage, migrateDuas, getStorageUri,
@@ -48,6 +49,17 @@ export default function MyDuasScreen() {
     extrapolate: 'clamp',
   });
 
+  const isMounted = useRef(true);
+  useEffect(() => {
+    return () => { isMounted.current = false; };
+  }, []);
+
+  const onScrollEvent = useRef(
+    Animated.event([{ nativeEvent: { contentOffset: { y: scrollY } } }], {
+      useNativeDriver: true,
+    })
+  ).current;
+
   const handleAddDua = async (duaData: Omit<UserDua, 'id' | 'createdAt'>) => {
     try {
       let finalMediaUri = duaData.mediaUri;
@@ -56,7 +68,7 @@ export default function MyDuasScreen() {
       }
       const newDua: UserDua = {
         ...duaData,
-        id: Math.random().toString(36).substring(7),
+        id: `${Date.now()}-${Math.random().toString(36).substring(2, 9)}`,
         createdAt: Date.now(),
         mediaUri: finalMediaUri,
       };
@@ -75,13 +87,14 @@ export default function MyDuasScreen() {
 
   const loadScreen = async () => {
     try {
-      const [loadedDuas, mode, relinkFlag, bannerDismissed, pinnedVal] = await Promise.all([
+      const [loadedDuas, mode, bannerDismissed, relinkFlag, pinnedVal] = await Promise.all([
         loadMyDuas(),
         getStorageMode(),
-        AsyncStorage.getItem(RELINK_NEEDED_KEY),
         AsyncStorage.getItem(BANNER_DISMISSED_KEY),
+        AsyncStorage.getItem(RELINK_NEEDED_KEY),
         AsyncStorage.getItem(PINNED_DUAS_KEY),
       ]);
+      if (!isMounted.current) return;
       setDuas(loadedDuas.sort((a, b) => b.createdAt - a.createdAt));
       setShowRelinkBanner(relinkFlag === 'true');
       setShowSuggestBanner(mode === 'internal' && bannerDismissed !== 'true');
@@ -172,7 +185,7 @@ export default function MyDuasScreen() {
     return bPinned - aPinned;
   });
 
-  const renderItem = ({ item: dua }: { item: UserDua }) => (
+  const renderItem = useCallback(({ item: dua }: { item: UserDua }) => (
     <TouchableOpacity activeOpacity={1}
       onLongPress={() => {
         setSelectedDua(dua);
@@ -208,7 +221,7 @@ export default function MyDuasScreen() {
         </View>
       </ThemeCard>
     </TouchableOpacity>
-  );
+  ), [activeColor, colors.border, colors.text, colors.textSecondary, i18n.language, pinnedDuaIds, router, t]);
 
   const renderEmpty = () => {
     
@@ -231,6 +244,8 @@ export default function MyDuasScreen() {
     );
   };
 
+  const renderSeparator = useCallback(() => <View style={{ height: Spacing.three }} />, []);
+
   return (
     <SafeAreaView style={[styles.safeArea, { backgroundColor: colors.background }]}>
       <PageHeader 
@@ -243,25 +258,24 @@ export default function MyDuasScreen() {
           </TouchableOpacity>
         }
       />
-      {renderHeader()}
-        <Animated.FlatList
-          data={sortedDuas}
-          keyExtractor={(item: any) => item.id.toString()}
-          ListHeaderComponent={renderHeader}
-          renderItem={renderItem}
-          ListEmptyComponent={renderEmpty}
-          contentContainerStyle={styles.container}
-          ItemSeparatorComponent={() => <View style={{ height: Spacing.three }} />}
-          showsVerticalScrollIndicator={false}
-          ListFooterComponent={<View style={{ height: 100 }} />}
-          keyboardDismissMode="on-drag"
-          keyboardShouldPersistTaps="handled"
-          onScroll={Animated.event(
-            [{ nativeEvent: { contentOffset: { y: scrollY } } }],
-            { useNativeDriver: true }
-          )}
-          scrollEventThrottle={16}
-        />
+      <Animated.FlatList
+        data={sortedDuas}
+        keyExtractor={(item: any, index: number) => `${item.id}-${index}`}
+        ListHeaderComponent={renderHeader}
+        renderItem={renderItem}
+        ListEmptyComponent={renderEmpty}
+        contentContainerStyle={styles.container}
+        ItemSeparatorComponent={renderSeparator}
+        showsVerticalScrollIndicator={false}
+        ListFooterComponent={<View style={{ height: 100 }} />}
+        keyboardDismissMode="on-drag"
+        keyboardShouldPersistTaps="handled"
+        onScroll={onScrollEvent}
+        scrollEventThrottle={16}
+        initialNumToRender={10}
+        windowSize={5}
+        maxToRenderPerBatch={10}
+      />
 
 
 

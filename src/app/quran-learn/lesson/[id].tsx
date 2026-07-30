@@ -22,7 +22,14 @@ export default function LessonPlayerScreen() {
 
   const [completed, setCompleted] = useState(false);
   const completedRef = useRef(false);
+  const quizTimerRef = useRef<NodeJS.Timeout | null>(null);
   const [tappedItems, setTappedItems] = useState<Set<string>>(new Set());
+
+  useEffect(() => {
+    return () => {
+      if (quizTimerRef.current) clearTimeout(quizTimerRef.current);
+    };
+  }, []);
 
   // Flashcard & Quiz State
   const [currentIndex, setCurrentIndex] = useState(0);
@@ -112,14 +119,16 @@ export default function LessonPlayerScreen() {
     if (selectedAnswer) return; // already answered
     const target = activeLesson!.items![currentIndex];
     setSelectedAnswer(item.id);
+    if (quizTimerRef.current) clearTimeout(quizTimerRef.current);
+    
     if (item.id === target.id) {
       // Correct!
-      setTimeout(() => {
+      quizTimerRef.current = setTimeout(() => {
         handleNextSequential();
       }, 1000);
     } else {
       // Wrong - let them try again after a delay
-      setTimeout(() => {
+      quizTimerRef.current = setTimeout(() => {
         setSelectedAnswer(null);
       }, 1000);
     }

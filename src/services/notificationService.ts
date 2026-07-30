@@ -2,6 +2,7 @@ import i18n from '@/i18n';
 import notifee, { AndroidImportance, TimestampTrigger, TriggerType } from '@notifee/react-native';
 import { formatNumber } from '@/utils/formatNumber';
 import { QuietHours, usePreferencesStore } from '../store/preferencesStore';
+import { Platform } from 'react-native';
 
 const PRAYERS_START_CHANNEL = 'prayers_start_channel_v5';
 const PRAYERS_END_CHANNEL = 'prayers_end_channel_v5';
@@ -43,7 +44,7 @@ function getRandomAllowedTime(targetDate: Date, qh: QuietHours): Date {
   let attempts = 0;
   while (attempts < 50) {
     // Pick random hour between 6 AM and 10 PM roughly
-    const hour = Math.floor(Math.random() * 24);
+    const hour = Math.floor(Math.random() * 16) + 6;
     const min = Math.floor(Math.random() * 60);
     date.setHours(hour, min, 0, 0);
     
@@ -52,7 +53,14 @@ function getRandomAllowedTime(targetDate: Date, qh: QuietHours): Date {
     }
     attempts++;
   }
-  // fallback if somehow we can't find one
+  // fallback if somehow we can't find one randomly, find the first available hour
+  for (let h = 0; h < 24; h++) {
+    date.setHours(h, 0, 0, 0);
+    if (!isQuietHour(date, qh)) {
+      return date;
+    }
+  }
+  // If the user literally blocked all 24 hours, just default to 12 PM
   date.setHours(12, 0, 0, 0);
   return date;
 }
@@ -130,24 +138,20 @@ export async function scheduleAllNotifications() {
 async function performScheduling() {
   const state = usePreferencesStore.getState();
   if (!state.notificationsEnabled) {
-    await notifee.cancelAllNotifications();
+    await notifee.cancelTriggerNotifications();
     return;
   }
 
   await setupChannels();
   
   // Clear existing to avoid duplicates
-  await notifee.cancelAllNotifications();
+  await notifee.cancelTriggerNotifications();
 
   // Fetch location & method for ALADHAN API
   let lat = state.location?.latitude ?? 23.8103;
   let lon = state.location?.longitude ?? 90.4125;
   let method = state.calcMethod ?? 1;
   let madhab = state.madhab ?? 1;
-  let city = state.manualCity || state.location?.city || 'Dhaka';
-  let country = 'Bangladesh';
-  let isCityBased = !!state.manualCity || !state.location;
-  let adj = state.hijriOffset || 0;
 
   // Preferences now handled by store directly
 
@@ -155,59 +159,53 @@ async function performScheduling() {
   const year = now.getFullYear();
   const month = now.getMonth() + 1; // 1-12
 
-  let url = isCityBased 
-    ? `https://api.aladhan.com/v1/calendarByCity/${year}/${month}?city=${city}&country=${country}&method=${method}&school=${madhab}&adj=${adj}`
-    : `https://api.aladhan.com/v1/calendar/${year}/${month}?latitude=${lat}&longitude=${lon}&method=${method}&school=${madhab}&adj=${adj}`;
+  // Generate current month's calendar locally
+  const { generateLocalCalendar } = require('../utils/localCalendar');
+  let currentMonthData = generateLocalCalendar(year, month, lat, lon, method, madhab);
+  
+  const today = now.getDate();
+  const maxDaysToSchedule = Platform.OS === 'ios' ? 5 : 7;
+  
+  // Schedule for the next days
+  let daysToSchedule = currentMonthData.filter((d: any) => {
+    const dayNum = parseInt(d.date.gregorian.day, 10);
+    return dayNum >= today && dayNum < today + maxDaysToSchedule;
+  });
 
-  try {
-    const res = await fetch(url);
-    const json = await res.json();
-    if (json.data && Array.isArray(json.data)) {
-      const today = now.getDate();
-      
-      // We will schedule for the next 7 days
-      let daysToSchedule = json.data.filter((d: any) => {
-        const dayNum = parseInt(d.date.gregorian.day, 10);
-        return dayNum >= today && dayNum < today + 7;
-      });
+  // If less than required days left in the month, generate next month's data
+  if (daysToSchedule.length < maxDaysToSchedule) {
+    let nextMonth = month + 1;
+    let nextYear = year;
+    if (nextMonth > 12) {
+      nextMonth = 1;
+      nextYear++;
+    }
+    
+    try {
+      const nextMonthData = generateLocalCalendar(nextYear, nextMonth, lat, lon, method, madhab);
+      const needed = maxDaysToSchedule - daysToSchedule.length;
+      const extraDays = nextMonthData.slice(0, needed);
+      daysToSchedule = [...daysToSchedule, ...extraDays];
+    } catch (nextErr) {
+      console.error('Failed to generate next month data for notifications', nextErr);
+    }
+  }
 
-      // If less than 7 days left in the month, fetch the next month's data
-      if (daysToSchedule.length < 7) {
-        let nextMonth = month + 1;
-        let nextYear = year;
-        if (nextMonth > 12) {
-          nextMonth = 1;
-          nextYear++;
-        }
-        
-        let nextUrl = isCityBased 
-          ? `https://api.aladhan.com/v1/calendarByCity/${nextYear}/${nextMonth}?city=${city}&country=${country}&method=${method}&school=${madhab}&adj=${adj}`
-          : `https://api.aladhan.com/v1/calendar/${nextYear}/${nextMonth}?latitude=${lat}&longitude=${lon}&method=${method}&school=${madhab}&adj=${adj}`;
-          
-        try {
-          const nextRes = await fetch(nextUrl);
-          const nextJson = await nextRes.json();
-          if (nextJson.data && Array.isArray(nextJson.data)) {
-            const needed = 7 - daysToSchedule.length;
-            const extraDays = nextJson.data.slice(0, needed);
-            daysToSchedule = [...daysToSchedule, ...extraDays];
-          }
-        } catch (nextErr) {
-          console.error('Failed to fetch next month data for notifications', nextErr);
-        }
-      }
-
-      for (let i = 0; i < daysToSchedule.length; i++) {
-        const dayData = daysToSchedule[i];
-        const dayNum = parseInt(dayData.date.gregorian.day, 10);
-        const monthNum = parseInt(dayData.date.gregorian.month.number, 10);
-        const yearNum = parseInt(dayData.date.gregorian.year, 10);
-        const targetDate = new Date(yearNum, monthNum - 1, dayNum);
+  for (let i = 0; i < daysToSchedule.length; i++) {
+    const dayData = daysToSchedule[i];
+    const dayNum = parseInt(dayData.date.gregorian.day, 10);
+    const monthNum = parseInt(dayData.date.gregorian.month.number, 10);
+    const yearNum = parseInt(dayData.date.gregorian.year, 10);
+    const targetDate = new Date(yearNum, monthNum - 1, dayNum);
         
         // 1. Prayer Alerts
-        if (state.prayerStartAlerts || state.prayerEndAlerts) {
-          await schedulePrayerDay(dayData.timings, targetDate, i === 0, state.quietHours, state.prayerStartAlerts, state.prayerEndAlerts);
-        }
+        await schedulePrayerDay(dayData.timings, targetDate, i === 0, state.quietHours, {
+          fajr: { start: state.fajrStartAlert, end: state.fajrEndAlert },
+          dhuhr: { start: state.dhuhrStartAlert, end: state.dhuhrEndAlert },
+          asr: { start: state.asrStartAlert, end: state.asrEndAlert },
+          maghrib: { start: state.maghribStartAlert, end: state.maghribEndAlert },
+          isha: { start: state.ishaStartAlert, end: state.ishaEndAlert },
+        });
 
         // 2. Events (Jumu'ah, White Days, etc)
         await scheduleEventsDay(dayData, targetDate, state.quietHours);
@@ -216,14 +214,10 @@ async function performScheduling() {
         if (state.taskRemindersEnabled) {
           await scheduleTaskDay(targetDate, state.quietHours);
         }
-      }
     }
-  } catch (e) {
-    console.error('Failed to schedule notifications', e);
   }
-}
 
-async function schedulePrayerDay(timings: any, targetDate: Date, _isToday: boolean, quietHours: QuietHours, startAlerts: boolean, endAlerts: boolean) {
+async function schedulePrayerDay(timings: any, targetDate: Date, _isToday: boolean, quietHours: QuietHours, alerts: { [key: string]: { start: boolean, end: boolean } }) {
   const prayers = [
     { id: 'fajr', name: i18n.t('prayerTimes.fajr'), time: timings.Fajr },
     { id: 'dhuhr', name: i18n.t('prayerTimes.dhuhr'), time: timings.Dhuhr },
@@ -238,8 +232,10 @@ async function schedulePrayerDay(timings: any, targetDate: Date, _isToday: boole
     const current = prayers[i];
     const prayerTime = parseTimeString(current.time, targetDate);
     
+    const currentAlerts = alerts[current.id] || { start: false, end: false };
+    
     // Start notification
-    if (startAlerts && prayerTime.getTime() > now.getTime() && !isQuietHour(prayerTime, quietHours)) {
+    if (currentAlerts.start && prayerTime.getTime() > now.getTime() && !isQuietHour(prayerTime, quietHours)) {
       const trigger: TimestampTrigger = {
         type: TriggerType.TIMESTAMP,
         timestamp: prayerTime.getTime(),
@@ -266,23 +262,33 @@ async function schedulePrayerDay(timings: any, targetDate: Date, _isToday: boole
       }, trigger);
     }
 
-    // Ending Warning (15 mins before NEXT prayer, except Isha and Fajr)
-    if (endAlerts && i < prayers.length - 1 && current.id !== 'fajr' && current.id !== 'isha') {
-      const next = prayers[i + 1];
-      const nextTime = parseTimeString(next.time, targetDate);
-      const warningTime = new Date(nextTime.getTime() - 15 * 60000);
-      
-      if (warningTime.getTime() > now.getTime() && !isQuietHour(warningTime, quietHours)) {
-        const trigger: TimestampTrigger = {
-          type: TriggerType.TIMESTAMP,
-          timestamp: warningTime.getTime(),
-          alarmManager: { allowWhileIdle: true },
-        };
-        await notifee.createTriggerNotification({
-          title: i18n.t('notifications.prayerEndTitle', { currentPrayer: current.name }),
-          android: { showTimestamp: true, channelId: PRAYERS_END_CHANNEL, smallIcon: 'notification_icon', color: '#4c956c' , pressAction: { id: 'default' } },
-          ios: { sound: 'default', badgeCount: 1 },
-        }, trigger);
+    // Ending Warning (15 mins before next boundary)
+    if (currentAlerts.end) {
+      let nextTimeStr = '';
+      if (current.id === 'fajr') nextTimeStr = timings.Sunrise;
+      else if (current.id === 'isha') nextTimeStr = timings.Midnight;
+      else nextTimeStr = prayers[i + 1]?.time;
+
+      if (nextTimeStr) {
+        let nextTime = parseTimeString(nextTimeStr, targetDate);
+        if (nextTime.getTime() < prayerTime.getTime()) {
+          nextTime = new Date(nextTime.getTime());
+          nextTime.setDate(nextTime.getDate() + 1);
+        }
+        const warningTime = new Date(nextTime.getTime() - 15 * 60000);
+        
+        if (warningTime.getTime() > now.getTime() && !isQuietHour(warningTime, quietHours)) {
+          const trigger: TimestampTrigger = {
+            type: TriggerType.TIMESTAMP,
+            timestamp: warningTime.getTime(),
+            alarmManager: { allowWhileIdle: true },
+          };
+          await notifee.createTriggerNotification({
+            title: i18n.t('notifications.prayerEndTitle', { currentPrayer: current.name }),
+            android: { showTimestamp: true, channelId: PRAYERS_END_CHANNEL, smallIcon: 'notification_icon', color: '#4c956c' , pressAction: { id: 'default' } },
+            ios: { sound: 'default', badgeCount: 1 },
+          }, trigger);
+        }
       }
     }
   }

@@ -65,7 +65,10 @@ export default function SystemAnnouncer() {
 
     try {
       // 2. Fetch Server Config
-      const response = await fetch(SYSTEM_CONFIG_URL);
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), 10000);
+      const response = await fetch(SYSTEM_CONFIG_URL, { signal: controller.signal });
+      clearTimeout(timeoutId);
       if (!response.ok) return;
       const config: SystemConfig = await response.json();
 

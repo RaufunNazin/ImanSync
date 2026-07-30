@@ -1,9 +1,15 @@
 import { useAudioPlayer as useExpoAudioPlayer } from 'expo-audio';
-
+import { useEffect } from 'react';
 import * as Speech from 'expo-speech';
 
 export function useAudioPlayer() {
   const player = useExpoAudioPlayer(null);
+
+  useEffect(() => {
+    return () => {
+      Speech.stop();
+    };
+  }, []);
 
   async function playAudio(url: string | null | undefined, fallbackText?: string) {
     // Stop any ongoing TTS before playing new audio

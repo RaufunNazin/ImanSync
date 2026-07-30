@@ -7,6 +7,7 @@ import { Fonts, Spacing, useThemeColors, useActiveColor } from '@/constants/them
 import PageHeader from '@/components/page-header';
 import { useTranslation } from 'react-i18next';
 import { ChevronRight } from 'lucide-react-native';
+import { useCallback } from 'react';
 
 import DuaService, { UnifiedDuaItem } from '@/services/duaService';
 import { loadMyDuas, saveMyDuas, saveMediaFile, UserDua } from '@/utils/my-duas-storage';
@@ -44,6 +45,12 @@ export default function DuaCategoryScreen() {
     extrapolate: 'clamp',
   });
 
+  const onScrollEvent = useRef(
+    Animated.event([{ nativeEvent: { contentOffset: { y: scrollY } } }], {
+      useNativeDriver: true,
+    })
+  ).current;
+
   const handleAddDua = async (duaData: Omit<UserDua, 'id' | 'createdAt'>) => {
     try {
       let finalMediaUri = duaData.mediaUri;
@@ -52,7 +59,7 @@ export default function DuaCategoryScreen() {
       }
       const newDua: UserDua = {
         ...duaData,
-        id: Math.random().toString(36).substring(7),
+        id: `${Date.now()}-${Math.random().toString(36).substring(2, 9)}`,
         createdAt: Date.now(),
         mediaUri: finalMediaUri,
       };
@@ -65,11 +72,16 @@ export default function DuaCategoryScreen() {
     }
   };
 
+  const isMountedMain = useRef(true);
+  useEffect(() => {
+    return () => { isMountedMain.current = false; };
+  }, []);
+
   useEffect(() => {
     AsyncStorage.getItem(PINNED_DUAS_KEY).then((val) => {
       if (val) {
         try {
-          setPinnedDuaIds(JSON.parse(val));
+          if (isMountedMain.current) setPinnedDuaIds(JSON.parse(val));
         } catch (e) {
           console.error('Failed to parse pinned duas', e);
         }
@@ -77,7 +89,7 @@ export default function DuaCategoryScreen() {
     });
   }, []);
 
-  const loadData = () => {
+  const loadData = (signal?: AbortSignal, isMounted?: React.MutableRefObject<boolean>) => {
     if (isCustom === 'true') {
       if (id.startsWith('curated_cat_')) {
         const categoryKey = id.replace('curated_cat_', '');
@@ -96,11 +108,12 @@ export default function DuaCategoryScreen() {
           isCustom: true,
           image: d.image || undefined,
         }));
-        setDuas(formatted);
+        if (!isMounted || isMounted.current) setDuas(formatted);
 
       } else {
         loadMyDuas()
           .then((allCustom) => {
+            if (isMounted && !isMounted.current) return;
             const categoryDuas = allCustom.filter(d => d.categoryId === id).map(d => ({
               id: d.id,
               name: d.titleBn || d.titleEn || d.title || '',
@@ -118,16 +131,24 @@ export default function DuaCategoryScreen() {
           .catch(console.error);
       }
     } else {
-      DuaService.getDuasByCategory(Number(id))
+      DuaService.getDuasByCategory(Number(id), signal)
         .then((data) => {
-          setDuas(data);
+          if (!isMounted || isMounted.current) setDuas(data);
         })
-        .catch((err) => console.error(err));
+        .catch((err) => { if (err.name !== 'AbortError') console.error(err); });
     }
   };
 
   useEffect(() => {
-    loadData();
+    const isMounted = { current: true };
+    const abortController = new AbortController();
+    
+    loadData(abortController.signal, isMounted);
+    
+    return () => {
+      isMounted.current = false;
+      abortController.abort();
+    };
   }, [id, isCustom]);
 
   const sortedDuas = [...duas].sort((a, b) => {
@@ -136,7 +157,7 @@ export default function DuaCategoryScreen() {
     return bPinned - aPinned;
   });
 
-  const renderItem = ({ item: dua }: { item: UnifiedDuaItem }) => {
+  const renderItem = useCallback(({ item: dua }: { item: UnifiedDuaItem }) => {
     const title = dua.name;
     return (
       <ThemeCard
@@ -182,7 +203,7 @@ export default function DuaCategoryScreen() {
         </TouchableOpacity>
       </ThemeCard>
     );
-  };
+  }, [activeColor, colors.border, colors.text, colors.textSecondary, name, pinnedDuaIds, router]);
 
   const renderEmpty = () => {
     
@@ -207,6 +228,8 @@ export default function DuaCategoryScreen() {
     );
   };
 
+  const renderSeparator = useCallback(() => <View style={{ height: Spacing.three }} />, []);
+
   return (
     <SafeAreaView style={[styles.safeArea, { backgroundColor: colors.background }]}>
       <PageHeader 
@@ -223,17 +246,17 @@ export default function DuaCategoryScreen() {
 
         <Animated.FlatList
           data={sortedDuas}
-          keyExtractor={(item: any) => item.id.toString()}
+          keyExtractor={(item: any, index: number) => `${item.id}-${index}`}
           renderItem={renderItem}
           ListEmptyComponent={renderEmpty}
           contentContainerStyle={styles.container}
-          ItemSeparatorComponent={() => <View style={{ height: Spacing.three }} />}
+          ItemSeparatorComponent={renderSeparator}
           showsVerticalScrollIndicator={false}
-          onScroll={Animated.event(
-            [{ nativeEvent: { contentOffset: { y: scrollY } } }],
-            { useNativeDriver: true }
-          )}
+          onScroll={onScrollEvent}
           scrollEventThrottle={16}
+          initialNumToRender={10}
+          windowSize={5}
+          maxToRenderPerBatch={10}
         />
 
 

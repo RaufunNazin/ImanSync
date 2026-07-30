@@ -1,6 +1,6 @@
 import ThemeCard from '@/components/ThemeCard';
-import React, { useCallback, useState } from 'react';
-import { ScrollView, StyleSheet, Text, TouchableOpacity, View, TouchableWithoutFeedback } from 'react-native';
+import React, { useCallback, useState, useRef, useEffect } from 'react';
+import { ScrollView, StyleSheet, Text, TouchableOpacity, View, TouchableWithoutFeedback, InteractionManager } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Fonts, Spacing, useThemeColors, useActiveColor } from '@/constants/theme';
 import PageHeader from '@/components/page-header';
@@ -24,16 +24,28 @@ export default function DuaBookmarksScreen() {
   const folderStore = useFolderStore();
   const [bookmarks, setBookmarks] = useState<any[]>([]);
   const [createModalVisible, setCreateModalVisible] = useState(false);
+  
+  const interactionHandles = useRef<any[]>([]);
+
+  useEffect(() => {
+    return () => {
+      interactionHandles.current.forEach((h: any) => h?.cancel());
+    };
+  }, []);
   const [newFolderName, setNewFolderName] = useState('');
 
   // Move Bookmark Modal
   const [moveModalVisible, setMoveModalVisible] = useState(false);
   const [bookmarkToMove, setBookmarkToMove] = useState<any>(null);
 
+  const isMounted = useRef(true);
+
   useFocusEffect(
     useCallback(() => {
+      isMounted.current = true;
       folderStore.initialize();
       AsyncStorage.getItem('imansync_dua_bookmarks').then(val => {
+        if (!isMounted.current) return;
         if (val) {
           try {
             setBookmarks(JSON.parse(val));
@@ -43,6 +55,7 @@ export default function DuaBookmarksScreen() {
           }
         }
       });
+      return () => { isMounted.current = false; };
     }, [])
   );
 
@@ -59,13 +72,26 @@ export default function DuaBookmarksScreen() {
     }
   };
 
-  const moveBookmark = async (targetFolderId: string | null) => {
+  const moveBookmark = (targetFolderId: string | null) => {
     if (!bookmarkToMove) return;
+    
+    // Optimistic UI updates
     const updated = bookmarks.map(b => b === bookmarkToMove ? { ...b, folderId: targetFolderId } : b);
     setBookmarks(updated);
-    await AsyncStorage.setItem('imansync_dua_bookmarks', JSON.stringify(updated));
     setMoveModalVisible(false);
     setBookmarkToMove(null);
+
+    const handle = InteractionManager.runAfterInteractions(async () => {
+      try {
+        await AsyncStorage.setItem('imansync_dua_bookmarks', JSON.stringify(updated));
+      } catch (error) {
+        console.error('Failed to move dua bookmark', error);
+        if (isMounted.current) {
+          setBookmarks(bookmarks); // Revert to original bookmarks
+        }
+      }
+    });
+    interactionHandles.current.push(handle);
   };
 
 

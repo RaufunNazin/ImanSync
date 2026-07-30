@@ -23,12 +23,17 @@ import { getLocalYYYYMMDD } from '@/utils/dateUtils';
 import * as Haptics from 'expo-haptics';
 import surahsData from '@/data/surahs.json';
 
+
 const SurahDownloadButton = React.memo(({ surahId, reciterId, colors, i18n_language, t }: any) => {
   const isDownloaded = useDownloadStore((s) => s.downloadedFiles[`${reciterId}_${surahId}`]);
   const progress = useDownloadStore((s) => s.downloadProgress[`${reciterId}_${surahId}`]);
-  const downloadStore = useDownloadStore();
-  const downloadSurah = downloadStore.downloadSurah;
-  const deleteSurah = downloadStore.deleteSurah;
+  const isPaused = useDownloadStore((s) => s.pausedDownloads[`${reciterId}_${surahId}`]);
+  
+  const downloadSurah = useDownloadStore((s) => s.downloadSurah);
+  const deleteSurah = useDownloadStore((s) => s.deleteSurah);
+  const resumeDownload = useDownloadStore((s) => s.resumeDownload);
+  const pauseDownload = useDownloadStore((s) => s.pauseDownload);
+  const cancelDownload = useDownloadStore((s) => s.cancelDownload);
   const [confirmVisible, setConfirmVisible] = useState(false);
   const [downloadModalVisible, setDownloadModalVisible] = useState(false);
   const isDark = colors.background === '#0c1618';
@@ -59,7 +64,7 @@ const SurahDownloadButton = React.memo(({ surahId, reciterId, colors, i18n_langu
             color={activeColor}
             trackColor={colors.textSecondary + '30'}
             label={formatNumber(Math.round(progress), i18n_language)}
-            isPaused={!!downloadStore.pausedDownloads[`${reciterId}_${surahId}`]}
+            isPaused={!!isPaused}
           />
         ) : (
           <Reanimated.View entering={FadeInDown.duration(300)}>
@@ -82,26 +87,26 @@ const SurahDownloadButton = React.memo(({ surahId, reciterId, colors, i18n_langu
         visible={downloadModalVisible}
         title={t('quran.download.title', { defaultValue: 'Download Options' })}
         options={[
-          ...(downloadStore.pausedDownloads[`${reciterId}_${surahId}`]
+          ...(isPaused
             ? [{
                 id: 'resume',
                 icon: <Play size={20} color={activeColor} />,
                 label: t('quran.download.resume', { defaultValue: 'Resume Download' }),
-                onPress: () => downloadStore.resumeDownload(reciterId, surahId),
+                onPress: () => resumeDownload(reciterId, surahId),
                 iconBgColor: activeColor + '22',
               }]
             : [{
                 id: 'pause',
                 icon: <Pause size={20} color={colors.accent} />,
                 label: t('quran.download.pause', { defaultValue: 'Pause Download' }),
-                onPress: () => downloadStore.pauseDownload(reciterId, surahId),
+                onPress: () => pauseDownload(reciterId, surahId),
                 iconBgColor: colors.accent + '22',
               }]),
           {
             id: 'stop',
             icon: <Square size={20} color={colors.error} fill={colors.error} />,
             label: t('quran.download.stop', { defaultValue: 'Stop Download' }),
-            onPress: () => downloadStore.cancelDownload(reciterId, surahId),
+            onPress: () => cancelDownload(reciterId, surahId),
             iconBgColor: colors.error + '22',
             labelColor: colors.error,
           },
@@ -174,12 +179,19 @@ export default function QuranScreen() {
   const activeQuranColor = isDark ? colors.accent : colors.highlight;
   const router = useRouter();
   const { t, i18n } = useTranslation();
-  const audioStore = useAudioStore();
-  const downloadStore = useDownloadStore();
-  const readingStore = useReadingStore();
+  const audioCurrentSurahId = useAudioStore(s => s.currentSurahId);
+  const audioCurrentReciterId = useAudioStore(s => s.currentReciterId);
+  const setHideGlobalBanner = useAudioStore(s => s.setHideGlobalBanner);
+
+  const initDownloads = useDownloadStore(s => s.initialize);
+
+  const initReadingStore = useReadingStore(s => s.initialize);
+  const readingHistoryLog = useReadingStore(s => s.historyLog);
+  const dailyGoalPages = useReadingStore(s => s.dailyGoalPages);
+  
   const today = getLocalYYYYMMDD();
-  const pagesReadToday = readingStore.historyLog[today] || 0;
-  const isGoalMet = pagesReadToday >= readingStore.dailyGoalPages;
+  const pagesReadToday = readingHistoryLog[today] || 0;
+  const isGoalMet = pagesReadToday >= dailyGoalPages;
   
   const [activeTab, setActiveTab] = useState<'surah' | 'juz' | 'bookmarks'>('surah');
   const surahs = surahsData.data;
@@ -188,7 +200,16 @@ export default function QuranScreen() {
   const [bookmarks, setBookmarks] = useState([]);
   const [showLearnBanner, setShowLearnBanner] = useState(true);
   const [toast, setToast] = useState<{message: string} | null>(null);
+  const [showConfetti, setShowConfetti] = useState(false);
+  const prevPagesReadRef = React.useRef(pagesReadToday);
   const toastTimeoutRef = React.useRef<NodeJS.Timeout | null>(null);
+
+  useEffect(() => {
+    if (prevPagesReadRef.current < dailyGoalPages && pagesReadToday >= dailyGoalPages) {
+      setShowConfetti(true);
+    }
+    prevPagesReadRef.current = pagesReadToday;
+  }, [pagesReadToday, dailyGoalPages]);
 
   useEffect(() => {
     return () => {
@@ -203,12 +224,12 @@ export default function QuranScreen() {
     if (toastTimeoutRef.current) clearTimeout(toastTimeoutRef.current);
     toastTimeoutRef.current = setTimeout(() => {
         setToast(null);
-        audioStore.setHideGlobalBanner(false);
+        setHideGlobalBanner(false);
     }, 3000);
   };
 
   useEffect(() => {
-    downloadStore.initialize();
+    initDownloads();
   }, []);
 
   const toggleSurahBookmark = useCallback(async (surah: any) => {
@@ -276,14 +297,14 @@ export default function QuranScreen() {
       let direction = currentOffset > 0 && currentOffset > scrollOffset.current ? 'down' : 'up';
       const isScrollingDown = direction === 'down';
       
-      if (audioStore.currentSurahId) {
-        audioStore.setHideGlobalBanner(isScrollingDown);
+      if (audioCurrentSurahId) {
+        setHideGlobalBanner(isScrollingDown);
       }
       scrollOffset.current = currentOffset;
     });
 
     return () => scrollY.removeListener(listenerId);
-  }, [audioStore.currentSurahId]);
+  }, [audioCurrentSurahId]);
 
 
 
@@ -294,7 +315,7 @@ export default function QuranScreen() {
   }, [bookmarks]);
 
   useEffect(() => {
-    readingStore.initialize();
+    initReadingStore();
   }, []);
 
   useFocusEffect(
@@ -354,7 +375,7 @@ export default function QuranScreen() {
                 color: isGoalMet ? colors.highlight : colors.textSecondary,
                 fontWeight: '600'
               }}>
-                {formatNumber(pagesReadToday, i18n.language)} / {formatNumber(readingStore.dailyGoalPages, i18n.language)}
+                {formatNumber(pagesReadToday, i18n.language)} / {formatNumber(dailyGoalPages, i18n.language)}
               </Text>
             </TouchableOpacity>
 
@@ -393,9 +414,16 @@ export default function QuranScreen() {
         scrollEventThrottle={16}
         ListHeaderComponent={
           <>
-            {isGoalMet && pagesReadToday === readingStore.dailyGoalPages && (
+            {showConfetti && (
               <View pointerEvents="none" style={StyleSheet.absoluteFill}>
-                <ConfettiCannon count={50} origin={{x: -10, y: 0}} fallSpeed={2500} fadeOut autoStart />
+                <ConfettiCannon 
+                  count={50} 
+                  origin={{x: -10, y: 0}} 
+                  fallSpeed={2500} 
+                  fadeOut 
+                  autoStart 
+                  onAnimationEnd={() => setShowConfetti(false)}
+                />
               </View>
             )}
 
@@ -450,6 +478,9 @@ export default function QuranScreen() {
         }
         data={activeTab === 'surah' ? surahs : [{ id: 'dummy_tab_content' }]}
         keyExtractor={(item: any) => item.id.toString()}
+        initialNumToRender={10}
+        windowSize={5}
+        maxToRenderPerBatch={10}
         renderItem={({ item, index }: any) => {
           if (activeTab === 'surah') {
             const isLast = index === surahs.length - 1;
@@ -459,7 +490,7 @@ export default function QuranScreen() {
                   surah={item}
                   colors={colors}
                   language={i18n.language}
-                  reciterId={audioStore.currentReciterId}
+                  reciterId={audioCurrentReciterId}
                   isBookmarked={bookmarkedSurahIds.has(item.id)}
                   onPress={handleSurahPress}
                   onBookmarkToggle={toggleSurahBookmark}
@@ -529,7 +560,7 @@ export default function QuranScreen() {
                                 surah={surahData}
                                 colors={colors}
                                 language={i18n.language}
-                                reciterId={audioStore.currentReciterId}
+                                reciterId={audioCurrentReciterId}
                                 isBookmarked={true}
                                 onPress={() => router.push(`/surah/${surah.surahId}`)}
                                 onBookmarkToggle={() => toggleSurahBookmark({ id: surah.surahId })}
@@ -729,14 +760,6 @@ const styles = StyleSheet.create({
     borderRadius: 18,
     alignItems: 'center',
     justifyContent: 'center',
-  },
-  storiesTitle: {
-    fontFamily: Fonts.outfit,
-    marginBottom: 4,
-  },
-  storiesSubtitle: {
-    fontFamily: Fonts.outfit,
-    fontSize: 13,
   },
   tabsContainer: {
     flexDirection: 'row',

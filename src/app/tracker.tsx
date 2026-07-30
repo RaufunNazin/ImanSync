@@ -6,7 +6,7 @@ import { formatNumber } from '@/utils/formatNumber';
 import * as Haptics from 'expo-haptics';
 import { Activity, BookOpen, CheckCircle2, HandCoins, Heart, RotateCcw, X, History } from 'lucide-react-native';
 import { useRouter } from 'expo-router';
-import React, { useEffect, useMemo, useState } from 'react';
+import React, { useEffect, useMemo, useState, useRef } from 'react';
 import { useTranslation } from 'react-i18next';
 import { ScrollView, StyleSheet, Text, TouchableOpacity, View, AppState, Modal, Dimensions } from 'react-native';
 import Animated, { useAnimatedProps, useAnimatedStyle, useSharedValue, withSpring, withTiming } from 'react-native-reanimated';
@@ -106,9 +106,10 @@ export default function TrackerScreen() {
   const router = useRouter();
 
   const [activeTab, setActiveTab] = useState<'Daily' | 'Weekly' | 'Monthly'>('Daily');
-  const trackerHistoryStore = useTrackerHistoryStore();
-  const history = trackerHistoryStore.history;
-  const loading = !trackerHistoryStore.isLoaded;
+  const history = useTrackerHistoryStore(s => s.history);
+  const loading = !useTrackerHistoryStore(s => s.isLoaded);
+  const toggleTaskAction = useTrackerHistoryStore(s => s.toggleTask);
+  const qadaStore = useQadaStore(s => s);
 
   const [todayStr, setTodayStr] = useState(getLocalYYYYMMDD());
 
@@ -116,11 +117,19 @@ export default function TrackerScreen() {
   const [showConfetti, setShowConfetti] = useState(false);
   const [historyModalDate, setHistoryModalDate] = useState<string | null>(null);
 
-  const qadaStore = useQadaStore();
+  const hapticTimeoutRef = useRef<NodeJS.Timeout | null>(null);
 
   useEffect(() => {
-    qadaStore.initialize();
+    return () => {
+      if (hapticTimeoutRef.current) clearTimeout(hapticTimeoutRef.current);
+    };
   }, []);
+
+  const initializeQada = useQadaStore(s => s.initialize);
+
+  useEffect(() => {
+    initializeQada();
+  }, [initializeQada]);
 
   useEffect(() => {
     const sub = AppState.addEventListener('change', (state) => {
@@ -137,13 +146,14 @@ export default function TrackerScreen() {
     const todayData = history[currentDayStr] || {};
     const wasCompletedCount = DAILY_TASKS.filter(t => todayData[t.id]).length;
 
-    trackerHistoryStore.toggleTask(currentDayStr, id);
+    toggleTaskAction(currentDayStr, id);
 
     const nextToday = { ...todayData, [id]: !todayData[id] };
     const newCompletedCount = DAILY_TASKS.filter(t => nextToday[t.id]).length;
 
     if (newCompletedCount === DAILY_TASKS.length && wasCompletedCount !== DAILY_TASKS.length) {
-      setTimeout(() => Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success), 300);
+      if (hapticTimeoutRef.current) clearTimeout(hapticTimeoutRef.current);
+      hapticTimeoutRef.current = setTimeout(() => Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success), 300);
       setShowConfetti(true);
     } else {
       Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);

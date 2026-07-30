@@ -1,5 +1,5 @@
 import ThemeCard from '@/components/ThemeCard';
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useRef } from 'react';
 import { View, Text, StyleSheet, ScrollView, TouchableOpacity } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useLocalSearchParams } from 'expo-router';
@@ -39,11 +39,16 @@ export default function QuranLearnScreen() {
   const { playAudio } = useAudioPlayer();
   const { t, i18n } = useTranslation();
 
+  const isMounted = useRef(true);
+  useEffect(() => {
+    return () => { isMounted.current = false; };
+  }, []);
   const fetchAyah = async (sId: number, aId: number) => {
     setSelectedWord(null);
     try {
       const res = await fetch(`https://api.quran.com/api/v4/verses/by_key/${sId}:${aId}?language=${i18n.language}&words=true&word_fields=text_uthmani,text_uthmani_tajweed,audio_url&audio=1`);
       const json = await res.json();
+      if (!isMounted.current) return;
       if (json.verse && json.verse.words) {
         setWords(json.verse.words);
       }
@@ -65,6 +70,7 @@ export default function QuranLearnScreen() {
     fetch(`https://api.quran.com/api/v4/chapters/${currentSurahId}`)
       .then(res => res.json())
       .then(json => {
+        if (!isMounted.current) return;
         if (json.chapter && json.chapter.verses_count) {
           setMaxAyahs(json.chapter.verses_count);
         }

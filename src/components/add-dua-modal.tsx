@@ -52,7 +52,7 @@ export default function AddDuaModal({ visible, onClose, onSave, initialData, col
       setMediaType(initialData.type);
       setMediaUri(initialData.mediaUri || null);
       setSelectedCategoryId(initialData.categoryId || null);
-      loadCustomCategories().then(setCategories);
+      loadCustomCategories().then(setCategories).catch(console.error);
     } else if (visible) {
       // Load draft if no initialData
       AsyncStorage.getItem(DRAFT_KEY).then(draft => {
@@ -75,19 +75,22 @@ export default function AddDuaModal({ visible, onClose, onSave, initialData, col
         } else {
           reset();
         }
-      });
+      }).catch(console.error);
       setActiveTab(i18n.language === 'bn' ? 'bn' : 'en');
-      loadCustomCategories().then(setCategories);
+      loadCustomCategories().then(setCategories).catch(console.error);
     }
   }, [visible, initialData, i18n.language]);
 
   // Auto-save draft effect
   useEffect(() => {
     if (visible && !initialData) {
-      const draft = {
-        titleBn, titleEn, arabic, transliterationBn, transliterationEn, translationBn, translationEn, type: mediaType, mediaUri, categoryId: selectedCategoryId
-      };
-      AsyncStorage.setItem(DRAFT_KEY, JSON.stringify(draft)).catch(console.error);
+      const handler = setTimeout(() => {
+        const draft = {
+          titleBn, titleEn, arabic, transliterationBn, transliterationEn, translationBn, translationEn, type: mediaType, mediaUri, categoryId: selectedCategoryId
+        };
+        AsyncStorage.setItem(DRAFT_KEY, JSON.stringify(draft)).catch(console.error);
+      }, 500);
+      return () => clearTimeout(handler);
     }
   }, [titleBn, titleEn, arabic, transliterationBn, transliterationEn, translationBn, translationEn, mediaType, mediaUri, selectedCategoryId, visible, initialData]);
 
@@ -142,7 +145,7 @@ export default function AddDuaModal({ visible, onClose, onSave, initialData, col
   const handleCreateCategory = async () => {
     if (!newCategoryName.trim()) return;
     const newCat: CustomCategory = {
-      id: Math.random().toString(36).substring(7),
+      id: `${Date.now()}-${Math.random().toString(36).substring(2, 9)}`,
       name: newCategoryName.trim(),
       createdAt: Date.now()
     };

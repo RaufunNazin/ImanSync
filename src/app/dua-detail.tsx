@@ -12,6 +12,7 @@ import { ScrollView, StyleSheet, Text, TouchableOpacity, View, Image } from 'rea
 import { curatedImageMap } from '@/data/curated-images';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import ImageViewerModal from '@/components/ImageViewerModal';
+import DuaService from '@/services/duaService';
 
 interface DuaSettings {
   showEnTrans: boolean;
@@ -73,32 +74,35 @@ export default function DuaDetailScreen() {
     image: params.image || ''
   });
 
+  const isMounted = React.useRef(true);
+
   useEffect(() => {
+    isMounted.current = true;
+    const abortController = new AbortController();
+    
     // If arabic is missing (because category endpoint doesn't return segments), fetch full details
     if (!params.arabic && params.id) {
-      import('@/services/duaService').then(({ default: DuaService }) => {
-        DuaService.getDuaById(params.id).then(fullDua => {
-          if (fullDua) {
-            setDuaData(prev => ({
-              ...prev,
-              arabic: fullDua.arabic,
-              translationBn: fullDua.translationBn,
-              translationEn: fullDua.translationEn || prev.translationEn,
-              source: fullDua.reference || prev.source,
-            }));
-          }
-        });
-      });
+      DuaService.getDuaById(params.id, abortController.signal).then(fullDua => {
+        if (fullDua && isMounted.current) {
+          setDuaData(prev => ({
+            ...prev,
+            arabic: fullDua.arabic,
+            translationBn: fullDua.translationBn,
+            translationEn: fullDua.translationEn || prev.translationEn,
+            source: fullDua.reference || prev.source,
+          }));
+        }
+      }).catch((e) => { if (e.name !== 'AbortError') console.error(e); });
     }
 
     AsyncStorage.getItem('imansync_dua_settings').then(val => {
-      if (val) {
+      if (val && isMounted.current) {
         try { setSettings(prev => ({ ...prev, ...JSON.parse(val) })); } catch (e) { console.error('Corrupted dua settings', e); }
       }
     }).catch(e => console.error(e));
 
     AsyncStorage.getItem('imansync_dua_bookmarks').then(val => {
-      if (val) {
+      if (val && isMounted.current) {
         try {
           const parsed = JSON.parse(val);
           setBookmarks(parsed);
@@ -107,7 +111,12 @@ export default function DuaDetailScreen() {
           console.error('Corrupted dua bookmarks', e);
         }
       }
-    });
+    }).catch(e => console.error(e));
+    
+    return () => {
+      isMounted.current = false;
+      abortController.abort();
+    };
   }, [params.id]);
 
   const toggleBookmark = async () => {

@@ -32,6 +32,9 @@ export default function NamesScreen() {
         data={names}
         keyExtractor={item => item.id}
         contentContainerStyle={styles.list}
+        initialNumToRender={10}
+        windowSize={5}
+        maxToRenderPerBatch={10}
         renderItem={({ item }) => (
           <ThemeCard intensity={40}  style={[styles.cardWrapper, { borderColor: colors.border }]}>
             <View style={[styles.card, themeStyles.cardShadow]}>

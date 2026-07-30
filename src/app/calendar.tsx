@@ -5,7 +5,7 @@ import { usePreferencesStore } from '@/store/preferencesStore';
 import { useThemeStore } from '@/store/themeStore';
 import { ChevronLeft, ChevronRight } from 'lucide-react-native';
 import { useTranslation } from 'react-i18next';
-import { StyleSheet, Text, TouchableOpacity, View, ScrollView, useWindowDimensions } from 'react-native';
+import { StyleSheet, Text, TouchableOpacity, View, ScrollView, useWindowDimensions, ActivityIndicator } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { formatNumber } from '@/utils/formatNumber';
 import OptionsModal from '@/components/OptionsModal';
@@ -27,19 +27,13 @@ export default function CalendarScreen() {
   const cellWidth = Math.floor((screenWidth - Spacing.four * 2 - 6) / 7);
 
   const [currentDate, setCurrentDate] = useState(new Date());
-  const [calendarData, setCalendarData] = useState<any[]>(() => {
-    const year = currentDate.getFullYear();
-    const month = currentDate.getMonth() + 1;
-    const method = prefs.calcMethod || 1;
-    const madhab = prefs.madhab || 0;
-    const lat = prefs.location?.latitude || 23.8103;
-    const lon = prefs.location?.longitude || 90.4125;
-    return generateLocalCalendar(year, month, lat, lon, method, madhab);
-  });
+  const [calendarData, setCalendarData] = useState<any[]>([]);
+  const [isGenerating, setIsGenerating] = useState(true);
   const [selectedDate, setSelectedDate] = useState<string | null>(null);
   const [optionsModalVisible, setOptionsModalVisible] = useState(false);
 
   useEffect(() => {
+    setIsGenerating(true);
     const year = currentDate.getFullYear();
     const month = currentDate.getMonth() + 1;
     const method = prefs.calcMethod || 1;
@@ -47,7 +41,12 @@ export default function CalendarScreen() {
     const lat = prefs.location?.latitude || 23.8103;
     const lon = prefs.location?.longitude || 90.4125;
     
-    setCalendarData(generateLocalCalendar(year, month, lat, lon, method, madhab));
+    // Defer heavy calculation to not block the main thread/UI navigation
+    const timer = setTimeout(() => {
+      setCalendarData(generateLocalCalendar(year, month, lat, lon, method, madhab));
+      setIsGenerating(false);
+    }, 10);
+    return () => clearTimeout(timer);
   }, [currentDate.getFullYear(), currentDate.getMonth(), prefs.calcMethod, prefs.madhab, prefs.manualCity, prefs.location]);
 
   // Set default selection to today if in current month, else 1st of month
@@ -77,7 +76,13 @@ export default function CalendarScreen() {
   }, [selectedDate, calendarData]);
 
   const calendarGrid = useMemo(() => {
-    if (calendarData.length === 0) return null;
+    if (isGenerating || calendarData.length === 0) {
+      return (
+        <View style={{ height: 250, justifyContent: 'center', alignItems: 'center' }}>
+          <ActivityIndicator size="large" color={activeColor} />
+        </View>
+      );
+    }
 
     const firstDayStr = calendarData[0].date.gregorian.date; // DD-MM-YYYY
     const parts = firstDayStr.split('-');

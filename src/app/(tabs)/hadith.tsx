@@ -32,9 +32,10 @@ export default function HadithScreen() {
 
   useFocusEffect(
     useCallback(() => {
+      let isMounted = true;
       AsyncStorage.getItem('imansync_hadith_bookmarks')
         .then(val => {
-          if (val) {
+          if (val && isMounted) {
             try { setBookmarks(JSON.parse(val)); } catch (e) { console.error('Corrupted hadith bookmarks', e); }
           }
         })
@@ -42,11 +43,13 @@ export default function HadithScreen() {
 
       AsyncStorage.getItem('last_read_hadith')
         .then(val => {
-          if (val) {
+          if (val && isMounted) {
             try { setLastReadHadith(JSON.parse(val)); } catch (e) { console.error('Corrupted last_read_hadith', e); }
           }
         })
         .catch(e => console.error(e));
+        
+      return () => { isMounted = false; };
     }, [])
   );
 

@@ -35,8 +35,9 @@ async function ensureDirExists() {
 function handleDownloadResult(key: string, result: FileSystem.FileSystemDownloadResult | undefined, set: any) {
   if (result && result.uri) {
     delete activeDownloads[key];
+    const filename = result.uri.split('/').pop();
     set((state: any) => {
-      const newFiles = { ...state.downloadedFiles, [key]: result.uri };
+      const newFiles = { ...state.downloadedFiles, [key]: filename };
       AsyncStorage.setItem(STORAGE_KEY, JSON.stringify(newFiles)).catch(console.error);
 
       const newProgress = { ...state.downloadProgress };
@@ -63,13 +64,20 @@ export const useDownloadStore = create<DownloadState>((set, get) => ({
       if (stored) {
         const parsed = JSON.parse(stored);
         
-        // Verify files actually exist on disk
+        // Verify files actually exist on disk in parallel
+        const keys = Object.keys(parsed);
+        const verificationPromises = keys.map(async (key) => {
+          const filename = parsed[key].split('/').pop();
+          const absoluteUri = AUDIO_DIR + '/' + filename;
+          const info = await FileSystem.getInfoAsync(absoluteUri);
+          return { key, filename, exists: info.exists };
+        });
+
+        const results = await Promise.all(verificationPromises);
+        
         const verified: Record<string, string> = {};
-        for (const key of Object.keys(parsed)) {
-          const info = await FileSystem.getInfoAsync(parsed[key]);
-          if (info.exists) {
-            verified[key] = parsed[key];
-          }
+        for (const res of results) {
+          if (res.exists) verified[res.key] = res.filename;
         }
         
         set({ downloadedFiles: verified });
@@ -81,7 +89,8 @@ export const useDownloadStore = create<DownloadState>((set, get) => ({
   },
 
   getDownloadedUri: (reciterId: number, surahId: number) => {
-    return get().downloadedFiles[`${reciterId}_${surahId}`] || null;
+    const filename = get().downloadedFiles[`${reciterId}_${surahId}`];
+    return filename ? AUDIO_DIR + '/' + filename : null;
   },
 
   downloadSurah: async (reciterId: number, surahId: number) => {
@@ -217,10 +226,11 @@ export const useDownloadStore = create<DownloadState>((set, get) => ({
   deleteSurah: async (reciterId: number, surahId: number) => {
     if (Platform.OS === 'web') return;
     const key = `${reciterId}_${surahId}`;
-    const localUri = get().downloadedFiles[key];
+    const filename = get().downloadedFiles[key];
     
-    if (localUri) {
+    if (filename) {
       try {
+        const localUri = AUDIO_DIR + '/' + filename;
         const info = await FileSystem.getInfoAsync(localUri);
         if (info.exists) {
           await FileSystem.deleteAsync(localUri);

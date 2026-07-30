@@ -4,7 +4,7 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useLocalSearchParams } from 'expo-router';
 import { Bookmark, Settings2, Share2, Plus, Minus } from 'lucide-react-native';
 import React, { useEffect, useState, useRef } from 'react';
-import { ActivityIndicator, FlatList, StyleSheet, Switch, Text, TouchableOpacity, View, Share } from 'react-native';
+import { ActivityIndicator, FlatList, StyleSheet, Switch, Text, TouchableOpacity, View, Share, InteractionManager } from 'react-native';
 import AppModal from '@/components/AppModal';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useTranslation } from 'react-i18next';
@@ -39,6 +39,63 @@ const DEFAULT_SETTINGS: HadithSettings = {
   showEnglish: true,
   showBangla: true,
 };
+
+const HadithCard = React.memo(({
+  item,
+  colors,
+  activeColor,
+  language,
+  settings,
+  isBookmarked,
+  onShare,
+  onBookmarkToggle,
+}: any) => {
+  return (
+    <ThemeCard intensity={30} style={[styles.hadithCardWrapper, { borderColor: colors.border, marginBottom: Spacing.four }]}>
+      <View style={styles.hadithCard}>
+        <View style={[styles.hadithHeader, { backgroundColor: colors.backgroundElement, borderColor: colors.border }]}>
+          <View style={[styles.hadithNumberCircle, { backgroundColor: colors.background }]}>
+            <Text numberOfLines={1} adjustsFontSizeToFit style={[styles.hadithNumberText, { color: activeColor }]}>
+              {formatNumber(item.hadithnumber, language)}
+            </Text>
+          </View>
+          <View style={styles.headerActions}>
+            <TouchableOpacity onPress={() => onShare(item)} style={styles.iconButton}>
+              <Share2 size={20} color={colors.textSecondary} />
+            </TouchableOpacity>
+            <TouchableOpacity onPress={() => onBookmarkToggle(item)} style={styles.iconButton}>
+              <Bookmark size={20} color={isBookmarked ? activeColor : colors.textSecondary} fill={isBookmarked ? activeColor : 'none'} />
+            </TouchableOpacity>
+          </View>
+        </View>
+
+        <View style={styles.hadithContent}>
+          <Text style={[styles.arabicText, { color: colors.text, fontSize: settings.arabicFontSize, lineHeight: settings.arabicFontSize * 1.8 }]}>
+            {item.arabic}
+          </Text>
+
+          {settings.showBangla && item.bangla && (
+            <Text style={[styles.translationText, { color: colors.textSecondary, fontSize: settings.translationFontSize, marginTop: Spacing.four }]}>
+              {item.bangla}
+            </Text>
+          )}
+
+          {settings.showEnglish && item.english && (
+            <Text style={[styles.translationText, { color: colors.textSecondary, fontSize: settings.translationFontSize, marginTop: Spacing.three }]}>
+              {item.english}
+            </Text>
+          )}
+        </View>
+
+        <View style={styles.hadithFooter}>
+          <Text style={[styles.referenceText, { color: colors.textSecondary }]}>
+            {item.reference}
+          </Text>
+        </View>
+      </View>
+    </ThemeCard>
+  );
+});
 
 const BOOK_NAMES: Record<string, string> = {
   bukhari: 'Sahih al-Bukhari',
@@ -88,6 +145,17 @@ export default function HadithChapterScreen() {
   
   const flatListRef = useRef<FlatList>(null);
   const isInitialScrollDone = useRef(false);
+  const abortControllerRef = useRef<AbortController | null>(null);
+  const isMounted = useRef(true);
+  const interactionHandles = useRef<any[]>([]);
+
+  useEffect(() => {
+    return () => {
+      isMounted.current = false;
+      interactionHandles.current.forEach(h => h?.cancel());
+      if (abortControllerRef.current) abortControllerRef.current.abort();
+    };
+  }, []);
   const chapterNameRef = useRef(chapterName);
 
   useEffect(() => {
@@ -117,15 +185,17 @@ export default function HadithChapterScreen() {
   };
 
   useEffect(() => {
+    let scrollTimer: NodeJS.Timeout;
     if (hadiths.length > 0 && hadithnumber && !isInitialScrollDone.current) {
       const index = hadiths.findIndex(h => h.hadithnumber === Number(hadithnumber));
       if (index >= 0) {
-        setTimeout(() => {
+        scrollTimer = setTimeout(() => {
           flatListRef.current?.scrollToIndex({ index, animated: true, viewPosition: 0 });
           isInitialScrollDone.current = true;
         }, 300);
       }
     }
+    return () => { if (scrollTimer) clearTimeout(scrollTimer); };
   }, [hadiths, hadithnumber]);
 
   useEffect(() => {
@@ -141,41 +211,48 @@ export default function HadithChapterScreen() {
         parsed.forEach((b: any) => {
           if (b.type === 'hadith' && b.bookId === book && b.chapterId === chapter) map[b.hadithnumber] = true;
         });
-        setBookmarkedHadiths(map);
+        if (isMounted.current) setBookmarkedHadiths(map);
       }
     } catch (e) {
       console.error(e);
     }
   };
 
-  const toggleBookmark = async (hadithItem: Hadith) => {
-    try {
-      const stored = await AsyncStorage.getItem('imansync_hadith_bookmarks');
-      let bookmarks = stored ? JSON.parse(stored) : [];
-      
-      const existsIndex = bookmarks.findIndex((b: any) => b.type === 'hadith' && b.bookId === book && b.chapterId === chapter && b.hadithnumber === hadithItem.hadithnumber);
-      
-      if (existsIndex >= 0) {
-        bookmarks.splice(existsIndex, 1);
-        setBookmarkedHadiths(prev => ({ ...prev, [hadithItem.hadithnumber]: false }));
-      } else {
-        bookmarks.push({
-          type: 'hadith',
-          bookId: book,
-          chapterId: chapter,
-          bookName: BOOK_NAMES[book as string] || book,
-          chapterName: chapterName,
-          hadithnumber: hadithItem.hadithnumber,
-          arabic: hadithItem.arabic,
-          translation: hadithItem.english || hadithItem.bangla || '',
-        });
-        setBookmarkedHadiths(prev => ({ ...prev, [hadithItem.hadithnumber]: true }));
+  const toggleBookmark = (hadithItem: Hadith) => {
+    const isCurrentlyBookmarked = !!bookmarkedHadiths[hadithItem.hadithnumber];
+    setBookmarkedHadiths(prev => ({ ...prev, [hadithItem.hadithnumber]: !isCurrentlyBookmarked }));
+
+    const handle = InteractionManager.runAfterInteractions(async () => {
+      try {
+        const stored = await AsyncStorage.getItem('imansync_hadith_bookmarks');
+        let bookmarks = stored ? JSON.parse(stored) : [];
+        
+        const existsIndex = bookmarks.findIndex((b: any) => b.type === 'hadith' && b.bookId === book && b.chapterId === chapter && b.hadithnumber === hadithItem.hadithnumber);
+        
+        if (existsIndex >= 0) {
+          bookmarks.splice(existsIndex, 1);
+        } else {
+          bookmarks.push({
+            type: 'hadith',
+            bookId: book,
+            chapterId: chapter,
+            bookName: BOOK_NAMES[book as string] || book,
+            chapterName: chapterName,
+            hadithnumber: hadithItem.hadithnumber,
+            arabic: hadithItem.arabic,
+            translation: hadithItem.english || hadithItem.bangla || '',
+          });
+        }
+        
+        await AsyncStorage.setItem('imansync_hadith_bookmarks', JSON.stringify(bookmarks));
+      } catch (e) {
+        console.error(e);
+        if (isMounted.current) {
+          setBookmarkedHadiths(prev => ({ ...prev, [hadithItem.hadithnumber]: isCurrentlyBookmarked }));
+        }
       }
-      
-      await AsyncStorage.setItem('imansync_hadith_bookmarks', JSON.stringify(bookmarks));
-    } catch (e) {
-      console.error(e);
-    }
+    });
+    interactionHandles.current.push(handle);
   };
 
   const shareHadith = async (hadithItem: Hadith) => {
@@ -216,6 +293,9 @@ export default function HadithChapterScreen() {
     
     const cacheKey = `hadith_${book}_${chapter}_data`;
 
+    abortControllerRef.current = new AbortController();
+    const signal = abortControllerRef.current.signal;
+
     fetchOnce({
       key: cacheKey,
       onStart: () => {
@@ -225,9 +305,9 @@ export default function HadithChapterScreen() {
         const baseUrl = 'https://cdn.jsdelivr.net/gh/fawazahmed0/hadith-api@1/editions';
         
         const [arRes, enRes, bnRes] = await Promise.all([
-          fetch(`${baseUrl}/ara-${book}/sections/${chapter}.json`).catch(() => null),
-          fetch(`${baseUrl}/eng-${book}/sections/${chapter}.json`).catch(() => null),
-          fetch(`${baseUrl}/ben-${book}/sections/${chapter}.json`).catch(() => null),
+          fetch(`${baseUrl}/ara-${book}/sections/${chapter}.json`, { signal }).catch((e) => { if (e.name !== 'AbortError') return null; throw e; }),
+          fetch(`${baseUrl}/eng-${book}/sections/${chapter}.json`, { signal }).catch((e) => { if (e.name !== 'AbortError') return null; throw e; }),
+          fetch(`${baseUrl}/ben-${book}/sections/${chapter}.json`, { signal }).catch((e) => { if (e.name !== 'AbortError') return null; throw e; }),
         ]);
 
         const arData = arRes && arRes.ok ? await arRes.json() : null;
@@ -274,61 +354,25 @@ export default function HadithChapterScreen() {
         setLoading(false);
       },
       onError: (err) => {
+        if (err?.name === 'AbortError') return;
         console.error("Error fetching hadith:", err);
         setLoading(false);
       }
     });
   }, [book, chapter]);
 
-  const renderItem = ({ item }: { item: Hadith }) => {
-    const isBookmarked = bookmarkedHadiths[item.hadithnumber];
-
-    return (
-      <ThemeCard intensity={30} style={[styles.hadithCardWrapper, { borderColor: colors.border, marginBottom: Spacing.four }]}>
-        <View style={styles.hadithCard}>
-          {/* Hadith Header */}
-          <View style={[styles.hadithHeader, { backgroundColor: colors.backgroundElement, borderColor: colors.border }]}>
-            <View style={[styles.hadithNumberCircle, { backgroundColor: colors.background }]}>
-              <Text 
-                numberOfLines={1} 
-                adjustsFontSizeToFit 
-                style={[styles.hadithNumberText, { color: activeColor }]}
-              >
-                {formatNumber(item.hadithnumber, i18n.language)}
-              </Text>
-            </View>
-            <View style={styles.headerActions}>
-              <TouchableOpacity onPress={() => shareHadith(item)} style={styles.iconButton}>
-                <Share2 size={20} color={colors.textSecondary} />
-              </TouchableOpacity>
-              <TouchableOpacity onPress={() => toggleBookmark(item)} style={styles.iconButton}>
-                <Bookmark size={20} color={isBookmarked ? activeColor : colors.textSecondary} fill={isBookmarked ? activeColor : 'none'} />
-              </TouchableOpacity>
-            </View>
-          </View>
-
-        {/* Hadith Content */}
-        <View style={styles.hadithContent}>
-          <Text style={[styles.arabicText, { color: colors.text, fontSize: settings.arabicFontSize, lineHeight: settings.arabicFontSize * 1.8 }]}>
-            {item.arabic}
-          </Text>
-
-          {settings.showBangla && item.bangla && (
-            <Text style={[styles.translationText, { color: colors.textSecondary, fontSize: settings.translationFontSize, marginTop: Spacing.four }]}>
-              {item.bangla}
-            </Text>
-          )}
-
-          {settings.showEnglish && item.english && (
-            <Text style={[styles.translationText, { color: colors.textSecondary, fontSize: settings.translationFontSize, marginTop: Spacing.three }]}>
-              {item.english}
-            </Text>
-          )}
-        </View>
-      </View>
-    </ThemeCard>
-    );
-  };
+  const renderItem = React.useCallback(({ item }: { item: Hadith }) => (
+    <HadithCard
+      item={item}
+      colors={colors}
+      activeColor={activeColor}
+      language={i18n.language}
+      settings={settings}
+      isBookmarked={!!bookmarkedHadiths[item.hadithnumber]}
+      onShare={shareHadith}
+      onBookmarkToggle={toggleBookmark}
+    />
+  ), [colors, activeColor, i18n.language, settings, bookmarkedHadiths, shareHadith, toggleBookmark]);
 
   return (
     <SafeAreaView edges={['top']} style={[styles.safeArea, { backgroundColor: colors.background }]}>
@@ -533,5 +577,15 @@ const styles = StyleSheet.create({
     fontSize: 16,
     width: 24,
     textAlign: 'center',
+  },
+  hadithFooter: {
+    marginTop: Spacing.four,
+    paddingTop: Spacing.three,
+    borderTopWidth: StyleSheet.hairlineWidth,
+    borderTopColor: '#e0e0e0', // This will be overridden by theme colors if needed, or left as is
+  },
+  referenceText: {
+    fontFamily: Fonts.outfit,
+    fontSize: 12,
   },
 });

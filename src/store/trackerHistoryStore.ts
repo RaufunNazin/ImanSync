@@ -46,6 +46,29 @@ export const useTrackerHistoryStore = create<TrackerHistoryState>()(
     {
       name: 'tracker-history-storage',
       storage: createJSONStorage(() => zustandStorage),
+      onRehydrateStorage: () => (state) => {
+        if (state) {
+          const now = new Date();
+          const oneYearAgo = now.getTime() - 365 * 24 * 60 * 60 * 1000;
+          const newHistory = { ...state.history };
+          let pruned = false;
+          
+          for (const dateStr in newHistory) {
+            const parts = dateStr.split('-');
+            if (parts.length === 3) {
+               const entryDate = new Date(parseInt(parts[0]), parseInt(parts[1])-1, parseInt(parts[2]));
+               if (entryDate.getTime() < oneYearAgo) {
+                 delete newHistory[dateStr];
+                 pruned = true;
+               }
+            }
+          }
+          
+          if (pruned) {
+            state.setHistory(newHistory);
+          }
+        }
+      },
     }
   )
 );

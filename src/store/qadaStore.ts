@@ -36,7 +36,15 @@ export const useQadaStore = create<QadaState>()(
           if (val) {
             const mmkvVal = zustandStorage.getItem('qada-storage');
             if (!mmkvVal) {
-              set({ ...JSON.parse(val), isLoaded: true });
+              const parsed = JSON.parse(val);
+              const sanitized: Partial<QadaState> = {};
+              const types: QadaType[] = ['fajr', 'dhuhr', 'asr', 'maghrib', 'isha', 'witr', 'fasts'];
+              for (const type of types) {
+                if (typeof parsed[type] === 'number') {
+                  sanitized[type] = Math.max(0, parsed[type]);
+                }
+              }
+              set({ ...sanitized, isLoaded: true });
             }
           }
         } catch (e) {

@@ -15,6 +15,7 @@ import * as Haptics from 'expo-haptics';
 import { LinearGradient } from 'expo-linear-gradient';
 import { useRouter } from 'expo-router';
 import { Book, BookOpen, CalendarDays, Compass, Share2, History, Activity } from 'lucide-react-native';
+import { useShallow } from 'zustand/react/shallow';
 import React, { useEffect, useMemo, useState, useRef } from 'react';
 import { useTranslation } from 'react-i18next';
 import {
@@ -98,8 +99,7 @@ export default function HomeScreen() {
   const router = useRouter();
   const { t, i18n } = useTranslation();
 
-  const qada = useQadaStore();
-  const totalQada = qada.fajr + qada.dhuhr + qada.asr + qada.maghrib + qada.isha + qada.witr;
+  const totalQada = useQadaStore(useShallow(state => state.fajr + state.dhuhr + state.asr + state.maghrib + state.isha + state.witr));
 
   const [currentTime, setCurrentTime] = useState(new Date());
   const [rawTimings, setRawTimings] = useState<Record<string, string>>({});
@@ -112,10 +112,13 @@ export default function HomeScreen() {
     const cached = storage.getString('cached_daily_hadith');
     return cached ? JSON.parse(cached) : null;
   });
-  const trackerHistoryStore = useTrackerHistoryStore();
-  const trackerHistory = trackerHistoryStore.history;
-  const prefs = usePreferencesStore();
-  
+  const trackerHistory = useTrackerHistoryStore(state => state.history);
+  const toggleTask = useTrackerHistoryStore(state => state.toggleTask);
+  const prefsLocation = usePreferencesStore(state => state.location);
+  const prefsManualCity = usePreferencesStore(state => state.manualCity);
+  const prefsCalcMethod = usePreferencesStore(state => state.calcMethod);
+  const prefsMadhab = usePreferencesStore(state => state.madhab);
+  const prefsHijriOffset = usePreferencesStore(state => state.hijriOffset);
 
   const hadithRef = useRef(null);
   const verseRef = useRef(null);
@@ -148,7 +151,7 @@ export default function HomeScreen() {
 
   const togglePrayerTask = (prayerId: string) => {
     const currentDayStr = getLocalYYYYMMDD();
-    trackerHistoryStore.toggleTask(currentDayStr, prayerId);
+    toggleTask(currentDayStr, prayerId);
     Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
   };
 
@@ -162,10 +165,10 @@ export default function HomeScreen() {
 
   // Fetch prayer times
   useEffect(() => {
-    let lat = prefs.location?.latitude;
-    let lon = prefs.location?.longitude;
-    let city = prefs.manualCity || prefs.location?.city || 'Dhaka';
-    let isCityBased = !!prefs.manualCity || !prefs.location;
+    let lat = prefsLocation?.latitude;
+    let lon = prefsLocation?.longitude;
+    let city = prefsManualCity || prefsLocation?.city || 'Dhaka';
+    let isCityBased = !!prefsManualCity || !prefsLocation;
     
     if (isCityBased && districtCoords[city]) {
       lat = districtCoords[city].lat;
@@ -178,8 +181,8 @@ export default function HomeScreen() {
       lon = 90.4125;
     }
 
-    let method = prefs.calcMethod ?? 1;
-    let madhab = prefs.madhab ?? 1;
+    let method = prefsCalcMethod ?? 1;
+    let madhab = prefsMadhab ?? 1;
 
     let params = CalculationMethod.Karachi();
     if (method === 2) params = CalculationMethod.NorthAmerica();
@@ -220,7 +223,7 @@ export default function HomeScreen() {
       if (isNaN(monthNum)) monthNum = 1;
       
       // Apply offset
-      let adj = prefs.hijriOffset || 0;
+      let adj = prefsHijriOffset || 0;
       let finalDay = parseInt(hDay, 10) + adj;
       
       setHijriRaw({
@@ -232,7 +235,7 @@ export default function HomeScreen() {
     } catch (e) {
       console.error('Hijri calculation error:', e);
     }
-  }, [prefs.calcMethod, prefs.madhab, prefs.location, prefs.manualCity, prefs.hijriOffset]);
+  }, [prefsCalcMethod, prefsMadhab, prefsLocation, prefsManualCity, prefsHijriOffset]);
 
   // Fetch a random Quran verse (Arabic + English)
   useEffect(() => {
@@ -572,13 +575,13 @@ export default function HomeScreen() {
     const month = t(monthKey, { defaultValue: hijriRaw.monthEn });
     const suffix = t('hijri.ah', { defaultValue: 'AH' });
     
-    let displayDay = parseInt(hijriRaw.day, 10) + (prefs.hijriOffset || 0);
+    let displayDay = parseInt(hijriRaw.day, 10) + (prefsHijriOffset || 0);
     // basic bounds
     if (displayDay < 1) displayDay = 1;
     if (displayDay > 30) displayDay = 30;
 
     return `${formatNumber(displayDay.toString(), i18n.language)} ${month} ${formatNumber(hijriRaw.year, i18n.language)} ${suffix}`;
-  }, [hijriRaw, t, i18n.language, prefs.hijriOffset]);
+  }, [hijriRaw, t, i18n.language, prefsHijriOffset]);
 
   const isMakruh = useMemo(() => {
     if (!rawTimings.Sunrise || !rawTimings.Sunset || !rawTimings.Dhuhr) return false;

@@ -2,7 +2,7 @@ import Animated, { LinearTransition } from 'react-native-reanimated';
 import ThemeCard from '@/components/ThemeCard';
 import OptionsModal from '@/components/OptionsModal';
 import PageHeader from '@/components/page-header';
-import TimePickerModal from '@/components/TimePickerModal';
+import NotificationsModal from '@/components/NotificationsModal';
 import { Fonts, Spacing, useThemeColors, useActiveColor } from '@/constants/theme';
 import { setLanguage } from '@/i18n';
 import { usePreferencesStore } from '@/store/preferencesStore';
@@ -22,8 +22,8 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import * as Location from 'expo-location';
 import { useRouter, useLocalSearchParams } from 'expo-router';
 import * as Updates from 'expo-updates';
-import { Bell, BellOff, BookOpen, CalendarDays, Calculator, Clock, FileText, FolderLock, Globe, Info, LayoutDashboard, ListTodo, MapPin, Palette, RefreshCw, Scale, Shield} from 'lucide-react-native';
-import React, { useEffect, useState } from 'react';
+import { Bell, BookOpen, CalendarDays, Calculator, FileText, FolderLock, Globe, Info, MapPin, Palette, RefreshCw, Scale, Shield} from 'lucide-react-native';
+import React, { useEffect, useState, useRef } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Alert, Linking, ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import AppModal from '@/components/AppModal';
@@ -51,12 +51,10 @@ export default function SettingsScreen() {
 
   const [fetchingLoc, setFetchingLoc] = useState(false);
   const [checkingUpdate, setCheckingUpdate] = useState(false);
-    
-  const [pickerVisible, setPickerVisible] = useState(false);
-  const [pickerType, setPickerType] = useState<'start' | 'end'>('start');
 
   const [optionsModalVisible, setOptionsModalVisible] = useState(false);
   const [optionsModalType, setOptionsModalType] = useState<'calc' | 'madhab' | 'hijri' | 'bangla' | 'location' | 'appearance' | 'calendar' | null>(null);
+  const [notificationsModalVisible, setNotificationsModalVisible] = useState(false);
 
   const [updateStatus, setUpdateStatus] = useState<string | null>(null);
 
@@ -66,24 +64,39 @@ export default function SettingsScreen() {
   const [highlightedRow, setHighlightedRow] = useState<string | null>(params.highlight || null);
   const scrollViewRef = React.useRef<ScrollView>(null);
 
-  const [locationY, setLocationY] = useState(0);
+  const locationY = React.useRef(0);
+
+  const updateStatusTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+  const scrollTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+  const highlightTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+  const notificationDebounceRef = useRef<NodeJS.Timeout | null>(null);
+
+  useEffect(() => {
+    return () => {
+      if (updateStatusTimeoutRef.current) clearTimeout(updateStatusTimeoutRef.current);
+      if (scrollTimeoutRef.current) clearTimeout(scrollTimeoutRef.current);
+      if (highlightTimeoutRef.current) clearTimeout(highlightTimeoutRef.current);
+      if (notificationDebounceRef.current) clearTimeout(notificationDebounceRef.current);
+    };
+  }, []);
 
   useEffect(() => {
     if (params.highlight) {
       setHighlightedRow(params.highlight);
       
-      setTimeout(() => {
+      if (scrollTimeoutRef.current) clearTimeout(scrollTimeoutRef.current);
+      scrollTimeoutRef.current = setTimeout(() => {
         if (params.highlight === 'storage') {
           scrollViewRef.current?.scrollToEnd({ animated: true });
-        } else if (params.highlight === 'location' && locationY > 0) {
-          scrollViewRef.current?.scrollTo({ y: locationY - 20, animated: true });
+        } else if (params.highlight === 'location' && locationY.current > 0) {
+          scrollViewRef.current?.scrollTo({ y: locationY.current - 20, animated: true });
         }
       }, 400);
 
-      const timer = setTimeout(() => setHighlightedRow(null), 3000);
-      return () => clearTimeout(timer);
+      if (highlightTimeoutRef.current) clearTimeout(highlightTimeoutRef.current);
+      highlightTimeoutRef.current = setTimeout(() => setHighlightedRow(null), 3000);
     }
-  }, [params.highlight, locationY]);
+  }, [params.highlight]);
 
   // ── Permanent Storage ──────────────────────────────────────────────────────
   const [storageMode, setStorageMode] = useState<StorageMode>('internal');
@@ -92,34 +105,14 @@ export default function SettingsScreen() {
   const [storageConfirmModal, setStorageConfirmModal] = useState<'enable' | 'disable' | null>(null);
 
   useEffect(() => {
+    let isMounted = true;
     getStorageMode().then((mode) => {
-      setStorageMode(mode);
+      if (isMounted) setStorageMode(mode);
     });
+    return () => { isMounted = false; };
   }, []);
 
-  const toggleNotifications = async (enabled: boolean) => {
-    prefs.setPreferences({ notificationsEnabled: enabled });
-    if (enabled) {
-      import('../../services/notificationService').then(s => s.scheduleAllNotifications());
-    } else {
-      import('@notifee/react-native').then(n => n.default.cancelAllNotifications());
-    }
-  };
 
-  const togglePrayerStartAlerts = (enabled: boolean) => {
-    prefs.setPreferences({ prayerStartAlerts: enabled });
-    import('../../services/notificationService').then(s => s.scheduleAllNotifications());
-  };
-
-  const togglePrayerEndAlerts = (enabled: boolean) => {
-    prefs.setPreferences({ prayerEndAlerts: enabled });
-    import('../../services/notificationService').then(s => s.scheduleAllNotifications());
-  };
-
-  const toggleTaskReminders = (enabled: boolean) => {
-    prefs.setPreferences({ taskRemindersEnabled: enabled });
-    import('../../services/notificationService').then(s => s.scheduleAllNotifications());
-  };
 
   const toggleDarkMode = (enabled: boolean) => {
     // DO NOT wrap in InteractionManager — setTheme is a simple Zustand set().
@@ -131,17 +124,14 @@ export default function SettingsScreen() {
   const cycleLanguage = () => {
     const nextLang = i18n.language === 'en' ? 'bn' : 'en';
     setLanguage(nextLang);
-    import('../../services/notificationService').then(s => s.scheduleAllNotifications());
+    
+    if (notificationDebounceRef.current) clearTimeout(notificationDebounceRef.current);
+    notificationDebounceRef.current = setTimeout(() => {
+      import('../../services/notificationService').then(s => s.scheduleAllNotifications());
+    }, 1000);
   };
 
 
-
-  const formatTime12h = (hour: number, minute: number, lang: string) => {
-    const d = new Date();
-    d.setHours(hour, minute, 0, 0);
-    const timeEn = d.toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit', hour12: true });
-    return formatNumber(timeEn, lang);
-  };
 
   const fetchLocation = async () => {
     setFetchingLoc(true);
@@ -171,35 +161,48 @@ export default function SettingsScreen() {
     }
   };
 
+  const isMounted = useRef(true);
+  useEffect(() => {
+    return () => { isMounted.current = false; };
+  }, []);
+
   const checkForUpdates = async () => {
     if (__DEV__) {
       setUpdateStatus(t('settings.devModeUpdateMsg', 'Unavailable in Dev'));
-      setTimeout(() => setUpdateStatus(null), 3000);
+      if (updateStatusTimeoutRef.current) clearTimeout(updateStatusTimeoutRef.current);
+      updateStatusTimeoutRef.current = setTimeout(() => setUpdateStatus(null), 3000);
       return;
     }
 
     try {
       setCheckingUpdate(true);
+      if (updateStatusTimeoutRef.current) clearTimeout(updateStatusTimeoutRef.current);
       setUpdateStatus(t('settings.checkingUpdates', 'Checking for Updates...'));
       
       const update = await Updates.checkForUpdateAsync();
       
       if (update.isAvailable) {
+        if (!isMounted.current) return;
         setUpdateStatus(t('settings.downloadingUpdate', 'Downloading Update...'));
         await Updates.fetchUpdateAsync();
         
+        if (!isMounted.current) return;
         setUpdateStatus(t('settings.restartingApp', 'Applying Updates...'));
         await Updates.reloadAsync();
       } else {
+        if (!isMounted.current) return;
         setUpdateStatus(t('settings.upToDate', 'Up to Date'));
-        setTimeout(() => setUpdateStatus(null), 3000);
+        if (updateStatusTimeoutRef.current) clearTimeout(updateStatusTimeoutRef.current);
+        updateStatusTimeoutRef.current = setTimeout(() => { if (isMounted.current) setUpdateStatus(null) }, 3000);
       }
     } catch (error) {
       console.log('Error checking for updates', error);
+      if (!isMounted.current) return;
       setUpdateStatus(t('settings.errorCheckingUpdates', 'Update Failed'));
-      setTimeout(() => setUpdateStatus(null), 3000);
+      if (updateStatusTimeoutRef.current) clearTimeout(updateStatusTimeoutRef.current);
+      updateStatusTimeoutRef.current = setTimeout(() => { if (isMounted.current) setUpdateStatus(null) }, 3000);
     } finally {
-      setCheckingUpdate(false);
+      if (isMounted.current) setCheckingUpdate(false);
     }
   };
 
@@ -292,75 +295,16 @@ export default function SettingsScreen() {
 
         <Animated.Text layout={LinearTransition.duration(200)} style={[styles.sectionTitle, { color: colors.textSecondary, marginTop: Spacing.four }]}>{t('settings.notificationsTitle', { defaultValue: 'Notifications Settings' })}</Animated.Text>
         <ThemeCard animated layout={LinearTransition.duration(200)} style={[styles.card]}>
-          <SettingRow icon={Bell} title={t('settings.masterToggle', { defaultValue: 'Master Toggle' })} value={prefs.notificationsEnabled} type="toggle" isLast={!prefs.notificationsEnabled} onPress={toggleNotifications} />
-          {prefs.notificationsEnabled && (
-            <>
-              <SettingRow icon={Clock} title={t('settings.prayerStartAlerts', { defaultValue: 'Prayer Start Alerts' })} value={prefs.prayerStartAlerts} type="toggle" onPress={togglePrayerStartAlerts} />
-              <SettingRow icon={Clock} title={t('settings.prayerEndAlerts', { defaultValue: 'Prayer End Alerts' })} value={prefs.prayerEndAlerts} type="toggle" onPress={togglePrayerEndAlerts} />
-              <SettingRow icon={ListTodo} title={t('settings.dailyReminders', { defaultValue: 'Daily Reminders' })} value={prefs.taskRemindersEnabled} type="toggle" onPress={toggleTaskReminders} />
-              <SettingRow
-                icon={BellOff}
-                title={t('settings.doNotDisturb')}
-                value={prefs.quietHours.enabled}
-                type="toggle"
-                isLast={true}
-                onPress={(v: boolean) => {
-                  prefs.setPreferences({ quietHours: { ...prefs.quietHours, enabled: v } });
-                  import('../../services/notificationService').then(s => s.scheduleAllNotifications());
-                }}
-               
-              />
-              {prefs.quietHours.enabled && (
-                <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', paddingBottom: Spacing.three, paddingLeft: 52 }}>
-                  <Text style={[styles.settingTitle, { color: colors.textSecondary, fontSize: 13 }]}>
-                    {t('settings.dndSchedule')}
-                  </Text>
-                  <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6 }}>
-                    <TouchableOpacity activeOpacity={1} 
-                      onPress={() => { setPickerType('start'); setPickerVisible(true); }}
-                      style={{ paddingHorizontal: 8, paddingVertical: 4, borderRadius: 6, backgroundColor: colors.border + '40' }}
-                    >
-                      <Text style={{ fontFamily: Fonts.outfit, fontSize: 13, color: colors.text }}>
-                        {formatTime12h(prefs.quietHours.startHour, prefs.quietHours.startMinute, i18n.language)}
-                      </Text>
-                    </TouchableOpacity>
-                    <Text style={{ fontFamily: Fonts.outfit, fontSize: 12, color: colors.textSecondary }}>
-                      {t('settings.to')}
-                    </Text>
-                    <TouchableOpacity activeOpacity={1} 
-                      onPress={() => { setPickerType('end'); setPickerVisible(true); }}
-                      style={{ paddingHorizontal: 8, paddingVertical: 4, borderRadius: 6, backgroundColor: colors.border + '40' }}
-                    >
-                      <Text style={{ fontFamily: Fonts.outfit, fontSize: 13, color: colors.text }}>
-                        {formatTime12h(prefs.quietHours.endHour, prefs.quietHours.endMinute, i18n.language)}
-                      </Text>
-                    </TouchableOpacity>
-                  </View>
-                </View>
-              )}
-            </>
-          )}
+          <SettingRow 
+            icon={Bell} 
+            title={t('settings.notificationsTitle')} 
+            onPress={() => setNotificationsModalVisible(true)} 
+            type="navigate" 
+            isLast={true}
+          />
         </ThemeCard>
 
-        <TimePickerModal
-          visible={pickerVisible}
-          onClose={() => setPickerVisible(false)}
-          title={pickerType === 'start' ? t('settings.dndFrom') : t('settings.dndTo')}
-          initialHour={pickerType === 'start' ? prefs.quietHours.startHour : prefs.quietHours.endHour}
-          initialMinute={pickerType === 'start' ? prefs.quietHours.startMinute : prefs.quietHours.endMinute}
-         
-          onSave={(hour, minute) => {
-            setPickerVisible(false);
-            if (pickerType === 'start') {
-              prefs.setPreferences({ quietHours: { ...prefs.quietHours, startHour: hour, startMinute: minute } });
-            } else {
-              prefs.setPreferences({ quietHours: { ...prefs.quietHours, endHour: hour, endMinute: minute } });
-            }
-            import('../../services/notificationService').then(s => s.scheduleAllNotifications());
-          }}
-        />
-
-        <Animated.Text layout={LinearTransition.duration(200)} onLayout={(e) => setLocationY(e.nativeEvent.layout.y)} style={[styles.sectionTitle, { color: colors.textSecondary, marginTop: Spacing.four }]}>{t('settings.locationCalc')}</Animated.Text>
+        <Animated.Text layout={LinearTransition.duration(200)} onLayout={(e) => { locationY.current = e.nativeEvent.layout.y; }} style={[styles.sectionTitle, { color: colors.textSecondary, marginTop: Spacing.four }]}>{t('settings.locationCalc')}</Animated.Text>
         <ThemeCard animated layout={LinearTransition.duration(200)} style={[styles.card]}>
           <SettingRow
             icon={MapPin}
@@ -407,16 +351,11 @@ export default function SettingsScreen() {
             highlight={highlightedRow === 'storage'}
            
           />
-          <SettingRow
-            icon={Shield}
-            title={t('settings.managePermissions')}
-            onPress={() => Linking.openSettings()}
-           
-          />
           <SettingRow 
-            icon={LayoutDashboard} 
-            title="Manage Widgets" 
-            onPress={() => router.push('/widgets' as any)} 
+            icon={Shield} 
+            title={t('settings.managePermissions')} 
+            onPress={() => Linking.openSettings()} 
+           
           />
           <SettingRow 
             icon={RefreshCw} 
@@ -442,6 +381,7 @@ export default function SettingsScreen() {
         </Animated.View>
       </ScrollView>
 
+      <NotificationsModal visible={notificationsModalVisible} onClose={() => setNotificationsModalVisible(false)} />
       
       {/* Options Modal */}
       {optionsModalType && (

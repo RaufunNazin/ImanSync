@@ -20,9 +20,35 @@ const DEFAULT_SYNC_STATE: SyncState = {
   lastSurahDownloaded: 0,
 };
 
+const fetchWithTimeout = async (url: string, options: any, timeoutMs = 15000) => {
+  const controller = new AbortController();
+  const id = setTimeout(() => controller.abort(), timeoutMs);
+  
+  if (options.signal) {
+    options.signal.addEventListener('abort', () => {
+      clearTimeout(id);
+      controller.abort();
+    });
+    if (options.signal.aborted) {
+      clearTimeout(id);
+      controller.abort();
+    }
+  }
+  
+  try {
+    const res = await fetch(url, { ...options, signal: controller.signal });
+    clearTimeout(id);
+    return res;
+  } catch (e) {
+    clearTimeout(id);
+    throw e;
+  }
+};
+
 export const usePreloaders = () => {
   const isRunning = useRef(false);
   const appState = useRef(AppState.currentState);
+  const abortControllerRef = useRef<AbortController | null>(null);
 
   useEffect(() => {
     // Load state
@@ -38,6 +64,7 @@ export const usePreloaders = () => {
     const runQueue = async () => {
       if (isRunning.current) return;
       isRunning.current = true;
+      abortControllerRef.current = new AbortController();
 
       try {
         let state = loadState();
@@ -45,6 +72,7 @@ export const usePreloaders = () => {
         // Pause if app goes to background
         const checkPause = () => {
           if (appState.current !== 'active') {
+            abortControllerRef.current?.abort();
             throw new Error('PAUSED_BACKGROUND');
           }
         };
@@ -67,7 +95,7 @@ export const usePreloaders = () => {
 
         // 1b. Surah List
         if (!state.surahListDone) {
-          const res = await fetch('https://api.alquran.cloud/v1/surah');
+          const res = await fetchWithTimeout('https://api.alquran.cloud/v1/surah', { signal: abortControllerRef.current?.signal });
           const json = await res.json();
           if (json && json.data) {
             const formatted = json.data.map((item: any) => ({
@@ -114,7 +142,7 @@ export const usePreloaders = () => {
 
           // Only fetch if not already cached
           if (!storage.getString(cacheKey)) {
-            const res = await fetch(`https://api.alquran.cloud/v1/surah/${targetSurah}/editions/${editionsStr}`);
+            const res = await fetchWithTimeout(`https://api.alquran.cloud/v1/surah/${targetSurah}/editions/${editionsStr}`, { signal: abortControllerRef.current?.signal });
             const json = await res.json();
             
             if (json && json.data) {
@@ -152,6 +180,7 @@ export const usePreloaders = () => {
         }
 
       } catch (e: any) {
+        if (e.name === 'AbortError') return;
         if (e.message !== 'PAUSED_BACKGROUND') {
           console.error('Preloader error:', e);
         }
@@ -175,6 +204,7 @@ export const usePreloaders = () => {
 
     return () => {
       subscription.remove();
+      abortControllerRef.current?.abort();
     };
   }, []);
 };

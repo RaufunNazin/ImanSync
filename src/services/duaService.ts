@@ -63,22 +63,21 @@ class DuaService {
     return cached ? JSON.parse(cached) : [];
   }
 
-  static async getCategories(): Promise<HisnulCategory[]> {
+  static async getCategories(signal?: AbortSignal): Promise<HisnulCategory[]> {
     try {
       const cached = storage.getString(CACHE_KEY_CATEGORIES);
       if (cached) {
-      this.fetchAndCacheCategories().catch(console.warn);
-      return JSON.parse(cached);
+        return JSON.parse(cached);
+      }
+      return await this.fetchAndCacheCategories(signal);
+    } catch (e: any) {
+      if (e.name !== 'AbortError') console.warn('Error fetching categories:', e);
+      return [];
     }
-    return await this.fetchAndCacheCategories();
-  } catch (e) {
-    console.warn('Error in getCategories:', e);
-    return [];
-  }
   }
 
-  private static async fetchAndCacheCategories(): Promise<HisnulCategory[]> {
-    const res = await fetch(`${this.API_BASE}/categories`);
+  private static async fetchAndCacheCategories(signal?: AbortSignal): Promise<HisnulCategory[]> {
+    const res = await fetch(`${this.API_BASE}/categories`, { signal });
     const json = await res.json();
     if (json.success && json.data) {
       storage.set(CACHE_KEY_CATEGORIES, JSON.stringify(json.data));
@@ -93,25 +92,25 @@ class DuaService {
     return cached ? JSON.parse(cached) : [];
   }
 
-  static async getDuasByCategory(categoryId: number): Promise<UnifiedDuaItem[]> {
+  static async getDuasByCategory(categoryId: number, signal?: AbortSignal): Promise<UnifiedDuaItem[]> {
     try {
       const cacheKey = `${CACHE_KEY_DUAS}_cat_${categoryId}`;
       const cached = storage.getString(cacheKey);
       
       if (cached) {
-      this.fetchAndCacheCategoryDuas(categoryId).catch(console.warn);
+      this.fetchAndCacheCategoryDuas(categoryId, signal).catch(console.warn);
       return JSON.parse(cached);
     }
-    return await this.fetchAndCacheCategoryDuas(categoryId);
+    return await this.fetchAndCacheCategoryDuas(categoryId, signal);
   } catch (e) {
     console.warn(`Error in getDuasByCategory(${categoryId}):`, e);
     return [];
   }
   }
 
-  private static async fetchAndCacheCategoryDuas(categoryId: number): Promise<UnifiedDuaItem[]> {
+  private static async fetchAndCacheCategoryDuas(categoryId: number, signal?: AbortSignal): Promise<UnifiedDuaItem[]> {
     // We assume limit=100 is enough for a single category since max dua per category is small
-    const res = await fetch(`${this.API_BASE}/categories/${categoryId}/duas?limit=200`);
+    const res = await fetch(`${this.API_BASE}/categories/${categoryId}/duas?limit=200`, { signal });
     const json = await res.json();
     if (json.success && json.data) {
       const unified = json.data.map(this.mapToUnified);
@@ -121,7 +120,7 @@ class DuaService {
     return [];
   }
 
-  static async getDuaById(id: string | number): Promise<UnifiedDuaItem | null> {
+  static async getDuaById(id: string | number, signal?: AbortSignal): Promise<UnifiedDuaItem | null> {
     try {
       const cacheKey = `${CACHE_KEY_DUAS}_id_${id}`;
       const cached = storage.getString(cacheKey);
@@ -129,7 +128,7 @@ class DuaService {
         return JSON.parse(cached) as UnifiedDuaItem;
       }
       
-      const res = await fetch(`${this.API_BASE}/duas/${id}`);
+      const res = await fetch(`${this.API_BASE}/duas/${id}`, { signal });
       const json = await res.json();
       if (json.success && json.data) {
         const unified = this.mapToUnified(json.data);
@@ -137,35 +136,35 @@ class DuaService {
         return unified;
       }
       return null;
-    } catch (e) {
-      console.warn(`Error fetching dua ${id}:`, e);
+    } catch (e: any) {
+      if (e.name !== 'AbortError') console.warn(`Error fetching dua ${id}:`, e);
       return null;
     }
   }
 
-  static async searchNative(query: string, isArabic: boolean): Promise<UnifiedDuaItem[]> {
+  static async searchNative(query: string, isArabic: boolean, signal?: AbortSignal): Promise<UnifiedDuaItem[]> {
     try {
       const endpoint = isArabic ? '/search/arabic' : '/search';
-      const res = await fetch(`${this.API_BASE}${endpoint}?q=${encodeURIComponent(query)}`);
+      const res = await fetch(`${this.API_BASE}${endpoint}?q=${encodeURIComponent(query)}`, { signal });
       const json = await res.json();
       if (json.success && json.data) {
         return json.data.map(this.mapToUnified);
     }
     return [];
-  } catch (e) {
-    console.warn('Error in searchNative:', e);
+  } catch (e: any) {
+    if (e.name !== 'AbortError') console.warn('Error in searchNative:', e);
     return [];
   }
   }
 
-  static async searchHybrid(query: string): Promise<UnifiedDuaItem[]> {
+  static async searchHybrid(query: string, signal?: AbortSignal): Promise<UnifiedDuaItem[]> {
     if (!query) return [];
     
     const isArabicOrBengali = /[\u0600-\u06FF\u0980-\u09FF]/.test(query);
     const isArabic = /[\u0600-\u06FF]/.test(query);
     
     if (isArabicOrBengali) {
-      return this.searchNative(query, isArabic);
+      return this.searchNative(query, isArabic, signal);
     } else {
       // English search
       const q = query.toLowerCase();
@@ -173,24 +172,34 @@ class DuaService {
         hisnulEnMapping[id].translation_en.toLowerCase().includes(q)
       );
       
-      const results = await Promise.all(
-        matchingIds.slice(0, 20).map(async (id) => {
-          const cacheKey = `${CACHE_KEY_DUAS}_id_${id}`;
-          const cached = storage.getString(cacheKey);
-          if (cached) return JSON.parse(cached) as UnifiedDuaItem;
-          
-          try {
-            const res = await fetch(`${this.API_BASE}/duas/${id}`);
-            const json = await res.json();
-            if (json.success && json.data) {
-              const unified = this.mapToUnified(json.data);
-              storage.set(cacheKey, JSON.stringify(unified));
-              return unified;
+      const targetIds = matchingIds.slice(0, 20);
+      const results: (UnifiedDuaItem | null)[] = [];
+      const chunkSize = 5;
+
+      for (let i = 0; i < targetIds.length; i += chunkSize) {
+        const chunk = targetIds.slice(i, i + chunkSize);
+        const chunkResults = await Promise.all(
+          chunk.map(async (id) => {
+            const cacheKey = `${CACHE_KEY_DUAS}_id_${id}`;
+            const cached = storage.getString(cacheKey);
+            if (cached) return JSON.parse(cached) as UnifiedDuaItem;
+            
+            try {
+              const res = await fetch(`${this.API_BASE}/duas/${id}`, { signal });
+              const json = await res.json();
+              if (json.success && json.data) {
+                const unified = this.mapToUnified(json.data);
+                storage.set(cacheKey, JSON.stringify(unified));
+                return unified;
+              }
+            } catch(e) {
+              console.warn(`Error fetching dua ${id}:`, e);
             }
-          } catch(e) {}
-          return null;
-        })
-      );
+            return null;
+          })
+        );
+        results.push(...chunkResults);
+      }
       
       return results.filter(Boolean) as UnifiedDuaItem[];
     }

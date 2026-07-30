@@ -1,5 +1,5 @@
-import React, { useEffect, useState, useCallback } from 'react';
-import { View, Text, StyleSheet, ScrollView, TouchableOpacity, ActivityIndicator } from 'react-native';
+import React, { useEffect, useState, useCallback, useRef } from 'react';
+import { View, Text, StyleSheet, FlatList, TouchableOpacity, ActivityIndicator, InteractionManager } from 'react-native';
 import { useLocalSearchParams, useRouter, useFocusEffect } from 'expo-router';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Fonts, Spacing, useThemeColors, useActiveColor } from '@/constants/theme';
@@ -11,6 +11,7 @@ import * as Haptics from 'expo-haptics';
 import { Bookmark } from 'lucide-react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import hadithChaptersBn from '@/data/hadith-chapters-bn.json';
+import { fetchOnce } from '@/utils/fetchWithCache';
 
 const BOOK_NAMES: Record<string, string> = {
   bukhari: 'Sahih al-Bukhari',
@@ -37,6 +38,14 @@ export default function HadithBookScreen() {
   const [sections, setSections] = useState<Section[]>([]);
   const [loading, setLoading] = useState(true);
   const [bookmarkedChapters, setBookmarkedChapters] = useState<Record<string, boolean>>({});
+  
+  const interactionHandles = useRef<any[]>([]);
+
+  useEffect(() => {
+    return () => {
+      interactionHandles.current.forEach((h: any) => h?.cancel());
+    };
+  }, []);
   
   const bookName = book ? t(`hadith.books.${book}`, { defaultValue: BOOK_NAMES[book] }) : 'Hadith Book';
 
@@ -66,72 +75,92 @@ export default function HadithBookScreen() {
   useEffect(() => {
     if (!book) return;
     
-    // Fetch chapters metadata
-    fetch('https://cdn.jsdelivr.net/gh/fawazahmed0/hadith-api@1/info.json')
-      .then(res => res.json())
-      .then(data => {
-        const bookData = data[book]?.metadata;
-        if (bookData && bookData.sections && bookData.section_details) {
-          const parsedSections: Section[] = [];
-          
-          for (const key in bookData.sections) {
-            const sectionName = bookData.sections[key];
-            const details = bookData.section_details[key];
+    let isMounted = true;
+    const task = InteractionManager.runAfterInteractions(() => {
+      fetchOnce({
+        key: `hadith_info_${book}`,
+        onStart: () => {
+          if (isMounted) setLoading(true);
+        },
+        fetcher: async () => {
+          const res = await fetch('https://cdn.jsdelivr.net/gh/fawazahmed0/hadith-api@1/info.json');
+          return res.json();
+        },
+        onData: (data) => {
+          if (!isMounted) return;
+          const bookData = data[book]?.metadata;
+          if (bookData && bookData.sections && bookData.section_details) {
+            const parsedSections: Section[] = [];
             
-            // Skip empty sections or sections with 0 hadiths
-            if (sectionName && details) {
-              const count = details.hadithnumber_last - details.hadithnumber_first + 1;
-              if (count > 0) {
-                parsedSections.push({
-                  id: key,
-                  name: sectionName,
-                  count: count,
-                });
+            for (const key in bookData.sections) {
+              const sectionName = bookData.sections[key];
+              const details = bookData.section_details[key];
+              
+              if (sectionName && details) {
+                const count = details.hadithnumber_last - details.hadithnumber_first + 1;
+                if (count > 0) {
+                  parsedSections.push({
+                    id: key,
+                    name: sectionName,
+                    count: count,
+                  });
+                }
               }
             }
+            setSections(parsedSections);
           }
-          
-          setSections(parsedSections);
+          setLoading(false);
+        },
+        onError: (err) => {
+          console.error("Error fetching hadith info:", err);
+          if (isMounted) setLoading(false);
         }
-      })
-      .catch(err => console.error("Error fetching hadith info:", err))
-      .finally(() => setLoading(false));
+      });
+    });
+
+    return () => {
+      isMounted = false;
+      task.cancel();
+    };
   }, [book]);
 
-  const toggleBookmark = async (section: Section) => {
+  const toggleBookmark = (section: Section) => {
     Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
     
     const isBookmarked = bookmarkedChapters[section.id];
     const newMap = { ...bookmarkedChapters, [section.id]: !isBookmarked };
     setBookmarkedChapters(newMap);
 
-    try {
-      const stored = await AsyncStorage.getItem('imansync_hadith_bookmarks');
-      let currentBookmarks = stored ? JSON.parse(stored) : [];
-      
-      if (isBookmarked) {
-        // Remove
-        currentBookmarks = currentBookmarks.filter((b: any) => 
-          !(b.type === 'chapter' && b.bookId === book && b.chapterId === section.id)
-        );
-      } else {
-        // Add
-        currentBookmarks.push({
-          type: 'chapter',
-          bookId: book,
-          bookName: bookName,
-          chapterId: section.id,
-          chapterName: section.name,
-          addedAt: new Date().toISOString()
-        });
+    const handle = InteractionManager.runAfterInteractions(async () => {
+      try {
+        const stored = await AsyncStorage.getItem('imansync_hadith_bookmarks');
+        let currentBookmarks = stored ? JSON.parse(stored) : [];
+        
+        if (isBookmarked) {
+          // Remove
+          currentBookmarks = currentBookmarks.filter((b: any) => 
+            !(b.type === 'chapter' && b.bookId === book && b.chapterId === section.id)
+          );
+        } else {
+          // Add
+          currentBookmarks.push({
+            type: 'chapter',
+            bookId: book,
+            bookName: bookName,
+            chapterId: section.id,
+            chapterName: section.name,
+            addedAt: new Date().toISOString()
+          });
+        }
+        
+        await AsyncStorage.setItem('imansync_hadith_bookmarks', JSON.stringify(currentBookmarks));
+      } catch (e) {
+        console.error('Failed to toggle chapter bookmark', e);
+        // Revert UI on failure
+        setBookmarkedChapters({ ...bookmarkedChapters, [section.id]: isBookmarked });
       }
-      
-      await AsyncStorage.setItem('imansync_hadith_bookmarks', JSON.stringify(currentBookmarks));
-    } catch (e) {
-      console.error('Failed to toggle chapter bookmark', e);
-      // Revert UI on failure
-      setBookmarkedChapters({ ...bookmarkedChapters, [section.id]: isBookmarked });
-    }
+    });
+    interactionHandles.current.push(handle);
   };
 
   return (
@@ -143,15 +172,19 @@ export default function HadithBookScreen() {
           <ActivityIndicator size="large" color={activeColor} />
         </View>
       ) : (
-        <ScrollView 
+        <FlatList
           showsVerticalScrollIndicator={false}
           contentContainerStyle={styles.container}
-        >
-          {sections.map((section) => {
+          data={sections}
+          keyExtractor={(item) => item.id.toString()}
+          initialNumToRender={10}
+          windowSize={5}
+          maxToRenderPerBatch={10}
+          renderItem={({ item: section }) => {
             const isBookmarked = bookmarkedChapters[section.id];
             
             return (
-              <ThemeCard key={section.id} intensity={30} style={[styles.cardWrapper, { borderColor: colors.border }]}>
+              <ThemeCard intensity={30} style={[styles.cardWrapper, { borderColor: colors.border }]}>
                 <TouchableOpacity activeOpacity={1}
                   style={styles.card}
                   onPress={() => {
@@ -190,8 +223,8 @@ export default function HadithBookScreen() {
                 </TouchableOpacity>
               </ThemeCard>
             );
-          })}
-        </ScrollView>
+          }}
+        />
       )}
     </SafeAreaView>
   );

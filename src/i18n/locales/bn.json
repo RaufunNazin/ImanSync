@@ -373,9 +373,17 @@
     "madhab_1": "হানাফী",
     "footerSubtitle": "শুধুই আল্লাহর সন্তুষ্টির জন্য",
     "notificationsTitle": "নোটিফিকেশন সেটিংস",
-    "masterToggle": "মাস্টার সুইচ",
-    "prayerStartAlerts": "নামাজ শুরুর এলার্ট",
-    "prayerEndAlerts": "নামাজ শেষের এলার্ট",
+    "masterToggle": "নোটিফিকেশন চালু করুন",
+    "fajrStart": "ফজর শুরু",
+    "fajrEnd": "ফজর শেষের এলার্ট",
+    "dhuhrStart": "যোহর শুরু",
+    "dhuhrEnd": "যোহর শেষের এলার্ট",
+    "asrStart": "আসর শুরু",
+    "asrEnd": "আসর শেষের এলার্ট",
+    "maghribStart": "মাগরিব শুরু",
+    "maghribEnd": "মাগরিব শেষের এলার্ট",
+    "ishaStart": "ইশা শুরু",
+    "ishaEnd": "ইশা শেষের এলার্ট",
     "dailyReminders": "দৈনিক রিমাইন্ডার",
     "doNotDisturb": "ডু নট ডিস্টার্ব",
     "dndFrom": "নীরব সময় শুরু",
@@ -439,17 +447,6 @@
     "west": "পঃ",
     "accuracy": "কম্পাসের নির্ভুলতা:",
     "interference": "ম্যাগনেটিক সিগন্যালে সমস্যা হচ্ছে। দয়া করে ফোনটি ইলেকট্রনিক্স ডিভাইস থেকে দূরে সরান।"
-  },
-  "stories": {
-    "titleEn": "সূরার প্রেক্ষাপট",
-    "titleAr": "سياق السور",
-    "discover": "নাজিলের প্রেক্ষাপট জানুন",
-    "body": "আমরা প্রতিটি সূরার শানে নুযূল অনুবাদ ও ভেরিফাই করছি।",
-    "authentic": "বিশ্বস্ত সূত্র",
-    "authenticDesc": "নির্ভরযোগ্য আলেমদের বই থেকে নেওয়া।",
-    "deeper": "গভীর উপলব্ধি",
-    "deeperDesc": "আয়াতগুলো কেন ও কখন নাজিল হয়েছিল তা জানুন।",
-    "return": "কুরআনে ফিরে যান"
   },
   "prayerTimes": {
     "fajr": "ফজর",
@@ -1271,8 +1268,8 @@
     "sha'ban": "শাবান",
     "ramadan": "রমজান",
     "shawwal": "শাওয়াল",
-    "dhu_al-qi'dah": "জ্বিলকদ",
-    "dhu_al-hijjah": "জ্বিলহজ্জ",
+    "dhu_al-qi'dah": "জিলক্বদ",
+    "dhu_al-hijjah": "জিলহজ্ব",
     "ah": "হিজরি"
   },
   "calendar": {
@@ -1299,18 +1296,6 @@
     "noMatchingQuran": "\"{{query}}\" এর জন্য কোনো ফলাফল পাওয়া যায়নি"
   },
   "noResults": "কোন ফলাফল পাওয়া যায়নি",
-  "trivia": {
-    "title": "ইসলামিক কুইজ",
-    "quizCompleted": "কুইজ সম্পন্ন হয়েছে!",
-    "perfectScore": "দুর্দান্ত! চমৎকার জ্ঞান! মাশাআল্লাহ!",
-    "goodScore": "ভালো করেছেন! শিখতে থাকুন!",
-    "lowScore": "আরও শেখার একটি দুর্দান্ত সুযোগ!",
-    "playAgain": "আবার খেলুন",
-    "questionOf": "প্রশ্ন {{total}} এর মধ্যে {{current}}",
-    "score": "স্কোর: {{score}}",
-    "finish": "শেষ করুন",
-    "nextQuestion": "পরবর্তী প্রশ্ন"
-  },
   "common": {
     "less": "কম",
     "more": "বেশি",
@@ -1382,5 +1367,13 @@
     "searchPlaceholder": "হাদিস খুঁজুন...",
     "chapterBookmark": "অধ্যায় বুকমার্ক"
   },
-  "searchIn": "{{title}} খুঁজুন..."
+  "searchIn": "{{title}} খুঁজুন...",
+  "widgets": {
+    "manageWidgets": "উইজেট পরিচালনা",
+    "previewDesc": "উইজেটগুলোর প্রিভিউ দেখুন। হোম স্ক্রিনে যুক্ত করতে লং প্রেস করুন।",
+    "prayerTimeline": "নামাজের সময়সূচী",
+    "specialTimes": "বিশেষ সময়",
+    "dailyTracker": "ডেইলি ট্র্যাকার",
+    "islamicDate": "ইসলামিক তারিখ"
+  }
 }
