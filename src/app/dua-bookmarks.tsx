@@ -204,7 +204,7 @@ export default function DuaBookmarksScreen() {
       </ScrollView>
 
       {/* Create Folder Modal */}
-      <Modal visible={createModalVisible} transparent animationType="fade">
+      <Modal visible={createModalVisible} transparent animationType="fade" statusBarTranslucent navigationBarTranslucent>
         <TouchableWithoutFeedback onPress={() => setCreateModalVisible(false)}>
           <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center', backgroundColor: 'rgba(0,0,0,0.5)', padding: Spacing.four }}>
             <TouchableWithoutFeedback>
@@ -235,7 +235,7 @@ export default function DuaBookmarksScreen() {
       </Modal>
 
       {/* Move Bookmark Modal */}
-      <Modal visible={moveModalVisible} transparent animationType="slide">
+      <Modal visible={moveModalVisible} transparent animationType="fade" statusBarTranslucent navigationBarTranslucent>
         <TouchableWithoutFeedback onPress={() => setMoveModalVisible(false)}>
           <View style={{ flex: 1, justifyContent: 'flex-end', backgroundColor: 'rgba(0,0,0,0.5)' }}>
             <TouchableWithoutFeedback>

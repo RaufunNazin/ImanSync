@@ -221,7 +221,7 @@ export default function QuranTrackerScreen() {
 
       {/* History Detail Modal */}
       {historyModalDate && (
-        <Modal visible={true} transparent animationType="fade" onRequestClose={() => setHistoryModalDate(null)}>
+        <Modal visible={true} transparent animationType="fade" onRequestClose={() => setHistoryModalDate(null)} statusBarTranslucent navigationBarTranslucent>
           <View style={styles.modalBackdrop}>
             <TouchableOpacity activeOpacity={1} style={StyleSheet.absoluteFill} onPress={() => setHistoryModalDate(null)}>
               <View style={StyleSheet.absoluteFill} />

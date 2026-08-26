@@ -23,7 +23,7 @@ const { width: SCREEN_WIDTH, height: SCREEN_HEIGHT } = Dimensions.get('window');
 
 export default function ImageViewerModal({ visible, source, onClose }: ImageViewerModalProps) {
   return (
-    <Modal visible={visible} transparent animationType="fade" onRequestClose={onClose} statusBarTranslucent>
+    <Modal visible={visible} transparent animationType="fade" onRequestClose={onClose} statusBarTranslucent navigationBarTranslucent>
       <StatusBar backgroundColor="rgba(0,0,0,0.95)" barStyle="light-content" />
       <TouchableWithoutFeedback onPress={onClose}>
         <View style={styles.overlay}>

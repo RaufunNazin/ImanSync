@@ -5,7 +5,7 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import * as Updates from 'expo-updates';
 import { useTranslation } from 'react-i18next';
 import { Fonts, Spacing, useThemeColors, useActiveColor } from '@/constants/theme';
-import { Bell, RefreshCw, Info } from 'lucide-react-native';
+import { Bell, RefreshCw, Sparkles } from 'lucide-react-native';
 
 const SYSTEM_CONFIG_URL = 'https://raw.githubusercontent.com/RaufunNazin/ImanSync/main/system_config.json';
 
@@ -152,15 +152,15 @@ export default function SystemAnnouncer() {
           </TouchableOpacity>
         }
       >
-        <View style={{ alignItems: 'center', paddingTop: 8 }}>
+        <View style={{ alignItems: 'center' }}>
           <View style={[styles.iconWrap, { backgroundColor: activeColor + '20' }]}>
-            <Info size={32} color={activeColor} />
+            <Sparkles size={32} color={activeColor} />
           </View>
-          <Text style={[styles.title, { color: colors.text }]}>{t('system.whatsNew', "What's New")}</Text>
+          <Text style={[styles.title, { color: colors.text }]}>{t('system.welcomeTitle', 'Welcome to ImanSync!')}</Text>
           <Text style={[styles.versionTag, { color: colors.textSecondary }]}>v{changelog?.version}</Text>
         </View>
 
-        <View style={{ width: '100%', marginTop: 24 }}>
+        <View style={{ width: '100%', marginTop: 16 }}>
           {changelog && getLocalizedText(changelog).map((line: string, i: number) => (
             <View key={i} style={styles.bulletRow}>
               <View style={[styles.bullet, { backgroundColor: colors.textSecondary }]} />
@@ -258,7 +258,7 @@ const styles = StyleSheet.create({
   bulletRow: {
     flexDirection: 'row',
     alignItems: 'flex-start',
-    marginBottom: Spacing.three,
+    marginBottom: Spacing.two,
     paddingHorizontal: Spacing.two,
   },
   bullet: {

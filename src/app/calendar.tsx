@@ -47,7 +47,7 @@ export default function CalendarScreen() {
       setIsGenerating(false);
     }, 10);
     return () => clearTimeout(timer);
-  }, [currentDate.getFullYear(), currentDate.getMonth(), prefs.calcMethod, prefs.madhab, prefs.manualCity, prefs.location]);
+  }, [currentDate.getFullYear(), currentDate.getMonth(), prefs.calcMethod, prefs.madhab, prefs.manualLocation, prefs.location]);
 
   // Set default selection to today if in current month, else 1st of month
   useEffect(() => {

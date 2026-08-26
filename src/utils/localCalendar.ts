@@ -3,7 +3,7 @@ import { Coordinates, CalculationMethod, PrayerTimes, Madhab } from 'adhan';
 const formatTime = (date: Date) => {
   let hours = date.getHours();
   let minutes = date.getMinutes();
-  const timeStr = `${String(hours).padStart(2, '0')}:${String(minutes).padStart(2, '0')} (BST)`;
+  const timeStr = `${String(hours).padStart(2, '0')}:${String(minutes).padStart(2, '0')}`;
   return timeStr;
 };
 

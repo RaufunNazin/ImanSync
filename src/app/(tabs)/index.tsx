@@ -4,7 +4,6 @@ import AnimatedProgressBar from '@/components/AnimatedProgressBar';
 import { Fonts, Spacing, useThemeColors } from '@/constants/theme';
 import { usePreferencesStore } from '@/store/preferencesStore';
 import { useQadaStore } from '@/store/qadaStore';
-import { districtCoords } from '@/utils/districts';
 import { Coordinates, CalculationMethod, PrayerTimes, Madhab } from 'adhan';
 import { formatNumber } from '@/utils/formatNumber';
 import { getLocalYYYYMMDD } from '@/utils/dateUtils';
@@ -115,7 +114,7 @@ export default function HomeScreen() {
   const trackerHistory = useTrackerHistoryStore(state => state.history);
   const toggleTask = useTrackerHistoryStore(state => state.toggleTask);
   const prefsLocation = usePreferencesStore(state => state.location);
-  const prefsManualCity = usePreferencesStore(state => state.manualCity);
+  const prefsManualLocation = usePreferencesStore(state => state.manualLocation);
   const prefsCalcMethod = usePreferencesStore(state => state.calcMethod);
   const prefsMadhab = usePreferencesStore(state => state.madhab);
   const prefsHijriOffset = usePreferencesStore(state => state.hijriOffset);
@@ -165,20 +164,15 @@ export default function HomeScreen() {
 
   // Fetch prayer times
   useEffect(() => {
-    let lat = prefsLocation?.latitude;
-    let lon = prefsLocation?.longitude;
-    let city = prefsManualCity || prefsLocation?.city || 'Dhaka';
-    let isCityBased = !!prefsManualCity || !prefsLocation;
+    let lat = 23.8103;
+    let lon = 90.4125;
     
-    if (isCityBased && districtCoords[city]) {
-      lat = districtCoords[city].lat;
-      lon = districtCoords[city].lon;
-    }
-    
-    // Default to Dhaka if nothing is found
-    if (!lat || !lon) {
-      lat = 23.8103;
-      lon = 90.4125;
+    if (prefsManualLocation) {
+      lat = prefsManualLocation.latitude;
+      lon = prefsManualLocation.longitude;
+    } else if (prefsLocation) {
+      lat = prefsLocation.latitude;
+      lon = prefsLocation.longitude;
     }
 
     let method = prefsCalcMethod ?? 1;
@@ -235,7 +229,7 @@ export default function HomeScreen() {
     } catch (e) {
       console.error('Hijri calculation error:', e);
     }
-  }, [prefsCalcMethod, prefsMadhab, prefsLocation, prefsManualCity, prefsHijriOffset]);
+  }, [prefsCalcMethod, prefsMadhab, prefsLocation, prefsManualLocation, prefsHijriOffset]);
 
   // Fetch a random Quran verse (Arabic + English)
   useEffect(() => {

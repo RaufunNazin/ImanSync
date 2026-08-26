@@ -1055,6 +1055,7 @@
     }
   ],
   "system": {
+    "welcomeTitle": "Welcome to ImanSync!",
     "updateReadyTitle": "Update Ready!",
     "updateReadyDesc": "A new version of the app has been downloaded. Restart the app to apply the new features.",
     "restartNow": "Restart Now",

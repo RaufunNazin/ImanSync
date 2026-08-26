@@ -414,7 +414,7 @@ export default function TrackerScreen() {
 
       {/* Interactive History Modal */}
       {historyModalDate && (
-        <Modal visible={true} transparent animationType="fade" onRequestClose={() => setHistoryModalDate(null)}>
+        <Modal visible={true} transparent animationType="fade" onRequestClose={() => setHistoryModalDate(null)} statusBarTranslucent navigationBarTranslucent>
           <View style={styles.modalBackdrop}>
             <TouchableOpacity activeOpacity={1} style={[StyleSheet.absoluteFill, { backgroundColor: 'rgba(0,0,0,0.5)' }]} onPress={() => setHistoryModalDate(null)} />
             <ThemeCard intensity={80} style={[styles.modalCard, { borderColor: colors.border }]}>

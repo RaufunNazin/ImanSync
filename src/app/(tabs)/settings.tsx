@@ -7,7 +7,6 @@ import { Fonts, Spacing, useThemeColors, useActiveColor } from '@/constants/them
 import { setLanguage } from '@/i18n';
 import { usePreferencesStore } from '@/store/preferencesStore';
 import { useThemeStore } from '@/store/themeStore';
-import { districtMapBn, getDistrictName } from '@/utils/districts';
 import { formatNumber } from '@/utils/formatNumber';
 import {
   getStorageMode,
@@ -28,6 +27,15 @@ import { useTranslation } from 'react-i18next';
 import { Alert, Linking, ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import AppModal from '@/components/AppModal';
 import { SafeAreaView } from 'react-native-safe-area-context';
+
+const getEnglishCountryName = (isoCode: string, fallback: string) => {
+  try {
+    const displayNames = new Intl.DisplayNames(['en-US'], { type: 'region' });
+    return displayNames.of(isoCode) || fallback;
+  } catch (e) {
+    return fallback;
+  }
+};
 
 const CALC_METHODS = [
   { id: 1, key: 'settings.calcMethod_1' },
@@ -57,6 +65,9 @@ export default function SettingsScreen() {
   const [notificationsModalVisible, setNotificationsModalVisible] = useState(false);
 
   const [updateStatus, setUpdateStatus] = useState<string | null>(null);
+
+  const [dynamicLocationOptions, setDynamicLocationOptions] = useState<{id: string, name: string}[]>([]);
+  const [locationSearchQuery, setLocationSearchQuery] = useState('');
 
   const prefs = usePreferencesStore();
 
@@ -150,14 +161,38 @@ export default function SettingsScreen() {
       });
 
       let city = reverse[0]?.city || reverse[0]?.subregion || reverse[0]?.region || 'Unknown Location';
+      let isoCode = reverse[0]?.isoCountryCode;
+      let country = isoCode ? getEnglishCountryName(isoCode, reverse[0]?.country || 'Unknown Country') : reverse[0]?.country || 'Unknown Country';
 
-      prefs.setPreferences({ location: { latitude: location.coords.latitude, longitude: location.coords.longitude, city } });
+      prefs.setPreferences({ location: { latitude: location.coords.latitude, longitude: location.coords.longitude, city, country, isoCountryCode: isoCode || undefined } });
       import('../../services/notificationService').then(s => s.scheduleAllNotifications());
     } catch (e) {
       console.log('Error fetching location', e);
       Alert.alert(t('common.error'), t('settings.locationFetchError'));
     } finally {
       setFetchingLoc(false);
+    }
+  };
+
+  const openLocationModal = async () => {
+    setOptionsModalType('location');
+    setOptionsModalVisible(true);
+    setLocationSearchQuery('');
+    setDynamicLocationOptions([{ id: 'auto', name: t('settings.autoGPS', { defaultValue: 'Auto (GPS)' }) }]);
+    try {
+      const country = prefs.location?.country || 'Bangladesh';
+      const res = await fetch('https://countriesnow.space/api/v0.1/countries/cities', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ country })
+      });
+      const data = await res.json();
+      if (!data.error && data.data) {
+        const cityOptions = data.data.map((c: string) => ({ id: c, name: c }));
+        setDynamicLocationOptions([{ id: 'auto', name: t('settings.autoGPS', { defaultValue: 'Auto (GPS)' }) }, ...cityOptions]);
+      }
+    } catch(e) {
+      console.log('Error fetching cities', e);
     }
   };
 
@@ -309,12 +344,9 @@ export default function SettingsScreen() {
           <SettingRow
             icon={MapPin}
             title={t('settings.location')}
-            value={prefs.manualCity ? getDistrictName(prefs.manualCity, i18n.language) : (prefs.location ? getDistrictName(prefs.location.city, i18n.language) : t('settings.autoGPS', { defaultValue: 'Auto (GPS)' }))}
+            value={prefs.manualLocation ? prefs.manualLocation.city : (prefs.location ? prefs.location.city : t('settings.autoGPS', { defaultValue: 'Auto (GPS)' }))}
             type={fetchingLoc ? 'loading' : 'navigate'}
-            onPress={() => {
-              setOptionsModalType('location');
-              setOptionsModalVisible(true);
-            }}
+            onPress={openLocationModal}
             highlight={highlightedRow === 'location'}
            
           />
@@ -401,16 +433,25 @@ export default function SettingsScreen() {
             optionsModalType === 'madhab' ? MADHABS.map(m => ({ id: m.id, name: t(m.key as any) })) :
             optionsModalType === 'appearance'  ? [] :
             optionsModalType === 'hijri' || optionsModalType === 'bangla' ? [-2, -1, 0, 1, 2].map(n => ({ id: n, name: `${n > 0 ? '+' : ''}${formatNumber(n, i18n.language)} ${t('settings.days', { defaultValue: 'Days' })}` })) :
-            [{ id: 'auto', name: t('settings.autoGPS', { defaultValue: 'Auto (GPS)' }) }, ...Object.keys(districtMapBn).sort().map(k => ({ id: k, name: getDistrictName(k, i18n.language) }))]
+            (() => {
+              let locationOpts = [...dynamicLocationOptions];
+              if (locationSearchQuery.trim()) {
+                 locationOpts.splice(1, 0, { id: `custom_${locationSearchQuery.trim()}`, name: t('settings.searchFor', { query: locationSearchQuery.trim(), defaultValue: `Search for: ${locationSearchQuery.trim()}` }) });
+              }
+              return locationOpts;
+            })()
           }
           selectedValue={
             optionsModalType === 'calc' ? prefs.calcMethod :
             optionsModalType === 'madhab' ? prefs.madhab :
             optionsModalType === 'hijri' ? prefs.hijriOffset :
             optionsModalType === 'bangla' ? prefs.banglaOffset :
-            (prefs.manualCity || 'auto')
+            (prefs.manualLocation?.city || 'auto')
           }
           enableSearch={optionsModalType === 'location'}
+          onSearchChange={(text) => {
+            if (optionsModalType === 'location') setLocationSearchQuery(text);
+          }}
           onSelect={(val) => {
             if (optionsModalType === 'calc') prefs.setPreferences({ calcMethod: val as number });
             else if (optionsModalType === 'madhab') prefs.setPreferences({ madhab: val as number });
@@ -418,10 +459,43 @@ export default function SettingsScreen() {
             else if (optionsModalType === 'bangla') prefs.setPreferences({ banglaOffset: val as number });
             else if (optionsModalType === 'location') {
               if (val === 'auto') {
-                prefs.setPreferences({ manualCity: null });
+                prefs.setPreferences({ manualLocation: null });
                 fetchLocation();
               } else {
-                prefs.setPreferences({ manualCity: val as string });
+                setFetchingLoc(true);
+                let query = val as string;
+                if (query.startsWith('custom_')) {
+                   query = query.replace('custom_', '');
+                } else {
+                   const country = prefs.location?.country || 'Bangladesh';
+                   query = `${query}, ${country}`;
+                }
+
+                Location.geocodeAsync(query).then(async coords => {
+                   if (coords && coords.length > 0) {
+                      const reverse = await Location.reverseGeocodeAsync({ latitude: coords[0].latitude, longitude: coords[0].longitude });
+                      const resolvedCity = reverse[0]?.city || reverse[0]?.subregion || reverse[0]?.region || query;
+                      const isoCode = reverse[0]?.isoCountryCode;
+                      const resolvedCountry = isoCode ? getEnglishCountryName(isoCode, reverse[0]?.country || 'Unknown') : reverse[0]?.country;
+
+                      prefs.setPreferences({ 
+                        manualLocation: { 
+                          latitude: coords[0].latitude, 
+                          longitude: coords[0].longitude, 
+                          city: resolvedCity,
+                          country: resolvedCountry || undefined,
+                          isoCountryCode: isoCode || undefined
+                        } 
+                      });
+                      import('../../services/notificationService').then(s => s.scheduleAllNotifications());
+                   } else {
+                      Alert.alert(t('settings.error', { defaultValue: 'Error' }), t('settings.locationFetchError', { defaultValue: 'Could not resolve location coordinates.' }));
+                   }
+                }).catch(() => {
+                   Alert.alert(t('settings.error', { defaultValue: 'Error' }), t('settings.locationFetchError', { defaultValue: 'Could not resolve location coordinates.' }));
+                }).finally(() => {
+                   setFetchingLoc(false);
+                });
               }
             }
             import('../../services/notificationService').then(s => s.scheduleAllNotifications());

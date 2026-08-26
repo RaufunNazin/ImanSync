@@ -6,23 +6,21 @@
       "date": "June 1, 2026",
       "en": [
         "🎉 Welcome to ImanSync! Your premium Islamic companion is now live.",
-        "🕌 Experience the complete Quran with rich audio playback and Bengali translations.",
-        "🧭 Discover precise, real-time Qibla direction powered by your device's location.",
-        "🔔 Stay consistent with smart, customizable prayer notifications and automated quiet hours.",
-        "📿 Explore a vast Dua library backed by the Hisnul Muslim API, and save personal Duas directly to your device storage.",
-        "🌙 Enjoy an ad-free, stunning interface crafted with a soothing dark mode and native dual-language support.",
-        "✨ Fluid navigation with modern sliding tab animations and polished micro-interactions.",
-        "🔜 Upcoming: Full-text Hadith search functionality in English and Bengali."
+        "🕌 Complete Quran with rich audio & translations.",
+        "🧭 Precise real-time Qibla direction.",
+        "🔔 Smart prayer notifications with auto silent mode.",
+        "📿 Vast Dua library with permanent device storage.",
+        "🌙 Ad-free dark mode with native dual-language support.",
+        "✨ Fluid navigation & polished animations."
       ],
       "bn": [
-        "🎉 ইমান সিঙ্ক (ImanSync)-এর সাথে আপনার নতুন পথচলা শুরু হোক!",
-        "🕌 স্পষ্ট অডিও এবং বিশুদ্ধ বাংলা অনুবাদসহ সম্পূর্ণ আল-কুরআন।",
-        "🧭 আপনার বর্তমান লোকেশনের উপর ভিত্তি করে রিয়েল-টাইম কিবলা নির্দেশিকা।",
-        "🔔 স্মার্ট নামাজের নোটিফিকেশন, সাথে অটোমেটিক সাইলেন্ট মোড (Do Not Disturb)।",
-        "📿 হিসনুল মুসলিম এর দোয়া কালেকশন এবং পার্মানেন্ট স্টোরেজের মাধ্যমে নিজের দোয়া সেভ করার সুবিধা।",
-        "🌙 প্রিমিয়াম ডার্ক মোড এবং সম্পূর্ণ বাংলা ও ইংরেজি ভাষার সাপোর্ট।",
-        "✨ অ্যাপ জুড়ে আকর্ষণীয় স্মুথ অ্যানিমেশন এবং প্রিমিয়াম ইউজার ইন্টারফেস (UI)।",
-        "🔜 আসছে: বাংলা এবং ইংরেজি ভাষায় সম্পূর্ণ হাদিস সার্চ করার সুবিধা।"
+        "🎉 ইমান সিঙ্কের সাথে আপনার নতুন পথচলা শুরু হোক!",
+        "🕌 অডিও এবং অনুবাদসহ সম্পূর্ণ আল-কুরআন।",
+        "🧭 রিয়েল-টাইম কিবলা নির্দেশিকা।",
+        "🔔 স্মার্ট নামাজের নোটিফিকেশন ও অটো সাইলেন্ট মোড।",
+        "📿 হিসনুল মুসলিম এর দোয়া কালেকশন ও স্টোরেজ সুবিধা।",
+        "🌙 প্রিমিয়াম ডার্ক মোড এবং বাংলা ও ইংরেজি সাপোর্ট।",
+        "✨ স্মুথ অ্যানিমেশন এবং প্রিমিয়াম ইউজার ইন্টারফেস।"
       ]
     }
   ],

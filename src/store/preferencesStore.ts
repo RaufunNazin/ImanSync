@@ -31,11 +31,19 @@ interface PreferencesState {
     latitude: number;
     longitude: number;
     city: string;
+    country?: string;
+    isoCountryCode?: string;
   } | null;
   hijriOffset: number;
   showBanglaCalendar: boolean;
   banglaOffset: number;
-  manualCity: string | null;
+  manualLocation: {
+    latitude: number;
+    longitude: number;
+    city: string;
+    country?: string;
+    isoCountryCode?: string;
+  } | null;
   showCuratedDuas: boolean;
   setPreferences: (partial: Partial<Omit<PreferencesState, 'setPreferences' | 'initialize'>>) => void;
   initialize: () => Promise<void>;
@@ -71,7 +79,7 @@ export const usePreferencesStore = create<PreferencesState>()(
       hijriOffset: 0,
       showBanglaCalendar: false,
       banglaOffset: 0,
-      manualCity: null,
+      manualLocation: null,
       showCuratedDuas: false,
       
       setPreferences: (partial) => {
@@ -93,6 +101,13 @@ export const usePreferencesStore = create<PreferencesState>()(
                  maghribStartAlert: s, maghribEndAlert: e,
                  ishaStartAlert: s, ishaEndAlert: e,
                });
+             }
+             
+             // Migrate manualCity string to null since we now require manualLocation object
+             if (mmkvParsed && mmkvParsed.state && mmkvParsed.state.manualCity !== undefined) {
+               set({ manualLocation: null });
+               // The old manualCity will be ignored by zustand persist automatically if not in initial state, 
+               // but explicit clear helps.
              }
           }
 

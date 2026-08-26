@@ -1,9 +1,9 @@
 import PageHeader from '@/components/page-header';
 import { Fonts, Spacing, useThemeColors } from '@/constants/theme';
 import { formatNumber } from '@/utils/formatNumber';
-import AsyncStorage from '@react-native-async-storage/async-storage';
 import * as Location from 'expo-location';
 import React, { useEffect, useState } from 'react';
+import { usePreferencesStore } from '@/store/preferencesStore';
 import { useTranslation } from 'react-i18next';
 import { StyleSheet, Text, View, AppState } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
@@ -42,23 +42,25 @@ export default function QiblaScreen() {
   
   const heading = useSharedValue(0);
 
+  const prefsLocation = usePreferencesStore(state => state.location);
+  const prefsManualLocation = usePreferencesStore(state => state.manualLocation);
+
   useEffect(() => {
     let isMounted = true;
     let headingSubscription: Location.LocationSubscription | null = null;
     let lastStateUpdate = Date.now();
 
-    AsyncStorage.getItem('imansync_location').then(val => {
-      if (val) {
-        try {
-          const loc = JSON.parse(val);
-          if (loc.latitude && loc.longitude) {
-            setQiblaBearing(getQiblaBearing(loc.latitude, loc.longitude));
-          }
-        } catch(e) {}
-      } else {
-        setQiblaBearing(getQiblaBearing(23.8103, 90.4125));
-      }
-    });
+    let lat = 23.8103;
+    let lon = 90.4125;
+    
+    if (prefsManualLocation) {
+      lat = prefsManualLocation.latitude;
+      lon = prefsManualLocation.longitude;
+    } else if (prefsLocation) {
+      lat = prefsLocation.latitude;
+      lon = prefsLocation.longitude;
+    }
+    setQiblaBearing(getQiblaBearing(lat, lon));
 
     const checkLocation = async () => {
       // Verify global device location services are switched on
@@ -74,11 +76,9 @@ export default function QiblaScreen() {
       try {
         const currentLoc = await Location.getCurrentPositionAsync({ accuracy: Location.Accuracy.Balanced });
         if (currentLoc.coords) {
-          setQiblaBearing(getQiblaBearing(currentLoc.coords.latitude, currentLoc.coords.longitude));
-          AsyncStorage.setItem('imansync_location', JSON.stringify({
-            latitude: currentLoc.coords.latitude,
-            longitude: currentLoc.coords.longitude
-          }));
+          if (!prefsManualLocation) {
+            setQiblaBearing(getQiblaBearing(currentLoc.coords.latitude, currentLoc.coords.longitude));
+          }
         }
 
         if (!headingSubscription) {

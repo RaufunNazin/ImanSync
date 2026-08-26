@@ -26,6 +26,7 @@ interface OptionsModalProps {
   selectedValue: string | number | null;
   onSelect: (id: string | number) => void;
   enableSearch?: boolean;
+  onSearchChange?: (text: string) => void;
   customContent?: React.ReactNode;
 }
 
@@ -37,6 +38,7 @@ export default function OptionsModal({
   selectedValue,
   onSelect,
   enableSearch = false,
+  onSearchChange,
   customContent,
 }: OptionsModalProps) {
   const activeColor = useActiveColor();
@@ -54,8 +56,9 @@ export default function OptionsModal({
   React.useEffect(() => {
     if (visible) {
       setSearchQuery('');
+      if (onSearchChange) onSearchChange('');
     }
-  }, [visible]);
+  }, [visible, onSearchChange]);
 
   return (
     <AppModal visible={visible} onClose={onClose} title={title} scrollable={false}>
@@ -70,7 +73,10 @@ export default function OptionsModal({
                     placeholder={t('searchIn', { title, defaultValue: `Search ${title}...` })}
                     placeholderTextColor={colors.textSecondary}
                     value={searchQuery}
-                    onChangeText={setSearchQuery}
+                    onChangeText={(text) => {
+                      setSearchQuery(text);
+                      if (onSearchChange) onSearchChange(text);
+                    }}
                   />
                 </View>
               )}
